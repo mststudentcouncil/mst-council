@@ -47,7 +47,7 @@ if (loginBtn) {
         const currentUrl = window.location.href.split('#')[0];
     
         // เปลี่ยน URL ให้วิ่งเข้าโฟลเดอร์ Passport โดยตรง
-        window.location.href = `/Passport?redirect=${encodeURIComponent(currentUrl)}`;
+        window.location.href = `/passport?redirect=${encodeURIComponent(currentUrl)}`;
     });
 }
 
