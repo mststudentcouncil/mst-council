@@ -36,8 +36,8 @@
     
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
-    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+
     <style>
         body { 
             background-color: var(--mst-light); 
@@ -65,28 +65,7 @@
         /* Loader Animation Inline */
         .loader { border: 4px solid #f3f3f3; border-top: 4px solid #6A1B9A; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        /* ปุ่ม Telegram */
-        .btn-telegram {
-            background-color: #24A1DE; 
-            color: #ffffff;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 12px;
-            font-size: 15px;
-            font-weight: 700;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px; 
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(36, 161, 222, 0.3);
-            text-decoration: none;
-        }
-        .btn-telegram:hover {
-            background-color: #1d88bc;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(36, 161, 222, 0.4);
-        }
+        
     </style>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#6A1B9A">
@@ -139,39 +118,27 @@
                     <div class="flex gap-3">
                         <i class="fa-solid fa-shield-halved text-mst-purple mt-1"></i>
                         <div>
-                            <p class="text-sm font-bold text-gray-800">เข้าสู่ระบบเพื่อดำเนินการสมัคร<br>และตรวจสอบสถานะ</p>
+                            <p class="text-sm font-bold text-gray-800">ระบบรับสมัครคณะกรรมการสภานักเรียน<br>และตรวจสอบสถานะการสมัคร</p>
                             <p class="text-xs text-gray-500 mt-1">ประจำปีการศึกษา <span id="displayYear" class="font-bold text-mst-purple">...</span></p>
-                            <p class="text-xs text-red-500 font-bold mt-1">กรุณาใช้บัญชี Google ของโรงเรียน (@mst.ac.th)</p>
                         </div>
                     </div>
                 </div>
 
-                <div id="webview-warning" class="hidden mb-6 bg-red-50 border border-red-200 rounded-2xl p-4 text-left shadow-sm relative z-20">
-    <div class="flex items-start gap-3">
-        <div class="w-10 h-10 bg-red-100 text-red-600 rounded-full flex items-center justify-center flex-shrink-0 text-xl shadow-inner mt-1">
-            <i class="fa-solid fa-triangle-exclamation"></i>
+                <div class="flex flex-col items-center justify-center mb-6 relative z-10 w-full">
+    <button onclick="loginWithPassport()" class="group w-full bg-white border-2 border-gray-100 hover:border-mst-purple text-purple-900 font-bold py-4 px-6 rounded-2xl flex items-center justify-center gap-4 transition-all duration-300 shadow-sm hover:shadow-xl active:scale-95">
+        <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center text-purple-700 shrink-0 shadow-inner group-hover:scale-110 transition-transform">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
+            </svg>
         </div>
-        <div>
-            <h3 class="font-bold text-red-700 text-sm mb-1">ไม่สามารถเข้าสู่ระบบผ่านแอปนี้ได้</h3>
-            <p class="text-xs text-red-600 leading-relaxed mb-3">
-                นโยบายความปลอดภัย Google ไม่อนุญาตให้ล็อกอินภายในแอป <b>LINE, IG หรือ Facebook</b>
-            </p>
-            <div class="bg-white p-3 rounded-xl border border-red-100 text-[11px] text-gray-700 shadow-sm">
-                <span class="font-bold text-mst-purple block mb-1">💡 วิธีแก้ไขเพื่อเข้าสู่ระบบ:</span>
-                กดปุ่ม 3 จุด มุมขวาบน (หรือมุมล่าง) <br>แล้วเลือก <b class="text-blue-600">"เปิดในเบราว์เซอร์ (Safari / Chrome)"</b>
-            </div>
-        </div>
-    </div>
+        <span class="text-md">Login with MST Passport</span>
+    </button>
+    
+    <p class="mt-4 text-xs text-gray-400">
+        * เข้าสู่ระบบผ่านระบบศูนย์กลาง
+    </p>
 </div>
 
-<div id="google-login-wrapper" class="flex justify-center mb-4 relative z-10">
-    <div id="g_id_onload" 
-         data-client_id="151555458498-fjmti72kvokr5dh5mlsjqq7vugrduuef.apps.googleusercontent.com" 
-         data-callback="handleCredentialResponse" 
-         data-auto_prompt="false"
-         data-hd="mst.ac.th"> </div>
-    <div class="g_id_signin d-flex justify-content-center" data-type="standard" data-shape="pill" data-theme="filled_blue" data-text="signin_with" data-size="large" data-logo_alignment="left"></div>
-</div>
                 <div id="loginError" class="text-red-500 text-sm mt-4 font-bold flex items-center justify-center gap-2"></div>
                 <div class="flex flex-col gap-3 mt-6">
                     <button onclick="showPreparationInfo()" class="w-full bg-yellow-50 text-yellow-700 hover:bg-yellow-100 py-2.5 rounded-xl text-sm font-bold border border-yellow-200 transition-all flex justify-center items-center gap-2 shadow-sm">
@@ -391,6 +358,7 @@
         async function fetchInitialData() {
             const savedStdId = localStorage.getItem('mstsc_std_login');
             const savedEmail = localStorage.getItem('mstsc_std_email'); 
+            if (savedEmail) currentUserFullEmail = savedEmail; // <--- เพิ่มบรรทัดนี้
             
             // 🟢 1. ดึงข้อมูลจากความจำเครื่อง (Cache) มาโชว์ทันทีแบบไม่ต้องรอ
             const cachedData = localStorage.getItem('mstsc_cached_data');
@@ -409,7 +377,7 @@
                     }
 
                     if (savedStdId) {
-                        processStudentLogin(savedStdId);
+                        processStudentLogin({ id: savedStdId });
                     } else {
                         document.getElementById('view-login').style.display = 'block';
                     }
@@ -441,7 +409,7 @@
                         checkAndShowStatus(savedStdId, appliedDB[savedStdId]);
                     } else if (!cachedData) {
                         // กรณีคนเปิดแอปครั้งแรกสุดในชีวิต (ยังไม่มีแคช)
-                        if (savedStdId) processStudentLogin(savedStdId);
+                        if (savedStdId) processStudentLogin({ id: savedStdId });
                         else document.getElementById('view-login').style.display = 'block';
                     }
 
@@ -512,26 +480,70 @@
         
         fetchInitialData();
 
-        async function handleCredentialResponse(response) {
-            try {
-                const payload = decodeJwtResponse(response.credential);
-                if(!payload.email.endsWith('@mst.ac.th')) { Swal.fire('ใช้อีเมลผิด!', 'อนุญาตเฉพาะอีเมล @mst.ac.th ของโรงเรียนเท่านั้น', 'error'); return; }
-                const stdId = payload.email.split('@')[0].slice(-5);
-                
-                localStorage.setItem('mstsc_std_login', stdId);
-                localStorage.setItem('mstsc_std_email', payload.email); 
-                currentUserFullEmail = payload.email; 
-                
-                // 🟢 สั่งให้ OneSignal จำรหัสนักเรียนเครื่องนี้
+        // กดปุ่มแล้วส่งไปหน้า Passport
+function loginWithPassport() {
+    const currentUrl = window.location.href.split('#')[0];
+    window.location.href = `../passport/index.html?redirect=${encodeURIComponent(currentUrl)}`;
+}
+
+// ตรวจสอบข้อมูลเมื่อ Passport ส่งกลับมา (SSO Callback)
+window.addEventListener('DOMContentLoaded', () => {
+    const hash = window.location.hash;
+    if (hash && hash.startsWith("#auth=")) {
+        document.getElementById('view-initial-load').style.display = 'block';
+        document.getElementById('view-login').style.display = 'none';
+
+        const payloadBase64 = hash.replace("#auth=", "");
+        try {
+            const encryptedPayload = decodeURIComponent(payloadBase64);
+            const bytes = CryptoJS.AES.decrypt(encryptedPayload, "MST_SECRET_KEY_2026");
+            const decodedStr = bytes.toString(CryptoJS.enc.Utf8);
+            const payload = JSON.parse(decodedStr);
+
+            history.replaceState(null, null, ' '); // ล้าง URL
+
+            // เช็คเวลาหมดอายุ 60 วินาที
+            if (Date.now() - payload.timestamp > 60000) {
+                Swal.fire('หมดเวลาเชื่อมต่อ', 'เซสชันหมดอายุ กรุณาล็อกอินใหม่อีกครั้ง', 'error').then(() => location.reload());
+                return;
+            }
+            
+            // ❌ ลบส่วนที่ดักจับบล็อกศิษย์เก่าออก ปล่อยให้ระบบ Admission ของคุณเช็คว่าอยู่ ม.4 เอง
+
+            const stdId = payload.id; 
+            const email = payload.email || `${stdId}@mst.ac.th`;
+
+            localStorage.setItem('mstsc_std_login', stdId);
+            localStorage.setItem('mstsc_std_email', email);
+            currentUserFullEmail = email;
+
+            if (typeof OneSignalDeferred !== 'undefined') {
                 OneSignalDeferred.push(function(OneSignal) {
                     OneSignal.login(stdId.toString());
                 });
-                
-                if (isDataLoaded) {
-                    processStudentLogin(stdId);
-                } 
-            } catch(error) { Swal.fire('ข้อผิดพลาด', 'ไม่สามารถอ่านข้อมูลบัญชีได้', 'error'); }
+            }
+
+            // ตรวจสอบเงื่อนไข ม.4
+            if (isDataLoaded) {
+                processStudentLogin(payload); // ส่งข้อมูลทั้งก้อนของ Passport ไปเลย
+            } else {
+                const checkData = setInterval(() => {
+                    if (isDataLoaded) {
+                        clearInterval(checkData);
+                        processStudentLogin(payload); // ส่งข้อมูลทั้งก้อนของ Passport ไปเลย
+                    }
+                }, 500);
+            }
+
+        } catch (err) {
+            console.error("SSO Error:", err);
+            history.replaceState(null, null, ' ');
+            Swal.fire('ข้อผิดพลาด', 'เกิดข้อผิดพลาดในการตรวจสอบสิทธิ์ (อาจขาดฟังก์ชันค้นหา)', 'error');
+            document.getElementById('view-initial-load').style.display = 'none';
+            document.getElementById('view-login').style.display = 'block';
         }
+    }
+});
 
         function logoutStudent() {
             Swal.fire({
@@ -552,56 +564,102 @@
             });
         }
 
-        function connectTelegram() {
-    // ชื่อบอทของคุณ (ไม่ต้องมี @)
-    var botUsername = "mstsc_admin_bot"; 
+// ==========================================
+// 🚀 ฟังก์ชันช่วยค้นหา (ต้องมีฟังก์ชันนี้วางไว้นอกสุด)
+// ==========================================
+function findStudentRobust(searchId, dbObject) {
+    if (!searchId || !dbObject) return null;
+    let target = String(searchId).trim();
+    let target5 = target.length >= 7 ? target.slice(-5) : target;
     
-    // เปิดแอป Telegram ไปที่หน้าบอทตรงๆ
-    window.open("https://t.me/" + botUsername, "_blank");
+    for (let key in dbObject) {
+        let dbKey = String(key).trim();
+        let dbKey5 = dbKey.length >= 7 ? dbKey.slice(-5) : dbKey;
+        if (dbKey5 === target5) {
+            return { key: key, data: dbObject[key] };
+        }
+    }
+    return null;
 }
 
-        function processStudentLogin(stdId) {
-            document.getElementById('view-login').style.display = 'none';
+    function processStudentLogin(payload) {
+    document.getElementById('view-login').style.display = 'none';
+    document.getElementById('view-initial-load').style.display = 'none'; // <--- เพิ่มบรรทัดนี้เพื่อซ่อนวงแหวน Loader
+
+    let stdId = payload.id;
+    
+    // ค้นหาในฐานข้อมูลคนที่เคยสมัครแล้ว
+    let appliedMatch = findStudentRobust(stdId, appliedDB);
+    
+    if(appliedMatch) {
+        document.getElementById('navLogoutBtn').style.display = 'flex';
+        checkAndShowStatus(appliedMatch.key, appliedMatch.data);
+    } else {
+        let now = new Date();
+        let isOpen = true;
+        let cMsg = "";
+        
+        if(systemSettings.SystemStatus === 'closed') { isOpen = false; cMsg = "ระบบถูกปิดรับสมัครโดยคณะกรรมการ"; }
+        else if(systemSettings.AppStartTime && now < new Date(systemSettings.AppStartTime)) { isOpen = false; cMsg = `ระบบจะเปิดรับสมัครในวันที่<br><b class="text-mst-purple">${formatDateTime(systemSettings.AppStartTime)} น.</b>`; }
+        else if(systemSettings.AppEndTime && now > new Date(systemSettings.AppEndTime)) { isOpen = false; cMsg = "หมดเขตการรับสมัครสำหรับปีการศึกษานี้แล้ว"; }
+
+        if(!isOpen) {
+            document.getElementById('closedMessageText').innerHTML = cMsg;
+            document.getElementById('view-closed').style.display = 'block';
+            document.getElementById('navLogoutBtn').style.display = 'flex';
+        } else {
+            // 🔍 ตรวจสอบว่าอยู่ ม.4 หรือไม่
+            // (เช็คจากฐานข้อมูล onlineStudentDB เป็นหลัก หรือเช็คจากข้อมูลที่ Passport ส่งมา)
+            let studentMatch = findStudentRobust(stdId, onlineStudentDB);
+            let isM4 = studentMatch || String(payload.level) === 'ม.4' || String(payload.room).includes('ม.4');
             
-            if(appliedDB[stdId]) {
+            if(isM4) {
                 document.getElementById('navLogoutBtn').style.display = 'flex';
-                checkAndShowStatus(stdId, appliedDB[stdId]);
-            } else {
-                let now = new Date();
-                let isOpen = true;
-                let cMsg = "";
                 
-                if(systemSettings.SystemStatus === 'closed') { isOpen = false; cMsg = "ระบบถูกปิดรับสมัครโดยคณะกรรมการ"; }
-                else if(systemSettings.AppStartTime && now < new Date(systemSettings.AppStartTime)) { isOpen = false; cMsg = `ระบบจะเปิดรับสมัครในวันที่<br><b class="text-mst-purple">${formatDateTime(systemSettings.AppStartTime)} น.</b>`; }
-                else if(systemSettings.AppEndTime && now > new Date(systemSettings.AppEndTime)) { isOpen = false; cMsg = "หมดเขตการรับสมัครสำหรับปีการศึกษานี้แล้ว"; }
+                // 🎯 ดึงข้อมูล คำนำหน้า ชื่อ สกุล ชั้น/ห้อง จาก Passport มาใช้โดยตรง
+                let prefix = payload.prefix || '';
+                let fname = payload.fname || '';
+                let lname = payload.lname || '';
+                
+                let fullName = `${prefix}${fname} ${lname}`.trim();
+                let fullRoom = '';
 
-                if(!isOpen) {
-                    document.getElementById('closedMessageText').innerHTML = cMsg;
-                    document.getElementById('view-closed').style.display = 'block';
-                    document.getElementById('navLogoutBtn').style.display = 'flex';
-                } else if(onlineStudentDB[stdId]) {
-                    document.getElementById('navLogoutBtn').style.display = 'flex';
-                    const stu = onlineStudentDB[stdId];
-                    document.getElementById('studentId').value = stdId;
-                    document.getElementById('studentName').value = stu.name;
-                    document.getElementById('studentRoom').value =  stu.room;
-                    document.getElementById('showLeaderName').value = stu.name;
-                    document.getElementById('showLeaderRoom').value = stu.room;
-                    
-                    const pSelect = document.getElementById('partyNameSelect');
-                    if(availableParties.length > 0) {
-                        pSelect.innerHTML = '<option value="" selected disabled>-- เลือกพรรคที่ต้องการสังกัด --</option>' + availableParties.map(p => `<option value="${p}">${p}</option>`).join('');
-                    } else {
-                        pSelect.innerHTML = '<option value="" selected disabled>ยังไม่มีพรรคในปีนี้</option>';
-                    }
-
-                    document.getElementById('view-application').style.display = 'block';
-                } else {
-                    localStorage.removeItem('mstsc_std_login');
-                    Swal.fire('ไม่มีสิทธิ์ใช้งานระบบ', `รหัสนักเรียน ${stdId} <br>ไม่ได้ศึกษาอยู่ชั้นมัธยมศึกษาปีที่ 4<br><br>หากคิดว่ามีข้อผิดพลาด<br>โปรดติดต่อห้องสภานักเรียน`, 'warning').then(() => location.reload());
+                // จัดการรูปแบบ ม.x/y
+                if (payload.level && payload.room && payload.room !== '-') {
+                    fullRoom = `${payload.level}/${payload.room}`;
+                } else if (payload.room && payload.room !== '-') {
+                    fullRoom = payload.room;
                 }
+
+                // *Fallback: ถ้า Passport ส่งชื่อมาว่างเปล่า (เกิดได้ยาก) ให้ดึงจากฐานข้อมูลเก่ามาแทน
+                if (!fname && studentMatch) {
+                    fullName = studentMatch.data.name;
+                    fullRoom = studentMatch.data.room;
+                }
+
+                // นำไปกรอกลงฟอร์ม
+                document.getElementById('studentId').value = stdId; 
+                document.getElementById('studentName').value = fullName;
+                document.getElementById('studentRoom').value = fullRoom;
+                document.getElementById('showLeaderName').value = fullName;
+                document.getElementById('showLeaderRoom').value = fullRoom;
+                
+                const pSelect = document.getElementById('partyNameSelect');
+                if(availableParties.length > 0) {
+                    pSelect.innerHTML = '<option value="" selected disabled>-- เลือกพรรคที่ต้องการสังกัด --</option>' + availableParties.map(p => `<option value="${p}">${p}</option>`).join('');
+                } else {
+                    pSelect.innerHTML = '<option value="" selected disabled>ยังไม่มีพรรคในปีนี้</option>';
+                }
+
+                document.getElementById('view-status').style.display = 'none'; // <--- เพิ่มบรรทัดนี้
+                document.getElementById('view-application').style.display = 'block';
+            } else {
+                localStorage.removeItem('mstsc_std_login');
+                Swal.fire('ไม่มีสิทธิ์ใช้งานระบบ', `รหัสนักเรียน ${stdId} <br>ไม่ได้ศึกษาอยู่ชั้นมัธยมศึกษาปีที่ 4<br><br>หากคิดว่ามีข้อผิดพลาด<br>โปรดติดต่อห้องสภานักเรียน`, 'warning').then(() => location.reload());
             }
         }
+    }
+}
 
         function checkAndShowStatus(stdId, appData) {
             let confirmEndStr = systemSettings.ConfirmEndTime;
@@ -665,8 +723,12 @@
             if(btnCommittee) btnCommittee.style.display = 'none';
             if(btnAdmin) btnAdmin.style.display = 'none';
 
+            // เพิ่ม 2 บรรทัดนี้เพื่อบังคับซ่อนหน้าล็อกอินและหน้าฟอร์มสมัครให้หมด
+            document.getElementById('view-login').style.display = 'none';
+            document.getElementById('view-application').style.display = 'none';
+
             document.getElementById('view-status').style.display = 'block';
-            const stu = onlineStudentDB[stdId] || {name: "ไม่ทราบชื่อ", room: "-"};
+            const stu = onlineStudentDB[stdId] || {name: appData.name || "ไม่ทราบชื่อ", room: appData.room || "-"}; // (อันนี้รวมตัวที่แก้ให้ดึงชื่อจากใบสมัครมาให้ด้วยครับ)
             const contentDiv = document.getElementById('statusContent');
             let now = new Date();
             let statusHtml = '';
@@ -1133,6 +1195,8 @@
                 const resData = await apiCall(payload);
                 if(resData.status === 'success') { 
                     
+                    localStorage.removeItem('mstsc_cached_data'); // <--- เพิ่มบรรทัดนี้เพื่อล้างแคชเก่าทิ้ง
+
                     // สร้าง HTML เป็นลักษณะใบเสร็จรับเงิน
                     let receiptHtml = `
                     <div class="bg-white border-2 border-dashed border-gray-300 p-5 rounded-xl max-w-sm mx-auto text-left shadow-sm mt-2">
@@ -1218,30 +1282,5 @@
             });
         }
     </script>
-
-    <script>
-    // สคริปต์ลบปุ่ม Google ทิ้งเมื่อเปิดผ่าน In-App Browser (ใช้ได้โดยไม่ต้องมี jQuery)
-    document.addEventListener("DOMContentLoaded", function() {
-        var isWebView = /Line|Instagram|FBAN|FBAV/i.test(navigator.userAgent);
-        
-        if (isWebView) {
-            // 1. ฝัง CSS ซ่อนขั้นเด็ดขาด ไม่ให้โชว์ iframe ขึ้นมาได้
-            var style = document.createElement('style');
-            style.innerHTML = '.g_id_signin, #g_id_onload, #google-login-wrapper { display: none !important; opacity: 0 !important; pointer-events: none !important; visibility: hidden !important; width: 0 !important; height: 0 !important; margin: 0 !important; padding: 0 !important; }';
-            document.head.appendChild(style);
-            
-            // 2. ลบออกจาก DOM ถอนรากถอนโคน
-            var wrapper = document.getElementById('google-login-wrapper');
-            if (wrapper) wrapper.remove();
-            
-            // 3. แสดงหน้าต่างแจ้งเตือน
-            var warning = document.getElementById('webview-warning');
-            if (warning) {
-                warning.classList.remove('hidden');
-                warning.classList.add('block', 'fade-in');
-            }
-        }
-    });
-</script>
 </body>
 </html>
