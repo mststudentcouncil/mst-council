@@ -2,7 +2,7 @@
   "name": "e-Voting",
   "short_name": "e-Voting",
   "description": "ระบบลงคะแนนอิเล็กทรอนิกส์ โรงเรียนเมืองสุราษฎร์ธานี",
-  "start_url": "/",
+  "start_url": "/evoting/", 
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#581c87",

@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>หน้าหลัก - คณะกรรมการสภานักเรียนโรงเรียนเมืองสุราษฎร์ธานี</title>
+    
+    <!-- ฟอนต์และโลโก้ -->
+    <link rel="icon" type="image/webp" href="https://i.ibb.co/GQYCbXrc/logo.webp">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Anuphan', 'sans-serif'] },
+                    colors: { 
+                        mstPurple: '#4C1D95', 
+                        mstPurpleHover: '#3B1676', 
+                        mstYellow: '#FBBF24', 
+                        mstCream: '#FEFCF3' 
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body { 
+            background-color: #FEFCF3; 
+            color: #1f2937; 
+            overflow-x: hidden; 
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(76, 29, 149, 0.04) 0%, transparent 25%), 
+                radial-gradient(circle at 85% 30%, rgba(251, 191, 36, 0.08) 0%, transparent 25%);
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.85); 
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.7); 
+            box-shadow: 0 15px 35px -5px rgba(76, 29, 149, 0.08); 
+            border-radius: 1.5rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .glass-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px -5px rgba(76, 29, 149, 0.15);
+            border-color: rgba(251, 191, 36, 0.5); /* Hover border yellow */
+        }
+
+        .fade-in-up { animation: fadeInUp 0.7s cubic-bezier(0.4, 0, 0.2, 1) forwards; opacity: 0; }
+        .delay-100 { animation-delay: 100ms; }
+        .delay-200 { animation-delay: 200ms; }
+        .delay-300 { animation-delay: 300ms; }
+        .delay-400 { animation-delay: 400ms; }
+        .delay-500 { animation-delay: 500ms; }
+        
+        @keyframes fadeInUp { 
+            from { opacity: 0; transform: translateY(20px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+
+        /* Floating Blobs (Decoration) */
+        .blob-1 { position: fixed; top: -10%; right: -10%; width: 40vw; height: 40vw; min-width: 300px; min-height: 300px; background: #c4b5fd; border-radius: 50%; filter: blur(100px); opacity: 0.4; z-index: -1; animation: float 10s infinite alternate ease-in-out; }
+        .blob-2 { position: fixed; bottom: -10%; left: -10%; width: 40vw; height: 40vw; min-width: 300px; min-height: 300px; background: #fde68a; border-radius: 50%; filter: blur(100px); opacity: 0.4; z-index: -1; animation: float 12s infinite alternate-reverse ease-in-out; }
+        
+        @keyframes float {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(30px, -30px); }
+        }
+
+        .category-title {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 1.5rem;
+        }
+        .category-title::after {
+            content: '';
+            position: absolute;
+            bottom: -0.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 3px;
+            background-color: #FBBF24;
+            border-radius: 2px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col relative antialiased selection:bg-mstPurple selection:text-white">
+    <!-- Background Decor -->
+    <div class="blob-1"></div>
+    <div class="blob-2"></div>
+
+    <!-- Header Section -->
+    <header class="w-full pt-12 pb-8 px-4 flex flex-col items-center justify-center text-center fade-in-up z-10">
+        <div class="relative group cursor-pointer mb-6">
+            <div class="absolute inset-0 bg-mstYellow rounded-full blur-xl opacity-30 group-hover:opacity-60 transition duration-500"></div>
+            <img src="https://i.ibb.co/GQYCbXrc/logo.webp" alt="MSTSC Logo" class="w-28 h-28 md:w-36 md:h-36 object-contain relative z-10 drop-shadow-2xl transform group-hover:scale-105 transition duration-300">
+        </div>
+        
+        <h1 class="text-2xl md:text-4xl font-extrabold text-mstPurple mb-2 tracking-tight">คณะกรรมการสภานักเรียน</h1>
+        <h2 class="text-lg md:text-2xl font-bold text-gray-700 mb-4">โรงเรียนเมืองสุราษฎร์ธานี</h2>
+        
+        <div class="flex flex-wrap justify-center gap-2 mt-1">
+            <span class="bg-purple-100/80 text-mstPurple text-[10px] md:text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-wider border border-purple-200 backdrop-blur-sm shadow-sm">
+                Muangsuratthani Student Council
+            </span>
+            <span class="bg-yellow-100/80 text-yellow-700 text-[10px] md:text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-wider border border-yellow-200 backdrop-blur-sm shadow-sm">
+                MSTSC
+            </span>
+        </div>
+    </header>
+
+    <!-- Main Navigation Content -->
+    <main class="flex-1 w-full max-w-6xl mx-auto px-4 pb-16 z-10">
+        
+        <!-- Section: ระบบบริการหลัก (Core Services) -->
+        <div class="text-center mt-4 mb-6 fade-in-up delay-100">
+            <h3 class="text-xl font-bold text-mstPurple category-title"><i class="fa-solid fa-server mr-2 text-mstYellow"></i>ระบบบริการหลัก</h3>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full mb-12">
+            
+            <!-- Card 1: MST Passport -->
+            <a href="./passport/index.html" class="glass-card p-8 flex flex-col items-center text-center group fade-in-up delay-100 block relative overflow-hidden">
+                <div class="absolute -right-6 -top-6 w-24 h-24 bg-purple-100 rounded-full blur-2xl opacity-50 group-hover:opacity-100 transition-opacity"></div>
+                <div class="w-16 h-16 bg-gradient-to-br from-indigo-500 to-mstPurple text-white rounded-[1.25rem] flex items-center justify-center text-3xl mb-5 shadow-lg shadow-purple-500/30 group-hover:scale-110 transition-transform duration-300">
+                    <i class="fa-solid fa-passport"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-mstPurple transition-colors">MST Passport</h3>
+                <p class="text-sm text-gray-500 font-medium">ระบบยืนยันตัวตนกลาง (SSO) สำหรับเข้าใช้งานระบบต่างๆ</p>
+                <div class="mt-5 flex-grow flex items-end">
+                    <span class="text-mstPurple text-sm font-bold bg-purple-50 px-4 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-all transform translate-y-2 group-hover:translate-y-0 flex items-center gap-2">เข้าสู่ระบบ <i class="fas fa-arrow-right text-xs"></i></span>
+                </div>
+            </a>
+
+            <!-- Card 2: e-Voting -->
+            <a href="./evoting/index.html" class="glass-card p-8 flex flex-col items-center text-center group fade-in-up delay-200 block relative overflow-hidden">
+                <div class="absolute -right-6 -top-6 w-24 h-24 bg-red-100 rounded-full blur-2xl opacity-50 group-hover:opacity-100 transition-opacity"></div>
+                <div class="w-16 h-16 bg-gradient-to-br from-rose-500 to-red-600 text-white rounded-[1.25rem] flex items-center justify-center text-3xl mb-5 shadow-lg shadow-red-500/30 group-hover:scale-110 transition-transform duration-300">
+                    <i class="fa-solid fa-check-to-slot"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-red-600 transition-colors">e-Voting</h3>
+                <p class="text-sm text-gray-500 font-medium">ระบบลงคะแนนเสียงเลือกตั้งอิเล็กทรอนิกส์</p>
+                <div class="mt-5 flex-grow flex items-end">
+                    <span class="text-red-600 text-sm font-bold bg-red-50 px-4 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-all transform translate-y-2 group-hover:translate-y-0 flex items-center gap-2">ไปลงคะแนน <i class="fas fa-arrow-right text-xs"></i></span>
+                </div>
+            </a>
+
+            <!-- Card 3: Public Hearing -->
+            <a href="./Feedback/index.html" class="glass-card p-8 flex flex-col items-center text-center group fade-in-up delay-300 block relative overflow-hidden">
+                <div class="absolute -right-6 -top-6 w-24 h-24 bg-blue-100 rounded-full blur-2xl opacity-50 group-hover:opacity-100 transition-opacity"></div>
+                <div class="w-16 h-16 bg-gradient-to-br from-cyan-500 to-blue-600 text-white rounded-[1.25rem] flex items-center justify-center text-3xl mb-5 shadow-lg shadow-blue-500/30 group-hover:scale-110 transition-transform duration-300">
+                    <i class="fa-solid fa-bullhorn"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">Public Hearing</h3>
+                <p class="text-sm text-gray-500 font-medium">ศูนย์รับฟังความคิดเห็นและรับเรื่องร้องเรียน</p>
+                <div class="mt-5 flex-grow flex items-end">
+                    <span class="text-blue-600 text-sm font-bold bg-blue-50 px-4 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-all transform translate-y-2 group-hover:translate-y-0 flex items-center gap-2">เสนอความคิดเห็น <i class="fas fa-arrow-right text-xs"></i></span>
+                </div>
+            </a>
+
+            <!-- Card 5: Admission -->
+            <a href="./admission/index.html" class="glass-card p-8 flex flex-col items-center text-center group fade-in-up delay-500 block relative overflow-hidden">
+                <div class="absolute -right-6 -top-6 w-24 h-24 bg-amber-100 rounded-full blur-2xl opacity-50 group-hover:opacity-100 transition-opacity"></div>
+                <div class="w-16 h-16 bg-gradient-to-br from-amber-400 to-orange-500 text-white rounded-[1.25rem] flex items-center justify-center text-3xl mb-5 shadow-lg shadow-orange-500/30 group-hover:scale-110 transition-transform duration-300">
+                    <i class="fa-solid fa-user-graduate"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-orange-600 transition-colors">SC Admission</h3>
+                <p class="text-sm text-gray-500 font-medium">ระบบรับสมัครคณะกรรมการสภานักเรียนชุดใหม่ ประจำปีการศึกษา</p>
+                <div class="mt-5 flex-grow flex items-end">
+                    <span class="text-orange-600 text-sm font-bold bg-orange-50 px-4 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-all transform translate-y-2 group-hover:translate-y-0 flex items-center gap-2">ดูรายละเอียด <i class="fas fa-arrow-right text-xs"></i></span>
+                </div>
+            </a>
+
+            <a href="./regis/index.html" class="glass-card p-8 flex flex-col items-center text-center group fade-in-up delay-400 block relative overflow-hidden">
+                <div class="absolute -right-6 -top-6 w-24 h-24 bg-emerald-100 rounded-full blur-2xl opacity-50 group-hover:opacity-100 transition-opacity"></div>
+                <div class="w-16 h-16 bg-gradient-to-br from-teal-400 to-emerald-600 text-white rounded-[1.25rem] flex items-center justify-center text-3xl mb-5 shadow-lg shadow-emerald-500/30 group-hover:scale-110 transition-transform duration-300">
+                    <i class="fa-solid fa-folder-open"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-emerald-600 transition-colors">SC Regis</h3>
+                <p class="text-sm text-gray-500 font-medium">ระบบทะเบียนและจัดเก็บข้อมูลประวัติของคณะกรรมการสภานักเรียน</p>
+                <div class="mt-5 flex-grow flex items-end">
+                    <span class="text-emerald-600 text-sm font-bold bg-emerald-50 px-4 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-all transform translate-y-2 group-hover:translate-y-0 flex items-center gap-2">จัดการข้อมูล <i class="fas fa-arrow-right text-xs"></i></span>
+                </div>
+            </a>
+
+            <!-- Card 4: Vault -->
+            <a href="./vault/index.html" class="glass-card p-8 flex flex-col items-center text-center group fade-in-up delay-500 block relative overflow-hidden">
+                <div class="absolute -right-6 -top-6 w-24 h-24 bg-pink-100 rounded-full blur-2xl opacity-50 group-hover:opacity-100 transition-opacity"></div>
+                <div class="w-16 h-16 bg-gradient-to-br from-[#833AB4] to-[#E1306C] text-white rounded-[1.25rem] flex items-center justify-center text-3xl mb-5 shadow-lg shadow-pink-500/30 group-hover:scale-110 transition-transform duration-300">
+                    <i class="fa-solid fa-vault"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-pink-600 transition-colors">SC Vault</h3>
+                <p class="text-sm text-gray-500 font-medium">คลังเก็บเกียรติบัตรและผลงานส่วนตัว ของคณะกรรมการสภานักเรียน</p>
+                <div class="mt-5 flex-grow flex items-end">
+                    <span class="text-pink-600 text-sm font-bold bg-pink-50 px-4 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-all transform translate-y-2 group-hover:translate-y-0 flex items-center gap-2">เข้าสู่คลังผลงาน <i class="fas fa-arrow-right text-xs"></i></span>
+                </div>
+            </a>
+
+        </div>
+
+        <!-- Section: บริการและข้อมูลโรงเรียน (School Info & Services) -->
+        <div class="text-center mt-12 mb-6 fade-in-up delay-500">
+            <h3 class="text-xl font-bold text-gray-700 category-title"><i class="fa-solid fa-school mr-2 text-gray-400"></i>บริการและข้อมูลอื่นๆ</h3>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 w-full mb-12 fade-in-up delay-500">
+            <!-- Digital ID -->
+            <a href="https://liff.line.me/2008923798-Py9KNvvH" class="glass-card p-4 flex flex-col items-center text-center shadow-sm hover:shadow-md transition-all group">
+                <div class="w-10 h-10 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-lg mb-2 group-hover:bg-emerald-500 group-hover:text-white transition-colors"><i class="fa-solid fa-id-card"></i></div>
+                <span class="font-bold text-gray-700 text-xs">Digital ID</span>
+            </a>
+            
+            <!-- SGS -->
+            <a href="https://sgs.bopp-obec.info/sgss/TblStudentsInfo/Show-TblStudentsInfo-Table.aspx" target="_blank" class="glass-card p-4 flex flex-col items-center text-center shadow-sm hover:shadow-md transition-all group">
+                <div class="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-lg mb-2 group-hover:bg-blue-500 group-hover:text-white transition-colors"><i class="fa-solid fa-graduation-cap"></i></div>
+                <span class="font-bold text-gray-700 text-xs">ผลการเรียน SGS</span>
+            </a>
+
+            <!-- ข้อมูลสุขภาพ -->
+            <a href="https://liff.line.me/2008988681-suVlGOQh" class="glass-card p-4 flex flex-col items-center text-center shadow-sm hover:shadow-md transition-all group">
+                <div class="w-10 h-10 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center text-lg mb-2 group-hover:bg-rose-500 group-hover:text-white transition-colors"><i class="fa-solid fa-heart-pulse"></i></div>
+                <span class="font-bold text-gray-700 text-xs">ข้อมูลสุขภาพ</span>
+            </a>
+
+            <!-- ค่าเทอม -->
+            <a href="https://schoolbillingdev31.com/SBMST/Pages/PrintReportPayInForStudent.aspx" target="_blank" class="glass-card p-4 flex flex-col items-center text-center shadow-sm hover:shadow-md transition-all group">
+                <div class="w-10 h-10 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-lg mb-2 group-hover:bg-green-500 group-hover:text-white transition-colors"><i class="fa-solid fa-magnifying-glass-dollar"></i></div>
+                <span class="font-bold text-gray-700 text-xs">ค่าบำรุงการศึกษา</span>
+            </a>
+
+            <!-- งานทะเบียน -->
+            <a href="https://sites.google.com/mst.ac.th/register-mst" target="_blank" class="glass-card p-4 flex flex-col items-center text-center shadow-sm hover:shadow-md transition-all group">
+                <div class="w-10 h-10 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center text-lg mb-2 group-hover:bg-indigo-500 group-hover:text-white transition-colors"><i class="fa-solid fa-clipboard-list"></i></div>
+                <span class="font-bold text-gray-700 text-xs">งานทะเบียนวัดผล</span>
+            </a>
+
+            <!-- สมัครเรียน -->
+            <a href="https://mst-muangsuratthani.pawano.net/mst-muangsuratthani" target="_blank" class="glass-card p-4 flex flex-col items-center text-center shadow-sm hover:shadow-md transition-all group">
+                <div class="w-10 h-10 bg-sky-100 text-sky-600 rounded-full flex items-center justify-center text-lg mb-2 group-hover:bg-sky-500 group-hover:text-white transition-colors"><i class="fa-solid fa-user-plus"></i></div>
+                <span class="font-bold text-gray-700 text-xs">รับสมัครนักเรียนใหม่</span>
+            </a>
+
+            <!-- ชุมนุม -->
+            <a href="https://mst.activities-club.com/" target="_blank" class="glass-card p-4 flex flex-col items-center text-center shadow-sm hover:shadow-md transition-all group">
+                <div class="w-10 h-10 bg-fuchsia-100 text-fuchsia-600 rounded-full flex items-center justify-center text-lg mb-2 group-hover:bg-fuchsia-500 group-hover:text-white transition-colors"><i class="fa-solid fa-users"></i></div>
+                <span class="font-bold text-gray-700 text-xs">ลงทะเบียนชุมนุม</span>
+            </a>
+
+            <!-- ห้องสมุด -->
+            <a href="http://mst.vlcloud.net" target="_blank" class="glass-card p-4 flex flex-col items-center text-center shadow-sm hover:shadow-md transition-all group">
+                <div class="w-10 h-10 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center text-lg mb-2 group-hover:bg-amber-500 group-hover:text-white transition-colors"><i class="fa-solid fa-book-open-reader"></i></div>
+                <span class="font-bold text-gray-700 text-xs">ห้องสมุดดิจิทัล</span>
+            </a>
+        </div>
+
+        <!-- Social Media Section -->
+        <div class="mt-16 text-center fade-in-up delay-500">
+            <p class="text-xs font-bold text-gray-400 mb-4 uppercase tracking-[0.2em] flex items-center justify-center gap-3">
+                <span class="w-10 h-[1px] bg-gray-300"></span>
+                ติดต่อและติดตามข่าวสาร
+                <span class="w-10 h-[1px] bg-gray-300"></span>
+            </p>
+            <div class="flex justify-center gap-5">
+                <a href="https://www.facebook.com/mstcouncil" target="_blank" class="w-12 h-12 bg-white rounded-full flex items-center justify-center text-blue-600 text-xl shadow-sm border border-gray-100 hover:bg-blue-600 hover:text-white transition-all transform hover:scale-110 hover:shadow-lg">
+                    <i class="fa-brands fa-facebook-f"></i>
+                </a>
+                <a href="https://instagram.com/MST.STUDENTCOUNCIL" target="_blank" class="w-12 h-12 bg-white rounded-full flex items-center justify-center text-pink-600 text-xl shadow-sm border border-gray-100 hover:bg-gradient-to-tr hover:from-yellow-400 hover:via-pink-500 hover:to-purple-600 hover:text-white transition-all transform hover:scale-110 hover:shadow-lg hover:border-transparent">
+                    <i class="fa-brands fa-instagram"></i>
+                </a>
+                <!-- ลิงก์ LINE ให้วิ่งไปที่หน้าแอดเพื่อนหรือแชทตรงของ MSTSC -->
+                <a href="https://lin.ee/PriqD2o" target="_blank" class="w-12 h-12 bg-white rounded-full flex items-center justify-center text-[#06C755] text-xl shadow-sm border border-gray-100 hover:bg-[#06C755] hover:text-white transition-all transform hover:scale-110 hover:shadow-lg">
+                    <i class="fa-brands fa-line"></i>
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="w-full text-center py-8 text-xs text-gray-400 font-medium z-10 mt-auto bg-white/30 backdrop-blur-sm border-t border-white/50">
+        <p class="mb-1">&copy; <script>document.write(new Date().getFullYear())</script> Muangsuratthani Student Council. All Rights Reserved.</p>
+        <p class="flex items-center justify-center gap-1">
+            <i class="fas fa-code text-mstPurple opacity-70"></i> 
+            <span class="opacity-80">Developed by MSTSC Tech Team</span>
+        </p>
+    </footer>
+
+</body>
+</html>
