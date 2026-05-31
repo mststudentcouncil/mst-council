@@ -70,9 +70,9 @@
             <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-mstPurple via-purple-400 to-mstYellow"></div>
             
             <div class="flex flex-col sm:flex-row items-center sm:items-start gap-6">
-                <div id="user-initials" class="w-24 h-24 sm:w-28 sm:h-28 bg-gradient-to-br from-white/90 via-yellow-50/60 to-purple-100/80 backdrop-blur-xl border-2 border-white shadow-[0_12px_30px_-10px_rgba(76,29,149,0.25)] rounded-full flex items-center justify-center text-mstPurple text-4xl shrink-0">
-    <i class="fas fa-user"></i>
-</div>
+                <div id="user-initials" class="w-24 h-24 sm:w-28 sm:h-28 bg-gradient-to-br from-white/90 via-yellow-50/60 to-purple-100/80 backdrop-blur-xl border-2 border-white shadow-[0_12px_30px_-10px_rgba(76,29,149,0.25)] rounded-full flex items-center justify-center text-mstPurple text-4xl font-black shrink-0">
+                    --
+                </div>
                 
                 <div class="text-center sm:text-left flex-1">
                     <h2 class="text-mstPurple font-bold text-sm sm:text-base tracking-wide mb-1">ระบบจัดการบัญชี MST Passport</h2>
@@ -213,7 +213,11 @@
                         const lname = currentUserData.lname || '';
                         document.getElementById('user-fullname').innerText = `${fname} ${lname}`;
                         
-    
+                        // ตัวอักษรย่อภายในวงกลม Avatar (ชื่อ 1 ตัว + นามสกุล 1 ตัว)
+let initials = "";
+if (fname.length > 0) initials += fname.charAt(0); // ดึงตัวอักษรแรกของชื่อ
+if (lname.length > 0) initials += lname.charAt(0); // ดึงตัวอักษรแรกของนามสกุล
+document.getElementById('user-initials').innerText = initials || "--";
 
                         // แสดงรหัสประจำตัว
                         document.getElementById('user-id').innerText = currentUserData.id || '-';

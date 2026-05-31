@@ -108,8 +108,8 @@
             <div id="step-2" class="w-full hidden fade-in">
                 <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-100">
                     <div class="flex items-center space-x-3 sm:space-x-4">
-                        <div id="user-initials" class="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-white/90 via-yellow-50/60 to-purple-100/80 backdrop-blur-md border border-white shadow-[0_4px_15px_rgba(76,29,149,0.12)] rounded-full flex items-center justify-center text-mstPurple text-lg sm:text-xl">
-                            <i class="fas fa-user"></i>
+                        <div id="user-initials" class="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-white/90 via-yellow-50/60 to-purple-100/80 backdrop-blur-md border border-white shadow-[0_4px_15px_rgba(76,29,149,0.12)] rounded-full flex items-center justify-center text-mstPurple text-lg sm:text-xl font-black">
+                            MS
                         </div>
                         <div>
                             <p class="text-[10px] sm:text-xs text-gray-400 font-medium uppercase tracking-wider">กำลังเข้าสู่ระบบ</p>
@@ -143,7 +143,7 @@
                 <div class="flex items-center justify-between bg-white border border-gray-200 rounded-xl p-4 mb-6 shadow-sm">
                     <div class="flex items-center gap-4">
                         <div id="consent-initials" class="w-11 h-11 bg-gradient-to-br from-white/90 via-yellow-50/60 to-purple-100/80 backdrop-blur-md border border-white shadow-[0_4px_15px_rgba(76,29,149,0.12)] rounded-full flex items-center justify-center text-mstPurple text-lg font-black">
-                            <i class="fas fa-user"></i>
+                            MS
                         </div>
                         <div>
                             <span id="confirm-id" class="text-gray-900 font-bold block text-base leading-none mb-1">---</span>
@@ -398,7 +398,7 @@
                             // 1. ดึงตัวอักษรย่อจากชื่อ-นามสกุลมาแสดงผลบน Avatar
                             let initial1 = userData.fname ? userData.fname.charAt(0) : "M";
                             let initial2 = userData.lname ? userData.lname.charAt(0) : "S";
-                            //document.getElementById('consent-initials').innerText = initial1 + initial2;
+                            document.getElementById('consent-initials').innerText = initial1 + initial2;
                             
                             // 2. สั่งแสดงหน้าต่างขออนุญาตสิทธิ์ (หยุดรอตรงนี้ ไม่เด้งอัตโนมัติแล้ว)
                             switchView('step-confirm');
@@ -504,7 +504,7 @@
             e.preventDefault();
             const sid = document.getElementById('username-input').value.trim();
             document.getElementById('display-username').innerText = sid;
-            //document.getElementById('user-initials').innerText = sid.substring(0,2).toUpperCase();
+            document.getElementById('user-initials').innerText = sid.substring(0,2).toUpperCase();
             switchView('step-2');
             setTimeout(() => document.getElementById('password-input').focus(), 100);
         }
@@ -621,7 +621,7 @@
                     // ดึงตัวอักษรย่อจากชื่อ
                     let initial1 = userData.fname ? userData.fname.charAt(0) : "M";
                     let initial2 = userData.lname ? userData.lname.charAt(0) : "S";
-                    //document.getElementById('consent-initials').innerText = initial1 + initial2;
+                    document.getElementById('consent-initials').innerText = initial1 + initial2;
                     
                     // สั่งแสดงหน้าต่างขออนุญาต
                     switchView('step-confirm');
