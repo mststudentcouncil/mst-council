@@ -125,28 +125,67 @@
             </div>
 
             <div class="glass-card p-6 md:col-span-2">
-                <h3 class="text-lg font-bold text-gray-800 mb-1 flex items-center gap-2">
-                    <i class="fas fa-network-wired text-mstPurple"></i> เครือข่ายระบบที่เชื่อมต่อ (SSO Apps)
-                </h3>
-                <p class="text-sm text-gray-500 mb-5">รายการแพลตฟอร์มภายในโรงเรียนที่รองรับการเข้าสู่ระบบผ่าน MST Passport ในปัจจุบัน</p>
-                
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div class="bg-white border border-gray-100 p-4 rounded-xl shadow-sm hover:shadow-md transition group">
-                        <div class="flex items-start gap-4">
-                            <div class="w-12 h-12 bg-purple-50 rounded-lg flex items-center justify-center text-mstPurple text-2xl group-hover:bg-mstPurple group-hover:text-mstYellow transition-colors shrink-0">
-                                <i class="fas fa-vote-yea"></i>
-                            </div>
-                            <div>
-                                <h4 class="font-bold text-gray-800 text-sm">ระบบลงคะแนนอิเล็กทรอนิกส์</h4>
-                                <p class="text-xs text-gray-400 mt-0.5 mb-2 leading-relaxed">เปิดสิทธิ์ให้กลุ่มนักเรียนปัจจุบันเข้าร่วมโหวต และจำแนกสิทธิ์ตามห้องเรียนสำเร็จ</p>
-                                <span class="bg-green-100 text-green-700 px-2 py-0.5 rounded text-[10px] font-bold"><i class="fas fa-check-circle mr-1"></i> เปิดใช้งาน</span>
-                            </div>
-                        </div>
-                    </div>
-
+    <h3 class="text-lg font-bold text-gray-800 mb-1 flex items-center gap-2">
+        <i class="fas fa-network-wired text-mstPurple"></i> เครือข่ายระบบที่เชื่อมต่อ (SSO Apps)
+    </h3>
+    <p class="text-sm text-gray-500 mb-5">คลิกเพื่อเข้าสู่ระบบแพลตฟอร์มภายในโรงเรียนด้วยบัญชี MST Passport</p>
     
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        
+        <a href="https://mstsc.pages.dev/evoting" target="_blank" class="bg-white border border-gray-100 p-4 rounded-xl shadow-sm hover:shadow-lg hover:border-purple-200 transition group block">
+            <div class="flex items-start gap-4">
+                <div class="w-12 h-12 bg-purple-50 rounded-lg flex items-center justify-center text-mstPurple text-2xl group-hover:bg-mstPurple group-hover:text-mstYellow transition-colors shrink-0">
+                    <i class="fas fa-vote-yea"></i>
+                </div>
+                <div>
+                    <h4 class="font-bold text-gray-800 text-sm">e-Voting</h4>
+                    <p class="text-xs text-gray-400 mt-0.5 mb-2 leading-relaxed">ระบบลงคะแนนอิเล็กทรอนิกส์</p>
+                    <span class="bg-green-100 text-green-700 px-2 py-0.5 rounded text-[10px] font-bold"><i class="fas fa-check-circle mr-1"></i> พร้อมใช้งาน</span>
                 </div>
             </div>
+        </a>
+
+        <a href="https://mstsc.pages.dev/digitalid" target="_blank" class="bg-white border border-gray-100 p-4 rounded-xl shadow-sm hover:shadow-lg hover:border-purple-200 transition group block">
+            <div class="flex items-start gap-4">
+                <div class="w-12 h-12 bg-red-50 rounded-lg flex items-center justify-center text-red-600 text-2xl group-hover:bg-red-600 group-hover:text-white transition-colors shrink-0">
+                    <i class="fas fa-id-card"></i>
+                </div>
+                <div>
+                    <h4 class="font-bold text-gray-800 text-sm">Digital ID</h4>
+                    <p class="text-xs text-gray-400 mt-0.5 mb-2 leading-relaxed">บัตรประจำตัวนักเรียนดิจิทัล</p>
+                    <span class="bg-green-100 text-green-700 px-2 py-0.5 rounded text-[10px] font-bold"><i class="fas fa-check-circle mr-1"></i> พร้อมใช้งาน</span>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://mstsc.pages.dev/admission" target="_blank" class="bg-white border border-gray-100 p-4 rounded-xl shadow-sm hover:shadow-lg hover:border-purple-200 transition group block">
+            <div class="flex items-start gap-4">
+                <div class="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center text-blue-600 text-2xl group-hover:bg-blue-600 group-hover:text-white transition-colors shrink-0">
+                    <i class="fas fa-school"></i>
+                </div>
+                <div>
+                    <h4 class="font-bold text-gray-800 text-sm">MSTSC Admission</h4>
+                    <p class="text-xs text-gray-400 mt-0.5 mb-2 leading-relaxed">ระบบรับสมัครคณะกรรมการสภานักเรียน</p>
+                    <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-[10px] font-bold"><i class="fas fa-external-link-alt mr-1"></i> ไปยังระบบ</span>
+                </div>
+            </div>
+        </a>
+
+        <a href="https://mstsc.pages.dev/regis" target="_blank" class="bg-white border border-gray-100 p-4 rounded-xl shadow-sm hover:shadow-lg hover:border-purple-200 transition group block">
+            <div class="flex items-start gap-4">
+                <div class="w-12 h-12 bg-yellow-50 rounded-lg flex items-center justify-center text-yellow-600 text-2xl group-hover:bg-yellow-500 group-hover:text-white transition-colors shrink-0">
+                    <i class="fas fa-edit"></i>
+                </div>
+                <div>
+                    <h4 class="font-bold text-gray-800 text-sm">MSTSC Registration</h4>
+                    <p class="text-xs text-gray-400 mt-0.5 mb-2 leading-relaxed">ระบบบันทึกข้อมูลพื้นฐานสภานักเรียน</p>
+                    <span class="bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded text-[10px] font-bold"><i class="fas fa-external-link-alt mr-1"></i> ไปยังระบบ</span>
+                </div>
+            </div>
+        </a>
+        
+    </div>
+</div>
         </div>
     </main>
 
