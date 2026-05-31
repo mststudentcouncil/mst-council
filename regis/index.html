@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>REGIS MSTSC - ระบบรายงานตัวสภานักเรียน</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@300;400;500;600;700&family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Anuphan', 'sans-serif'] },
+                    colors: {
+                        mst: { purple: '#6A1B9A', yellow: '#FFD600', light: '#f3f0f7', dark: '#2c2c2c', gray: '#f9fafb' }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://earthchie.github.io/jquery.Thailand.js/jquery.Thailand.js/dependencies/JQL.min.js"></script>
+    <script src="https://earthchie.github.io/jquery.Thailand.js/jquery.Thailand.js/dependencies/typeahead.bundle.js"></script>
+    <link rel="stylesheet" href="https://earthchie.github.io/jquery.Thailand.js/jquery.Thailand.js/dist/jquery.Thailand.min.css">
+    <script src="https://earthchie.github.io/jquery.Thailand.js/jquery.Thailand.js/dist/jquery.Thailand.min.js"></script>
+
+    <style>
+        body { 
+            background-color: var(--mst-light); 
+            background-image: radial-gradient(circle at 10% 20%, rgba(106, 27, 154, 0.05) 0%, transparent 20%), radial-gradient(circle at 90% 80%, rgba(255, 214, 0, 0.1) 0%, transparent 20%);
+            padding-bottom: 60px;
+        }
+        
+        .step-hidden { display: none; }
+        
+        /* บังคับช่อง Input สีขาวและอยู่เหนือลายน้ำเสมอ */
+        input[type="text"], input[type="tel"], input[type="email"], select, .input-clean {
+            background-color: #ffffff !important; 
+            border: 1px solid #e5e7eb;
+            color: #374151 !important;
+            opacity: 1 !important; 
+            -webkit-text-fill-color: #374151 !important; 
+            position: relative;
+            z-index: 10;
+        }
+
+        .input-clean {
+            width: 100%; border-radius: 0.75rem; padding: 0.75rem 1rem;
+            outline: none; transition: all 0.3s; font-size: 0.95rem;
+        }
+        .input-clean:focus { border-color: #6A1B9A; box-shadow: 0 0 0 4px rgba(106, 27, 154, 0.1); }
+        
+        /* สไตล์ช่องล็อกข้อมูล (ให้อ่านง่ายขึ้น ไม่กลืนไปกับพื้น) */
+        .input-clean[readonly] { 
+            background-color: #f8fafc !important; 
+            border: 1px dashed #cbd5e1 !important;
+            color: #64748b !important;
+            -webkit-text-fill-color: #64748b !important;
+            cursor: not-allowed; 
+        }
+        
+        /* JQuery Thailand Dropdown (ให้อยู่ชั้นบนสุด) */
+        .tt-menu { background-color: white; border-radius: 0.75rem; border: 1px solid #e5e7eb; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); font-family: 'Anuphan', sans-serif; padding: 5px; z-index: 9999 !important; }
+        .tt-suggestion { padding: 8px 12px; border-radius: 0.5rem; margin-bottom: 2px; position: relative; z-index: 9999; }
+        .tt-suggestion:hover, .tt-cursor { background-color: #f3f0f7; color: #6A1B9A; font-weight: 600; }
+
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid #6A1B9A; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .global-footer {
+            position: fixed; bottom: 0; left: 0; width: 100%; text-align: center; padding: 15px;
+            font-size: 0.75rem; color: #6b7280; background: linear-gradient(to top, rgba(243, 240, 247, 0.95) 0%, transparent 100%);
+            pointer-events: none; z-index: 50;
+        }
+    </style>
+</head>
+<body class="text-mst-dark flex items-center justify-center min-h-screen p-4">
+
+    <div class="bg-white w-full max-w-4xl rounded-[2rem] shadow-[0_20px_50px_rgba(106,27,154,0.1)] overflow-hidden relative transition-all duration-500 z-10">
+        
+        <img src="https://i.postimg.cc/yxjxZmRN/Logo-mstsc-(1)-(1).png" class="absolute right-[-10%] bottom-[-5%] w-[400px] h-[400px] object-contain opacity-[0.03] z-0 pointer-events-none" alt="Watermark">
+
+        <div class="bg-gradient-to-r from-mst-purple to-[#4a0072] p-8 text-white relative overflow-hidden flex justify-between items-center">
+    
+    <img src="https://i.postimg.cc/yxjxZmRN/Logo-mstsc-(1)-(1).png" class="absolute right-[-20px] top-1/2 transform -translate-y-1/2 w-48 h-48 opacity-[0.15] z-0 pointer-events-none" alt="Watermark Header">
+    
+    <div class="relative z-10 text-left">
+        <h1 class="text-3xl md:text-4xl font-black tracking-wide">REGIS - MSTSC</h1>
+        <p class="text-mst-yellow font-medium mt-1 text-sm md:text-base">ระบบรายงานตัวและจัดเก็บข้อมูลสภานักเรียน</p>
+    </div>
+
+    <a href="admin.html" class="relative z-10 bg-white/10 hover:bg-white/20 text-white px-3 md:px-5 py-2 md:py-2.5 rounded-xl text-xs md:text-sm font-bold backdrop-blur-md transition-all flex items-center gap-2 border border-white/20 shadow-sm hover:shadow-md cursor-pointer">
+        <i class="fa-solid fa-user-shield"></i> <span class="hidden md:inline">ผู้ดูแลระบบ</span>
+    </a>
+
+</div>
+
+        <div class="p-6 md:p-10 relative z-10">
+            
+            <div id="loginSection" class="text-center py-8">
+    <img src="https://i.postimg.cc/yxjxZmRN/Logo-mstsc-(1)-(1).png" alt="MSTSC Logo" class="w-28 h-28 mx-auto mb-6 drop-shadow-xl p-1 border-4 border-mst-yellow rounded-full bg-white relative z-10">
+    
+    <div class="bg-blue-50 border border-blue-100 rounded-2xl p-4 mb-8 text-left max-w-md mx-auto relative z-10">
+        <div class="flex gap-3">
+            <i class="fa-solid fa-shield-halved text-blue-500 mt-1"></i>
+            <div>
+                <p class="text-sm font-bold text-gray-800">เข้าสู่ระบบด้วยอีเมลโรงเรียน</p>
+                <p class="text-xs text-gray-500 mt-1">กรุณาใช้อีเมล @mst.ac.th เพื่อยืนยันตัวตนและดึงข้อมูลจากระบบรับสมัคร</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="webview-warning" class="hidden mb-6 bg-red-50 border border-red-200 rounded-2xl p-4 text-left max-w-md mx-auto shadow-sm relative z-20">
+        <div class="flex items-start gap-3">
+            <div class="w-10 h-10 bg-red-100 text-red-600 rounded-full flex items-center justify-center flex-shrink-0 text-xl shadow-inner mt-1">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <div>
+                <h3 class="font-bold text-red-700 text-sm mb-1">ไม่สามารถเข้าสู่ระบบผ่านแอปนี้ได้</h3>
+                <p class="text-xs text-red-600 leading-relaxed mb-3">
+                    นโยบายความปลอดภัยของ Google ไม่อนุญาตให้ล็อกอินภายในแอป <b>LINE, IG หรือ Facebook</b>
+                </p>
+                <div class="bg-white p-3 rounded-xl border border-red-100 text-[11px] text-gray-700 shadow-sm">
+                    <span class="font-bold text-mst-purple block mb-1">💡 วิธีแก้ไขเพื่อเข้าสู่ระบบ:</span>
+                    กดปุ่ม 3 จุด มุมขวาบน (หรือมุมล่าง) <br>แล้วเลือก <b class="text-blue-600">"เปิดในเบราว์เซอร์ (Open in Safari / Chrome)"</b>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="google-login-wrapper" class="flex justify-center mb-4 relative z-10">
+        <div id="g_id_onload"
+             data-client_id="1055496557-rm1petnl1gtd6c1ed01q9o6k880ik2ta.apps.googleusercontent.com"
+             data-callback="handleCredentialResponse"
+             data-auto_prompt="false">
+        </div>
+        <div class="g_id_signin" data-type="standard" data-size="large" data-theme="outline" data-text="sign_in_with" data-shape="pill" data-logo_alignment="left"></div>
+    </div>
+    
+    <div id="loginLoader" class="hidden flex-col items-center mt-6 relative z-10">
+        <div class="loader mb-3"></div>
+        <p class="text-sm font-medium text-mst-purple">กำลังตรวจสอบสิทธิ์...</p>
+    </div>
+</div>
+
+            <div id="registrationForm" class="step-hidden relative z-10">
+                
+                <div class="bg-white rounded-2xl p-5 mb-8 border border-gray-200 flex flex-col md:flex-row justify-between items-center gap-4 shadow-sm relative z-10">
+                    <div class="text-left w-full md:w-auto">
+                        <p class="text-xs text-gray-500 font-bold uppercase tracking-wider mb-1">ปีการศึกษาของท่าน</p>
+                        <p class="text-3xl font-black text-mst-purple" id="showStudentYear">...</p>
+                    </div>
+                    <div class="text-left md:text-right w-full md:w-auto bg-gray-50 md:bg-transparent p-3 md:p-0 rounded-xl border md:border-0 border-gray-100">
+                        <p class="text-xs text-gray-500 font-bold uppercase tracking-wider mb-1">สถานภาพปัจจุบัน</p>
+                        <span id="showStatusText" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-bold bg-gray-200 text-gray-700">
+                            <span class="w-2 h-2 rounded-full bg-gray-500"></span>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="flex justify-between mb-8 relative px-2 z-10">
+                    <div class="absolute top-1/2 left-0 w-full h-1 bg-gray-100 -z-10 transform -translate-y-1/2 rounded-full"></div>
+                    <div id="progressBar" class="absolute top-1/2 left-0 w-1/3 h-1 bg-mst-purple transition-all duration-500 -z-10 transform -translate-y-1/2 rounded-full"></div>
+                    <div class="step-indicator w-10 h-10 rounded-full bg-mst-purple text-white flex items-center justify-center font-bold text-sm shadow-lg ring-4 ring-white">1</div>
+                    <div class="step-indicator w-10 h-10 rounded-full bg-gray-200 text-gray-400 flex items-center justify-center font-bold text-sm ring-4 ring-white transition-colors duration-300">2</div>
+                    <div class="step-indicator w-10 h-10 rounded-full bg-gray-200 text-gray-400 flex items-center justify-center font-bold text-sm ring-4 ring-white transition-colors duration-300">3</div>
+                </div>
+
+                <form id="mainForm" class="relative z-10">
+                    <input type="hidden" id="academic_year">
+
+                    <div class="step-content" id="step1">
+                        <h3 class="text-lg font-bold mb-5 text-mst-purple flex items-center gap-2"><i class="fa-solid fa-user-pen"></i> ข้อมูลทั่วไป (Personal Info)</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+                            <div class="md:col-span-3"><label class="block text-xs font-bold text-gray-500 mb-1">รหัสนักเรียน</label><input type="text" id="std_id" readonly class="input-clean pointer-events-none"></div>
+                            <div class="md:col-span-3"><label class="block text-xs font-bold text-gray-500 mb-1">คำนำหน้า</label><input type="text" id="prefix" readonly class="input-clean pointer-events-none"></div>
+                            <div class="md:col-span-3"><label class="block text-xs font-bold text-gray-500 mb-1">ชื่อ</label><input type="text" id="fname_th" readonly class="input-clean pointer-events-none"></div>
+                            <div class="md:col-span-3"><label class="block text-xs font-bold text-gray-500 mb-1">นามสกุล</label><input type="text" id="lname_th" readonly class="input-clean pointer-events-none"></div>
+                            
+                            <div class="md:col-span-6"><label class="block text-xs font-bold text-gray-700 mb-1">Name (English) <span class="text-red-500">*</span></label><input type="text" id="fname_en" class="input-clean uppercase" placeholder="FIRSTNAME" required></div>
+                            <div class="md:col-span-6"><label class="block text-xs font-bold text-gray-700 mb-1">Surname (English) <span class="text-red-500">*</span></label><input type="text" id="lname_en" class="input-clean uppercase" placeholder="LASTNAME" required></div>
+                            
+                            <div class="md:col-span-4"><label class="block text-xs font-bold text-gray-700 mb-1">ชื่อเล่น <span class="text-red-500">*</span></label><input type="text" id="nickname" class="input-clean" required></div>
+                            
+                            <div class="md:col-span-8">
+                                <label class="block text-xs font-bold text-gray-700 mb-1">วัน/เดือน/ปีเกิด (พ.ศ.) <span class="text-red-500">*</span></label>
+                                <div class="flex gap-2">
+                                    <select id="dob_day" class="input-clean" required></select>
+                                    <select id="dob_month" class="input-clean" required></select>
+                                    <select id="dob_year" class="input-clean" required></select>
+                                </div>
+                            </div>
+
+                            <div class="md:col-span-4"><label class="block text-xs font-bold text-gray-700 mb-1">ห้องเรียน <span class="text-red-500">*</span></label><select id="room" class="input-clean" required></select></div>
+                            <div class="md:col-span-4"><label class="block text-xs font-bold text-gray-700 mb-1">กรุ๊ปเลือด</label><select id="blood_type" class="input-clean"><option value="">เลือก</option><option value="A">A</option><option value="B">B</option><option value="O">O</option><option value="AB">AB</option></select></div>
+                            <div class="md:col-span-4"><label class="block text-xs font-bold text-gray-700 mb-1">เลขบัตรประชาชน<span class="text-red-500">*</span></label><input type="tel" id="id_card" class="input-clean" maxlength="13" inputmode="numeric" placeholder="XXXXXXXXXXXXX" required></div>
+                        </div>
+                        <div class="mt-8 flex justify-end"><button type="button" onclick="nextStep(1)" class="bg-mst-purple hover:bg-purple-800 text-white px-8 py-3 rounded-xl font-bold transition-all shadow-md hover:shadow-lg">ถัดไป <i class="fa-solid fa-arrow-right ml-2"></i></button></div>
+                    </div>
+
+                    <div class="step-content step-hidden" id="step2">
+                        <h3 class="text-lg font-bold mb-5 text-mst-purple flex items-center gap-2"><i class="fa-solid fa-address-book"></i> การติดต่อและที่อยู่ (Contact & Address)</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+                            <div class="md:col-span-6"><label class="block text-xs font-bold text-gray-500 mb-1"><i class="fa-solid fa-school text-mst-purple"></i> อีเมลโรงเรียน</label><input type="email" id="school_email" readonly class="input-clean pointer-events-none"></div>
+                            <div class="md:col-span-6"><label class="block text-xs font-bold text-gray-700 mb-1"><i class="fa-solid fa-envelope text-red-500"></i> อีเมลส่วนตัว (สำรอง)</label><input type="email" id="personal_email" class="input-clean"></div>
+                            
+                            <div class="md:col-span-4"><label class="block text-xs font-bold text-gray-700 mb-1"><i class="fa-solid fa-phone text-blue-500"></i> เบอร์โทรศัพท์ <span class="text-red-500">*</span></label><input type="tel" id="phone" class="input-clean" required placeholder="08XXXXXXXX"></div>
+                            <div class="md:col-span-4"><label class="block text-xs font-bold text-gray-700 mb-1"><i class="fa-brands fa-line text-green-500"></i> Line ID</label><input type="text" id="line_id" class="input-clean"></div>
+                            <div class="md:col-span-4"><label class="block text-xs font-bold text-gray-700 mb-1"><i class="fa-brands fa-instagram text-pink-500"></i> IG / Facebook</label><input type="text" id="social" class="input-clean" placeholder="@username"></div>
+                            
+                            <div class="md:col-span-12 mt-4 mb-2"><h4 class="text-sm font-bold text-gray-800 border-b pb-2"><i class="fa-solid fa-map-location-dot"></i> ที่อยู่ปัจจุบัน</h4></div>
+                            <div class="md:col-span-12"><label class="block text-xs font-bold text-gray-700 mb-1">บ้านเลขที่ / หมู่ / ซอย / ถนน <span class="text-red-500">*</span></label><input type="text" id="addr_no" class="input-clean" required placeholder="เช่น 123/4 ม.5 ถ.ชนเกษม"></div>
+                            <div class="md:col-span-6"><label class="block text-xs font-bold text-gray-700 mb-1">ตำบล/แขวง <span class="text-red-500">*</span></label><input type="text" id="district" class="input-clean" required></div>
+                            <div class="md:col-span-6"><label class="block text-xs font-bold text-gray-700 mb-1">อำเภอ/เขต <span class="text-red-500">*</span></label><input type="text" id="amphoe" class="input-clean" required></div>
+                            <div class="md:col-span-6"><label class="block text-xs font-bold text-gray-700 mb-1">จังหวัด <span class="text-red-500">*</span></label><input type="text" id="province" class="input-clean" required></div>
+                            <div class="md:col-span-6"><label class="block text-xs font-bold text-gray-700 mb-1">รหัสไปรษณีย์ <span class="text-red-500">*</span></label><input type="text" id="zipcode" class="input-clean" required></div>
+
+                            <div class="md:col-span-12 mt-4 mb-2"><h4 class="text-sm font-bold text-gray-800 border-b pb-2"><i class="fa-solid fa-users"></i> ข้อมูลผู้ปกครอง</h4></div>
+                            <div class="md:col-span-6"><label class="block text-xs font-bold text-gray-700 mb-1">ชื่อ-สกุล ผู้ปกครอง <span class="text-red-500">*</span></label><input type="text" id="parent_name" class="input-clean" required></div>
+                            <div class="md:col-span-6"><label class="block text-xs font-bold text-gray-700 mb-1">เบอร์โทรศัพท์ผู้ปกครอง <span class="text-red-500">*</span></label><input type="tel" id="parent_phone" class="input-clean" required></div>
+                        </div>
+                        <div class="mt-8 flex justify-between">
+                            <button type="button" onclick="prevStep(2)" class="bg-gray-100 hover:bg-gray-200 text-gray-600 px-6 py-3 rounded-xl font-bold transition-all"><i class="fa-solid fa-arrow-left mr-2"></i> ย้อนกลับ</button>
+                            <button type="button" onclick="nextStep(2)" class="bg-mst-purple hover:bg-purple-800 text-white px-8 py-3 rounded-xl font-bold transition-all shadow-md">ถัดไป <i class="fa-solid fa-arrow-right ml-2"></i></button>
+                        </div>
+                    </div>
+
+                    <div class="step-content step-hidden" id="step3">
+                        <h3 class="text-lg font-bold mb-5 text-mst-purple flex items-center gap-2"><i class="fa-solid fa-file-shield"></i> ข้อมูลเพิ่มเติม & อัปโหลด (Extra & Upload)</h3>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                            <div class="md:col-span-1">
+                                <label class="block text-xs font-bold text-gray-700 mb-1">ไซซ์เสื้อ <span class="text-red-500">*</span></label>
+                                <select id="shirt_size" class="input-clean" required>
+                                    <option value="S">S</option><option value="M">M</option><option value="L">L</option><option value="XL">XL</option><option value="2XL">2XL</option><option value="3XL">3XL</option>
+                                </select>
+                            </div>
+                            <div class="md:col-span-1"><label class="block text-xs font-bold text-gray-700 mb-1">โรคประจำตัว (ถ้าไม่มี - )</label><input type="text" id="med_condition" class="input-clean" value=" "></div>
+                            <div class="md:col-span-1"><label class="block text-xs font-bold text-gray-700 mb-1">อาหารที่แพ้ (ถ้าไม่มี - )</label><input type="text" id="food_limit" class="input-clean" value=" "></div>
+                        </div>
+                        
+                        <div class="border-2 border-dashed border-gray-300 rounded-2xl p-8 text-center hover:bg-purple-50 hover:border-mst-purple transition-colors group bg-white">
+                            <i class="fa-solid fa-cloud-arrow-up text-4xl text-gray-400 group-hover:text-mst-purple mb-3 transition-colors"></i>
+                            <p class="text-sm font-bold text-gray-700 mb-1">อัปโหลดรูปภาพหน้าตรง</p>
+                            <p class="text-xs text-gray-500">รองรับ PNG , JPG , หรือรูปภาพ (ขนาดไม่เกิน 10MB)</p>
+                            <input type="file" id="fileUpload" accept=".pdf,image/png,image/jpeg" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-bold file:bg-mst-yellow file:text-mst-dark hover:file:bg-yellow-500 cursor-pointer mt-4 mx-auto max-w-xs transition-colors">
+                            <p id="fileNameDisplay" class="text-sm text-green-600 mt-3 font-bold hidden"></p>
+                            <input type="hidden" id="existing_document_url">
+                        </div>
+
+                        <!-- กล่องข้อความเตือนก่อนบันทึก (เพิ่มใหม่) -->
+                        <div class="mt-8 p-4 bg-red-50 rounded-2xl border border-red-200 flex items-start gap-3 shadow-sm relative z-20">
+                            <div class="bg-red-100 text-red-600 w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <i class="fa-solid fa-triangle-exclamation"></i>
+                            </div>
+                            <div>
+                                <b class="text-sm text-red-700 block mb-1">คำเตือน: กรุณาตรวจสอบข้อมูลก่อนบันทึก</b>
+                                <p class="text-xs text-red-600 leading-relaxed">
+                                    โปรดตรวจสอบความถูกต้องของข้อมูลทุกขั้นตอนอีกครั้ง <b>ท่านจะไม่สามารถแก้ไขข้อมูลด้วยตนเองในภายหลังได้</b> หากบันทึกแล้วพบข้อผิดพลาด จะต้องติดต่อห้องสภานักเรียนเพื่อทำการแก้ไขเท่านั้น
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-6 p-5 bg-[#f8fcfd] rounded-2xl border border-[#bce8f1]">
+                            <label class="flex items-start cursor-pointer gap-3">
+                                <input type="checkbox" id="pdpa_consent" class="mt-1 w-5 h-5 text-mst-purple rounded border-gray-300 focus:ring-mst-purple relative z-20">
+                                <div class="text-sm text-gray-700 leading-relaxed relative z-20">
+                                    <b class="text-dark"><i class="fa-solid fa-shield-check text-green-600"></i> ความปลอดภัยของข้อมูล (PDPA)</b><br>
+                                    ข้าพเจ้ายืนยันว่าข้อมูลถูกต้อง และยินยอมให้คณะกรรมการสภานักเรียนโรงเรียนเมืองสุราษฎร์ธานี เก็บรวบรวมข้อมูลส่วนบุคคล เพื่อใช้ในกิจการสภานักเรียนเท่านั้น จะไม่มีการเผยแพร่สู่ภายนอก
+                                </div>
+                            </label>
+                        </div>
+
+                        <div class="mt-8 flex justify-between items-center">
+                            <button type="button" onclick="prevStep(3)" class="bg-gray-100 hover:bg-gray-200 text-gray-600 px-6 py-3 rounded-xl font-bold transition-all"><i class="fa-solid fa-arrow-left mr-2"></i> ย้อนกลับ</button>
+                            <div class="flex items-center gap-3">
+                                <div id="submitLoader" class="loader hidden"></div>
+                                <button type="button" onclick="submitData()" id="submitBtn" class="bg-gradient-to-r from-mst-purple to-purple-800 hover:from-purple-800 hover:to-purple-900 text-white px-8 py-3 rounded-xl font-bold shadow-lg transform hover:-translate-y-1 transition-all"><i class="fa-solid fa-save mr-2"></i> บันทึกข้อมูลรายงานตัว</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <!-- ส่วนที่จะแสดงเมื่อรายงานตัวสำเร็จแล้ว (เพิ่มใหม่) -->
+            <div id="successSection" class="hidden pt-4 pb-12 px-6 md:px-10 lg:px-14 relative z-10 fade-in w-full mx-auto box-border">
+    
+    <div class="text-center mb-10 md:mb-14 mt-4">
+        <div class="w-24 h-24 mx-auto bg-green-50 text-green-500 rounded-full flex items-center justify-center text-5xl mb-6 shadow-sm ring-8 ring-green-50/50">
+            <i class="fa-solid fa-check"></i>
+        </div>
+        
+        <h2 class="text-3xl md:text-4xl font-black text-gray-800 mb-3 tracking-tight">รายงานตัวเรียบร้อยแล้ว</h2>
+        <p class="text-gray-500 mb-8 text-sm md:text-base">ข้อมูลของคุณถูกบันทึกเข้าสู่ระบบฐานข้อมูลสภานักเรียนอย่างสมบูรณ์</p>
+
+        <div class="inline-flex items-center gap-3 bg-orange-50 text-orange-700 px-6 py-4 rounded-2xl text-sm font-bold border border-orange-200 shadow-sm">
+            <div class="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center text-orange-600 flex-shrink-0">
+                <i class="fa-solid fa-info"></i>
+            </div>
+            <span class="text-left">หากต้องการแก้ไขข้อมูลในภายหลัง <u class="underline-offset-4 text-orange-800 font-black cursor-pointer">กรุณาติดต่อห้องสภานักเรียน</u></span>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 text-left">
+        
+        <div class="space-y-5">
+            <h3 class="text-lg font-black text-mst-purple flex items-center gap-2 border-b-2 border-gray-100 pb-3">
+                <i class="fa-solid fa-key"></i> บัญชีและรหัสผ่านส่วนกลาง
+            </h3>
+
+            <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
+                <div class="flex items-center gap-3 mb-4">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/4/4e/Gmail_Icon.png" class="w-7 h-7">
+                    <h4 class="font-bold text-gray-800 text-sm">อีเมล (MST STUDENT COUNCIL)</h4>
+                </div>
+                <div class="space-y-2 text-sm bg-gray-50 p-3.5 rounded-xl border border-gray-100">
+                    <div class="flex justify-between items-center"><span class="text-gray-500 font-medium">Email:</span><span class="font-bold text-mst-purple select-all">studentcouncil@mst.ac.th</span></div>
+                    <div class="flex justify-between items-center"><span class="text-gray-500 font-medium">Password:</span><span class="font-black text-gray-800 select-all tracking-wider bg-gray-200/50 px-2 py-0.5 rounded">077285686</span></div>
+                </div>
+            </div>
+
+            <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-7 h-7 rounded-lg bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600 text-white flex items-center justify-center text-sm shadow-sm"><i class="fa-brands fa-instagram"></i></div>
+                    <h4 class="font-bold text-gray-800 text-sm">Instagram</h4>
+                </div>
+                <div class="space-y-2 text-sm bg-gray-50 p-3.5 rounded-xl border border-gray-100">
+                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 border-b border-gray-200/60 pb-2"><span class="text-gray-500 font-medium">IG Username:</span><span class="font-bold text-gray-800 select-all">mst.studentcouncil</span></div>
+                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 border-b border-gray-200/60 pb-2 pt-1"><span class="text-gray-500 font-medium">Email:</span><span class="font-bold text-mst-purple select-all">studentcouncil@mst.ac.th</span></div>
+                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 pt-1"><span class="text-gray-500 font-medium">Password:</span><span class="font-black text-gray-800 select-all tracking-wider">@Muangsurat</span></div>
+                </div>
+            </div>
+
+            <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-7 h-7 rounded-lg bg-[#06C755] text-white flex items-center justify-center text-sm shadow-sm"><i class="fa-brands fa-line"></i></div>
+                    <h4 class="font-bold text-gray-800 text-sm">LINE Official (MSTSC)</h4>
+                </div>
+                <div class="space-y-2 text-sm bg-gray-50 p-3.5 rounded-xl border border-gray-100 mb-3">
+                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 border-b border-gray-200/60 pb-2"><span class="text-gray-500 font-medium">Email:</span><span class="font-bold text-mst-purple select-all">studentcouncil@mst.ac.th</span></div>
+                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 pt-1"><span class="text-gray-500 font-medium">Password:</span><span class="font-black text-gray-800 select-all tracking-wider">@Muangsurat</span></div>
+                </div>
+                <div class="bg-red-50 text-red-700 text-xs p-3 rounded-xl border border-red-100 leading-relaxed">
+                    <i class="fa-solid fa-shield-halved text-red-500 mr-1"></i> <b>หมายเหตุ:</b> มีการตั้งยืนยันสองชั้น (2FA) ระบบจะส่งรหัสยืนยันไปทางอีเมล studentcouncil@mst.ac.th
+                </div>
+            </div>
+
+            <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+                <div class="flex gap-4 mb-4">
+                    <div class="flex-1 bg-gradient-to-br from-[#00C4CC]/10 to-[#00C4CC]/5 border border-[#00C4CC]/20 rounded-xl p-3 text-center">
+                        <i class="fa-solid fa-c text-[#00C4CC] text-2xl mb-1"></i>
+                        <h4 class="font-bold text-gray-800 text-xs">Canva (MSTSC)</h4>
+                    </div>
+                    <div class="flex-1 bg-gray-50 border border-gray-200 rounded-xl p-3 text-center">
+                        <i class="fa-brands fa-tiktok text-black text-2xl mb-1"></i>
+                        <h4 class="font-bold text-gray-800 text-xs">TikTok (MSTSC)</h4>
+                    </div>
+                </div>
+                <div class="text-center text-xs text-gray-600 bg-purple-50 border border-purple-100 p-3.5 rounded-xl leading-relaxed">
+                    เข้าสู่ระบบด้วย <b class="text-mst-purple">อีเมล SSO (Google)</b><br>
+                    <span class="font-bold text-gray-800 text-sm my-1 block select-all">studentcouncil@mst.ac.th</span>
+                    <span class="text-gray-500">(ต้องเข้าสู่ระบบอีเมลนี้ค้างไว้ในเครื่องก่อน)</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="space-y-5">
+            <h3 class="text-lg font-black text-mst-purple flex items-center gap-2 border-b-2 border-gray-100 pb-3 mt-4 lg:mt-0">
+                <i class="fa-solid fa-server"></i> ระบบสารสนเทศสภานักเรียน
+            </h3>
+            
+            <div class="bg-gradient-to-r from-[#56A8D6] to-[#229ED9] p-5 rounded-2xl text-white shadow-md hover:shadow-lg transition-all relative overflow-hidden group">
+                <i class="fa-brands fa-telegram absolute -right-4 -bottom-4 text-[80px] opacity-20 group-hover:scale-110 group-hover:-rotate-12 transition-transform duration-300"></i>
+                <div class="relative z-10 flex flex-col xl:flex-row gap-4 justify-between items-center text-center xl:text-left">
+                    <div>
+                        <h4 class="font-bold text-sm mb-1"><i class="fa-solid fa-bell text-yellow-300 mr-1"></i> แจ้งเตือนเมื่อมีเรื่องร้องเรียน</h4>
+                        <p class="text-[11px] text-blue-50 leading-relaxed">รับการแจ้งเตือนผ่าน Telegram<br>(ให้ดาวน์โหลดและเข้าสู่ระบบแอปให้เรียบร้อยก่อน)</p>
+                    </div>
+                    <a href="https://t.me/+ZEsGMYLa5UYxMWE1" target="_blank" class="w-full xl:w-auto text-center bg-white text-[#229ED9] text-xs font-bold px-5 py-2.5 rounded-xl hover:bg-gray-50 transition-colors shadow-sm whitespace-nowrap">
+                        เข้าร่วมกลุ่ม
+                    </a>
+                </div>
+            </div>
+
+            <p class="text-[13px] text-gray-600 px-1 font-medium">สามารถศึกษาระบบต่างๆ ของสภานักเรียนได้ผ่านเว็บไซต์ เพื่อสานต่อและพัฒนาให้ดียิ่งขึ้น</p>
+
+            <div class="flex flex-col gap-3">
+                
+                <a href="https://sites.google.com/mst.ac.th/council" target="_blank" class="flex items-center p-3.5 bg-white border border-gray-100 hover:border-mst-purple hover:bg-purple-50/50 rounded-2xl transition-all shadow-sm group">
+                    <div class="w-10 h-10 bg-purple-100 text-mst-purple rounded-xl flex items-center justify-center mr-4 group-hover:scale-105 transition-transform">
+                        <i class="fa-solid fa-globe"></i>
+                    </div>
+                    <div class="flex-grow">
+                        <p class="font-bold text-gray-800 text-sm group-hover:text-mst-purple transition-colors">เว็บไซต์หลักสภานักเรียน</p>
+                        <p class="text-[10px] text-gray-400">sites.google.com/mst.ac.th/council</p>
+                    </div>
+                    <i class="fa-solid fa-arrow-up-right-from-square text-gray-300 group-hover:text-mst-purple text-xs"></i>
+                </a>
+
+                <a href="https://admission-mstsc.pages.dev" target="_blank" class="flex items-center p-3.5 bg-white border border-gray-100 hover:border-blue-500 hover:bg-blue-50/50 rounded-2xl transition-all shadow-sm group">
+                    <div class="w-10 h-10 bg-gray-50 text-gray-400 group-hover:bg-blue-100 group-hover:text-blue-600 rounded-xl flex items-center justify-center mr-4 transition-colors">
+                        <i class="fa-solid fa-user-plus"></i>
+                    </div>
+                    <div class="flex-grow">
+                        <p class="font-bold text-gray-800 text-sm group-hover:text-blue-600 transition-colors">เว็บรับสมัครสภา (Admission)</p>
+                        <p class="text-[10px] text-gray-400">admission-mstsc.pages.dev</p>
+                    </div>
+                </a>
+
+                <a href="https://mstsc-e-voting.pages.dev" target="_blank" class="flex items-center p-3.5 bg-white border border-gray-100 hover:border-yellow-500 hover:bg-yellow-50/50 rounded-2xl transition-all shadow-sm group">
+                    <div class="w-10 h-10 bg-gray-50 text-gray-400 group-hover:bg-yellow-100 group-hover:text-yellow-600 rounded-xl flex items-center justify-center mr-4 transition-colors">
+                        <i class="fa-solid fa-check-to-slot"></i>
+                    </div>
+                    <div class="flex-grow">
+                        <p class="font-bold text-gray-800 text-sm group-hover:text-yellow-600 transition-colors">เว็บสำหรับการโหวต/เลือกตั้ง (e-Voting)</p>
+                        <p class="text-[10px] text-gray-400">mstsc-e-voting.pages.dev</p>
+                    </div>
+                </a>
+
+                <a href="https://reg-mstsc.pages.dev" target="_blank" class="flex items-center p-3.5 bg-white border border-gray-100 hover:border-indigo-500 hover:bg-indigo-50/50 rounded-2xl transition-all shadow-sm group">
+                    <div class="w-10 h-10 bg-gray-50 text-gray-400 group-hover:bg-indigo-100 group-hover:text-indigo-600 rounded-xl flex items-center justify-center mr-4 transition-colors">
+                        <i class="fa-solid fa-id-card-clip"></i>
+                    </div>
+                    <div class="flex-grow">
+                        <p class="font-bold text-gray-800 text-sm group-hover:text-indigo-600 transition-colors">เว็บทะเบียนสภานักเรียน (REG)</p>
+                        <p class="text-[10px] text-gray-400">reg-mstsc.pages.dev</p>
+                    </div>
+                </a>
+
+                <a href="https://cert-mstsc.pages.dev" target="_blank" class="flex items-center p-3.5 bg-white border border-gray-100 hover:border-orange-500 hover:bg-orange-50/50 rounded-2xl transition-all shadow-sm group">
+                    <div class="w-10 h-10 bg-gray-50 text-gray-400 group-hover:bg-orange-100 group-hover:text-orange-600 rounded-xl flex items-center justify-center mr-4 transition-colors">
+                        <i class="fa-solid fa-certificate"></i>
+                    </div>
+                    <div class="flex-grow">
+                        <p class="font-bold text-gray-800 text-sm group-hover:text-orange-600 transition-colors">เว็บคลังเกียรติบัตร (Certificate)</p>
+                        <p class="text-[10px] text-gray-400">cert-mstsc.pages.dev</p>
+                    </div>
+                </a>
+
+                <a href="https://mstsc-feedback.pages.dev" target="_blank" class="flex items-center p-3.5 bg-white border border-gray-100 hover:border-rose-500 hover:bg-rose-50/50 rounded-2xl transition-all shadow-sm group">
+                    <div class="w-10 h-10 bg-gray-50 text-gray-400 group-hover:bg-rose-100 group-hover:text-rose-600 rounded-xl flex items-center justify-center mr-4 transition-colors">
+                        <i class="fa-solid fa-bullhorn"></i>
+                    </div>
+                    <div class="flex-grow">
+                        <p class="font-bold text-gray-800 text-sm group-hover:text-rose-600 transition-colors">ระบบรับเรื่องร้องเรียน (Feedback)</p>
+                        <p class="text-[10px] text-gray-400">mstsc-feedback.pages.dev</p>
+                    </div>
+                </a>
+
+                <a href="https://mstsc-checkin.pages.dev/admin" target="_blank" class="flex items-center p-3.5 bg-white border border-gray-100 hover:border-teal-500 hover:bg-teal-50/50 rounded-2xl transition-all shadow-sm group">
+                    <div class="w-10 h-10 bg-gray-50 text-gray-400 group-hover:bg-teal-100 group-hover:text-teal-600 rounded-xl flex items-center justify-center mr-4 transition-colors">
+                        <i class="fa-solid fa-qrcode"></i>
+                    </div>
+                    <div class="flex-grow">
+                        <p class="font-bold text-gray-800 text-sm group-hover:text-teal-600 transition-colors">จัดการการเข้าร่วมกิจกรรม (Check-in)</p>
+                        <p class="text-[10px] text-gray-400">mstsc-checkin.pages.dev/admin</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="mt-12 text-center border-t border-gray-100 pt-8">
+        <button onclick="location.reload()" class="inline-flex items-center gap-2 bg-gray-50 border border-gray-200 hover:bg-gray-100 text-gray-600 px-8 py-3 rounded-full text-sm font-bold transition-all shadow-sm">
+            <i class="fa-solid fa-right-from-bracket"></i> กลับไปหน้าแรก / ปิดหน้าต่างนี้
+        </button>
+    </div>
+
+</div>
+
+    <script>
+        // ==========================================
+        // ⚙️ 1. ตั้งค่าพื้นฐาน (CONFIG)
+        // ==========================================
+        const API_URL = "https://script.google.com/macros/s/AKfycbx7ujsszpBJ1nCZ8idqCaUDd6qmvr9sOvouGzpTuLv6GXe8SxCx5VHoqCOMvpSZu4Kqig/exec";
+
+        let currentStep = 1;
+        let fileData = { base64: null, mimeType: null };
+        let studentAuthData = {};
+        
+        const today = new Date();
+        let systemAcademicYear = today.getFullYear() + 543;
+        if (today.getMonth() < 4 || (today.getMonth() === 4 && today.getDate() < 15)) systemAcademicYear -= 1;
+
+        $(document).ready(function() {
+            let roomHtml = '<option value="">เลือกห้อง</option>';
+            for(let i=1; i<=10; i++) roomHtml += `<option value="${i}">ห้อง ${i}</option>`;
+            $('#room').html(roomHtml);
+
+            const months = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
+            let dHtml = '<option value="">วัน</option>'; for(let i=1; i<=31; i++) dHtml += `<option value="${i.toString().padStart(2,'0')}">${i}</option>`; $('#dob_day').html(dHtml);
+            let mHtml = '<option value="">เดือน</option>'; months.forEach((m, i) => mHtml += `<option value="${(i+1).toString().padStart(2,'0')}">${m}</option>`); $('#dob_month').html(mHtml);
+            let yHtml = '<option value="">ปี พ.ศ.</option>'; let curr = new Date().getFullYear()+543; for(let i=curr; i>=curr-25; i--) yHtml += `<option value="${i}">${i}</option>`; $('#dob_year').html(yHtml);
+
+            $.Thailand({ $district: $('#district'), $amphoe: $('#amphoe'), $province: $('#province'), $zipcode: $('#zipcode') });
+        });
+
+        // ==========================================
+        // 🔐 2. ระบบ Login ด้วย Google
+        // ==========================================
+        function parseJwt (token) {
+            var base64Url = token.split('.')[1];
+            var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            return JSON.parse(decodeURIComponent(window.atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')));
+        }
+
+        async function handleCredentialResponse(response) {
+            $('.g_id_signin').hide();
+            $('#loginLoader').removeClass('hidden').addClass('flex');
+
+            const email = parseJwt(response.credential).email;
+            if (!email.endsWith('@mst.ac.th')) {
+                Swal.fire('ปฏิเสธการเข้าถึง', 'กรุณาใช้อีเมล @mst.ac.th ของโรงเรียนเท่านั้น', 'error');
+                resetLogin(); return;
+            }
+
+            try {
+                const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'verifyLogin', email: email }) });
+                const data = await res.json();
+
+                if (data.status === 'success') {
+                    $('#loginSection').addClass('hidden');
+                    $('#registrationForm').removeClass('step-hidden').addClass('fade-in');
+                    
+                    studentAuthData.std_id = data.std_id;
+                    $('#school_email').val(email);
+
+                    if(data.existing_data) {
+                        const d = data.existing_data;
+                        $('#std_id').val(d.std_id);
+                        $('#prefix').val(d.prefix || 'นาย');
+                        $('#fname_th').val(d.fname_th || '');
+                        $('#lname_th').val(d.lname_th || '');
+                        $('#fname_en').val(d.fname_en || '');
+                        $('#lname_en').val(d.lname_en || '');
+                        $('#nickname').val(d.nickname || '');
+                        $('#blood_type').val(d.blood_type || '');
+                        $('#room').val(d.room || '');
+                        $('#id_card').val(d.id_card || '');
+                        $('#personal_email').val(d.personal_email || '');
+                        $('#phone').val(d.phone ? '0'+d.phone : '');
+                        $('#line_id').val(d.line_id || '');
+                        $('#social').val(d.social || '');
+                        $('#parent_name').val(d.parent_name || '');
+                        $('#parent_phone').val(d.parent_phone ? '0'+d.parent_phone : '');
+                        $('#addr_no').val(d.addr_no || '');
+                        $('#district').val(d.district || '');
+                        $('#amphoe').val(d.amphoe || '');
+                        $('#province').val(d.province || '');
+                        $('#zipcode').val(d.zipcode || '');
+                        $('#med_condition').val(d.med_condition || '-');
+                        $('#food_limit').val(d.food_limit || '-');
+                        $('#shirt_size').val(d.shirt_size || 'M');
+                        $('#existing_document_url').val(d.document_url || '');
+                        $('#academic_year').val(d.academic_year || systemAcademicYear);
+
+                        if(d.birthdate) {
+                            let dateObj = new Date(d.birthdate);
+                            if(!isNaN(dateObj)) {
+                                $('#dob_year').val(dateObj.getFullYear() + 543);
+                                $('#dob_month').val((dateObj.getMonth() + 1).toString().padStart(2,'0'));
+                                $('#dob_day').val(dateObj.getDate().toString().padStart(2,'0'));
+                            }
+                        }
+                        // --- 1. ล็อกข้อมูลพื้นฐานที่ส่งมาจากระบบรับสมัคร ห้ามแก้ไข ---
+                        // แก้ไขโดยใส่ String() ครอบเพื่อป้องกัน Error กรณีข้อมูลเป็นตัวเลข
+                        if(d.id_card && String(d.id_card).trim() !== '') {
+                            $('#id_card').prop('readonly', true).addClass('pointer-events-none');
+                        }
+                        if(d.birthdate) {
+                            $('#dob_day, #dob_month, #dob_year').prop('disabled', true).addClass('pointer-events-none bg-gray-50 text-gray-500');
+                        }
+
+                        // --- 2. ตรวจสอบว่ารายงานตัวสำเร็จแล้วหรือยัง ---
+                        // เช็คจากสถานะ หรือ เช็คว่ามีข้อมูลที่อยู่และเบอร์โทรแล้ว (แสดงว่าเคยบันทึกแบบฟอร์มนี้แล้ว)
+                        const isAlreadyRegistered = d.status === 'รายงานตัวสำเร็จ' || (d.addr_no && d.phone);
+                        
+                        if(isAlreadyRegistered) {
+                            $('#loginSection').addClass('hidden');
+                            $('#registrationForm').addClass('hidden step-hidden'); // ซ่อนฟอร์มทั้งหมด
+                            $('#successSection').removeClass('hidden'); // แสดงหน้าสำเร็จพร้อมลิงก์
+                            return; // จบการทำงาน ไม่ต้องดึงข้อมูลส่วนอื่นต่อ เพื่อป้องกัน Error
+                        }
+
+                        const stuYear = parseInt(d.academic_year);
+                        $('#showStudentYear').text(stuYear ? stuYear : '-');
+                        
+                        let statusHtml = '';
+                        if (!stuYear) { statusHtml = `<span class="w-2 h-2 rounded-full bg-gray-500"></span> ไม่ระบุปีการศึกษา`; $('#showStatusText').removeClass().addClass('inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-bold bg-gray-200 text-gray-700'); }
+                        else if (stuYear === systemAcademicYear) { statusHtml = `<span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> กำลังดำรงตำแหน่ง`; $('#showStatusText').removeClass().addClass('inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-bold bg-green-100 text-green-700'); }
+                        else if (stuYear < systemAcademicYear) { statusHtml = `<span class="w-2 h-2 rounded-full bg-yellow-500"></span> ที่ปรึกษาสภานักเรียน`; $('#showStatusText').removeClass().addClass('inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-bold bg-yellow-100 text-yellow-700'); }
+                        else { statusHtml = `<span class="w-2 h-2 rounded-full bg-blue-500"></span> ว่าที่คณะกรรมการ`; $('#showStatusText').removeClass().addClass('inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-bold bg-blue-100 text-blue-700'); }
+                        $('#showStatusText').html(statusHtml);
+                    }
+                } else {
+                    Swal.fire('ไม่พบสิทธิ์', data.message, 'warning');
+                    resetLogin();
+                }
+            } catch (error) {
+                Swal.fire('ระบบขัดข้อง', 'ไม่สามารถเชื่อมต่อฐานข้อมูลได้', 'error');
+                resetLogin();
+            }
+        }
+
+        function resetLogin() {
+            $('.g_id_signin').show();
+            $('#loginLoader').addClass('hidden').removeClass('flex');
+        }
+
+        // ==========================================
+        // 🔄 3. ระบบ Stepper
+        // ==========================================
+        function nextStep(step) {
+            if(step === 1) {
+                if(!$('#nickname').val() || !$('#dob_year').val() || !$('#room').val() || !$('#fname_en').val() || !$('#lname_en').val() || !$('#id_card').val()) {
+                    return Swal.fire('ข้อมูลไม่ครบ', 'กรุณากรอกข้อมูลที่มีเครื่องหมายดอกจัน (*) สีแดงให้ครบถ้วน', 'warning');
+                }
+                if($('#id_card').val().length !== 13) {
+                    return Swal.fire('ข้อมูลไม่ถูกต้อง', 'กรุณากรอกเลขบัตรประชาชนให้ครบ 13 หลัก', 'warning');
+                }
+            }
+            if(step === 2 && (!$('#phone').val() || !$('#addr_no').val() || !$('#district').val() || !$('#parent_phone').val())) {
+                return Swal.fire('ข้อมูลไม่ครบ', 'กรุณากรอกข้อมูลการติดต่อและที่อยู่ให้ครบถ้วน', 'warning');
+            }
+
+            $('#step' + step).addClass('step-hidden');
+            $('#step' + (step + 1)).removeClass('step-hidden');
+            updateProgress(step + 1);
+            window.scrollTo(0, 0);
+        }
+
+        function prevStep(step) {
+            $('#step' + step).addClass('step-hidden');
+            $('#step' + (step - 1)).removeClass('step-hidden');
+            updateProgress(step - 1);
+            window.scrollTo(0, 0);
+        }
+
+        function updateProgress(step) {
+            $('.step-indicator').each(function(index) {
+                if(index < step) {
+                    $(this).removeClass('bg-gray-200 text-gray-400').addClass('bg-mst-purple text-white');
+                } else {
+                    $(this).removeClass('bg-mst-purple text-white').addClass('bg-gray-200 text-gray-400');
+                }
+            });
+            $('#progressBar').css('width', step === 1 ? '33%' : step === 2 ? '66%' : '100%');
+        }
+
+        // ==========================================
+        // 📂 4. ระบบอัปโหลดไฟล์
+        // ==========================================
+        $('#fileUpload').on('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            if (file.size > 10 * 1024 * 1024) {
+                Swal.fire('ขนาดไฟล์เกิน', 'กรุณาอัปโหลดไฟล์ขนาดไม่เกิน 10MB', 'error');
+                this.value = ''; return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                fileData.base64 = event.target.result.split(',')[1];
+                fileData.mimeType = file.type;
+                $('#fileNameDisplay').text(`แนบไฟล์สำเร็จ: ${file.name}`).removeClass('hidden');
+            };
+            reader.readAsDataURL(file);
+        });
+
+        // ==========================================
+        // 💾 5. บันทึกข้อมูล
+        // ==========================================
+        async function submitData() {
+            if (!$('#pdpa_consent').is(':checked')) {
+                return Swal.fire('แจ้งเตือน', 'กรุณายอมรับข้อตกลงความปลอดภัยของข้อมูล (PDPA)', 'warning');
+            }
+
+            $('#submitBtn').addClass('hidden');
+            $('#submitLoader').removeClass('hidden');
+
+            let birthISO = "";
+            if($('#dob_day').val() && $('#dob_month').val() && $('#dob_year').val()) {
+                birthISO = `${$('#dob_year').val()-543}-${$('#dob_month').val()}-${$('#dob_day').val()}`;
+            }
+
+            const payload = {
+                action: 'saveData',
+                std_id: studentAuthData.std_id,
+                academic_year: $('#academic_year').val(),
+                prefix: $('#prefix').val(),
+                fname_th: $('#fname_th').val(),
+                lname_th: $('#lname_th').val(),
+                fname_en: $('#fname_en').val().toUpperCase(),
+                lname_en: $('#lname_en').val().toUpperCase(),
+                nickname: $('#nickname').val(),
+                birthdate: birthISO,
+                blood_type: $('#blood_type').val(),
+                room: $('#room').val(),
+                id_card: $('#id_card').val(),
+                school_email: $('#school_email').val(),
+                personal_email: $('#personal_email').val(),
+                phone: $('#phone').val(),
+                line_id: $('#line_id').val(),
+                social: $('#social').val(),
+                parent_name: $('#parent_name').val(),
+                parent_phone: $('#parent_phone').val(),
+                addr_no: $('#addr_no').val(),
+                district: $('#district').val(),
+                amphoe: $('#amphoe').val(),
+                province: $('#province').val(),
+                zipcode: $('#zipcode').val(),
+                med_condition: $('#med_condition').val(),
+                food_limit: $('#food_limit').val(),
+                shirt_size: $('#shirt_size').val(),
+                document_url: $('#existing_document_url').val(),
+                fileBase64: fileData.base64,
+                mimeType: fileData.mimeType
+            };
+
+            try {
+                const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) });
+                const result = await res.json();
+
+                if (result.status === 'success') {
+                    Swal.fire({
+                        title: 'บันทึกสำเร็จ!', 
+                        text: 'ระบบได้จัดเก็บข้อมูลรายงานตัวของคุณเรียบร้อยแล้ว', 
+                        icon: 'success', 
+                        confirmButtonColor: '#6A1B9A'
+                    }).then(() => { 
+                        // ซ่อนฟอร์มและโชว์หน้า Success
+$('#registrationForm').addClass('step-hidden');
+$('#successSection').removeClass('hidden');
+
+// === คำสั่งสำหรับขยายกล่องหลักให้เต็มจอ ===
+const mainBox = $('#successSection').closest('.bg-white');
+mainBox.removeClass('max-w-4xl').addClass('max-w-[95%] lg:max-w-6xl w-full');
+
+window.scrollTo(0, 0); // เลื่อนกลับไปด้านบน
+                    });
+                } else {
+                    Swal.fire('ข้อผิดพลาด', result.message, 'error');
+                }
+            } catch (error) {
+                Swal.fire('ระบบขัดข้อง', 'ไม่สามารถส่งข้อมูลได้ กรุณาลองใหม่อีกครั้ง', 'error');
+            } finally {
+                $('#submitBtn').removeClass('hidden');
+                $('#submitLoader').addClass('hidden');
+            }
+        }
+    </script>
+
+    <script>
+    $(document).ready(function() {
+        // เช็คตัวพิมพ์เล็ก/ใหญ่ ของชื่อแอปรวมถึง LINE, IG, Facebook
+        var isWebView = /Line|Instagram|FBAN|FBAV/i.test(navigator.userAgent);
+        
+        if (isWebView) {
+            // 1. เขียน CSS ฝังลงไปบังคับบล็อกปุ่ม Google ไม่ให้โชว์เด็ดขาด (ไม้ตายที่ 1)
+            $('head').append('<style>.g_id_signin, #g_id_onload, #google-login-wrapper { display: none !important; opacity: 0 !important; pointer-events: none !important; visibility: hidden !important; width: 0 !important; height: 0 !important; }</style>');
+            
+            // 2. เคลียร์โค้ด HTML ลบกล่องปุ่มล็อกอินทิ้ง (ไม้ตายที่ 2)
+            $('#google-login-wrapper').empty().remove();
+            
+            // 3. แสดงกล่องแจ้งเตือนสีแดง
+            $('#webview-warning').removeClass('hidden').addClass('block fade-in');
+        }
+    });
+</script>
+</body>
+</html>

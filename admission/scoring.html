@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ระบบให้คะแนนสัมภาษณ์ - MSTSC</title>
+    <link rel="icon" type="image/png" href="https://i.postimg.cc/yxjxZmRN/Logo_mstsc_(1)_(1).png">
+    <link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = { theme: { extend: { fontFamily: { sans: ['Anuphan', 'sans-serif'] }, colors: { mst: { purple: '#6A1B9A', yellow: '#FFD600' } } } } }
+    </script>
+    <style>
+        body { font-family: 'Anuphan', sans-serif; background: linear-gradient(135deg, #f3e8ff 0%, #fffbeb 100%); min-height: 100vh; background-attachment: fixed; }
+        .glass-card { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.5); box-shadow: 0 10px 30px rgba(103, 58, 183, 0.08); }
+        .input-clean { width: 100%; border-radius: 0.75rem; padding: 0.75rem 1rem; outline: none; transition: all 0.3s; font-size: 0.95rem; background-color: #ffffff; border: 1px solid #e2e8f0; color: #374151; font-weight: bold; appearance: none; background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236A1B9A' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e"); background-repeat: no-repeat; background-position: right 1rem center; background-size: 1em;}
+        .input-clean:focus { border-color: #6A1B9A; box-shadow: 0 0 0 4px rgba(106, 27, 154, 0.1); }
+        .score-box { background: rgba(255,255,255,0.6); border: 1px solid #f1f5f9; border-radius: 1rem; padding: 1.25rem; transition: all 0.2s; display: flex; flex-direction: column; justify-content: space-between; height: 100%; }
+        .score-box:hover { background: #ffffff; border-color: #e9d5ff; box-shadow: 0 4px 12px rgba(106,27,154,0.05); }
+        .fade-in { animation: fadeIn 0.4s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid #6A1B9A; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    </style>
+</head>
+<body class="text-gray-800 pb-12">
+
+    <div id="loginSection" class="min-h-screen flex items-center justify-center p-4 fade-in">
+        <div class="glass-card p-8 rounded-3xl shadow-xl w-full max-w-md text-center">
+            <img src="https://i.postimg.cc/yxjxZmRN/Logo_mstsc_(1)_(1).png" class="w-24 mx-auto mb-6 opacity-90">
+            <h1 class="text-2xl font-bold text-purple-900 mb-2">ระบบบันทึกคะแนน</h1>
+            <h2 class="text-2xl font-bold text-purple-900 mb-2">สำหรับกรรมการสัมภาษณ์</h2>
+            <p class="text-sm text-gray-500 mb-6 bg-white/50 py-2 rounded-xl border border-gray-100">ใช้อีเมลโรงเรียน (@mst.ac.th) เท่านั้น</p>
+            
+            <div id="webview-warning" class="hidden mb-4 bg-red-50 border border-red-200 rounded-2xl p-4 text-left shadow-sm relative z-20">
+    <div class="flex items-start gap-3">
+        <div class="w-10 h-10 bg-red-100 text-red-600 rounded-full flex items-center justify-center flex-shrink-0 text-xl shadow-inner mt-1">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+        </div>
+        <div>
+            <h3 class="font-bold text-red-700 text-sm mb-1">ไม่สามารถเข้าสู่ระบบผ่านแอปนี้</h3>
+            <p class="text-[11px] text-red-600 leading-relaxed mb-2">นโยบายความปลอดภัย Google ไม่อนุญาตให้ล็อกอินภายในแอป <b>LINE หรือ IG</b></p>
+            <div class="bg-white p-2 rounded-lg border border-red-100 text-[11px] text-gray-700 text-center font-bold">
+                กดปุ่ม 3 จุด แล้วเลือก <b class="text-blue-600">"เปิดในเบราว์เซอร์"</b>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="google-login-wrapper">
+    <div id="loginActions" class="flex justify-center mb-2 relative z-10">
+        <div id="g_id_onload" 
+             data-client_id="151555458498-fjmti72kvokr5dh5mlsjqq7vugrduuef.apps.googleusercontent.com" 
+             data-callback="handleJudgeLogin" 
+             data-auto_prompt="false"
+             data-hd="mst.ac.th"> </div>
+        <div class="g_id_signin" data-type="standard" data-shape="pill" data-theme="filled_blue" data-text="signin_with" data-size="large" data-logo_alignment="left"></div>
+    </div>
+</div>
+
+            <div id="loginLoader" class="hidden flex flex-col items-center justify-center py-4 fade-in">
+                <div class="loader mb-3"></div>
+                <p class="text-sm font-bold text-purple-600">กำลังตรวจสอบสิทธิ์และโหลดคิวสัมภาษณ์...</p>
+            </div>
+
+            <div id="loginError" class="text-red-500 text-sm mt-4 font-bold hidden bg-red-50 py-2 rounded-lg border border-red-100"><i class="fa-solid fa-triangle-exclamation"></i> บัญชีนี้ไม่มีสิทธิ์เข้าถึง</div>
+
+            <div class="mt-6 border-t border-gray-100 pt-5">
+                <button onclick="showJudgeGuide()" type="button" class="w-full bg-blue-50 text-blue-600 hover:bg-blue-100 px-4 py-3 rounded-xl text-sm font-bold border border-blue-200 transition-all flex items-center justify-center gap-2 shadow-sm">
+                    <i class="fa-solid fa-book-open-reader text-lg"></i> คู่มือการใช้งานสำหรับกรรมการ
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="guidelineSection" class="hidden min-h-screen flex flex-col p-4 fade-in max-w-3xl mx-auto">
+        <div class="glass-card rounded-3xl p-8 shadow-lg border-t-4 border-mst-yellow my-auto">
+            <div class="text-center mb-8">
+                <div class="w-20 h-20 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl shadow-inner"><i class="fa-solid fa-clipboard-list"></i></div>
+                <h2 class="text-2xl font-black text-gray-800">เกณฑ์การพิจารณาคะแนน</h2>
+                <p class="text-sm text-gray-500 mt-2">กรุณาอ่านรายละเอียดก่อนเริ่มการให้คะแนน</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[50vh] overflow-y-auto pr-3 custom-scrollbar text-sm">
+                <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
+                    <p class="font-bold text-purple-700 text-base"><i class="fa-solid fa-shirt w-5"></i> 1. การแต่งกาย (10)</p>
+                    <p class="text-gray-600 mt-1 ml-6">ความสะอาด เรียบร้อย ถูกต้องตามระเบียบโรงเรียน และกาลเทศะ</p>
+                </div>
+                <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
+                    <p class="font-bold text-purple-700 text-base"><i class="fa-solid fa-user-tie w-5"></i> 2. บุคลิกภาพและการพูด (15)</p>
+                    <p class="text-gray-600 mt-1 ml-6">ความมั่นใจ การสบตา น้ำเสียงชัดเจน การตอบคำถามตรงประเด็น</p>
+                </div>
+                <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
+                    <p class="font-bold text-purple-700 text-base"><i class="fa-solid fa-lightbulb w-5"></i> 3. ทัศนคติ (20)</p>
+                    <p class="text-gray-600 mt-1 ml-6">ความคิดเชิงบวก ความเสียสละ ความพร้อมในการทำงานเพื่อส่วนรวม</p>
+                </div>
+                <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
+                    <p class="font-bold text-purple-700 text-base"><i class="fa-solid fa-users w-5"></i> 4. ภาวะผู้นำ (15)</p>
+                    <p class="text-gray-600 mt-1 ml-6">การกล้าตัดสินใจ รับฟังผู้อื่น และความสามารถในการนำทีม</p>
+                </div>
+                <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
+                    <p class="font-bold text-purple-700 text-base"><i class="fa-solid fa-puzzle-piece w-5"></i> 5. การแก้ปัญหา (15)</p>
+                    <p class="text-gray-600 mt-1 ml-6">ไหวพริบในการจัดการสถานการณ์ การหาทางออกที่สร้างสรรค์</p>
+                </div>
+                <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
+                    <p class="font-bold text-purple-700 text-base"><i class="fa-solid fa-clipboard-check w-5"></i> 6. ความรับผิดชอบ (15)</p>
+                    <p class="text-gray-600 mt-1 ml-6">การจัดสรรเวลาเรียนและการทำกิจกรรม ความมุ่งมั่นตั้งใจ</p>
+                </div>
+                <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm md:col-span-2 lg:col-span-1">
+                    <p class="font-bold text-purple-700 text-base"><i class="fa-solid fa-laptop-code w-5"></i> 7. การใช้คอมพิวเตอร์ (10)</p>
+                    <p class="text-gray-600 mt-1 ml-6">ทักษะพื้นฐานโปรแกรมสำนักงาน การออกแบบ หรือจัดการข้อมูล</p>
+                </div>
+            </div>
+
+            <button onclick="startScoring(this)" class="w-full mt-8 bg-purple-600 hover:bg-purple-700 text-white py-4 rounded-xl font-bold text-lg shadow-md transition-all flex justify-center items-center gap-2">
+                เริ่มต้นให้คะแนน <i class="fa-solid fa-arrow-right"></i>
+            </button>
+        </div>
+    </div>
+
+    <div id="scoringSection" class="hidden fade-in">
+        
+        <nav class="glass-card sticky top-0 z-40 border-b border-white/40">
+            <div class="w-full max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <img src="https://i.postimg.cc/yxjxZmRN/Logo_mstsc_(1)_(1).png" class="h-10 w-10 md:h-12 md:w-12">
+                    <div class="block">
+                        <h1 class="text-sm md:text-base font-bold text-purple-800 leading-tight">ระบบบันทึกคะแนน</h1>
+                        <p class="text-[10px] md:text-xs text-gray-500">สำหรับกรรมการสัมภาษณ์</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-center gap-4">
+                    <div class="text-right block">
+                        <div class="text-xs md:text-sm font-bold text-gray-700 flex items-center justify-end gap-1.5"><i class="fa-regular fa-clock text-purple-500"></i> <span id="currentTime">--:--:--</span></div>
+                        <div class="text-[10px] md:text-xs text-gray-500 truncate max-w-[100px] md:max-w-[200px]"><span id="judgeNameDisplay" class="font-bold text-purple-700">-</span></div>
+                    </div>
+                    <button onclick="logoutJudge()" class="bg-red-50 text-red-600 hover:bg-red-100 px-3 py-2 md:px-4 md:py-2.5 rounded-xl text-xs font-bold transition-all border border-red-200 flex items-center gap-2 shadow-sm shrink-0"><i class="fa-solid fa-power-off"></i> <span class="hidden md:inline">ออกจากระบบ</span></button>
+                </div>
+            </div>
+        </nav>
+
+        <div class="w-full max-w-7xl mx-auto px-4 md:px-6 mt-6 md:mt-8">
+            
+            <div class="flex justify-between items-end mb-4 px-1">
+                <h2 class="text-base font-bold text-gray-600"><i class="fa-solid fa-users-viewfinder text-purple-400 mr-2"></i> สถานะคิวสัมภาษณ์</h2>
+                <button onclick="showQueueModal()" class="text-sm bg-white text-purple-700 border border-purple-200 px-4 py-2 rounded-xl font-bold hover:bg-purple-50 transition-all shadow-sm flex items-center gap-2">
+                    <i class="fa-solid fa-list-check"></i> เช็คคิวทั้งหมด
+                </button>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 mb-6">
+                <div class="glass-card p-4 md:p-5 rounded-2xl flex items-center justify-between border-purple-100">
+                    <div>
+                        <p class="text-xs md:text-sm font-bold text-gray-500 mb-1">คิวปัจจุบัน</p>
+                        <p class="text-xl md:text-2xl font-black text-purple-800"><span id="currentQueueIndex">0</span></p>
+                    </div>
+                    <div class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-purple-50 text-purple-600 flex items-center justify-center text-xl"><i class="fa-solid fa-list-ol"></i></div>
+                </div>
+                <div class="glass-card p-4 md:p-5 rounded-2xl flex items-center justify-between border-yellow-100">
+                    <div>
+                        <p class="text-xs md:text-sm font-bold text-gray-500 mb-1">เหลือในระบบ</p>
+                        <p class="text-xl md:text-2xl font-black text-yellow-600"><span id="remainingQueue">0</span> คิว</p>
+                    </div>
+                    <div class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-yellow-50 text-yellow-600 flex items-center justify-center text-xl"><i class="fa-solid fa-user-clock"></i></div>
+                </div>
+            </div>
+
+            <div class="glass-card rounded-3xl p-6 md:p-10 shadow-sm">
+                
+                <div id="candidateInfoCard" class="bg-gradient-to-br from-purple-50 to-white border border-purple-100 rounded-3xl p-8 mb-8 shadow-inner relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6 transition-all duration-300">
+                    <div class="absolute top-0 right-0 w-48 h-48 bg-purple-200 rounded-full blur-3xl -mr-10 -mt-10 opacity-50 pointer-events-none"></div>
+                    <div class="relative z-10 text-center md:text-left w-full md:w-2/3">
+                        <span class="inline-block bg-white text-purple-700 text-xs font-bold px-4 py-1.5 rounded-full border border-purple-200 shadow-xs mb-4 tracking-wide"><i class="fa-solid fa-microphone-lines mr-2"></i> ผู้รับการสัมภาษณ์</span>
+                        <h3 id="candidateName" class="text-2xl md:text-5xl font-black text-gray-800 mb-4 tracking-tight">กำลังโหลด...</h3>
+                        <div class="flex flex-wrap justify-center md:justify-start items-center gap-3">
+                            <span id="candidateAppNumber" class="bg-white text-gray-700 px-4 py-2 rounded-xl font-mono text-xs font-bold border border-gray-200 shadow-sm"><i class="fa-solid fa-hashtag text-gray-400 mr-1"></i> -</span>
+                            <span id="candidateRoom" class="bg-indigo-50 text-indigo-700 px-4 py-2 rounded-xl text-xs font-bold border border-indigo-100 shadow-sm"><i class="fa-solid fa-door-open text-indigo-400 mr-1"></i> -</span>
+                        </div>
+                    </div>
+                    <div class="relative z-10 w-full md:w-1/3 flex justify-center md:justify-end hidden md:flex">
+                        <i class="fa-solid fa-user-graduate text-8xl text-purple-200 drop-shadow-sm"></i>
+                    </div>
+                </div>
+
+                <div id="noQueueMessage" class="hidden text-center py-16 fade-in">
+                    <div class="w-24 h-24 bg-green-50 text-green-500 rounded-full flex items-center justify-center mx-auto mb-6 text-5xl shadow-sm border border-green-100"><i class="fa-solid fa-check"></i></div>
+                    <h3 class="text-3xl font-black text-gray-800 mb-3">ประเมินครบแล้ว</h3>
+                    <p class="text-gray-500 text-base">ขอขอบคุณคณะกรรมการที่ให้ความร่วมมือในการสัมภาษณ์</p>
+                    <p class="text-gray-500 text-base">อย่าลืมกด "ประมวลผลคะแนน" ในหน้าผู้ดูแลระบบ เพื่อประมวลผลผู้ผ่านคัดเลือก</p>
+                </div>
+
+                <form id="scoringForm" class="space-y-6">
+                    <div id="formContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5"></div>
+                </form>
+
+                <div id="actionButtons" class="mt-10 pt-8 border-t border-gray-100 flex flex-col sm:flex-row justify-end gap-4">
+                    <button id="btnAbsent" type="button" onclick="markAbsent(this)" class="w-full sm:w-auto px-8 py-4 bg-white hover:bg-red-50 text-red-500 border border-red-200 rounded-xl font-bold text-base shadow-sm transition-all flex justify-center items-center gap-2">
+                        <i class="fa-solid fa-user-xmark"></i> ขาดสอบ
+                    </button>
+                    <button id="btnSubmit" type="button" onclick="prepareScoreSubmit(this)" class="w-full sm:w-auto px-10 py-4 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-bold text-base shadow-md transition-all flex justify-center items-center gap-2">
+                        <i class="fa-solid fa-floppy-disk"></i> บันทึกคะแนน
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <div id="queueModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 fade-in backdrop-blur-sm">
+        <div class="glass-card w-full max-w-2xl rounded-3xl overflow-hidden flex flex-col max-h-[85vh] shadow-2xl">
+            <div class="p-5 border-b border-gray-100 flex justify-between items-center bg-white/90">
+                <h3 class="font-bold text-purple-800 text-xl"><i class="fa-solid fa-list-ul text-purple-500 mr-2"></i> ตรวจสอบลำดับคิว</h3>
+                <button onclick="closeQueueModal()" class="w-10 h-10 rounded-full bg-gray-100 text-gray-500 hover:bg-red-100 hover:text-red-500 flex items-center justify-center transition-all"><i class="fa-solid fa-times text-lg"></i></button>
+            </div>
+            <div class="p-5 overflow-y-auto custom-scrollbar bg-gray-50/50 flex-1">
+                <div id="queueListContainer" class="space-y-3"></div>
+            </div>
+            <div class="p-4 bg-purple-50 border-t border-purple-100 text-center text-xs md:text-sm font-bold text-purple-600">
+                <i class="fa-solid fa-circle-info mr-1"></i> แสดงเฉพาะผู้สมัครที่กรรมการท่านนี้ยังไม่ได้ให้คะแนน
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 🔴 ใส่ URL Web App ของคุณที่นี่
+        const API_URL = "https://script.google.com/macros/s/AKfycbzgZ75s7SMTRbPx5Cq_iHKgS9qhDq1CiZwyLurGDuoyRFzXPdT-ppCTPF12PIPHNFxYTw/exec"; 
+        
+        let currentQueue = [];
+        let currentIndex = 0;
+        let currentUserEmail = "";
+
+        // --- Clock System ---
+        function updateTime() {
+            const now = new Date();
+            document.getElementById('currentTime').innerText = now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        }
+        setInterval(updateTime, 1000);
+        updateTime();
+
+        // --- Helper: Button Loading ---
+        function setBtnLoading(btn, text) {
+            if(!btn) return;
+            if(!btn.dataset.originalHtml) btn.dataset.originalHtml = btn.innerHTML;
+            btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> ${text}`;
+            btn.disabled = true;
+            btn.classList.add('opacity-70', 'cursor-not-allowed');
+        }
+
+        function resetBtnLoading(btn) {
+            if(!btn || !btn.dataset.originalHtml) return;
+            btn.innerHTML = btn.dataset.originalHtml;
+            btn.disabled = false;
+            btn.classList.remove('opacity-70', 'cursor-not-allowed');
+        }
+
+        // --- Loading Overlay Handler ---
+        function showLoginLoader() {
+            document.getElementById('loginActions').classList.add('hidden');
+            document.getElementById('loginLoader').classList.remove('hidden');
+            document.getElementById('loginLoader').classList.add('flex');
+            document.getElementById('loginError').classList.add('hidden');
+        }
+        function hideLoginLoader() {
+            document.getElementById('loginActions').classList.remove('hidden');
+            document.getElementById('loginLoader').classList.add('hidden');
+            document.getElementById('loginLoader').classList.remove('flex');
+        }
+
+        // --- Login & Session System ---
+        window.onload = function() {
+            const savedJudge = localStorage.getItem('mstsc_judge_login');
+            if (savedJudge) {
+                currentUserEmail = savedJudge;
+                executeLoginFlow();
+            }
+        };
+
+        function decodeJwtResponse(token) {
+            let base64Url = token.split('.')[1];
+            let base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            return JSON.parse(decodeURIComponent(window.atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')));
+        }
+
+        async function handleJudgeLogin(response) {
+            try {
+                const payload = decodeJwtResponse(response.credential);
+                if(!payload.email.endsWith('@mst.ac.th')) { 
+                    document.getElementById('loginError').classList.remove('hidden'); 
+                    return; 
+                }
+                currentUserEmail = payload.email;
+                localStorage.setItem('mstsc_judge_login', currentUserEmail);
+                executeLoginFlow();
+            } catch(e) { Swal.fire('Error', 'ไม่สามารถเข้าสู่ระบบได้', 'error'); }
+        }
+
+        async function executeLoginFlow() {
+            showLoginLoader();
+
+            try {
+                const res = await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "getInterviewQueue", email: currentUserEmail }) }).then(r => r.json());
+
+                if(res.status === "error") {
+                    localStorage.removeItem('mstsc_judge_login');
+                    hideLoginLoader();
+                    document.getElementById('loginError').innerText = res.message;
+                    document.getElementById('loginError').classList.remove('hidden');
+                } else {
+                    document.getElementById('loginSection').classList.add('hidden');
+                    document.getElementById('guidelineSection').classList.remove('hidden'); 
+                    document.getElementById('judgeNameDisplay').innerText = res.judgeName;
+                    
+                    currentQueue = res.queue;
+                    initForm();
+                    loadCandidate();
+                }
+            } catch(e) { 
+                localStorage.removeItem('mstsc_judge_login');
+                hideLoginLoader();
+                document.getElementById('loginError').innerText = "ขัดข้อง ไม่สามารถเชื่อมต่อฐานข้อมูลได้";
+                document.getElementById('loginError').classList.remove('hidden');
+            }
+        }
+
+        function logoutJudge() { 
+            Swal.fire({ title: 'ออกจากระบบ', icon: 'question', showCancelButton: true, confirmButtonColor: '#dc2626', confirmButtonText: 'ออกระบบ', cancelButtonText: 'ยกเลิก', customClass: { confirmButton: 'rounded-xl', cancelButton: 'rounded-xl' } }).then((r) => { 
+                if (r.isConfirmed) {
+                    localStorage.removeItem('mstsc_judge_login'); 
+                    location.reload(); 
+                }
+            }); 
+        }
+
+        function startScoring(btn) {
+            setBtnLoading(btn, 'กำลังเข้าสู่ระบบให้คะแนน...');
+            setTimeout(() => {
+                resetBtnLoading(btn);
+                document.getElementById('guidelineSection').classList.add('hidden');
+                document.getElementById('scoringSection').classList.remove('hidden');
+            }, 300);
+        }
+
+        // --- Scoring Form System ---
+        function initForm() {
+            const container = document.getElementById('formContainer');
+            container.innerHTML = "";
+            container.innerHTML += createDropdownHtml('s1', '1. การแต่งกาย', 10, 'fa-shirt');
+            container.innerHTML += createDropdownHtml('s2', '2. บุคลิกภาพและการพูด', 15, 'fa-user-tie');
+            container.innerHTML += createDropdownHtml('s3', '3. ทัศนคติ', 20, 'fa-lightbulb');
+            container.innerHTML += createDropdownHtml('s4', '4. ภาวะผู้นำ', 15, 'fa-users');
+            container.innerHTML += createDropdownHtml('s5', '5. การแก้ปัญหา', 15, 'fa-puzzle-piece');
+            container.innerHTML += createDropdownHtml('s6', '6. ความรับผิดชอบ', 15, 'fa-clipboard-check');
+            container.innerHTML += createDropdownHtml('s7', '7. การใช้คอมพิวเตอร์', 10, 'fa-laptop-code');
+        }
+
+        function createDropdownHtml(id, label, maxScore, iconClass) {
+            let html = `<div class="score-box">
+                            <label class="block text-sm md:text-base font-bold text-gray-700 mb-3 flex justify-between items-center">
+                                <span><i class="fa-solid ${iconClass} text-purple-400 w-6"></i> ${label}</span> 
+                                <span class="text-[11px] bg-purple-100 text-purple-700 px-2.5 py-1 rounded-full border border-purple-200 shadow-sm shrink-0">เต็ม ${maxScore}</span>
+                            </label>
+                            <select id="${id}" class="input-clean cursor-pointer bg-white text-base py-3">
+                                <option value="" disabled selected>-- เลือกคะแนน --</option>`;
+            for(let i = maxScore; i >= 0; i--) html += `<option value="${i}">${i} คะแนน</option>`;
+            html += `</select></div>`;
+            return html;
+        }
+
+        function loadCandidate() {
+            let remaining = currentQueue.length - currentIndex;
+            
+            if(currentIndex >= currentQueue.length) {
+                document.getElementById('currentQueueIndex').innerText = "-";
+                document.getElementById('remainingQueue').innerText = "0";
+                
+                document.getElementById('candidateInfoCard').classList.add('hidden');
+                document.getElementById('scoringForm').classList.add('hidden');
+                document.getElementById('actionButtons').classList.add('hidden');
+                document.getElementById('noQueueMessage').classList.remove('hidden');
+                return;
+            } else {
+                document.getElementById('actionButtons').classList.remove('hidden');
+            }
+            
+            let p = currentQueue[currentIndex];
+            
+            if (p.queueNumber) {
+                document.getElementById('currentQueueIndex').innerText = "Q-" + String(p.queueNumber).padStart(3, '0');
+            } else {
+                document.getElementById('currentQueueIndex').innerText = "คนที่ " + (currentIndex + 1);
+            }
+            
+            document.getElementById('remainingQueue').innerText = remaining - 1; 
+            
+            document.getElementById('candidateName').innerText = p.name;
+            document.getElementById('candidateAppNumber').innerText = p.appNumber;
+            document.getElementById('candidateRoom').innerText =  p.room;
+            
+            document.querySelectorAll('#scoringForm select').forEach(s => s.value = ""); 
+        }
+
+        function prepareScoreSubmit(btn) {
+            let scores = {
+                s1: parseInt(document.getElementById('s1').value), s2: parseInt(document.getElementById('s2').value),
+                s3: parseInt(document.getElementById('s3').value), s4: parseInt(document.getElementById('s4').value),
+                s5: parseInt(document.getElementById('s5').value), s6: parseInt(document.getElementById('s6').value),
+                s7: parseInt(document.getElementById('s7').value)
+            };
+
+            if(Object.values(scores).includes(NaN)) {
+                Swal.fire({toast: true, position: 'top-end', icon: 'warning', title: 'กรุณาให้คะแนนให้ครบทุกข้อ', showConfirmButton: false, timer: 2000});
+                return;
+            }
+            sendScoreToBackend(scores, "submitScore", btn);
+        }
+
+        function markAbsent(btn) {
+            Swal.fire({
+                title: 'ยืนยันขาดสอบ?',
+                text: 'ระบบจะตัดคิวผู้สมัครนี้ออกทันที',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc2626',
+                cancelButtonColor: '#94a3b8',
+                confirmButtonText: 'ยืนยันขาดสอบ',
+                cancelButtonText: 'ยกเลิก',
+                customClass: { confirmButton: 'rounded-xl', cancelButton: 'rounded-xl' }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    sendScoreToBackend({}, "markAbsent", btn);
+                }
+            });
+        }
+
+        async function sendScoreToBackend(scores, actionType, btn) {
+            setBtnLoading(btn, actionType === "submitScore" ? "กำลังบันทึกคะแนน..." : "กำลังอัปเดต...");
+
+            const payload = { 
+                action: actionType, 
+                email: currentUserEmail, 
+                appNumber: currentQueue[currentIndex].appNumber 
+            };
+            if(actionType === "submitScore") payload.scores = scores;
+
+            try {
+                const res = await fetch(API_URL, {
+                    method: "POST",
+                    body: JSON.stringify(payload)
+                }).then(r => r.json());
+
+                if(res.status === "success") {
+                    let msg = actionType === "markAbsent" ? 'สถานะ: ขาดสอบ' : `บันทึกเรียบร้อย (รวม ${res.total} คะแนน)`;
+                    Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: msg, showConfirmButton: false, timer: 1500 });
+                    currentIndex++;
+                    loadCandidate();
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                } else {
+                    Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถบันทึกได้', 'error');
+                }
+            } catch(err) {
+                Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้', 'error');
+            } finally {
+                resetBtnLoading(btn);
+            }
+        }
+        
+        // --- Queue Modal System ---
+        function showQueueModal() {
+            const container = document.getElementById('queueListContainer');
+            container.innerHTML = '';
+            
+            if (!currentQueue || currentQueue.length === 0) {
+                container.innerHTML = '<div class="text-center text-gray-500 py-10 text-base font-bold"><i class="fa-solid fa-inbox text-4xl mb-3 text-gray-300 block"></i>ไม่มีคิวในระบบ</div>';
+            } else {
+                currentQueue.forEach((q, index) => {
+                    const isCurrent = (index === currentIndex);
+                    const qNumStr = q.queueNumber ? "Q-" + String(q.queueNumber).padStart(3, '0') : (index + 1);
+                    
+                    let statusBadge = '';
+                    if (index < currentIndex) {
+                        statusBadge = '<span class="text-xs bg-green-100 text-green-700 px-3 py-1.5 rounded-lg font-bold"><i class="fa-solid fa-check mr-1"></i>เสร็จ</span>';
+                    } else if (isCurrent) {
+                        statusBadge = '<span class="text-xs bg-purple-600 text-white px-3 py-1.5 rounded-lg font-bold animate-pulse">ปัจจุบัน</span>';
+                    } else {
+                        statusBadge = '<span class="text-xs bg-gray-200 text-gray-600 px-3 py-1.5 rounded-lg font-bold">รอคิว</span>';
+                    }
+
+                    const bgClass = isCurrent ? 'bg-purple-50 border-purple-300 shadow-md transform scale-[1.02]' : 'bg-white border-gray-100 opacity-80';
+                    const textClass = isCurrent ? 'text-purple-800' : 'text-gray-700';
+
+                    container.innerHTML += `
+                        <div class="p-4 rounded-2xl border ${bgClass} flex justify-between items-center transition-all duration-200">
+                            <div class="flex items-center gap-4 w-3/4">
+                                <div class="w-14 h-12 rounded-xl ${isCurrent ? 'bg-purple-200 text-purple-700 shadow-inner' : 'bg-gray-100 text-gray-500'} flex items-center justify-center font-black text-base shrink-0 tracking-wider">
+                                    ${qNumStr}
+                                </div>
+                                <div class="block overflow-hidden">
+                                    <p class="text-base font-bold ${textClass} truncate">${q.name}</p>
+                                    <p class="text-xs text-gray-500 mt-1"><i class="fa-solid fa-door-open text-gray-400"></i> ห้อง ${q.room} &nbsp;|&nbsp; ${q.appNumber}</p>
+                                </div>
+                            </div>
+                            <div class="shrink-0 text-right w-1/4">
+                                ${statusBadge}
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+            
+            document.getElementById('queueModal').classList.remove('hidden');
+        }
+
+        function closeQueueModal() {
+            document.getElementById('queueModal').classList.add('hidden');
+        }
+
+        function showJudgeGuide() {
+            Swal.fire({
+                title: '<strong class="text-blue-700 text-xl">คู่มือการใช้งานสำหรับกรรมการ</strong>',
+                html: `
+                    <div class="text-left text-sm text-gray-700 space-y-4 mt-3 max-h-[60vh] overflow-y-auto custom-scrollbar pr-2">
+                        <div class="bg-gray-50 p-3 rounded-xl border border-gray-200">
+                            <h4 class="font-bold text-gray-800 mb-1"><i class="fa-solid fa-right-to-bracket text-blue-500 w-5"></i> 1. การเข้าสู่ระบบ</h4>
+                            <p class="text-xs">ล็อกอินด้วยบัญชี @mst.ac.th โดยต้องเป็นอีเมลที่ผู้ดูแลระบบได้เพิ่มสิทธิ์ไว้ให้ล่วงหน้าเท่านั้น</p>
+                        </div>
+                        <div class="bg-gray-50 p-3 rounded-xl border border-gray-200">
+                            <h4 class="font-bold text-gray-800 mb-1"><i class="fa-solid fa-clipboard-list text-purple-500 w-5"></i> 2. เกณฑ์การประเมิน</h4>
+                            <p class="text-xs">ระบบจะแสดงเกณฑ์ทั้ง 7 ด้าน พร้อมคะแนนเต็มของแต่ละด้าน (รวม 100 คะแนน) ขอให้กรรมการศึกษารายละเอียดของแต่ละหัวข้อให้ครบถ้วนก่อนเริ่มการประเมิน</p>
+                        </div>
+                        <div class="bg-gray-50 p-3 rounded-xl border border-gray-200">
+                            <h4 class="font-bold text-gray-800 mb-1"><i class="fa-solid fa-star text-yellow-500 w-5"></i> 3. ขั้นตอนการให้คะแนน</h4>
+                            <p class="text-xs">หน้าจอจะแสดงข้อมูลผู้เข้าสัมภาษณ์ (ชื่อ, ห้อง, เลขที่ใบสมัคร) ขึ้นมาทีละ 1 คิว ให้กรรมการเลือกคะแนนในรูปแบบ Dropdown ให้ครบทุกข้อ หากเลือกไม่ครบ ระบบจะไม่ให้กดบันทึก</p>
+                        </div>
+                        <div class="bg-red-50 p-3 rounded-xl border border-red-200">
+                            <h4 class="font-bold text-red-700 mb-1"><i class="fa-solid fa-user-xmark text-red-500 w-5"></i> 4. กรณีผู้สมัครขาดสอบ</h4>
+                            <p class="text-xs text-red-600">หากเรียกคิวแล้วผู้สมัครไม่ปรากฏตัว ให้กดปุ่ม <b>"ขาดสอบ" (สีแดง)</b> ระบบจะตัดสิทธิ์ผู้สมัครคนดังกล่าวและข้ามไปคิวถัดไปทันที</p>
+                        </div>
+                        <div class="bg-gray-50 p-3 rounded-xl border border-gray-200">
+                            <h4 class="font-bold text-gray-800 mb-1"><i class="fa-solid fa-list-check text-green-500 w-5"></i> 5. การตรวจสอบคิว</h4>
+                            <p class="text-xs">สามารถกดปุ่ม <b>"เช็คคิวทั้งหมด"</b> เพื่อดูจำนวนผู้สมัครที่รออยู่ ผู้สมัครที่ประเมินเสร็จแล้ว และตรวจสอบความคืบหน้าของการสัมภาษณ์ได้ตลอดเวลา</p>
+                        </div>
+                    </div>
+                `,
+                confirmButtonColor: '#1d4ed8',
+                confirmButtonText: 'ปิดหน้าต่าง',
+                width: '500px',
+                customClass: { confirmButton: 'rounded-xl font-bold shadow-md' }
+            });
+        }
+    </script>
+
+    <script>
+    // สคริปต์ลบปุ่ม Google ทิ้งเมื่อเปิดผ่าน In-App Browser (ใช้ได้โดยไม่ต้องมี jQuery)
+    document.addEventListener("DOMContentLoaded", function() {
+        var isWebView = /Line|Instagram|FBAN|FBAV/i.test(navigator.userAgent);
+        
+        if (isWebView) {
+            // 1. ฝัง CSS ซ่อนขั้นเด็ดขาด ไม่ให้โชว์ iframe ขึ้นมาได้
+            var style = document.createElement('style');
+            style.innerHTML = '.g_id_signin, #g_id_onload, #google-login-wrapper { display: none !important; opacity: 0 !important; pointer-events: none !important; visibility: hidden !important; width: 0 !important; height: 0 !important; margin: 0 !important; padding: 0 !important; }';
+            document.head.appendChild(style);
+            
+            // 2. ลบออกจาก DOM ถอนรากถอนโคน
+            var wrapper = document.getElementById('google-login-wrapper');
+            if (wrapper) wrapper.remove();
+            
+            // 3. แสดงหน้าต่างแจ้งเตือน
+            var warning = document.getElementById('webview-warning');
+            if (warning) {
+                warning.classList.remove('hidden');
+                warning.classList.add('block', 'fade-in');
+            }
+        }
+    });
+</script>
+</body>
+</html>

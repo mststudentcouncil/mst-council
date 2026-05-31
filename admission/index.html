@@ -1,0 +1,1247 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ระบบรับสมัครสภานักเรียน - ADMISSION MSTSC</title>
+    
+    <link rel="icon" type="image/png" href="https://i.postimg.cc/yxjxZmRN/Logo_mstsc_(1)_(1).png">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#6A1B9A">
+    
+    <link rel="apple-touch-icon" href="https://i.ibb.co/F4SNC0SH/ADMISSION.jpg">
+    <link rel="apple-touch-icon" sizes="152x152" href="https://i.ibb.co/F4SNC0SH/ADMISSION.jpg">
+    <link rel="apple-touch-icon" sizes="180x180" href="https://i.ibb.co/F4SNC0SH/ADMISSION.jpg">
+    <link rel="apple-touch-icon" sizes="167x167" href="https://i.ibb.co/F4SNC0SH/ADMISSION.jpg">
+    
+    <link rel="icon" type="image/png" href="https://i.postimg.cc/yxjxZmRN/Logo_mstsc_(1)_(1).png">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Anuphan', 'sans-serif'] },
+                    colors: {
+                        mst: { purple: '#6A1B9A', yellow: '#FFD600', light: '#f3f0f7', dark: '#2c2c2c' }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    
+    <style>
+        body { 
+            background-color: var(--mst-light); 
+            background-image: radial-gradient(circle at 10% 20%, rgba(106, 27, 154, 0.05) 0%, transparent 20%), radial-gradient(circle at 90% 80%, rgba(255, 214, 0, 0.1) 0%, transparent 20%);
+            padding-bottom: 60px;
+        }
+
+        .input-clean {
+            width: 100%; border-radius: 0.75rem; padding: 0.75rem 1rem;
+            outline: none; transition: all 0.3s; font-size: 0.95rem;
+            background-color: #ffffff; border: 1px solid #e5e7eb; color: #374151;
+        }
+        .input-clean:focus { border-color: #6A1B9A; box-shadow: 0 0 0 4px rgba(106, 27, 154, 0.1); }
+        .input-clean[readonly] { background-color: #f8fafc !important; border: 1px dashed #cbd5e1 !important; color: #64748b !important; cursor: not-allowed; }
+
+        .fade-in { animation: fadeIn 0.25s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .app-number-box { background: linear-gradient(135deg, #6A1B9A, #9575cd); color: white; padding: 1.5rem 1rem; border-radius: 20px; position: relative; overflow: hidden; border: 2px solid rgba(255,255,255,0.2); }
+        .app-number-text { font-size: clamp(1.6rem, 6vw, 2.2rem); font-weight: 800; letter-spacing: 1px; font-family: monospace; position: relative; z-index: 1; }
+        
+        .step-content { display: none; }
+        #step1 { display: block; }
+        
+        /* Loader Animation Inline */
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid #6A1B9A; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        /* ปุ่ม Telegram */
+        .btn-telegram {
+            background-color: #24A1DE; 
+            color: #ffffff;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px; 
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(36, 161, 222, 0.3);
+            text-decoration: none;
+        }
+        .btn-telegram:hover {
+            background-color: #1d88bc;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(36, 161, 222, 0.4);
+        }
+    </style>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#6A1B9A">
+    
+    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+    <script>
+      window.OneSignalDeferred = window.OneSignalDeferred || [];
+      OneSignalDeferred.push(async function(OneSignal) {
+        await OneSignal.init({
+          appId: "78fd7e77-e56d-49eb-abf0-b3f258597987",
+        });
+      });
+    </script>
+</head>
+<body class="text-mst-dark flex flex-col items-center justify-center min-h-screen p-4">
+
+    <div class="bg-white w-full max-w-4xl rounded-[2rem] shadow-[0_20px_50px_rgba(106,27,154,0.1)] overflow-hidden relative transition-all duration-300 z-10 flex flex-col min-h-[80vh] my-4">
+        
+        <img src="https://i.postimg.cc/yxjxZmRN/Logo_mstsc_(1)_(1).png" class="absolute right-[-10%] bottom-[-5%] w-[400px] h-[400px] object-contain opacity-[0.03] z-0 pointer-events-none" alt="Watermark">
+
+        <div class="bg-gradient-to-r from-mst-purple to-[#4a0072] p-6 md:p-8 text-white relative overflow-hidden flex justify-between items-center z-10">
+            <img src="https://i.postimg.cc/yxjxZmRN/Logo_mstsc_(1)_(1).png" class="absolute right-[-20px] top-1/2 transform -translate-y-1/2 w-48 h-48 opacity-[0.15] z-0 pointer-events-none" alt="Watermark Header">
+            
+            <div class="relative z-10 text-left">
+                <h1 class="text-2xl md:text-4xl font-black tracking-wide">ADMISSION</h1>
+            <p class="text-mst-yellow font-medium mt-1 text-xs md:text-base">MST STUDENT COUNCIL</p>
+            </div>
+
+            <div class="relative z-10 flex items-center gap-2">
+                <!-- แก้คำสั่ง onclick เป็น refreshDataSilently(this) และลบ location.reload() ทิ้ง -->
+                <button id="btnRefresh" onclick="refreshDataSilently(this)" class="bg-white/10 hover:bg-white/20 text-white px-3 md:px-4 py-2 rounded-xl text-xs md:text-sm font-bold backdrop-blur-md transition-all flex items-center gap-2 border border-white/20 shadow-sm hover:shadow-md cursor-pointer">
+                    <i class="fa-solid fa-rotate-right"></i> <span class="hidden md:inline">รีเฟรช</span>
+                </button>
+                <button id="navLogoutBtn" class="bg-red-500/80 hover:bg-red-600 text-white px-3 md:px-4 py-2 rounded-xl text-xs md:text-sm font-bold backdrop-blur-md transition-all flex items-center gap-2 border border-red-500/50 shadow-sm hover:shadow-md cursor-pointer" style="display:none;" onclick="logoutStudent()">
+                    <i class="fa-solid fa-power-off"></i> <span class="hidden md:inline">ออกจากระบบ</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="p-5 md:p-10 relative z-10 flex-grow flex flex-col justify-center items-center w-full">
+            
+            <div id="view-initial-load" class="text-center py-12 w-full mx-auto fade-in" style="display: block;">
+                <div class="loader mx-auto mb-4" style="width: 50px; height: 50px; border-width: 5px;"></div>
+            </div>
+
+            <div id="view-login" class="text-center py-4 w-full max-w-md mx-auto fade-in" style="display: none;">
+                <img src="https://i.postimg.cc/yxjxZmRN/Logo_mstsc_(1)_(1).png" alt="MSTSC Logo" class="w-28 h-28 mx-auto mb-6 drop-shadow-xl p-1 border-4 border-mst-yellow rounded-full bg-white relative z-10">
+                
+                <div class="bg-purple-50 border border-purple-100 rounded-2xl p-4 mb-8 text-left max-w-md mx-auto relative z-10 shadow-sm">
+                    <div class="flex gap-3">
+                        <i class="fa-solid fa-shield-halved text-mst-purple mt-1"></i>
+                        <div>
+                            <p class="text-sm font-bold text-gray-800">เข้าสู่ระบบเพื่อดำเนินการสมัคร<br>และตรวจสอบสถานะ</p>
+                            <p class="text-xs text-gray-500 mt-1">ประจำปีการศึกษา <span id="displayYear" class="font-bold text-mst-purple">...</span></p>
+                            <p class="text-xs text-red-500 font-bold mt-1">กรุณาใช้บัญชี Google ของโรงเรียน (@mst.ac.th)</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="webview-warning" class="hidden mb-6 bg-red-50 border border-red-200 rounded-2xl p-4 text-left shadow-sm relative z-20">
+    <div class="flex items-start gap-3">
+        <div class="w-10 h-10 bg-red-100 text-red-600 rounded-full flex items-center justify-center flex-shrink-0 text-xl shadow-inner mt-1">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+        </div>
+        <div>
+            <h3 class="font-bold text-red-700 text-sm mb-1">ไม่สามารถเข้าสู่ระบบผ่านแอปนี้ได้</h3>
+            <p class="text-xs text-red-600 leading-relaxed mb-3">
+                นโยบายความปลอดภัย Google ไม่อนุญาตให้ล็อกอินภายในแอป <b>LINE, IG หรือ Facebook</b>
+            </p>
+            <div class="bg-white p-3 rounded-xl border border-red-100 text-[11px] text-gray-700 shadow-sm">
+                <span class="font-bold text-mst-purple block mb-1">💡 วิธีแก้ไขเพื่อเข้าสู่ระบบ:</span>
+                กดปุ่ม 3 จุด มุมขวาบน (หรือมุมล่าง) <br>แล้วเลือก <b class="text-blue-600">"เปิดในเบราว์เซอร์ (Safari / Chrome)"</b>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="google-login-wrapper" class="flex justify-center mb-4 relative z-10">
+    <div id="g_id_onload" 
+         data-client_id="151555458498-fjmti72kvokr5dh5mlsjqq7vugrduuef.apps.googleusercontent.com" 
+         data-callback="handleCredentialResponse" 
+         data-auto_prompt="false"
+         data-hd="mst.ac.th"> </div>
+    <div class="g_id_signin d-flex justify-content-center" data-type="standard" data-shape="pill" data-theme="filled_blue" data-text="signin_with" data-size="large" data-logo_alignment="left"></div>
+</div>
+                <div id="loginError" class="text-red-500 text-sm mt-4 font-bold flex items-center justify-center gap-2"></div>
+                <div class="flex flex-col gap-3 mt-6">
+                    <button onclick="showPreparationInfo()" class="w-full bg-yellow-50 text-yellow-700 hover:bg-yellow-100 py-2.5 rounded-xl text-sm font-bold border border-yellow-200 transition-all flex justify-center items-center gap-2 shadow-sm">
+                        <i class="fa-solid fa-clipboard-list"></i> สิ่งที่ต้องเตรียมในการสมัคร
+                    </button>
+                    <button onclick="showStudentGuide()" class="w-full bg-blue-50 text-blue-700 hover:bg-blue-100 py-2.5 rounded-xl text-sm font-bold border border-blue-200 transition-all flex justify-center items-center gap-2 shadow-sm">
+                        <i class="fa-solid fa-book-open-reader"></i> วิธีการใช้งานระบบ
+                    </button>
+                </div>
+            </div>
+
+            <div id="view-closed" class="text-center py-8 w-full max-w-md mx-auto fade-in" style="display: none;">
+                <div class="w-24 h-24 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="fa-solid fa-lock text-5xl text-red-500"></i>
+                </div>
+                <h4 class="text-2xl font-bold text-red-600 mb-2">ยังไม่เปิดให้ดำเนินการ</h4>
+                <p class="text-gray-500 text-sm mb-8" id="closedMessageText">ขออภัย ยังไม่ถึงเวลาเปิดรับสมัคร หรือหมดเขตรับสมัครแล้ว</p>
+            </div>
+
+            <div id="view-status" class="w-full max-w-xl mx-auto fade-in" style="display: none;">
+                <div id="statusContent"></div>
+            </div>
+
+            <div id="view-application" class="w-full fade-in" style="display: none;">
+                
+                <div id="stepperNav" class="flex justify-between mb-8 relative px-2 z-10" style="display: none;">
+                    <div class="absolute top-1/2 left-0 w-full h-1 bg-gray-100 -z-10 transform -translate-y-1/2 rounded-full"></div>
+                    <div id="progressBar" class="absolute top-1/2 left-0 w-1/3 h-1 bg-mst-purple transition-all duration-500 -z-10 transform -translate-y-1/2 rounded-full"></div>
+                    <div class="step-indicator w-10 h-10 rounded-full bg-mst-purple text-white flex items-center justify-center font-bold text-sm shadow-lg ring-4 ring-white">1</div>
+                    <div class="step-indicator w-10 h-10 rounded-full bg-gray-200 text-gray-400 flex items-center justify-center font-bold text-sm ring-4 ring-white transition-colors duration-300">2</div>
+                    <div class="step-indicator w-10 h-10 rounded-full bg-gray-200 text-gray-400 flex items-center justify-center font-bold text-sm ring-4 ring-white transition-colors duration-300">3</div>
+                </div>
+
+                <form id="admissionForm" class="relative z-10 w-full">
+                    
+                    <div class="step-content" id="step1">
+                        
+                        <div class="mb-6 bg-gradient-to-br from-purple-50 to-white p-6 rounded-2xl border border-purple-100 shadow-sm">
+                            <label class="block text-sm font-bold text-mst-purple mb-3 flex items-center gap-2">
+                                <i class="fa-solid fa-user-tie"></i> เลือกตำแหน่งที่ต้องการสมัคร <span class="text-red-500">*</span>
+                            </label>
+                            <select id="roleSelect" class="input-clean font-bold text-mst-purple text-lg shadow-sm" onchange="toggleFormMode()">
+                                <option value="" selected disabled>-- กรุณาเลือกตำแหน่ง --</option>
+                                <option value="ประธานนักเรียน">ประธานนักเรียน</option>
+                                <option value="กรรมการนักเรียน">กรรมการนักเรียน</option>
+                            </select>
+                        </div>
+
+                        <div id="fullFormSection" style="display: none;" class="fade-in">
+                            <h3 class="text-lg font-bold mb-5 text-gray-800 flex items-center gap-2"><i class="fa-solid fa-address-card text-mst-purple"></i> ข้อมูลส่วนตัว</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+                                <div class="md:col-span-4"><label class="block text-xs font-bold text-gray-500 mb-1">รหัสนักเรียน</label><input type="text" id="studentId" class="input-clean" readonly></div>
+                                <div class="md:col-span-8"><label class="block text-xs font-bold text-gray-500 mb-1">ชื่อ-สกุล</label><input type="text" id="studentName" class="input-clean" readonly></div>
+                                <div class="md:col-span-12"><label class="block text-xs font-bold text-gray-500 mb-1">ห้อง</label><input type="text" id="studentRoom" class="input-clean" readonly></div>
+                                
+                                <div class="md:col-span-12 mt-4">
+                                    <label class="block text-sm font-bold text-gray-800 mb-2"><i class="fa-solid fa-image text-mst-purple"></i> อัปโหลดรูปถ่ายผู้สมัคร (JPG/PNG) <span class="text-red-500">*</span></label>
+                                    <div class="border-2 border-dashed border-gray-300 rounded-2xl p-6 text-center hover:bg-purple-50 hover:border-mst-purple transition-colors bg-white">
+                                        <input type="file" id="applicantPhoto" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-bold file:bg-mst-yellow file:text-mst-dark hover:file:bg-yellow-500 cursor-pointer mx-auto transition-colors" accept="image/jpeg, image/png">
+                                        <p class="text-xs text-gray-400 mt-2">รูปถ่ายนักเรียนหน้าตรง รองรับไฟล์ JPG/PNG</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-8 flex justify-end">
+                                <button type="button" onclick="nextStep(1)" class="bg-mst-purple hover:bg-purple-800 text-white px-8 py-3 rounded-xl font-bold transition-all shadow-md">ถัดไป <i class="fa-solid fa-arrow-right ml-2"></i></button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="step-content" id="step2">
+                        <h3 class="text-lg font-bold mb-5 text-gray-800 flex items-center gap-2"><i class="fa-solid fa-flag text-mst-purple"></i> ข้อมูลสังกัดพรรค</h3>
+                        
+                        <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
+                            <label class="block text-sm font-bold text-gray-800 mb-3">ชื่อพรรค <span class="text-red-500">*</span></label>
+                            
+                            <input type="text" id="partyNameText" class="input-clean mb-4" placeholder="ระบุชื่อพรรค">
+                            
+                            <div class="flex flex-col md:flex-row items-center gap-3 mb-4" id="committeePartyContainer" style="display:none;">
+                                <select id="partyNameSelect" class="input-clean flex-grow"><option value="" selected disabled>-- เลือกพรรคที่ต้องการสังกัด --</option></select>
+                                <div class="bg-gray-50 border border-gray-200 rounded-xl px-5 py-3 flex items-center gap-2 shrink-0 w-full md:w-auto mt-2 md:mt-0">
+                                    <input type="checkbox" id="isIndependent" class="w-4 h-4 text-mst-purple rounded cursor-pointer" onchange="toggleIndependent()">
+                                    <label class="text-sm font-bold text-mst-purple cursor-pointer mb-0" for="isIndependent">ลงอิสระ</label>
+                                </div>
+                            </div>
+                            
+                            <div id="partyHelpText" class="text-red-500 text-xs font-bold mt-2 bg-red-50 p-3 rounded-lg border border-red-100" style="display: none;">
+                                <i class="fa-solid fa-circle-info mr-1"></i> หากไม่มีชื่อพรรคของท่าน ให้หัวหน้าพรรคลงสมัคร "ประธานนักเรียน" ก่อน
+                            </div>
+
+                            <div id="presidentOnlyInfo" class="mt-6 space-y-4 pt-4 border-t border-gray-100" style="display: none;">
+                                <div><label class="block text-xs font-bold text-gray-700 mb-1">สโลแกนพรรค <span class="text-red-500">*</span></label><input type="text" id="partySlogan" class="input-clean" placeholder="พิมพ์สโลแกนพรรค"></div>
+                                <div><label class="block text-xs font-bold text-gray-700 mb-1">นโยบายพรรค <span class="text-red-500">*</span></label><textarea id="partyPolicies" class="input-clean h-24 resize-none" placeholder="ระบุนโยบายหลักของพรรค"></textarea></div>
+                            </div>
+                        </div>
+
+                        <div class="mt-8 flex justify-between items-center">
+                            <button type="button" onclick="prevStep(2)" class="bg-gray-100 hover:bg-gray-200 text-gray-600 px-6 py-3 rounded-xl font-bold transition-all"><i class="fa-solid fa-arrow-left mr-2"></i> ย้อนกลับ</button>
+                            <button type="button" onclick="nextStep(2)" class="bg-mst-purple hover:bg-purple-800 text-white px-8 py-3 rounded-xl font-bold transition-all shadow-md">ถัดไป <i class="fa-solid fa-arrow-right ml-2"></i></button>
+                        </div>
+                    </div>
+
+                    <div class="step-content" id="step3">
+                        
+                        <div id="partyMembersSection" style="display: none;" class="mb-8">
+                            <div class="flex flex-col md:flex-row md:items-center justify-between mb-4 gap-2">
+                                <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2"><i class="fa-solid fa-users text-mst-purple"></i> รายชื่อสมาชิกพรรค</h3>
+                                <span class="text-xs text-blue-600 font-bold bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-100"><i class="fa-solid fa-keyboard mr-1"></i> พิมพ์รหัส 5 หลัก (สูงสุด 30 คน)</span>
+                            </div>
+                            
+                            <div class="bg-white p-4 md:p-6 rounded-2xl border border-gray-200 shadow-sm">
+                                <div id="membersContainer" class="space-y-2">
+                                    <div class="grid grid-cols-12 gap-2 items-center bg-blue-50 p-2 rounded-xl border border-blue-100 shadow-sm">
+                                        <div class="col-span-2 md:col-span-1 text-center font-bold text-blue-800 text-sm">1.</div>
+                                        <div class="col-span-10 md:col-span-3"><input type="text" class="input-clean text-center text-sm py-1.5 px-2 bg-white font-bold text-blue-800" value="หัวหน้าพรรค" readonly></div>
+                                        <div class="col-span-7 md:col-span-5"><input type="text" id="showLeaderName" class="input-clean bg-white text-sm py-1.5 px-2 font-bold" readonly></div>
+                                        <div class="col-span-5 md:col-span-3"><input type="text" id="showLeaderRoom" class="input-clean text-center bg-white text-sm py-1.5 px-2 font-bold" readonly></div>
+                                    </div>
+                                </div>
+                                <button type="button" id="addMemberBtn" class="mt-4 w-full py-3 border-2 border-dashed border-mst-purple text-mst-purple hover:bg-purple-50 rounded-xl font-bold transition-all flex justify-center items-center gap-2" onclick="addMemberRow()"><i class="fa-solid fa-user-plus"></i> เพิ่มสมาชิกลำดับต่อไป</button>
+                            </div>
+                        </div>
+
+                        <div id="qualificationSection" style="display: none;" class="mb-8">
+                            <h3 class="text-lg font-bold mb-4 text-gray-800 flex items-center gap-2"><i class="fa-solid fa-clipboard-check text-green-600"></i> ตรวจสอบคุณสมบัติ</h3>
+                            <div class="bg-green-50 p-5 rounded-2xl border border-green-200 shadow-sm">
+                                <ul id="qualList" class="text-sm text-gray-700 mb-4 space-y-3 leading-relaxed"></ul>
+                                <div class="bg-white p-4 rounded-xl border border-green-100 mt-4 flex items-start gap-3 cursor-pointer shadow-sm">
+                                    <input class="w-5 h-5 text-green-600 rounded border-gray-300 focus:ring-green-500 mt-0.5 cursor-pointer" type="checkbox" id="qualCheck" required>
+                                    <label class="font-bold text-gray-800 text-sm cursor-pointer" for="qualCheck">
+                                        ข้าพเจ้าขอรับรองว่ามีคุณสมบัติตามที่ระบุไว้ครบถ้วนทุกประการ หากตรวจพบว่าขาดคุณสมบัติภายหลัง ยินดีสละสิทธิ์ทันที
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-8 flex justify-between items-center pt-4 border-t border-gray-100">
+                            <button type="button" onclick="prevStep(3)" class="bg-gray-100 hover:bg-gray-200 text-gray-600 px-6 py-3 rounded-xl font-bold transition-all"><i class="fa-solid fa-arrow-left mr-2"></i> ย้อนกลับ</button>
+                            <button type="submit" id="submitAppBtn" class="bg-gradient-to-r from-mst-purple to-[#4a0072] hover:from-[#5e1889] hover:to-[#380056] text-white px-8 py-3 rounded-xl font-bold shadow-lg transform hover:-translate-y-1 transition-all"><i class="fa-solid fa-paper-plane mr-2"></i> ส่งใบสมัคร</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            
+        </div>
+    </div>
+
+    <div class="text-center pb-6 relative z-10 w-full mt-auto flex flex-wrap justify-center gap-3">
+        <a id="btn-committee" href="scoring.html" target="_blank" class="inline-flex items-center gap-2 text-xs font-bold text-purple-600 hover:text-white hover:bg-purple-600 transition-all bg-white/80 px-5 py-2.5 rounded-full backdrop-blur-sm border border-purple-200 shadow-sm">
+            <i class="fa-solid fa-square-poll-vertical"></i> สำหรับกรรมการ
+        </a>
+
+        <a id="btn-admin" href="admin_admission.html" target="_blank" class="inline-flex items-center gap-2 text-xs font-bold text-gray-400 hover:text-mst-purple transition-all bg-white/50 px-5 py-2.5 rounded-full backdrop-blur-sm border border-gray-200 shadow-sm">
+            <i class="fa-solid fa-user-shield"></i> ผู้ดูแลระบบ
+        </a>
+    </div>
+
+    <script>
+        // ========================================================
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzgZ75s7SMTRbPx5Cq_iHKgS9qhDq1CiZwyLurGDuoyRFzXPdT-ppCTPF12PIPHNFxYTw/exec";
+        // ========================================================
+
+        const svgIconsHTML = {
+            check: `<i class="fa-solid fa-circle-check text-green-500 mr-2 mt-1"></i>`,
+            warning: `<i class="fa-solid fa-triangle-exclamation text-yellow-500 mr-2 mt-1"></i>`
+        };
+
+        let onlineStudentDB = {}; 
+        let appliedDB = {}; 
+        let systemSettings = {};
+        let availableParties = [];
+        
+        let isDataLoaded = false;
+        let currentUserFullEmail = ""; // เพิ่มเพื่อเก็บอีเมลเต็มจาก Google
+        let pendingLoginId = null;
+
+        // --- Helper: Button Loading ---
+        function setBtnLoading(btn, text) {
+            if(!btn) return;
+            if(!btn.dataset.originalHtml) btn.dataset.originalHtml = btn.innerHTML;
+            btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> ${text}`;
+            btn.disabled = true;
+            btn.classList.add('opacity-70', 'cursor-not-allowed');
+        }
+
+        function resetBtnLoading(btn) {
+            if(!btn || !btn.dataset.originalHtml) return;
+            btn.innerHTML = btn.dataset.originalHtml;
+            btn.disabled = false;
+            btn.classList.remove('opacity-70', 'cursor-not-allowed');
+        }
+
+        function formatDateTime(dateStr) {
+            if (!dateStr) return '';
+            const d = new Date(dateStr);
+            const day = String(d.getDate()).padStart(2, '0');
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const year = d.getFullYear() < 2500 ? d.getFullYear() + 543 : d.getFullYear(); 
+            const hours = String(d.getHours()).padStart(2, '0');
+            const minutes = String(d.getMinutes()).padStart(2, '0');
+            return `${day}/${month}/${year} ${hours}:${minutes}`;
+        }
+
+        async function apiCall(payload) {
+            const response = await fetch(WEB_APP_URL, {
+                method: 'POST', redirect: 'follow', headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(payload)
+            });
+            return await response.json();
+        }
+
+        function decodeJwtResponse(token) {
+            let base64Url = token.split('.')[1];
+            let base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            let jsonPayload = decodeURIComponent(window.atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+            return JSON.parse(jsonPayload);
+        }
+
+        async function fetchInitialData() {
+            const savedStdId = localStorage.getItem('mstsc_std_login');
+            const savedEmail = localStorage.getItem('mstsc_std_email'); 
+            
+            // 🟢 1. ดึงข้อมูลจากความจำเครื่อง (Cache) มาโชว์ทันทีแบบไม่ต้องรอ
+            const cachedData = localStorage.getItem('mstsc_cached_data');
+            if (cachedData) {
+                try {
+                    const result = JSON.parse(cachedData);
+                    onlineStudentDB = result.students; 
+                    appliedDB = result.applied; 
+                    systemSettings = result.settings;
+                    availableParties = result.parties || [];
+                    isDataLoaded = true;
+                    
+                    document.getElementById('view-initial-load').style.display = 'none';
+                    if (document.getElementById('displayYear')) {
+                        document.getElementById('displayYear').innerText = systemSettings.CurrentAcademicYear || "2569";
+                    }
+
+                    if (savedStdId) {
+                        processStudentLogin(savedStdId);
+                    } else {
+                        document.getElementById('view-login').style.display = 'block';
+                    }
+                } catch(e) { console.log("Cache error"); }
+            }
+
+            // 🟢 2. แอบดึงข้อมูลใหม่จาก Server อยู่หลังบ้าน
+            try {
+                const result = await apiCall({ action: "getStudentInit" });
+                isDataLoaded = true;
+
+                if(result.status === 'success') {
+                    // บันทึกข้อมูลใหม่ลงความจำเครื่องเพื่อใช้รอบหน้า
+                    localStorage.setItem('mstsc_cached_data', JSON.stringify(result));
+                    
+                    onlineStudentDB = result.students; 
+                    appliedDB = result.applied; 
+                    systemSettings = result.settings;
+                    availableParties = result.parties || [];
+                    
+                    if(document.getElementById('displayYear')) {
+                        document.getElementById('displayYear').innerText = systemSettings.CurrentAcademicYear || "2569";
+                    }
+
+                    document.getElementById('view-initial-load').style.display = 'none';
+
+                    // หากมีข้อมูลใหม่ และนักเรียนอยู่ในหน้าระบบ ให้หน้าจออัปเดตเองอัตโนมัติ
+                    if (savedStdId && appliedDB[savedStdId]) {
+                        checkAndShowStatus(savedStdId, appliedDB[savedStdId]);
+                    } else if (!cachedData) {
+                        // กรณีคนเปิดแอปครั้งแรกสุดในชีวิต (ยังไม่มีแคช)
+                        if (savedStdId) processStudentLogin(savedStdId);
+                        else document.getElementById('view-login').style.display = 'block';
+                    }
+
+                    // ส่วนนี้คือเช็คคู่มือติดตั้งแอป PWA (ของเดิม)
+                    setTimeout(() => {
+                        const pushContainer = document.getElementById('pushSetupContainer');
+                        const guideBox = document.getElementById('installGuideBox');
+                        if (pushContainer && window.OneSignalDeferred) {
+                            const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+                            window.OneSignalDeferred.push(function(OneSignal) {
+                                try {
+                                    const isSubscribed = OneSignal.User.PushSubscription.optedIn;
+                                    if (isSubscribed) { pushContainer.style.display = 'none'; } 
+                                    else if (isStandalone && guideBox) { guideBox.style.display = 'none'; }
+                                } catch (e) {}
+                            });
+                        }
+                    }, 100);
+                } 
+            } catch (e) { 
+                // ถือดึงข้อมูลใหม่ล้มเหลว แต่มีแคชเก่าอยู่ ก็ไม่ต้องทำอะไร ปล่อยให้ดูของเก่าไปก่อน
+                if (!cachedData) {
+                    showError("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ โปรดตรวจสอบอินเทอร์เน็ต");
+                }
+            }
+        }
+
+        // ฟังก์ชันสำหรับดึงข้อมูลใหม่โดยที่หน้าเว็บไม่กระพริบ
+        async function refreshDataSilently(btn) {
+            const originalHtml = btn.innerHTML;
+            btn.innerHTML = `<i class="fa-solid fa-rotate-right fa-spin"></i> <span class="hidden md:inline">กำลังโหลด...</span>`;
+            btn.disabled = true;
+
+            try {
+                const result = await apiCall({ action: "getStudentInit" });
+                if(result.status === 'success') {
+                    // อัปเดตข้อมูลในความจำ
+                    onlineStudentDB = result.students; 
+                    appliedDB = result.applied; 
+                    systemSettings = result.settings;
+                    
+                    // เซฟลงความจำเครื่อง (Cache)
+                    localStorage.setItem('mstsc_cached_data', JSON.stringify(result));
+
+                    // รีเฟรชหน้าจอของนักเรียนแบบเนียนๆ
+                    const stdId = localStorage.getItem('mstsc_std_login');
+                    if (stdId && appliedDB[stdId]) {
+                        checkAndShowStatus(stdId, appliedDB[stdId]);
+                    }
+                    
+                    Swal.fire({toast: true, position: 'top-end', icon: 'success', title: 'อัปเดตข้อมูลล่าสุดแล้ว', showConfirmButton: false, timer: 1500});
+                }
+            } catch (e) {
+                Swal.fire({toast: true, position: 'top-end', icon: 'error', title: 'ดึงข้อมูลไม่สำเร็จ', showConfirmButton: false, timer: 1500});
+            } finally {
+                btn.innerHTML = originalHtml;
+                btn.disabled = false;
+            }
+        }
+
+        function showError(msg) {
+            document.getElementById('view-initial-load').style.display = 'none';
+            document.getElementById('view-login').style.display = 'block';
+            document.getElementById('view-status').style.display = 'none';
+            document.getElementById('loginError').innerHTML = `${svgIconsHTML.warning} ${msg}`; 
+            document.querySelector('.g_id_signin').style.display = 'none';
+        }
+        
+        fetchInitialData();
+
+        async function handleCredentialResponse(response) {
+            try {
+                const payload = decodeJwtResponse(response.credential);
+                if(!payload.email.endsWith('@mst.ac.th')) { Swal.fire('ใช้อีเมลผิด!', 'อนุญาตเฉพาะอีเมล @mst.ac.th ของโรงเรียนเท่านั้น', 'error'); return; }
+                const stdId = payload.email.split('@')[0].slice(-5);
+                
+                localStorage.setItem('mstsc_std_login', stdId);
+                localStorage.setItem('mstsc_std_email', payload.email); 
+                currentUserFullEmail = payload.email; 
+                
+                // 🟢 สั่งให้ OneSignal จำรหัสนักเรียนเครื่องนี้
+                OneSignalDeferred.push(function(OneSignal) {
+                    OneSignal.login(stdId.toString());
+                });
+                
+                if (isDataLoaded) {
+                    processStudentLogin(stdId);
+                } 
+            } catch(error) { Swal.fire('ข้อผิดพลาด', 'ไม่สามารถอ่านข้อมูลบัญชีได้', 'error'); }
+        }
+
+        function logoutStudent() {
+            Swal.fire({
+                title: 'ออกจากระบบ',
+                text: "คุณต้องการออกจากระบบใช่หรือไม่",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#dc2626',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'ออกจากระบบ',
+                cancelButtonText: 'ยกเลิก',
+                customClass: { confirmButton: 'rounded-xl', cancelButton: 'rounded-xl' }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    localStorage.removeItem('mstsc_std_login');
+                    location.reload();
+                }
+            });
+        }
+
+        function connectTelegram() {
+    // ชื่อบอทของคุณ (ไม่ต้องมี @)
+    var botUsername = "mstsc_admin_bot"; 
+    
+    // เปิดแอป Telegram ไปที่หน้าบอทตรงๆ
+    window.open("https://t.me/" + botUsername, "_blank");
+}
+
+        function processStudentLogin(stdId) {
+            document.getElementById('view-login').style.display = 'none';
+            
+            if(appliedDB[stdId]) {
+                document.getElementById('navLogoutBtn').style.display = 'flex';
+                checkAndShowStatus(stdId, appliedDB[stdId]);
+            } else {
+                let now = new Date();
+                let isOpen = true;
+                let cMsg = "";
+                
+                if(systemSettings.SystemStatus === 'closed') { isOpen = false; cMsg = "ระบบถูกปิดรับสมัครโดยคณะกรรมการ"; }
+                else if(systemSettings.AppStartTime && now < new Date(systemSettings.AppStartTime)) { isOpen = false; cMsg = `ระบบจะเปิดรับสมัครในวันที่<br><b class="text-mst-purple">${formatDateTime(systemSettings.AppStartTime)} น.</b>`; }
+                else if(systemSettings.AppEndTime && now > new Date(systemSettings.AppEndTime)) { isOpen = false; cMsg = "หมดเขตการรับสมัครสำหรับปีการศึกษานี้แล้ว"; }
+
+                if(!isOpen) {
+                    document.getElementById('closedMessageText').innerHTML = cMsg;
+                    document.getElementById('view-closed').style.display = 'block';
+                    document.getElementById('navLogoutBtn').style.display = 'flex';
+                } else if(onlineStudentDB[stdId]) {
+                    document.getElementById('navLogoutBtn').style.display = 'flex';
+                    const stu = onlineStudentDB[stdId];
+                    document.getElementById('studentId').value = stdId;
+                    document.getElementById('studentName').value = stu.name;
+                    document.getElementById('studentRoom').value =  stu.room;
+                    document.getElementById('showLeaderName').value = stu.name;
+                    document.getElementById('showLeaderRoom').value = stu.room;
+                    
+                    const pSelect = document.getElementById('partyNameSelect');
+                    if(availableParties.length > 0) {
+                        pSelect.innerHTML = '<option value="" selected disabled>-- เลือกพรรคที่ต้องการสังกัด --</option>' + availableParties.map(p => `<option value="${p}">${p}</option>`).join('');
+                    } else {
+                        pSelect.innerHTML = '<option value="" selected disabled>ยังไม่มีพรรคในปีนี้</option>';
+                    }
+
+                    document.getElementById('view-application').style.display = 'block';
+                } else {
+                    localStorage.removeItem('mstsc_std_login');
+                    Swal.fire('ไม่มีสิทธิ์ใช้งานระบบ', `รหัสนักเรียน ${stdId} <br>ไม่ได้ศึกษาอยู่ชั้นมัธยมศึกษาปีที่ 4<br><br>หากคิดว่ามีข้อผิดพลาด<br>โปรดติดต่อห้องสภานักเรียน`, 'warning').then(() => location.reload());
+                }
+            }
+        }
+
+        function checkAndShowStatus(stdId, appData) {
+            let confirmEndStr = systemSettings.ConfirmEndTime;
+            let appEndStr = systemSettings.AppEndTime;
+            let now = new Date();
+
+            if (confirmEndStr && appData.status === 'ส่งใบสมัครเรียบร้อย') {
+                if (now > new Date(confirmEndStr)) {
+                    appData.status = 'สละสิทธิ์อัตโนมัติ';
+                    studentUpdateStatusAPI(appData.sheet, appData.rowIndex, 'สละสิทธิ์อัตโนมัติ', null);
+                }
+            }
+            else if (appEndStr && (appData.status.includes('เอกสารไม่เรียบร้อย') || appData.status.includes('รอส่งใบสมัคร') || appData.status.includes('พิมพ์ใบสมัครแล้ว'))) {
+                if (now > new Date(appEndStr)) {
+                    appData.status = 'หมดเวลาส่งใบสมัคร';
+                    studentUpdateStatusAPI(appData.sheet, appData.rowIndex, 'หมดเวลาส่งใบสมัคร', null);
+                }
+            }
+            renderStatusView(stdId, appData, systemSettings);
+        }
+
+        function getCalculatedQueue(targetStdId, appData) {
+            let match = String(appData.appNumber).match(/MSTSC(\d{2})/);
+            let currentYear = match ? match[1] : "";
+            
+            let queuedApps = Object.entries(appliedDB)
+                .map(([id, data]) => {
+                    data.studentId = id; 
+                    return data;
+                })
+                .filter(a => {
+                    let isSameYear = false;
+                    if (currentYear && a.appNumber) {
+                        isSameYear = String(a.appNumber).includes('MSTSC' + currentYear);
+                    }
+                    let s = String(a.status || '').trim();
+                    // เพิ่มสถานะอื่นๆ ให้ตรงกับฝั่งแอดมิน เพื่อไม่ให้ลำดับคิวคลาดเคลื่อน
+                    let hasRightToInterview = (s === 'ยืนยันสมัครต่อ' || s === 'ผ่านการคัดเลือก' || s === 'ไม่ผ่านการคัดเลือก' || s === 'ขาดสอบ');
+                    return isSameYear && hasRightToInterview;
+                });
+
+            queuedApps.sort((a, b) => {
+                let matchA = String(a.room).match(/\d+$/);
+                let roomA = matchA ? parseInt(matchA[0], 10) : 999;
+                
+                let matchB = String(b.room).match(/\d+$/);
+                let roomB = matchB ? parseInt(matchB[0], 10) : 999;
+                
+                if (roomA !== roomB) return roomA - roomB;
+                return String(a.studentId).localeCompare(String(b.studentId));
+            });
+
+            let qIndex = queuedApps.findIndex(a => String(a.studentId) === String(targetStdId));
+            return qIndex !== -1 ? qIndex + 1 : null;
+        }
+        
+
+        function renderStatusView(stdId, appData, settings) {
+            const btnCommittee = document.getElementById('btn-committee');
+            const btnAdmin = document.getElementById('btn-admin');
+            if(btnCommittee) btnCommittee.style.display = 'none';
+            if(btnAdmin) btnAdmin.style.display = 'none';
+
+            document.getElementById('view-status').style.display = 'block';
+            const stu = onlineStudentDB[stdId] || {name: "ไม่ทราบชื่อ", room: "-"};
+            const contentDiv = document.getElementById('statusContent');
+            let now = new Date();
+            let statusHtml = '';
+            
+            let calculatedQueue = getCalculatedQueue(stdId, appData);
+            
+            const svgPass = `<i class="fa-solid fa-circle-check text-5xl text-green-500 mb-4 block drop-shadow-sm"></i>`;
+            const svgFail = `<i class="fa-solid fa-circle-xmark text-5xl text-red-500 mb-4 block drop-shadow-sm"></i>`;
+            const svgInfo = `<i class="fa-solid fa-circle-info text-5xl text-blue-500 mb-4 block drop-shadow-sm"></i>`;
+            const svgWaitDefault = `<i class="fa-solid fa-clock-rotate-left text-5xl text-gray-400 mb-4 block drop-shadow-sm"></i>`;
+            
+            let isResultAnnounced = false;
+            if (settings.ResultAnnounceTime && !isNaN(Date.parse(settings.ResultAnnounceTime))) {
+                if (now >= new Date(settings.ResultAnnounceTime)) isResultAnnounced = true;
+            }
+
+            let currentStatus = String(appData.status || '').trim();
+
+            if (currentStatus === 'ประธานนักเรียน') {
+                statusHtml = `<div class="bg-purple-50 border border-purple-300 text-center mt-6 p-6 rounded-3xl shadow-md relative overflow-hidden">
+                    <i class="fa-solid fa-crown text-6xl text-mst-yellow mb-4 block drop-shadow-md"></i>
+                    <h4 class="text-3xl font-black text-purple-800 mb-2">ประธานนักเรียน</h4>
+                    <p class="text-sm font-bold text-purple-600 mb-6">ขอแสดงความยินดี คุณได้รับการแต่งตั้งให้ดำรงตำแหน่งประธานนักเรียน</p>
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-purple-100">
+                        <p class="text-sm text-gray-800 mb-4">ให้ดำเนินการรายงานตัวผ่านระบบเพื่อยืนยันการรับตำแหน่ง</p>
+                        <a href="https://reg-mstsc.pages.dev" target="_blank" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-xl text-sm font-bold shadow-md transition-all inline-flex items-center gap-2"><i class="fa-solid fa-arrow-up-right-from-square"></i> ไปยังระบบรายงานตัว</a>
+                    </div>
+                </div>`;
+            } else if (currentStatus === 'หมดเวลาส่งใบสมัคร') {
+                statusHtml = `<div class="bg-red-50 border border-red-200 text-center mt-6 p-6 rounded-3xl shadow-sm">${svgFail}<h4 class="text-2xl font-black text-red-600 mb-2">หมดเวลาส่งใบสมัคร</h4><p class="text-sm text-red-500 mb-0">คุณไม่มีสิทธิ์ได้รับการคัดเลือกอีก เนื่องจากพ้นกำหนดเวลา</p></div>`;
+            } else if ((currentStatus === 'ผ่านการคัดเลือก' || currentStatus === 'ไม่ผ่านการคัดเลือก') && !isResultAnnounced) {
+                let annDateStr = settings.ResultAnnounceTime ? formatDateTime(settings.ResultAnnounceTime) : '...';
+                statusHtml = `<div class="bg-blue-50 border border-blue-200 text-center mt-6 p-6 rounded-3xl shadow-sm">${svgInfo}<h4 class="text-2xl font-black text-blue-600 mb-2">รอประกาศผลการคัดเลือก</h4><p class="text-sm text-blue-700 font-bold mb-0">${annDateStr} น.</p></div>`;
+            } else if (currentStatus === 'ผ่านการคัดเลือก') {
+                statusHtml = `<div class="bg-green-50 border border-green-300 text-center mt-6 p-6 rounded-3xl shadow-md">
+                    ${svgPass}
+                    <h4 class="text-2xl font-black text-green-700 mb-2">ผ่านการคัดเลือก</h4>
+                    <p class="text-sm font-bold text-green-600 mb-6">ขอแสดงความยินดี คุณผ่านการคัดเลือก</p>
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-green-100">
+                        <p class="text-sm text-gray-800 mb-4">ให้ดำเนินการรายงานตัวผ่านระบบเพื่อยืนยันการรับตำแหน่ง</p>
+                        <a href="https://reg-mstsc.pages.dev" target="_blank" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl text-sm font-bold shadow-md transition-all inline-flex items-center gap-2"><i class="fa-solid fa-arrow-up-right-from-square"></i> ไปยังระบบรายงานตัว</a>
+                    </div>
+                </div>`;
+            } else if (currentStatus === 'ไม่ผ่านการคัดเลือก') {
+                statusHtml = `<div class="bg-red-50 border border-red-200 text-center mt-6 p-6 rounded-3xl shadow-sm">${svgFail}<h4 class="text-2xl font-black text-red-600 mb-2">ไม่ผ่านการคัดเลือก</h4><p class="text-sm text-red-500  mb-0">ขอขอบคุณที่ให้ความสนใจในการสมัครครั้งนี้</p></div>`;
+            } else if (currentStatus === 'ส่งใบสมัครเรียบร้อย') {
+                let canConfirm = false; let timeMsg = "";
+
+                if (settings.ConfirmStartTime && settings.ConfirmEndTime) {
+                    let sDate = new Date(settings.ConfirmStartTime); let eDate = new Date(settings.ConfirmEndTime);
+                    if (now < sDate) timeMsg = `<div class="text-gray-500 text-sm font-bold mt-4 flex items-center justify-center gap-2"><i class="fa-regular fa-clock"></i> ระบบเปิดให้ยืนยันสิทธิ์ในวันที่<br>${formatDateTime(settings.ConfirmStartTime)} น.</div>`;
+                    else if (now >= sDate && now <= eDate) { canConfirm = true; timeMsg = `<div class="text-red-500 text-sm font-bold mt-5 bg-red-50 p-2.5 rounded-lg inline-flex items-center justify-center gap-2 border border-red-100"><i class="fa-solid fa-stopwatch"></i> หมดเขตยืนยันสิทธิ์<br>${formatDateTime(settings.ConfirmEndTime)} น.</div>`; }
+                    else timeMsg = `<div class="text-red-500 text-sm font-bold mt-4 flex items-center justify-center gap-2"><i class="fa-solid fa-ban"></i> หมดเวลายืนยันสิทธิ์แล้ว</div>`;
+                }
+
+                if (canConfirm) {
+                    statusHtml = `<div class="bg-white border-2 border-yellow-400 text-center mt-6 p-6 rounded-3xl shadow-lg relative overflow-hidden">
+                        <i class="fa-solid fa-file-circle-check text-5xl text-yellow-400 mb-4 block drop-shadow-md"></i>
+                        <h4 class="text-2xl font-black text-gray-800 mb-2">เอกสารสมบูรณ์</h4>
+                        <p class="text-sm font-bold text-gray-500 mb-6">กรุณากดยืนยันเพื่อเข้ารับการสัมภาษณ์</p>
+                        <div class="flex flex-col md:flex-row gap-3 justify-center">
+                            <button class="border-2 border-red-500 text-red-500 hover:bg-red-50 px-8 py-3 rounded-xl font-bold transition-all text-sm w-full md:w-auto" onclick="confirmStudentAction('${appData.sheet}', ${appData.rowIndex}, 'สละสิทธิ์การสมัคร', this)">สละสิทธิ์</button>
+                            <button class="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-xl font-bold shadow-md transition-all text-sm w-full md:w-auto" onclick="confirmStudentAction('${appData.sheet}', ${appData.rowIndex}, 'ยืนยันสมัครต่อ', this)">ยืนยันสมัครต่อ</button>
+                        </div>
+                        ${timeMsg}
+                    </div>`;
+                } else {
+                    statusHtml = `<div class="bg-gray-50 border border-gray-200 text-center mt-6 p-6 rounded-3xl shadow-sm">
+                        <i class="fa-solid fa-file-circle-check text-5xl text-gray-600 mb-4 block drop-shadow-sm opacity-80"></i>
+                        <h4 class="text-2xl font-black text-gray-800 mb-2">เอกสารสมบูรณ์</h4>
+                        <p class="text-sm text-gray-600 mb-0">คุณมีสิทธิ์เข้ารับการสัมภาษณ์</p>
+                        ${timeMsg}
+                    </div>`;
+                }
+            } else if (currentStatus === 'พิมพ์ใบสมัครแล้ว') {
+                statusHtml = `<div class="bg-gray-50 border border-gray-200 text-center mt-6 p-6 rounded-3xl shadow-sm">
+                    <i class="fa-solid fa-clock-rotate-left text-5xl text-yellow-500 mb-4 block drop-shadow-sm"></i>
+                    <h4 class="text-2xl font-black text-gray-800 mb-2">พิมพ์ใบสมัครแล้ว</h4>
+                    <p class="text-sm text-gray-600 mb-0">หากสถานะเป็น "พิมพ์ใบสมัครแล้ว"<br>ให้มารับใบสมัครที่ห้องสภานักเรียน</p>
+                </div>`;
+            } else if (currentStatus === 'สละสิทธิ์การสมัคร') {
+                statusHtml = `<div class="bg-gray-50 border border-gray-200 text-center mt-6 p-6 rounded-3xl shadow-sm">
+                    <i class="fa-solid fa-user-slash text-5xl text-gray-400 mb-4 block drop-shadow-sm"></i>
+                    <h4 class="text-2xl font-black text-gray-600 mb-2">สละสิทธิ์การสมัคร</h4>
+                    <p class="text-sm text-gray-500 mb-0">คุณได้กดยยกเลิกและสละสิทธิ์การสมัครด้วยตนเอง</p>
+                </div>`;
+            } else if (currentStatus === 'สละสิทธิ์อัตโนมัติ') {
+                statusHtml = `<div class="bg-gray-50 border border-gray-200 text-center mt-6 p-6 rounded-3xl shadow-sm">
+                    <i class="fa-solid fa-user-slash text-5xl text-gray-400 mb-4 block drop-shadow-sm"></i>
+                    <h4 class="text-2xl font-black text-gray-600 mb-2">สละสิทธิ์อัตโนมัติ</h4>
+                    <p class="text-sm text-gray-500 mb-0">คุณไม่ได้ดำเนินการยืนยันสิทธิ์ในเวลาที่กำหนด<br>ระบบจึงตัดสิทธิ์โดยอัตโนมัติ</p>
+                </div>`;
+            } else if (currentStatus === 'ขาดสอบ') {
+                statusHtml = `<div class="bg-red-50 border border-red-200 text-center mt-6 p-6 rounded-3xl shadow-sm">
+                    <i class="fa-solid fa-user-xmark text-5xl text-red-500 mb-4 block drop-shadow-sm"></i>
+                    <h4 class="text-2xl font-black text-red-600 mb-2">ขาดสอบสัมภาษณ์</h4>
+                    <p class="text-sm text-red-500 mb-0">คุณไม่ได้เข้ารับการสัมภาษณ์ตามเวลาที่กำหนด ระบบได้บันทึกว่าคุณขาดสอบ</p>
+                </div>`;
+            } else if (currentStatus.includes('เอกสารไม่เรียบร้อย')) {
+                statusHtml = `<div class="bg-red-50 border border-red-200 text-center mt-6 p-6 rounded-3xl shadow-sm">${svgFail}<h4 class="text-2xl font-black text-red-600 mb-2">${currentStatus}</h4><p class="text-sm text-red-500 mb-0">โปรดติดต่อห้องสภานักเรียนโดยด่วน</p></div>`;
+            } else if (currentStatus === 'ยืนยันสมัครต่อ') {
+                statusHtml = `<div class="bg-green-50 border border-green-200 text-center mt-6 p-6 rounded-3xl shadow-sm">${svgPass}<h4 class="text-2xl font-black text-green-600 mb-2">ยืนยันสิทธิ์เรียบร้อย</h4><p class="text-sm text-green-600 mb-0">คุณได้ยืนยันการเข้ารับการสัมภาษณ์แล้ว</p></div>`;
+            } else {
+                statusHtml = `<div class="bg-gray-50 border border-gray-200 text-center mt-6 p-6 rounded-3xl shadow-sm">${svgWaitDefault}<h4 class="text-2xl font-black text-gray-800 mb-2">${currentStatus}</h4></div>`;
+            }
+
+            // บัตรคิวสลิปสีขาว
+            let queueHtml = '';
+            if (currentStatus === 'ยืนยันสมัครต่อ' && settings.InterviewAnnounceTime) {
+                if (now >= new Date(settings.InterviewAnnounceTime)) {
+                    if (calculatedQueue) {
+                        let interviewDetails = "";
+                        if(settings.InterviewStartTime) interviewDetails += `<div class="flex items-start text-sm border-b border-gray-100 py-2 gap-2"><span class="text-gray-500 shrink-0 min-w-[85px]">เริ่มสัมภาษณ์:</span> <b class="text-gray-800">${formatDateTime(settings.InterviewStartTime)} น.</b></div>`;
+                        if(settings.InterviewLocation) interviewDetails += `<div class="flex items-start text-sm border-b border-gray-100 py-2 gap-2"><span class="text-gray-500 shrink-0 min-w-[85px]">สถานที่:</span> <b class="text-gray-800">${settings.InterviewLocation}</b></div>`;
+                        if(settings.InterviewNote) interviewDetails += `<div class="mt-3 bg-gray-50 p-3 rounded-lg text-sm text-gray-600 border border-gray-200"><i class="fa-solid fa-circle-info text-gray-400 mr-1"></i> ${settings.InterviewNote.replace(/\n/g, '<br>')}</div>`;
+
+                        queueHtml = `<div class="mt-8 bg-white p-6 rounded-xl shadow-lg border border-gray-200 max-w-sm mx-auto relative overflow-hidden">
+                            <div class="border-b-2 border-dashed border-gray-300 pb-4 mb-4 text-center">
+                                <h6 class="font-bold text-gray-400 text-[10px] uppercase tracking-[0.2em] mb-2">บัตรคิวสัมภาษณ์</h6>
+                                <div class="text-4xl md:text-5xl font-black font-mono text-gray-900 tracking-wider">Q-${("00" + calculatedQueue).slice(-3)}</div>
+                            </div>
+                            <div class="text-left mb-4 px-2">
+                                ${interviewDetails}
+                            </div>
+                            <div class="pt-4 border-t-2 border-dashed border-gray-300 text-center">
+                                <i class="fa-solid fa-barcode text-5xl text-gray-300"></i>
+                                <p class="text-[11px] text-gray-400 mt-2 font-mono uppercase tracking-widest">${appData.appNumber}</p>
+                            </div>
+                        </div>`;
+                    } else {
+                        queueHtml = `<div class="bg-yellow-50 text-yellow-700 text-sm font-bold text-center mt-6 p-4 rounded-xl shadow-sm border border-yellow-200"><i class="fa-solid fa-circle-notch fa-spin mr-2"></i> ถึงเวลาประกาศคิวแล้ว กำลังรอแอดมินจัดเตรียมคิว...</div>`;
+                    }
+                } else {
+                    queueHtml = `<div class="bg-blue-50 text-blue-700 text-sm font-bold text-center mt-6 p-4 rounded-xl shadow-sm border border-blue-200"><i class="fa-regular fa-calendar-check mr-2"></i> รอประกาศคิวสัมภาษณ์ <br><span class="text-mst-purple">${formatDateTime(settings.InterviewAnnounceTime)} น.</span></div>`;
+                }
+            }
+
+            contentDiv.innerHTML = `
+                <div class="text-center mb-2">
+                    <div class="app-number-box shadow-md mb-6 mx-auto" style="max-width: 320px;">
+                        <i class="fa-solid fa-file-invoice absolute -right-2 -bottom-2 text-[100px] opacity-[0.15]"></i>
+                        <div class="text-sm opacity-80 font-bold mb-1 uppercase tracking-wider">เลขที่ใบสมัคร</div>
+                        <div class="app-number-text">${appData.appNumber}</div>
+                    </div>
+                    <h4 class="text-2xl font-black text-gray-800 mb-1">${stu.name}</h4>
+                    <p class="text-gray-500 text-sm">รหัสนักเรียน: ${stdId} <span class="mx-2">|</span> ห้อง ${stu.room||'?'}</p>
+                </div>
+                ${statusHtml}
+                ${queueHtml}
+                
+                <div class="mt-6 space-y-3">
+                    <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm flex justify-between items-center">
+                        <span class="text-sm font-bold text-gray-500">ตำแหน่ง:</span>
+                        <span class="bg-mst-purple text-white rounded-lg px-4 py-1.5 font-bold text-sm shadow-sm">${appData.role}</span>
+                    </div>
+                    <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm flex justify-between items-center">
+                        <span class="text-sm font-bold text-gray-500">สังกัดพรรค:</span>
+                        <span class="font-black text-mst-purple text-base">${appData.party}</span>
+                    </div>
+                </div>
+
+                <div id="pushSetupContainer" class="mt-5 fade-in">
+                    <button onclick="OneSignalDeferred.push(function(OS) { OS.Slidedown.promptPush(); });" class="w-full justify-center bg-purple-100 text-purple-700 hover:bg-purple-200 px-6 py-3 rounded-xl font-bold transition-all shadow-sm flex items-center gap-2 border border-purple-200">
+                        <i class="fa-solid fa-bell fa-lg"></i> เปิดรับการแจ้งเตือนบนมือถือ
+                    </button>
+                    
+                    <div id="installGuideBox" class="mt-4 text-left bg-white border border-gray-200 rounded-xl p-4 shadow-sm text-sm">
+                        <h4 class="font-bold text-gray-800 mb-3 border-b pb-2">
+                            <i class="fa-solid fa-mobile-screen-button text-purple-600 mr-1"></i> วิธีติดตั้งแอปและเปิดการแจ้งเตือน
+                        </h4>
+
+                        <div class="mb-4">
+                            <h5 class="font-bold text-blue-600 mb-1"><i class="fa-brands fa-apple"></i> สำหรับ iOS (iPhone/iPad)</h5>
+                            <ol class="list-decimal list-inside text-gray-600 text-xs space-y-1 ml-1">
+                                <li>เปิดเว็บนี้ด้วยเบราว์เซอร์ <b>Safari</b> เท่านั้น</li>
+                                <li>กดปุ่ม <b>"จุด 3 จุด > แชร์"</b> <i class="fa-solid fa-arrow-up-from-bracket mx-1 text-gray-400"></i> (ด้านล่างหน้าจอ)</li>
+                                <li>เลื่อนหาและเลือก <b>"เพิ่มไปยังหน้าจอโฮม"</b> (Add to Home Screen)</li>
+                                <li>เปิดแอป ADMISSION จากหน้าจอโฮม ล็อกอิน และกดปุ่มสีม่วงเพื่อรับแจ้งเตือน</li>
+                            </ol>
+                        </div>
+
+                        <div>
+                            <h5 class="font-bold text-green-600 mb-1"><i class="fa-brands fa-android"></i> สำหรับ Android</h5>
+                            <ol class="list-decimal list-inside text-gray-600 text-xs space-y-1 ml-1">
+                                <li>เปิดเว็บนี้ด้วยเบราว์เซอร์ <b>Chrome</b></li>
+                                <li>กดที่ไอคอน <b>จุด 3 จุด</b> <i class="fa-solid fa-ellipsis-vertical mx-1 text-gray-400"></i> (มุมขวาบน)</li>
+                                <li>เลือกเมนู <b>"เพิ่มลงในหน้าจอโฮม"</b> (Add to Home Screen)</li>
+                                <li>เปิดแอป ADMISSION จากหน้าจอโฮม และกดปุ่มสีม่วงเพื่อรับแจ้งเตือน</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            `;
+            // 🟢 เพิ่มโค้ดตรวจสอบเพื่อซ่อน/แสดงกล่อง (วางต่อจากคำสั่ง .innerHTML ทันที)
+            setTimeout(() => {
+                const pushContainer = document.getElementById('pushSetupContainer');
+                const guideBox = document.getElementById('installGuideBox');
+                
+                if (pushContainer && window.OneSignalDeferred) {
+                    // เช็คว่านักเรียนเปิดผ่าน PWA (แอปที่ติดตั้งแล้ว) หรือไม่
+                    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+                    
+                    window.OneSignalDeferred.push(function(OneSignal) {
+                        // เช็คว่ารับการแจ้งเตือนไปแล้วหรือยัง
+                        const isSubscribed = OneSignal.User.PushSubscription.optedIn;
+                        
+                        if (isSubscribed) {
+                            // ถ้ารับแจ้งเตือนแล้ว = ซ่อนทั้งหมดเลย (เว็บจะดูสะอาดตา)
+                            pushContainer.style.display = 'none';
+                        } else {
+                            // ถ้ายังไม่รับการแจ้งเตือน = ให้แสดงกล่องรวม
+                            pushContainer.style.display = 'block';
+                            
+                            if (isStandalone && guideBox) {
+                                // ถ้า "ติดตั้งแอปแล้ว" แต่ "ยังไม่เปิดแจ้งเตือน" = ซ่อนแค่คู่มือ แต่โชว์ปุ่มกระดิ่งไว้
+                                guideBox.style.display = 'none'; 
+                            }
+                        }
+
+                        // ดักจับเมื่อนักเรียนกดตกลงปุ๊บ ให้ซ่อนกล่องทิ้งไปเลยแบบเรียลไทม์
+                        OneSignal.User.PushSubscription.addEventListener("change", function(evt) {
+                            if (evt.current.optedIn && pushContainer) {
+                                pushContainer.style.display = 'none';
+                            }
+                        });
+                    });
+                }
+            }, 100);
+            
+        }
+
+        function confirmStudentAction(sheetName, rowIndex, actionStr, btn) {
+            let msg = actionStr === 'ยืนยันสมัครต่อ' ? "คุณต้องการ 'ยืนยันสิทธิ์' เข้ารับการสัมภาษณ์ใช่หรือไม่?" : "คุณต้องการ 'สละสิทธิ์' การสมัครใช่หรือไม่? (ไม่สามารถยกเลิกได้)";
+            Swal.fire({ title: 'ยืนยันการทำรายการ', text: msg, icon: 'warning', showCancelButton: true, confirmButtonColor: actionStr === 'ยืนยันสมัครต่อ' ? '#16a34a' : '#dc2626', confirmButtonText: actionStr, cancelButtonText: 'ยกเลิก', customClass:{ confirmButton: 'rounded-xl', cancelButton: 'rounded-xl' } }).then((result) => {
+                if(result.isConfirmed) studentUpdateStatusAPI(sheetName, rowIndex, actionStr, btn);
+            });
+        }
+
+        async function studentUpdateStatusAPI(sheetName, rowIndex, newStatus, btn) {
+            if(btn) setBtnLoading(btn, 'กำลังบันทึก...');
+            try {
+                await apiCall({ action: "updateStatus", sheet: sheetName, rowIndex: rowIndex, status: newStatus });
+                if(btn) {
+                    resetBtnLoading(btn);
+                    Swal.fire({icon: 'success', title: 'อัปเดตสถานะเรียบร้อย', confirmButtonColor: '#6A1B9A'}).then(() => location.reload());
+                }
+            } catch (error) { 
+                if(btn) {
+                    resetBtnLoading(btn);
+                    Swal.fire('ผิดพลาด', 'ไม่สามารถเชื่อมต่อระบบได้', 'error'); 
+                }
+            }
+        }
+
+        function toggleFormMode() {
+            const role = document.getElementById('roleSelect').value;
+            document.getElementById('stepperNav').style.display = 'flex';
+            document.getElementById('fullFormSection').style.display = 'block';
+            
+            const partyInputText = document.getElementById('partyNameText');
+            const partySelectContainer = document.getElementById('committeePartyContainer');
+            const partyHelpText = document.getElementById('partyHelpText'); 
+
+            const qualSection = document.getElementById('qualificationSection');
+            const qualList = document.getElementById('qualList');
+
+            if (role === 'ประธานนักเรียน') {
+                partyInputText.style.display = 'block';
+                partySelectContainer.style.display = 'none';
+                if(partyHelpText) partyHelpText.style.display = 'none'; 
+
+                document.getElementById('presidentOnlyInfo').style.display = 'block';
+                document.getElementById('partyMembersSection').style.display = 'block';
+                
+                if(memberCounter === 1) addMemberRow(); 
+                
+                qualList.innerHTML = `
+                    <li class="flex items-start">${svgIconsHTML.check} <span>(1) เป็นนักเรียนโรงเรียนเมืองสุราษฎร์ธานีที่กำลังศึกษาในระดับชั้น ม.4</span></li>
+                    <li class="flex items-start">${svgIconsHTML.check} <span>(2) มีผลการเรียนเฉลี่ยสะสม ม.4 เทอม 1 <b class="text-gray-800">ไม่ต่ำกว่า 3.00</b> และผ่านคุณลักษณะอันพึงประสงค์</span></li>
+                    <li class="flex items-start">${svgIconsHTML.check} <span>(3) ลงสมัครในรูปแบบพรรค และมีตำแหน่งเป็นหัวหน้าพรรค</span></li>
+                    <li class="flex items-start">${svgIconsHTML.check} <span>(4) <b class="text-red-500">ไม่มีผลการเรียน 0, ร, มส, มผ</b> และไม่เคยถูกลงโทษทำทัณฑ์บน</span></li>
+                    <li class="flex items-start">${svgIconsHTML.check} <span>(5) ประพฤติเรียบร้อย ปฏิบัติตามกฎ มีจิตอาสา สละเวลาเพื่อส่วนรวม</span></li>
+                    <li class="flex items-start">${svgIconsHTML.check} <span>(6) ได้รับความยินยอมจากผู้ปกครอง ครูที่ปรึกษา ครูหัวหน้าระดับ และคณะกรรมการกลุ่มบริหารกิจการนักเรียน</span></li>
+                `;
+                qualSection.style.display = 'block';
+
+            } else {
+                partyInputText.style.display = 'none';
+                partySelectContainer.style.display = 'flex';
+                if(partyHelpText) partyHelpText.style.display = 'block'; 
+
+                document.getElementById('presidentOnlyInfo').style.display = 'none';
+                document.getElementById('partyMembersSection').style.display = 'none';
+                
+                qualList.innerHTML = `
+                    <li class="flex items-start">${svgIconsHTML.check} <span>(1) เป็นนักเรียนโรงเรียนเมืองสุราษฎร์ธานีที่กำลังศึกษาในระดับชั้น ม.4</span></li>
+                    <li class="flex items-start">${svgIconsHTML.check} <span>(2) มีผลการเรียนเฉลี่ยสะสม ม.4 เทอม 1 <b class="text-gray-800">ไม่ต่ำกว่า 2.50</b> และผ่านคุณลักษณะอันพึงประสงค์</span></li>
+                    <li class="flex items-start">${svgIconsHTML.check} <span>(3) สมัครเป็นพรรค โดยมีหัวหน้าพรรค (หรือลงอิสระ)</span></li>
+                    <li class="flex items-start">${svgIconsHTML.check} <span>(4) <b class="text-red-500">ไม่มีผลการเรียน 0, ร, มส, มผ</b> และไม่เคยถูกลงโทษทำทัณฑ์บน</span></li>
+                    <li class="flex items-start">${svgIconsHTML.check} <span>(5) ประพฤติเรียบร้อย ปฏิบัติตามกฎ มีจิตอาสา สละเวลาเพื่อส่วนรวม</span></li>
+                    <li class="flex items-start">${svgIconsHTML.check} <span>(6) ได้รับความยินยอมจากผู้ปกครอง ครูที่ปรึกษา ครูหัวหน้าระดับ และคณะกรรมการกลุ่มบริหารกิจการนักเรียน</span></li>
+                `;
+                qualSection.style.display = 'block';
+            }
+        }
+
+        function toggleIndependent() {
+            const isIndep = document.getElementById('isIndependent').checked;
+            const partySelect = document.getElementById('partyNameSelect');
+            if (isIndep) { 
+                partySelect.disabled = true; 
+                partySelect.classList.add('opacity-50');
+            } else { 
+                partySelect.disabled = false; 
+                partySelect.classList.remove('opacity-50');
+            }
+        }
+
+        function nextStep(step) {
+            const role = document.getElementById('roleSelect').value;
+            
+            if(step === 1) {
+                if(!role) return Swal.fire('ข้อมูลไม่ครบ', 'กรุณาเลือกตำแหน่งที่ต้องการสมัคร', 'warning');
+                
+                const photoFile = document.getElementById('applicantPhoto').files[0];
+                if(!photoFile) return Swal.fire('ข้อมูลไม่ครบ', 'กรุณาอัปโหลดรูปถ่ายผู้สมัคร', 'warning');
+                if (photoFile.size > 10 * 1024 * 1024) return Swal.fire('ไฟล์ใหญ่เกินไป', 'ขนาดเกิน 10 MB', 'warning');
+            }
+            
+            if(step === 2) {
+                if (role === 'ประธานนักเรียน') {
+                    if(!document.getElementById('partyNameText').value) return Swal.fire('ข้อมูลไม่ครบ', 'กรุณาระบุชื่อพรรค', 'warning');
+                    if(!document.getElementById('partySlogan').value) return Swal.fire('ข้อมูลไม่ครบ', 'กรุณาระบุสโลแกนพรรค', 'warning');
+                    if(!document.getElementById('partyPolicies').value) return Swal.fire('ข้อมูลไม่ครบ', 'กรุณาระบุนโยบายพรรค ไม่เกิน 25 บรรทัด', 'warning');
+                } else {
+                    const isIndep = document.getElementById('isIndependent').checked;
+                    if(!isIndep && !document.getElementById('partyNameSelect').value) {
+                         return Swal.fire('ข้อมูลไม่ครบ', 'กรุณาเลือกพรรค หรือ เลือกลงอิสระ', 'warning');
+                    }
+                }
+            }
+
+            document.getElementById('step' + step).style.display = 'none';
+            document.getElementById('step' + (step + 1)).style.display = 'block';
+            updateProgress(step + 1);
+            window.scrollTo({ top: document.getElementById('view-application').offsetTop - 50, behavior: 'smooth' });
+        }
+
+        function prevStep(step) {
+            document.getElementById('step' + step).style.display = 'none';
+            document.getElementById('step' + (step - 1)).style.display = 'block';
+            updateProgress(step - 1);
+            window.scrollTo({ top: document.getElementById('view-application').offsetTop - 50, behavior: 'smooth' });
+        }
+
+        function updateProgress(step) {
+            document.querySelectorAll('.step-indicator').forEach((el, index) => {
+                if(index < step) {
+                    el.classList.remove('bg-gray-200', 'text-gray-400');
+                    el.classList.add('bg-mst-purple', 'text-white');
+                } else {
+                    el.classList.remove('bg-mst-purple', 'text-white');
+                    el.classList.add('bg-gray-200', 'text-gray-400');
+                }
+            });
+            const progressBar = document.getElementById('progressBar');
+            if(progressBar) {
+                progressBar.style.width = step === 1 ? '33%' : step === 2 ? '66%' : '100%';
+            }
+        }
+
+        let memberCounter = 1;
+        function addMemberRow() {
+            if (memberCounter >= 30) return;
+            memberCounter++;
+            const container = document.getElementById('membersContainer');
+            const row = document.createElement('div');
+            row.className = 'grid grid-cols-12 gap-2 items-center bg-gray-50 p-2 rounded-xl border border-gray-200 shadow-sm member-row transition-all';
+            row.innerHTML = `
+                <div class="col-span-2 md:col-span-1 text-center font-bold text-gray-500 text-sm mt-1">${memberCounter}.</div>
+                <div class="col-span-10 md:col-span-3"><input type="text" class="input-clean text-center text-sm py-1.5 px-2 bg-white" placeholder="รหัส 5 หลัก" onkeyup="fetchStudentInfo(this)"></div>
+                <div class="col-span-7 md:col-span-5"><input type="text" class="input-clean bg-gray-100 text-sm py-1.5 px-2 memberName text-gray-600" placeholder="ชื่อ-สกุล" readonly></div>
+                <div class="col-span-3 md:col-span-2"><input type="text" class="input-clean bg-gray-100 text-center text-sm py-1.5 px-2 memberRoom text-gray-600" placeholder="ห้อง" readonly></div>
+                <div class="col-span-2 md:col-span-1 text-center"><button type="button" class="text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 w-8 h-8 rounded-lg flex items-center justify-center mx-auto transition-colors" onclick="this.parentElement.parentElement.remove(); memberCounter--; document.getElementById('addMemberBtn').style.display = 'flex';"><i class="fa-solid fa-trash-can"></i></button></div>
+            `;
+            container.appendChild(row);
+            
+            if (memberCounter >= 30) {
+                document.getElementById('addMemberBtn').style.display = 'none';
+            }
+        }
+
+        function fetchStudentInfo(input) {
+            const id = input.value.trim();
+            const row = input.parentElement.parentElement;
+            if(id.length >= 5 && onlineStudentDB[id]) {
+                row.querySelector('.memberName').value = onlineStudentDB[id].name;
+                row.querySelector('.memberRoom').value = onlineStudentDB[id].room;
+                input.classList.add('border-green-500', 'border-success', 'bg-green-50');
+            } else {
+                row.querySelector('.memberName').value = "";
+                row.querySelector('.memberRoom').value = "";
+                input.classList.remove('border-green-500', 'border-success', 'bg-green-50');
+            }
+        }
+
+        function getBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader(); 
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result); 
+                reader.onerror = error => reject(error);
+            });
+        }
+
+        document.getElementById('admissionForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const photoFile = document.getElementById('applicantPhoto').files[0];
+            const role = document.getElementById('roleSelect').value;
+            
+            if(role === 'ประธานนักเรียน' && document.querySelectorAll('.member-row input:not([readonly]):not(.border-success)').length > 0) {
+                Swal.fire('รหัสนักเรียนไม่ถูกต้อง', 'กรุณาตรวจสอบรหัสสมาชิกพรรคอีกครั้ง (พิมพ์ให้ถูกต้อง 5 หลัก)', 'error'); return;
+            }
+
+            const submitBtn = document.getElementById('submitAppBtn');
+            setBtnLoading(submitBtn, 'กำลังส่งข้อมูล...');
+            
+            let photoBase64Data = "";
+            if (photoFile) photoBase64Data = await getBase64(photoFile); 
+            
+            let membersList = [];
+            let finalPartyName = "";
+
+            if (role === 'ประธานนักเรียน') {
+                finalPartyName = document.getElementById('partyNameText').value;
+                document.querySelectorAll('.member-row').forEach(row => {
+                    const name = row.querySelector('.memberName').value;
+                    const room = row.querySelector('.memberRoom').value;
+                    if(name) membersList.push({ name: name, room: room });
+                });
+            } else {
+                if(document.getElementById('isIndependent').checked) {
+                    finalPartyName = "ผู้สมัครอิสระ";
+                } else {
+                    finalPartyName = document.getElementById('partyNameSelect').value;
+                }
+            }
+
+            const payload = {
+                action: "apply", 
+                email: currentUserFullEmail, // บรรทัดที่เพิ่ม: ส่งอีเมลไปบันทึกในชีท
+                studentId: document.getElementById('studentId').value, 
+                name: document.getElementById('studentName').value, 
+                room: document.getElementById('studentRoom').value.replace("ห้อง ", ""),
+                position: role, 
+                party: finalPartyName, 
+                slogan: document.getElementById('partySlogan').value, 
+                policies: document.getElementById('partyPolicies').value,
+                photoBase64: photoBase64Data, 
+                members: membersList
+            };
+
+            try {
+                const resData = await apiCall(payload);
+                if(resData.status === 'success') { 
+                    
+                    // สร้าง HTML เป็นลักษณะใบเสร็จรับเงิน
+                    let receiptHtml = `
+                    <div class="bg-white border-2 border-dashed border-gray-300 p-5 rounded-xl max-w-sm mx-auto text-left shadow-sm mt-2">
+                        <div class="text-center border-b border-gray-200 pb-3 mb-3">
+                            <img src="https://i.postimg.cc/yxjxZmRN/Logo_mstsc_(1)_(1).png" class="w-12 h-12 mx-auto mb-2 opacity-80">
+                            <h3 class="text-lg font-black text-mst-purple">รายละเอียดการสมัคร</h3>
+                            <p class="text-[10px] text-gray-500">MST STUDENT COUNCIL</p>
+                        </div>
+                        <div class="mb-2 text-sm flex justify-between"><span class="text-gray-500">ชื่อ-สกุล:</span> <span class="font-bold text-gray-800">${document.getElementById('studentName').value}</span></div>
+                        <div class="mb-2 text-sm flex justify-between"><span class="text-gray-500">ตำแหน่ง:</span> <span class="font-bold text-gray-800">${role}</span></div>
+                        <div class="mb-2 text-sm flex justify-between"><span class="text-gray-500">สังกัดพรรค:</span> <span class="font-bold text-gray-800 text-right w-40 truncate">${finalPartyName}</span></div>
+                        <div class="mt-4 pt-4 border-t border-gray-200 text-center">
+                            <p class="text-xs text-gray-500 mb-1">เลขที่ใบสมัคร</p>
+                            <div class="text-2xl font-black font-mono text-mst-purple tracking-widest bg-purple-50 py-2 rounded-lg border border-purple-100 shadow-inner">${resData.appNumber}</div>
+                        </div>
+                        <p class="text-xs text-red-500 font-bold text-center mt-4"><i class="fa-solid fa-camera mr-1"></i> โปรดบันทึกภาพหน้าจอนี้ไว้เป็นหลักฐาน</p>
+                    </div>`;
+
+                    Swal.fire({ 
+                        icon: 'success', 
+                        title: 'ส่งใบสมัครสำเร็จ!', 
+                        html: receiptHtml,
+                        confirmButtonColor: '#6A1B9A', 
+                        confirmButtonText: 'รับทราบ', 
+                        allowOutsideClick: false,
+                        customClass: { confirmButton: 'rounded-xl' }
+                    }).then(() => location.reload()); 
+                } else { 
+                    Swal.fire('ผิดพลาด', resData.message, 'error'); 
+                    resetBtnLoading(submitBtn);
+                }
+            } catch (error) { 
+                Swal.fire('ผิดพลาด', 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้', 'error'); 
+                resetBtnLoading(submitBtn);
+            }
+        });
+
+        function showPreparationInfo() {
+            Swal.fire({
+                title: '<strong class="text-mst-purple text-xl">สิ่งที่ต้องเตรียมในการสมัคร</strong>',
+                html: `
+                    <div class="text-left text-sm text-gray-700 space-y-3 mt-3">
+                        <div class="bg-gray-50 p-3 rounded-lg border border-gray-200">
+                            <p class="font-bold text-gray-800"><i class="fa-brands fa-google text-red-500 w-5"></i> 1. บัญชี Google โรงเรียน</p>
+                            <p class="text-xs mt-1 ml-6">ต้องใช้อีเมลที่ลงท้ายด้วย @mst.ac.th ในการล็อกอินเท่านั้น</p>
+                        </div>
+                        <div class="bg-gray-50 p-3 rounded-lg border border-gray-200">
+                            <p class="font-bold text-gray-800"><i class="fa-solid fa-image text-blue-500 w-5"></i> 2. ไฟล์รูปถ่ายหน้าตรง</p>
+                            <p class="text-xs mt-1 ml-6">รองรับเฉพาะไฟล์ .JPG หรือ .PNG ขนาดไฟล์รวมไม่เกิน 10MB</p>
+                        </div>
+                        <div class="bg-purple-50 p-3 rounded-lg border border-purple-200">
+                            <p class="font-bold text-purple-800"><i class="fa-solid fa-users text-purple-500 w-5"></i> 3. ข้อมูลพรรค (เฉพาะประธาน)</p>
+                            <p class="text-xs mt-1 ml-6 text-purple-700">เตรียมชื่อพรรค, สโลแกน, นโยบายหลัก และ <b>รหัสนักเรียน 5 หลัก</b> ของสมาชิกทุกคนในพรรค (พิมพ์รหัสแล้วระบบจะดึงชื่อให้อัตโนมัติ)</p>
+                        </div>
+                        <div class="bg-gray-50 p-3 rounded-lg border border-gray-200">
+                            <p class="font-bold text-gray-800"><i class="fa-solid fa-file-contract text-green-500 w-5"></i> 4. ตรวจสอบคุณสมบัติ</p>
+                            <p class="text-xs mt-1 ml-6">เช็คเกรดเฉลี่ย ม.4 เทอม 1 (ประธาน 3.00 ขึ้นไป, กรรมการ 2.50 ขึ้นไป) และต้องไม่มีผลการเรียน 0, ร, มส, มผ</p>
+                        </div>
+                    </div>
+                `,
+                confirmButtonColor: '#6A1B9A',
+                confirmButtonText: 'รับทราบ',
+                customClass: { confirmButton: 'rounded-xl font-bold' }
+            });
+        }
+
+        function showStudentGuide() {
+            Swal.fire({
+                title: '<strong class="text-blue-700 text-xl">คู่มือการใช้งานระบบนักเรียน</strong>',
+                html: `
+                    <div class="text-left text-sm text-gray-700 space-y-3 mt-3">
+                        <p><b>1. เข้าสู่ระบบ:</b> ใช้อีเมลโรงเรียนเพื่อเข้าสู่ระบบตามช่วงเวลาที่กำหนด</p>
+                        <p><b>2. กรอกข้อมูล:</b> เลือกตำแหน่ง (ประธาน/กรรมการ) ระบบจะเปลี่ยนหน้าฟอร์มให้อัตโนมัติ กรอกข้อมูลให้ครบถ้วนและแนบรูปถ่าย</p>
+                        <p><b>3. ส่งใบสมัคร:</b> เมื่อกดยืนยัน ระบบจะออก "เลขที่ใบสมัคร" ให้บันทึกภาพหน้าจอไว้เป็นหลักฐาน</p>
+                        <p><b>4. ติดตามสถานะ:</b> สามารถล็อกอินเข้ามาเช็คสถานะได้ตลอดเวลา หลังกรรมการพิมพ์ใบสมัคร ระบบจะเปลี่ยนสถานะเป็น <b>"พิมพ์ใบสมัครแล้ว"</b> ให้มารับใบสมัครที่ห้องสภานักเรียน หลังส่งเอกสารจะมีการอัพเดทสถานะอยู่เสมอ ใบสมัครที่ถูกต้องจะแสดงสถานะ <b>"ส่งใบสมัครแล้ว"</b></p>
+                        <p class="text-red-500 font-bold">5. การยืนยันสิทธิ์: เมื่อถึงเวลาที่ประกาศ ให้เข้ามาปุ่มกด "ยืนยันสมัครต่อ" เพื่อรับบัตรคิวเข้าสัมภาษณ์ หากไม่กดในเวลาที่กำหนด จะถือว่าสละสิทธิ์ทันที</p>
+                        <p><b>6. รับผลคัดเลือก:</b> สามารถเช็คผลการคัดเลือกได้ในระบบตามวันเวลาที่กำหนด</p>
+                    </div>
+                `,
+                confirmButtonColor: '#1d4ed8',
+                confirmButtonText: 'เข้าใจแล้ว',
+                customClass: { confirmButton: 'rounded-xl font-bold' }
+            });
+        }
+    </script>
+
+    <script>
+    // สคริปต์ลบปุ่ม Google ทิ้งเมื่อเปิดผ่าน In-App Browser (ใช้ได้โดยไม่ต้องมี jQuery)
+    document.addEventListener("DOMContentLoaded", function() {
+        var isWebView = /Line|Instagram|FBAN|FBAV/i.test(navigator.userAgent);
+        
+        if (isWebView) {
+            // 1. ฝัง CSS ซ่อนขั้นเด็ดขาด ไม่ให้โชว์ iframe ขึ้นมาได้
+            var style = document.createElement('style');
+            style.innerHTML = '.g_id_signin, #g_id_onload, #google-login-wrapper { display: none !important; opacity: 0 !important; pointer-events: none !important; visibility: hidden !important; width: 0 !important; height: 0 !important; margin: 0 !important; padding: 0 !important; }';
+            document.head.appendChild(style);
+            
+            // 2. ลบออกจาก DOM ถอนรากถอนโคน
+            var wrapper = document.getElementById('google-login-wrapper');
+            if (wrapper) wrapper.remove();
+            
+            // 3. แสดงหน้าต่างแจ้งเตือน
+            var warning = document.getElementById('webview-warning');
+            if (warning) {
+                warning.classList.remove('hidden');
+                warning.classList.add('block', 'fade-in');
+            }
+        }
+    });
+</script>
+</body>
+</html>

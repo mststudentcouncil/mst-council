@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<script>
+    // ฟังก์ชันเด้งหน้าต่างถามก่อนพาไปหน้า LINE
+window.confirmContactSupport = function() {
+    Swal.fire({
+        title: 'พบปัญหาในการใช้งาน?',
+        text: 'ระบบจะนำคุณไปยังแอปพลิเคชัน LINE เพื่อพูดคุยปัญหากับผู้ดูแลระบบ ต้องการดำเนินการต่อหรือไม่?',
+        icon: 'info',
+        showCancelButton: true,
+        confirmButtonColor: '#7e22ce', // สีม่วงให้เข้ากับธีมเว็บไซต์
+        cancelButtonColor: '#d1d5db',
+        confirmButtonText: 'ใช่, ไปที่ LINE',
+        cancelButtonText: 'ยกเลิก',
+        customClass: { popup: 'rounded-[2rem]' } // ทำขอบโค้งมนให้สวยงามเข้ากับเว็บ
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // ถ้ากดยืนยัน จะเปิดแท็บใหม่ไปที่ LINE ทันที
+            window.open('https://lin.ee/Os28nIs', '_blank');
+        }
+    });
+};
+</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>e-Voting - ระบบลงคะแนนอิเล็กทรอนิกส์</title>
+    <link rel="icon" type="image/webp" href="./logo.webp">
+    <link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    
+    <script>
+        tailwind.config = { 
+            theme: {
+                extend: { 
+                    fontFamily: { sans: ['Anuphan', 'sans-serif'] },
+                    colors: { primary: '#581c87', secondary: '#7e22ce' }
+                } 
+            } 
+        }
+    </script>
+    <style>
+        body { background: radial-gradient(circle at top right, #f3e8ff, #ffffff); min-height: 100vh; }
+        .glass-card { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.3); }
+        .animate-float { animation: float 6s ease-in-out infinite; }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        .fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="text-gray-800 antialiased">
+<div id="auth-overlay" class="fixed inset-0 bg-white z-[9999] hidden flex-col items-center justify-center transition-opacity duration-300">
+        <div id="auth-overlay-content" class="flex flex-col items-center text-center px-6 w-full max-w-sm fade-in">
+            </div>
+    </div>
+    <div class="max-w-4xl mx-auto px-4 pt-12 pb-20 flex flex-col items-center text-center">
+        <div class="animate-float mb-6">
+    <img src="./logo.webp" alt="Logo" class="w-24 h-24 md:w-32 md:h-32 rounded-full shadow-2xl object-cover bg-white">
+</div>
+        
+        <h1 class="text-3xl md:text-5xl font-black text-primary tracking-tight mb-4">
+            e-Voting
+        </h1>
+        <p class="text-lg md:text-xl text-gray-500 font-medium mb-10 max-w-lg">
+            ระบบลงคะแนนอิเล็กทรอนิกส์<br>โรงเรียนเมืองสุราษฎร์ธานี
+        </p>
+
+        <div class="glass-card w-full max-w-md p-8 rounded-[2.5rem] shadow-2xl mb-16">
+            <h2 class="text-xl font-bold mb-6">ยินดีต้อนรับ</h2>
+
+<button id="loginBtn" class="group w-full bg-white border-2 border-gray-100 hover:border-primary text-purple-900 font-bold py-4 px-6 rounded-2xl flex items-center justify-center gap-4 transition-all duration-300 shadow-sm hover:shadow-xl active:scale-95">
+    <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center text-purple-700 shrink-0 shadow-inner group-hover:scale-110 transition-transform">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
+        </svg>
+    </div>
+    <span class="text-md">Login with MST Passport</span>
+</button>
+            
+<p class="mt-6 text-xs text-gray-400">
+    * ใช้รหัสประจำตัวในการเข้าสู่ระบบผ่านระบบศูนย์กลาง
+</p>
+
+<button onclick="loginAsAdmin()" class="mt-4 text-xs font-bold text-gray-400 hover:text-purple-600 transition-colors flex items-center justify-center gap-1.5 mx-auto w-full">
+    <svg class="w-4 h-4" viewBox="0 0 24 24"><path fill="currentColor" d="M21.35,11.1H12.18V13.83H18.69C18.36,17.64 15.19,19.27 12.19,19.27C8.36,19.27 5,16.25 5,12C5,7.9 8.2,4.73 12.2,4.73C15.29,4.73 17.1,6.7 17.1,6.7L19,4.72C19,4.72 16.56,2 12.1,2C6.42,2 2.03,6.8 2.03,12C2.03,17.05 6.16,22 12.25,22C17.6,22 21.5,18.33 21.5,12.91C21.5,11.76 21.35,11.1 21.35,11.1V11.1Z"/></svg>
+    สำหรับผู้ดูแลระบบ
+</button>
+        </div>
+
+        <div class="w-full text-left">
+            <h3 class="text-2xl font-black text-primary mb-8 flex items-center gap-3">
+                <span class="w-8 h-8 bg-primary text-white rounded-lg flex items-center justify-center text-sm">?</span>
+                วิธีการใช้งานระบบ
+            </h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="glass-card p-6 rounded-3xl relative overflow-hidden group hover:bg-white transition-colors">
+                    <div class="text-4xl font-black text-purple-100 absolute -right-0 -top-0 group-hover:text-purple-200 transition-colors">01</div>
+                    <div class="relative z-10">
+                        <div class="w-12 h-12 bg-purple-100 text-primary rounded-2xl flex items-center justify-center mb-4">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                        </div>
+                        <h4 class="font-bold mb-2">เข้าสู่ระบบ</h4>
+                        <p class="text-sm text-gray-500">เข้าสู่ระบบด้วย MST Passport เพื่อตรวจสอบสิทธิ์การลงคะแนนของคุณ</p>
+                    </div>
+                </div>
+
+                <div class="glass-card p-6 rounded-3xl relative overflow-hidden group hover:bg-white transition-colors">
+                    <div class="text-4xl font-black text-purple-100 absolute -right-0 -top-0 group-hover:text-purple-200 transition-colors">02</div>
+                    <div class="relative z-10">
+                        <div class="w-12 h-12 bg-purple-100 text-primary rounded-2xl flex items-center justify-center mb-4">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        </div>
+                        <h4 class="font-bold mb-2">เลือกรายการ</h4>
+                        <p class="text-sm text-gray-500">เลือกหัวข้อที่ต้องการลงคะแนน และเข้าสู่คูหาเสมือนจริง</p>
+                    </div>
+                </div>
+
+                <div class="glass-card p-6 rounded-3xl relative overflow-hidden group hover:bg-white transition-colors">
+                    <div class="text-4xl font-black text-purple-100 absolute -right-0 -top-0 group-hover:text-purple-200 transition-colors">03</div>
+                    <div class="relative z-10">
+                        <div class="w-12 h-12 bg-purple-100 text-primary rounded-2xl flex items-center justify-center mb-4">
+            
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+            </svg>
+            </div>
+                        <h4 class="font-bold mb-2">ลงคะแนนและรับใบเสร็จ</h4>
+                        <p class="text-sm text-gray-500">เลือกเบอร์ที่ต้องการ ยืนยันสิทธิ์ และรับใบเสร็จยืนยันแบบดิจิทัล</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="text-center py-10 text-gray-400 text-xs">
+        © 2026 MSTSC. All Rights Reserved.
+    </footer>
+
+    <script type="module" src="auth.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <div class="fixed bottom-6 right-6 z-[9999]">
+    <button onclick="confirmContactSupport()" class="flex items-center gap-2 bg-white/90 backdrop-blur-sm border border-gray-200 shadow-lg rounded-full p-3 text-gray-400 hover:text-purple-600 hover:border-purple-300 hover:shadow-xl transition-all duration-300 group outline-none active:scale-95">
+        <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
+        <span class="max-w-0 overflow-hidden group-hover:max-w-[200px] transition-all duration-500 ease-in-out whitespace-nowrap text-xs font-bold text-purple-600">
+            แจ้งปัญหาการใช้งาน
+        </span>
+    </button>
+</div>
+</body>
+</html>
