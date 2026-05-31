@@ -45,7 +45,9 @@ if (loginBtn) {
     loginBtn.addEventListener("click", () => {
         showFullScreenLoading("กำลังพาไปยังระบบ MST Passport...");
         const currentUrl = window.location.href.split('#')[0];
-        window.location.href = `https://ssomst-passport.pages.dev?redirect=${encodeURIComponent(currentUrl)}`;
+    
+        // เปลี่ยน URL ให้วิ่งเข้าโฟลเดอร์ Passport โดยตรง
+        window.location.href = `/Passport/index.html?redirect=${encodeURIComponent(currentUrl)}`;
     });
 }
 
