@@ -255,22 +255,30 @@
                 </div>
             </section>
 
-            <section id="verifyPage" class="hidden fade-in flex-1 flex flex-col absolute inset-0 z-50 bg-[#f3e5f5]">
-                <div class="flex-1 flex flex-col justify-center p-4">
-                    <div class="glass-heavy p-8 rounded-[2.5rem] w-full max-w-sm mx-auto shadow-2xl border border-white text-center">
-                        <div class="w-16 h-16 bg-purple-50 text-mstPurple rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner border border-purple-100"><i class="fas fa-shield-alt text-2xl"></i></div>
-                        <h2 class="text-xl font-black text-gray-900 mb-6">เข้าสู่ระบบสตาฟ</h2>
-                        <form id="verifyForm" class="space-y-4">
-                            <input type="tel" id="v_std_id" placeholder="รหัสนักเรียน 5 หลัก" required class="w-full p-4 rounded-2xl bg-white outline-none font-bold text-center tracking-[0.2em] shadow-sm border border-gray-100 focus:border-mstPurple" maxlength="5">
-                            <input type="tel" id="v_id_card" placeholder="เลขบัตรประชาชน 13 หลัก" required class="w-full p-4 rounded-2xl bg-white outline-none font-bold text-center tracking-[0.1em] shadow-sm border border-gray-100 focus:border-mstPurple" maxlength="13">
-                        </form>
+            <section id="verifyPage" class="hidden fade-in flex-1 flex flex-col absolute inset-0 z-50 bg-gradient-to-br from-[#f3e5f5] to-[#fffde7]">
+    <div class="flex-1 flex flex-col justify-center items-center p-4">
+        <div class="glass-heavy p-8 rounded-[2.5rem] w-full max-w-md mx-auto shadow-2xl border border-white relative overflow-hidden">
+            <button onclick="nav('studentDashboard')" class="absolute top-5 right-5 text-gray-400 hover:text-red-500 w-8 h-8 flex items-center justify-center bg-gray-50 rounded-full shadow-sm transition-colors border border-gray-100">
+                <i class="fas fa-times"></i>
+            </button>
+            
+            <div class="text-center mb-6 mt-2">
+                <img src="https://i.ibb.co/GQYCbXrc/logo.webp" class="w-20 h-20 mx-auto mb-4 drop-shadow-md object-contain" alt="MSTSC Logo">
+                <h2 class="text-2xl font-black text-mstPurple tracking-tight">เข้าสู่ระบบสตาฟ</h2>
+                <p class="text-xs text-gray-500 mt-2 font-bold">เพื่อสแกน Digital ID ผู้เข้าร่วมกิจกรรม</p>
+            </div>
+            
+            <div class="space-y-4 text-center mt-6 border-t border-gray-100 pt-6">
+                <button onclick="loginWithPassportStaff()" class="group w-full bg-white border-2 border-gray-100 hover:border-mstPurple text-purple-900 font-bold py-4 px-6 rounded-2xl flex items-center justify-center gap-4 transition-all duration-300 shadow-sm hover:shadow-xl active:scale-95">
+                    <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center text-purple-700 shrink-0 shadow-inner group-hover:scale-110 transition-transform">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path></svg>
                     </div>
-                </div>
-                <div class="shrink-0 p-4 pb-safe glass border-t border-white flex gap-3 shadow-[0_-10px_20px_rgba(0,0,0,0.05)] rounded-t-[2rem]">
-                    <button onclick="nav('studentDashboard')" class="w-1/3 bg-white text-gray-500 font-bold py-4 rounded-2xl shadow-sm border border-gray-100">ยกเลิก</button>
-                    <button onclick="$('#verifyForm').submit()" class="w-2/3 bg-gray-900 text-mstYellow py-4 rounded-2xl font-black shadow-lg text-lg">เข้าสู่ระบบ</button>
-                </div>
-            </section>
+                    <span class="text-md">Login with MST Passport</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</section>
 
             <section id="adminDashboard" class="hidden fade-in flex-1 flex flex-col absolute inset-0 z-40 bg-[#f3e5f5]">
                 <div class="flex-1 overflow-y-auto no-scrollbar p-4 flex flex-col pb-safe relative">
@@ -351,9 +359,17 @@
 
         const PASSPORT_SSO_URL = "https://mstsc.pages.dev/passport"; // แก้ลิงก์นี้ถ้าเว็บพาสปอร์ตคุณเป็นชื่ออื่น
 
-// ฟังก์ชันส่งผู้ใช้ไปหน้าล็อกอินพาสปอร์ต
+// 1. เพิ่ม/อัปเดต ฟังก์ชันสำหรับเรียกใช้งาน Passport
 function redirectToPassport() {
+    sessionStorage.setItem('passport_intent', 'student_link'); // ระบุว่าเป็นการผูกบัญชีนักเรียน
     setLoader('กำลังเปลี่ยนหน้าไปยัง Passport...');
+    const currentUrl = window.location.origin + window.location.pathname;
+    window.location.href = `${PASSPORT_SSO_URL}?redirect=${encodeURIComponent(currentUrl)}`;
+}
+
+function loginWithPassportStaff() {
+    sessionStorage.setItem('passport_intent', 'staff_login'); // ระบุว่าเป็นการเข้าสู่ระบบสตาฟ
+    setLoader('กำลังไปยัง Passport...');
     const currentUrl = window.location.origin + window.location.pathname;
     window.location.href = `${PASSPORT_SSO_URL}?redirect=${encodeURIComponent(currentUrl)}`;
 }
@@ -375,7 +391,8 @@ function getAuthPayload() {
     return null;
 }
 
-        async function main() {
+        // 2. วางทับฟังก์ชัน main() เดิม
+async function main() {
     try {
         await liff.init({ liffId: LIFF_ID });
         if (!liff.isLoggedIn()) { 
@@ -383,35 +400,37 @@ function getAuthPayload() {
             nav('loginPage'); 
             $('#mainFooterButtons').addClass('hidden'); 
         } else { 
-            // 1. ดึงข้อมูล LINE ปกติ
             liffProfile = await liff.getProfile(); 
             $('#profileImage').attr('src', liffProfile.pictureUrl); 
             
-            // 2. เช็กว่าเพิ่งเด้งกลับมาจาก Passport หรือไม่?
             const passportData = getAuthPayload();
             
             if (passportData) {
-                // ถ้ามีข้อมูลพาสปอร์ต ให้ล้าง URL ให้สะอาด
                 history.replaceState(null, null, ' '); 
                 
-                // จัดเตรียมข้อมูลเข้าตัวแปร tempFoundStudent เพื่อรอผูกบัญชี
-                tempFoundStudent = { 
-                    id: passportData.id, 
-                    number: "-", // ฐานข้อมูลพาสปอร์ตไม่มีเลขที่ ใส่ - ไว้ก่อน
-                    name: (passportData.prefix || "") + (passportData.fname || "") + " " + (passportData.lname || ""), 
-                    className: (passportData.level || "-") + "/" + (passportData.room || "-")
-                };
+                // เช็คว่าเด้งกลับมาเพื่อทำอะไร?
+                const intent = sessionStorage.getItem('passport_intent');
+                sessionStorage.removeItem('passport_intent'); // เคลียร์ค่าทิ้ง
                 
-                // นำข้อมูลไปแปะแสดงผลในหน้า Confirm
-                $('#fs_id').text(tempFoundStudent.id); 
-                $('#fs_name').text(tempFoundStudent.name.trim()); 
-                $('#fs_class').text(tempFoundStudent.className); 
-                $('#fs_num').text(tempFoundStudent.number); 
-                
-                hideLoader();
-                nav('foundStudentPage'); // เปิดหน้ารอกดยืนยันผูกบัญชี
+                if (intent === 'staff_login') {
+                    // หากเป็นการล็อกอินสตาฟ
+                    verifyStaffWithPassport(passportData.id);
+                } else {
+                    // หากเป็นการผูกบัญชีนักเรียนทั่วไป (เหมือนเดิม)
+                    tempFoundStudent = { 
+                        id: passportData.id, 
+                        number: "-", 
+                        name: (passportData.prefix || "") + (passportData.fname || "") + " " + (passportData.lname || ""), 
+                        className: (passportData.level || "-") + "/" + (passportData.room || "-")
+                    };
+                    $('#fs_id').text(tempFoundStudent.id); 
+                    $('#fs_name').text(tempFoundStudent.name.trim()); 
+                    $('#fs_class').text(tempFoundStudent.className); 
+                    $('#fs_num').text(tempFoundStudent.number); 
+                    hideLoader();
+                    nav('foundStudentPage'); 
+                }
             } else {
-                // ถ้าไม่ได้เด้งมาจากพาสปอร์ต ก็แปลว่าเข้าเว็บมาปกติ ให้เช็กสถานะเลย
                 checkUserStatus(); 
             }
         }
@@ -702,14 +721,34 @@ function getAuthPayload() {
             else { $('#outRadioContainer').addClass('hidden'); $('input[name="scanType"][value="IN"]').prop('checked', true); }
         });
 
-        $('#verifyForm').on('submit', async function(e) {
-            e.preventDefault(); setLoader('ซิงค์...');
-            try {
-                const res = await fetch(GAS_URL, { redirect: "follow", method: 'POST', headers: {"Content-Type": "text/plain;charset=utf-8"}, body: JSON.stringify({ action: 'verifyAdmin', uid: liffProfile.userId, std_id: $('#v_std_id').val(), id_card: $('#v_id_card').val() }) }); const data = await res.json();
-                if (data.status === 'success') { adminName = data.name; Swal.fire('สำเร็จ', 'ยืนยันตัวตนผ่าน', 'success').then(() => { checkAdminAuth(); }); } 
-                else { Swal.fire('ไม่ผ่าน', 'ข้อมูลไม่ตรงกับระบบ', 'error'); }
-            } catch (e) {} hideLoader();
+        // 3. ฟังก์ชันตรวจสอบสิทธิ์สตาฟที่ดัดแปลงใหม่ (แทนโค้ด $('#verifyForm').on('submit') เดิม)
+async function verifyStaffWithPassport(stdId) {
+    setLoader('ตรวจสอบสิทธิ์สตาฟ...');
+    try {
+        const res = await fetch(GAS_URL, { 
+            redirect: "follow", 
+            method: 'POST', 
+            headers: {"Content-Type": "text/plain;charset=utf-8"}, 
+            body: JSON.stringify({ 
+                action: 'verifyAdmin', 
+                uid: liffProfile.userId, 
+                std_id: stdId, 
+                id_card: "PASSPORT_SSO" // ส่งรหัสหลอกไปให้ GAS ผ่านเงื่อนไข
+            }) 
         });
+        const data = await res.json();
+        
+        if (data.status === 'success') { 
+            adminName = data.name; 
+            Swal.fire('สำเร็จ', 'ยืนยันตัวตนสตาฟผ่าน', 'success').then(() => { checkAdminAuth(); }); 
+        } else { 
+            Swal.fire('ไม่มีสิทธิ์', 'คุณไม่มีชื่อในระบบสภานักเรียน', 'error').then(() => { nav('studentDashboard'); });
+        }
+    } catch (e) {
+        Swal.fire('Error', 'ตรวจสอบสิทธิ์ไม่สำเร็จ', 'error').then(() => { nav('studentDashboard'); });
+    }
+    hideLoader();
+}
 
         function exitAdmin() { stopScan(); nav('studentDashboard'); }
 

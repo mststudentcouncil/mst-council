@@ -11,6 +11,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -29,18 +30,29 @@
 
     <div class="flex-1 flex flex-col overflow-hidden relative" id="contentArea">
         
-        <section id="loginPage" class="hidden fade-in flex-1 flex flex-col items-center justify-center p-6">
-            <div class="glass-heavy p-8 rounded-[2.5rem] shadow-2xl text-center w-full max-w-md mx-auto">
-                <img src="https://i.ibb.co/GQYCbXrc/logo.webp" class="w-24 h-24 mx-auto mb-4 drop-shadow-xl">
-                <h2 class="text-3xl font-black text-mstPurple mb-1 tracking-tight">Master Admin</h2>
-                <p class="text-xs font-bold text-gray-500 mb-8 uppercase tracking-widest text-center">Student Council</p>
-                <form id="adminLoginForm" class="space-y-4">
-                    <input type="tel" id="adminStdId" placeholder="รหัสนักเรียน 5 หลัก" required class="w-full p-4 rounded-2xl border border-transparent bg-gray-50 text-center font-black tracking-widest outline-none focus:border-mstPurple shadow-inner focus:bg-white" maxlength="5">
-                    <input type="tel" id="adminIdCard" placeholder="เลขบัตรประชาชน 13 หลัก" required class="w-full p-4 rounded-2xl border border-transparent bg-gray-50 text-center font-black tracking-widest outline-none focus:border-mstPurple shadow-inner focus:bg-white" maxlength="13">
-                    <button type="submit" class="w-full bg-gray-900 text-yellow-400 py-4 rounded-2xl font-black shadow-lg hover:bg-black transition-colors mt-2 text-lg">เข้าสู่ระบบการจัดการ</button>
-                </form>
-            </div>
-        </section>
+        <section id="loginPage" class="hidden fade-in flex-1 flex flex-col items-center justify-center p-4">
+    <div class="glass-heavy p-8 rounded-[2.5rem] shadow-2xl text-center w-full max-w-md mx-auto relative overflow-hidden border border-white">
+        
+        <div class="text-center mb-6 mt-2">
+            <img src="https://i.ibb.co/GQYCbXrc/logo.webp" class="w-20 h-20 mx-auto mb-4 drop-shadow-md object-contain" alt="MSTSC Logo">
+            <h2 class="text-3xl font-black text-mstPurple mb-1 tracking-tight">Master Admin</h2>
+            <p class="text-xs font-bold text-gray-500 uppercase tracking-widest text-center">Digital ID System</p>
+        </div>
+        
+        <div class="space-y-4 text-center mt-8 border-t border-gray-100 pt-6">
+            <button onclick="loginWithPassportMasterAdmin()" class="group w-full bg-white border-2 border-gray-100 hover:border-mstPurple text-purple-900 font-bold py-4 px-6 rounded-2xl flex items-center justify-center gap-4 transition-all duration-300 shadow-sm hover:shadow-xl active:scale-95">
+                <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center text-purple-700 shrink-0 shadow-inner group-hover:scale-110 transition-transform">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path></svg>
+                </div>
+                <span class="text-md">Login with MST Passport</span>
+            </button>
+            <p class="mt-4 text-xs text-red-500 font-medium bg-red-50 p-2 rounded-lg border border-red-100">
+                <i class="fas fa-lock mr-1"></i> สงวนสิทธิ์เฉพาะคณะกรรมการสภานักเรียนเท่านั้น
+            </p>
+        </div>
+        
+    </div>
+</section>
 
         <section id="mainDashboard" class="hidden fade-in flex-1 flex flex-col overflow-y-auto no-scrollbar p-6">
             <div class="max-w-6xl mx-auto w-full space-y-6 pb-10">
@@ -109,7 +121,7 @@
                             <div class="w-16 h-16 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center mx-auto mb-4 relative z-10"><i class="fas fa-users text-2xl"></i></div>
                             <h2 class="text-lg font-black mb-1 relative z-10">ฐานข้อมูลนักเรียน</h2>
                             <p class="text-[10px] text-gray-500 mb-5 font-bold uppercase tracking-widest relative z-10">ผู้ลงทะเบียน Digital ID</p>
-                            <div id="userStats" class="text-center font-black text-5xl text-mstPurple bg-white py-6 rounded-3xl border border-gray-100 shadow-inner mb-4 flex flex-col items-center justify-center relative z-10"><span class="animate-pulse">0</span><span class="text-sm text-gray-400 font-bold mt-1">คนในระบบ</span></div>
+                            <div id="userStats" class="text-center font-black text-5xl text-mstPurple bg-white py-6 rounded-3xl border border-gray-100 shadow-inner mb-4 flex flex-col items-center justify-center relative z-10"><span class="animate-pulse">0</span><span class="text-sm text-gray-400 font-bold mt-1">นักเรียนในระบบ</span></div>
                             <div class="grid grid-cols-2 gap-2 relative z-10">
                                 <button onclick="nav('usersPage')" class="bg-blue-50 text-blue-600 font-bold py-3 rounded-xl hover:bg-blue-100 transition-colors shadow-sm text-xs"><i class="fas fa-list"></i> ดูรายชื่อ</button>
                                 <button onclick="triggerAutoSync()" class="bg-purple-50 text-mstPurple font-bold py-3 rounded-xl hover:bg-purple-100 transition-colors shadow-sm text-xs"><i class="fas fa-sync-alt"></i> ซิงก์ข้อมูล ร.ร.</button>
@@ -149,7 +161,58 @@
         
         let map, marker, circle;
         
-        $(document).ready(function() { if(sessionStorage.getItem("adminName")) loadDashboard(); else nav('loginPage'); });
+        // ฟังก์ชันเรียกหน้า Passport
+function loginWithPassportMasterAdmin() {
+    const currentUrl = window.location.origin + window.location.pathname;
+    window.location.href = `https://mstsc.pages.dev/passport?redirect=${encodeURIComponent(currentUrl)}`;
+}
+
+// เช็คสถานะเริ่มต้นและดักจับข้อมูลจากพาสปอร์ต
+$(document).ready(function() { 
+    if (window.location.hash.includes('#auth=')) {
+        handlePassportAuth();
+    } else if(sessionStorage.getItem("adminName")) {
+        loadDashboard(); 
+    } else {
+        nav('loginPage'); 
+    }
+});
+
+// ฟังก์ชันถอดรหัสและยืนยันตัวตนแอดมิน
+async function handlePassportAuth() {
+    Swal.fire({ title: 'กำลังตรวจสอบสิทธิ์ Admin...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+    try {
+        const payload = window.location.hash.replace('#auth=', '');
+        const decrypted = CryptoJS.AES.decrypt(decodeURIComponent(payload), "MST_SECRET_KEY_2026").toString(CryptoJS.enc.Utf8);
+        const userData = JSON.parse(decrypted);
+        const stdId = userData.id;
+        
+        history.replaceState(null, null, ' '); // ล้าง URL
+        
+        const res = await fetch(GAS_URL, { 
+            redirect: "follow", 
+            method: 'POST', 
+            headers: {"Content-Type": "text/plain;charset=utf-8"}, 
+            body: JSON.stringify({ 
+                action: 'verifyAdmin', 
+                uid: "ADMIN_DASHBOARD", 
+                std_id: stdId, 
+                id_card: "PASSPORT_SSO" 
+            }) 
+        });
+        const data = await res.json();
+        
+        if(data.status === 'success') { 
+            sessionStorage.setItem("adminName", data.name); 
+            Swal.close(); 
+            loadDashboard(); 
+        } else { 
+            Swal.fire('ไม่มีสิทธิ์', 'คุณไม่มีสิทธิ์ในการเข้าถึงระบบจัดการหลัก', 'error').then(() => nav('loginPage')); 
+        }
+    } catch(err) { 
+        Swal.fire('Error', 'เกิดข้อผิดพลาดในการยืนยันตัวตน', 'error').then(() => nav('loginPage')); 
+    }
+}
 
         function nav(pageId) { 
             $('#contentArea > section').addClass('hidden'); $('#' + pageId).removeClass('hidden'); 
@@ -197,20 +260,10 @@
             } else { Swal.fire('ผิดพลาด', 'อุปกรณ์นี้ไม่รองรับระบบ GPS', 'error'); }
         }
 
-        $('#adminLoginForm').on('submit', async function(e) {
-            e.preventDefault(); Swal.fire({ title: 'กำลังตรวจสอบ...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-            try {
-                const res = await fetch(GAS_URL, { redirect: "follow", method: 'POST', headers: {"Content-Type": "text/plain;charset=utf-8"}, body: JSON.stringify({ action: 'verifyAdmin', uid: "ADMIN_DASHBOARD", std_id: $('#adminStdId').val(), id_card: $('#adminIdCard').val() }) });
-                const data = await res.json();
-                if(data.status === 'success') { sessionStorage.setItem("adminName", data.name); Swal.close(); loadDashboard(); } 
-                else { Swal.fire('ผิดพลาด', 'ข้อมูลไม่ถูกต้อง หรือคุณไม่มีสิทธิ์', 'error'); }
-            } catch(err) { Swal.fire('Error', 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์', 'error'); }
-        });
-
         function loadDashboard() {
             nav('mainDashboard'); $('#adminNameShow').text(sessionStorage.getItem("adminName"));
             fetchEvents();
-            fetch(`${GAS_URL}?action=getAllUsers`, { redirect: "follow" }).then(res => res.json()).then(result => { $('#userStats').html(`${result.data.length} <span class="text-sm text-gray-400 font-bold mt-1">คนในระบบ</span>`); }).catch(e => {});
+            fetch(`${GAS_URL}?action=getAllUsers`, { redirect: "follow" }).then(res => res.json()).then(result => { $('#userStats').html(`${result.data.length} <span class="text-sm text-gray-400 font-bold mt-1">นักเรียนในระบบ</span>`); }).catch(e => {});
         }
 
         function logoutAdmin() { sessionStorage.removeItem("adminName"); location.reload(); }
@@ -285,7 +338,7 @@
                 // 1. ดึงข้อมูล User จาก GAS ก่อน
                 const resGas = await fetch(`${GAS_URL}?action=getAllUsers`, { redirect: "follow" }); 
                 const gasUsers = (await resGas.json()).data;
-                if(gasUsers.length === 0) return Swal.fire('แจ้งเตือน', 'ยังไม่มีคนในระบบให้ซิงก์', 'info');
+                if(gasUsers.length === 0) return Swal.fire('แจ้งเตือน', 'ยังไม่มีนักเรียนในระบบให้ซิงก์', 'info');
 
                 // 2. ดึงข้อมูล Excel ผ่าน Proxy
                 const webResponse = await fetch(`https://mst-proxy.studentcouncil-f38.workers.dev/?url=${encodeURIComponent("http://www.mst.ac.th/index.php")}`);
