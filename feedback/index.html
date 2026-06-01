@@ -32,6 +32,7 @@
 
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 
     <style>
         body { font-family: 'Anuphan', sans-serif; background: linear-gradient(135deg, #f3e5f5 0%, #fffde7 100%); min-height: 100vh; }
@@ -304,22 +305,18 @@
                 <div class="text-center mb-6 mt-4">
                     <img src="https://i.ibb.co/GQYCbXrc/logo.webp" class="w-20 h-20 mx-auto mb-3 drop-shadow-md object-contain" alt="MSTSC Logo">
                     <h2 class="text-2xl font-black text-mstPurple">ยืนยันตัวตนสภานักเรียน</h2>
-                    <p class="text-xs text-gray-500 mt-2">กรุณากรอกข้อมูลเพื่อตรวจสอบกับระบบ REGIS</p>
+                    <p class="text-xs text-gray-500 mt-2">กรุณาเข้าสู่ระบบเพื่อตรวจสอบกับระบบ REGIS</p>
                 </div>
-                <form id="verifyForm" class="space-y-5">
-                    <!-- ช่องกรอกรหัสนักเรียน -->
-<div>
-    <label class="block text-xs font-bold text-mstPurple uppercase tracking-wider mb-2">รหัสนักเรียน (5 หลัก)</label>
-    <input type="tel" inputmode="numeric" pattern="[0-9]*" id="v_std_id" required class="w-full p-4 rounded-xl border-2 border-white bg-white/80 focus:bg-white focus:border-mstPurple focus:ring-4 focus:ring-mstPurple/10 outline-none text-center tracking-[0.3em] font-black text-xl text-gray-800 transition-all shadow-inner" maxlength="5">
+                <div class="space-y-5 text-center mt-6">
+    <button onclick="loginWithPassportAdmin()" class="group w-full bg-white border-2 border-gray-100 hover:border-mstPurple text-purple-900 font-bold py-4 px-6 rounded-2xl flex items-center justify-center gap-4 transition-all duration-300 shadow-sm hover:shadow-xl active:scale-95">
+        <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center text-purple-700 shrink-0 shadow-inner group-hover:scale-110 transition-transform">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
+            </svg>
+        </div>
+        <span class="text-md">Login with MST Passport</span>
+    </button>
 </div>
-
-<!-- ช่องกรอกเลขประจำตัวประชาชน -->
-<div>
-    <label class="block text-xs font-bold text-mstPurple uppercase tracking-wider mb-2">เลขประจำตัวประชาชน (13 หลัก)</label>
-    <input type="tel" inputmode="numeric" pattern="[0-9]*" id="v_id_card" required class="w-full p-4 rounded-xl border-2 border-white bg-white/80 focus:bg-white focus:border-mstPurple focus:ring-4 focus:ring-mstPurple/10 outline-none text-center tracking-[0.2em] font-black text-lg text-gray-800 transition-all shadow-inner" maxlength="13">
-</div>
-                    <button type="submit" class="w-full bg-gradient-to-r from-mstPurple to-[#601cb8] text-mstYellow py-4 rounded-xl font-black shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all mt-4 text-lg"><i class="fas fa-check-circle mr-2"></i> ยืนยันและเข้าสู่ระบบ</button>
-                </form>
             </div>
         </section>
 
@@ -448,20 +445,27 @@
             }
         });
 
-        async function main() {
-            try {
-                await liff.init({ liffId: LIFF_ID });
-                if (!liff.isLoggedIn()) { 
-                    hideLoader(); nav('loginPage'); 
-                } else { 
-                    liffProfile = await liff.getProfile(); 
-                    $('#profileImage').attr('src', liffProfile.pictureUrl);
-                    $('#adminProfileImage').attr('src', liffProfile.pictureUrl);
-                    $('#mainHeader').removeClass('hidden'); 
-                    checkUserStatus(); 
-                }
-            } catch (err) { console.error(err); hideLoader(); Swal.fire('Error', 'LIFF Init Failed', 'error'); }
+        // นำโค้ดนี้ไปวางทับฟังก์ชัน main() เดิม
+async function main() {
+    try {
+        await liff.init({ liffId: LIFF_ID });
+        if (!liff.isLoggedIn()) { 
+            hideLoader(); nav('loginPage'); 
+        } else { 
+            liffProfile = await liff.getProfile(); 
+            $('#profileImage').attr('src', liffProfile.pictureUrl);
+            $('#adminProfileImage').attr('src', liffProfile.pictureUrl);
+            $('#mainHeader').removeClass('hidden'); 
+            
+            // 🌟 เพิ่มส่วนดักจับเมื่อล็อกอิน Passport เสร็จและเด้งกลับมา
+            if (window.location.hash.includes('#auth=')) {
+                handlePassportAuth();
+            } else {
+                checkUserStatus(); 
+            }
         }
+    } catch (err) { console.error(err); hideLoader(); Swal.fire('Error', 'LIFF Init Failed', 'error'); }
+}
         main();
 
         function setLoader(text) { $('#globalLoader').css('display', 'flex'); $('#loaderText').text(text); }
@@ -645,72 +649,87 @@
             hideLoader();
         }
 
-        $('#verifyForm').on('submit', async function(e) {
-            e.preventDefault(); setLoader('กำลังซิงค์ข้อมูลกับระบบ REGIS...');
-            const payload = { action: 'verifyAndRegisterAdmin', uid: liffProfile.userId, std_id: $('#v_std_id').val(), id_card: $('#v_id_card').val() };
-            try {
-                const res = await fetch(GAS_WEBAPP_URL, { method: 'POST', body: JSON.stringify(payload) });
-                const data = await res.json();
-                
-                if (data.status === 'success') {
-                    adminName = data.name;
-                    Swal.fire({icon: 'success', title: 'ยืนยันตัวตนสำเร็จ', text: `ยินดีต้อนรับ ${adminName}`, confirmButtonColor: '#4A148C'}).then(() => {
-                        $('#verifyScreen').addClass('hidden'); 
-                        $('#showAdminName').text(adminName); 
-                        $('#mainHeader').addClass('hidden');
-                        $('#adminHeader').removeClass('hidden');
-                        nav('adminDashboard'); 
-                        loadAdminData();
-                    });
-                } else { 
-                    // แจ้งเตือนกรณีไม่พบข้อมูล 
-                    Swal.fire({
-                        imageUrl: 'https://i.ibb.co/GQYCbXrc/logo.webp',
-                        imageWidth: 80,
-                        title: 'ตรวจสอบสิทธิ์ไม่ผ่าน!',
-                        html: `
-                            <p class="text-sm text-gray-600 mb-4">รหัสนักเรียนหรือเลขประจำตัวประชาชนไม่ถูกต้อง ท่านไม่ใช่สภานักเรียนหรือยังไม่ได้รายงานตัว</p>
-                            <div class="bg-purple-50 p-4 rounded-xl border border-purple-100 text-left shadow-inner">
-                                <p class="text-sm font-bold text-mstPurple mb-1"><i class="fas fa-info-circle text-mstYellow"></i> หากคุณเป็นสภานักเรียน</p>
-                                <p class="text-xs text-gray-600 leading-relaxed">กรุณาลงทะเบียนรายงานตัวในระบบส่วนกลางสภา (REGIS) ให้เรียบร้อยก่อน เพื่อเข้าใช้งานระบบจัดการเรื่องร้องเรียน</p>
-                            </div>
-                        `,
-                        showCancelButton: true,
-                        confirmButtonText: '<i class="fas fa-copy mr-1"></i> คัดลอกลิงก์ลงทะเบียน',
-                        cancelButtonText: 'ย้อนกลับ',
-                        confirmButtonColor: '#4A148C',
-                        cancelButtonColor: '#9ca3af',
-                        reverseButtons: true,
-                        customClass: {
-                            container: 'backdrop-blur-sm',
-                            popup: 'rounded-3xl border border-gray-100 shadow-2xl',
-                            confirmButton: 'rounded-xl font-bold shadow-md px-5 py-3',
-                            cancelButton: 'rounded-xl font-bold px-5 py-3'
-                        }
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            // ระบบคัดลอกลิงก์
-                            navigator.clipboard.writeText('https://reg-mstsc.pages.dev').then(() => {
-                                Swal.fire({
-                                    icon: 'success',
-                                    title: 'คัดลอกลิงก์สำเร็จ!',
-                                    text: 'กรุณานำลิงก์ไปเปิดใน Safari หรือ Chrome เพื่อลงทะเบียนรายงานตัว',
-                                    confirmButtonColor: '#4A148C',
-                                    customClass: {
-                                        popup: 'rounded-3xl border border-gray-100 shadow-2xl',
-                                        confirmButton: 'rounded-xl font-bold px-5 py-2'
-                                    }
-                                });
-                            }).catch(err => {
-                                // เผื่อกรณีมือถือบางรุ่นไม่อนุญาตให้ใช้ Clipboard
-                                Swal.fire('ไม่สามารถคัดลอกได้', 'กรุณาพิมพ์ URL: https://reg-mstsc.pages.dev', 'error');
-                            });
-                        }
+        // ฟังก์ชันส่งผู้ใช้ไปหน้า Passport
+function loginWithPassportAdmin() {
+    const currentUrl = window.location.href.split('#')[0]; 
+    window.location.href = `https://mstsc.pages.dev/passport?redirect=${encodeURIComponent(currentUrl)}`;
+}
+
+// ฟังก์ชันถอดรหัสและส่ง API ไปเช็คสิทธิ์แอดมิน
+async function handlePassportAuth() {
+    setLoader('กำลังตรวจสอบสิทธิ์ผ่าน Passport...');
+    try {
+        const payload = window.location.hash.replace('#auth=', '');
+        const decrypted = CryptoJS.AES.decrypt(decodeURIComponent(payload), "MST_SECRET_KEY_2026").toString(CryptoJS.enc.Utf8);
+        const userData = JSON.parse(decrypted);
+        
+        const stdId = userData.id; 
+        history.replaceState(null, null, ' '); // ล้าง URL ไม่ให้รกรุงรัง
+
+        // ส่งข้อมูลไปให้ Google Apps Script (ส่ง PASSPORT_SSO ไปแทนบัตรปชช. กันระบบเดิมเออเร่อ)
+        const apiPayload = { 
+            action: 'verifyAndRegisterAdmin', 
+            uid: liffProfile.userId, 
+            std_id: stdId, 
+            id_card: "PASSPORT_SSO" 
+        };
+        
+        const res = await fetch(GAS_WEBAPP_URL, { method: 'POST', body: JSON.stringify(apiPayload) });
+        const data = await res.json();
+        
+        if (data.status === 'success') {
+            adminName = data.name;
+            Swal.fire({icon: 'success', title: 'ยืนยันตัวตนสำเร็จ', text: `ยินดีต้อนรับ ${adminName}`, confirmButtonColor: '#4A148C'}).then(() => {
+                $('#verifyScreen').addClass('hidden'); 
+                $('#showAdminName').text(adminName); 
+                $('#mainHeader').addClass('hidden');
+                $('#adminHeader').removeClass('hidden');
+                nav('adminDashboard'); 
+                loadAdminData();
+            });
+        } else {
+            // โชว์หน้าต่างแจ้งเตือนและปุ่มแบบเดิม 100% กรณีสิทธิ์ไม่ผ่าน
+            Swal.fire({
+                imageUrl: 'https://i.ibb.co/GQYCbXrc/logo.webp',
+                imageWidth: 80,
+                title: 'ตรวจสอบสิทธิ์ไม่ผ่าน!',
+                html: `
+                    <p class="text-sm text-gray-600 mb-4">ระบบไม่พบสิทธิ์ของท่านในฐานข้อมูลสภานักเรียน</p>
+                    <div class="bg-purple-50 p-4 rounded-xl border border-purple-100 text-left shadow-inner">
+                        <p class="text-sm font-bold text-mstPurple mb-1"><i class="fas fa-info-circle text-mstYellow"></i> หากคุณเป็นสภานักเรียน</p>
+                        <p class="text-xs text-gray-600 leading-relaxed">กรุณาลงทะเบียนรายงานตัวในระบบส่วนกลางสภา (REGIS) ให้เรียบร้อยก่อน เพื่อเข้าใช้งานระบบจัดการเรื่องร้องเรียน</p>
+                    </div>
+                `,
+                showCancelButton: true,
+                confirmButtonText: '<i class="fas fa-copy mr-1"></i> คัดลอกลิงก์ลงทะเบียน',
+                cancelButtonText: 'ย้อนกลับ',
+                confirmButtonColor: '#4A148C',
+                cancelButtonColor: '#9ca3af',
+                reverseButtons: true,
+                customClass: {
+                    container: 'backdrop-blur-sm',
+                    popup: 'rounded-3xl border border-gray-100 shadow-2xl',
+                    confirmButton: 'rounded-xl font-bold shadow-md px-5 py-3',
+                    cancelButton: 'rounded-xl font-bold px-5 py-3'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    navigator.clipboard.writeText('https://reg-mstsc.pages.dev').then(() => {
+                        Swal.fire({ icon: 'success', title: 'คัดลอกลิงก์สำเร็จ!', text: 'นำลิงก์ไปเปิดในเว็บเบราว์เซอร์เพื่อรายงานตัว', confirmButtonColor: '#4A148C' });
+                    }).catch(err => {
+                        Swal.fire('ไม่สามารถคัดลอกได้', 'กรุณาพิมพ์ URL: https://reg-mstsc.pages.dev', 'error');
                     });
                 }
-            } catch (error) { Swal.fire('Error', 'ระบบขัดข้อง', 'error'); }
-            hideLoader();
-        });
+                checkUserStatus(); // กลับไปหน้าปกติ
+            });
+        }
+    } catch (error) {
+        console.error(error);
+        Swal.fire('Error', 'เกิดข้อผิดพลาดในการเชื่อมต่อ Passport', 'error');
+        checkUserStatus(); // กลับไปหน้าปกติ
+    }
+    hideLoader();
+}
 
         async function loadAdminData() {
             setLoader('กำลังโหลดเคสล่าสุด...');
