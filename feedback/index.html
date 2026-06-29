@@ -416,8 +416,8 @@
 
     <script>
         const LIFF_ID = "2008923798-7EBZdt6r";
-        const GAS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbz6HwhUAz_p41UffWvHata4dzoBJ6sgRyL0dQoWOyOhAFgPpWWQKDbUyswVNmI7XJ2h/exec";
-        
+        const API_BASE_URL = "https://mstsc-backend.onrender.com/api";
+
         let liffProfile = null; 
         let userData = null; 
         let adminName = ""; 
@@ -480,7 +480,7 @@ async function main() {
         async function checkUserStatus() {
             setLoader('กำลังดึงข้อมูล...');
             try {
-                const res = await fetch(`${GAS_WEBAPP_URL}?action=getUser&uid=${liffProfile.userId}`);
+                const res = await fetch(`${API_BASE_URL}/user?uid=${liffProfile.userId}`);
                 const data = await res.json();
                 if (data.status === 'found') { 
                     userData = data.user; 
@@ -531,13 +531,13 @@ async function main() {
         $('#registerForm').on('submit', async function(e) {
             e.preventDefault(); setLoader('กำลังบันทึกข้อมูล...');
             const payload = { action: 'register', uid: liffProfile.userId, name: $('#regName').val(), gender: $('#regGender').val(), email: $('#regEmail').val(), phone: $('#regPhone').val(), userStatus: $('#regStatus').val() };
-            try { const res = await fetch(GAS_WEBAPP_URL, { method: 'POST', body: JSON.stringify(payload) }); const data = await res.json(); if(data.status === 'success') { userData = payload; Swal.fire({icon:'success',title:'สำเร็จ',text:'ลงทะเบียนเรียบร้อย',confirmButtonColor:'#4A148C'}).then(() => nav('homePage')); } } catch (error) {} hideLoader();
+            try { const res = await fetch(`${API_BASE_URL}/user`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }); const data = await res.json(); if(data.status === 'success') { userData = payload; Swal.fire({icon:'success',title:'สำเร็จ',text:'ลงทะเบียนเรียบร้อย',confirmButtonColor:'#4A148C'}).then(() => nav('homePage')); } } catch (error) {} hideLoader();
         });
 
         $('#profileForm').on('submit', async function(e) {
             e.preventDefault(); setLoader('กำลังอัปเดตข้อมูล...');
             const payload = { action: 'updateUser', uid: liffProfile.userId, name: $('#editName').val(), gender: $('#editGender').val(), email: $('#editEmail').val(), phone: $('#editPhone').val(), userStatus: $('#editStatus').val() };
-            try { const res = await fetch(GAS_WEBAPP_URL, { method: 'POST', body: JSON.stringify(payload) }); const data = await res.json(); if(data.status === 'success') { userData = payload; Swal.fire({icon:'success',title:'สำเร็จ',text:'อัปเดตข้อมูลเรียบร้อย',confirmButtonColor:'#4A148C'}).then(() => nav('homePage')); } } catch (error) {} hideLoader();
+            try { const res = await fetch(`${API_BASE_URL}/user`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }); const data = await res.json(); if(data.status === 'success') { userData = payload; Swal.fire({icon:'success',title:'สำเร็จ',text:'อัปเดตข้อมูลเรียบร้อย',confirmButtonColor:'#4A148C'}).then(() => nav('homePage')); } } catch (error) {} hideLoader();
         });
 
         const getBase64 = (file) => new Promise((resolve, reject) => { const reader = new FileReader(); reader.readAsDataURL(file); reader.onload = () => resolve({ base64: reader.result, mimeType: file.type }); reader.onerror = error => reject(error); });
@@ -548,7 +548,7 @@ async function main() {
                 const files = document.getElementById('images').files; let imagesBase64 = [];
                 for(let i=0; i<files.length; i++){ if(files[i].size > 10 * 1024 * 1024) throw new Error('ขนาดไฟล์เกิน 10MB'); imagesBase64.push(await getBase64(files[i])); }
                 const payload = { action: 'submit', uid: liffProfile.userId, name: userData.name, gender: userData.gender, email: userData.email, phone: userData.phone, userStatus: userData.userStatus, category: $('#category').val(), details: $('#details').val(), publicConsent: $('input[name="publicConsent"]:checked').val(), images: imagesBase64 };
-                const res = await fetch(GAS_WEBAPP_URL, { method: 'POST', body: JSON.stringify(payload) });
+                const res = await fetch(`${API_BASE_URL}/submit`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
                 const result = await res.json();
                 if(result.status === 'success') { Swal.fire({icon:'success',title:'สำเร็จ',text:'ส่งข้อมูลเรียบร้อย รหัส: ' + result.id,confirmButtonColor:'#4A148C'}).then(() => { document.getElementById('complaintForm').reset(); $('#categoryHint').addClass('hidden'); nav('homePage'); }); }
             } catch (error) { Swal.fire('เกิดข้อผิดพลาด', error.message, 'error'); }
@@ -558,7 +558,7 @@ async function main() {
         async function loadTracking(mode) {
             setLoader('กำลังโหลดข้อมูล...');
             try {
-                const res = await fetch(`${GAS_WEBAPP_URL}?action=getComplaints`);
+                const res = await fetch(`${API_BASE_URL}/complaints`);
                 const result = await res.json();
                 globalComplaints = result.data.reverse();
                 lastNavPage = 'trackPage'; nav('trackPage');
@@ -633,7 +633,7 @@ async function main() {
         async function checkAdminAuth() {
             setLoader('กำลังตรวจสอบสิทธิ์...');
             try {
-                const res = await fetch(`${GAS_WEBAPP_URL}?action=checkAdminLogin&uid=${liffProfile.userId}`);
+                const res = await fetch(`${API_BASE_URL}/admin/check?uid=${liffProfile.userId}`);
                 const data = await res.json();
                 
                 if (data.status === 'found') {
@@ -674,7 +674,7 @@ async function handlePassportAuth() {
             id_card: "PASSPORT_SSO" 
         };
         
-        const res = await fetch(GAS_WEBAPP_URL, { method: 'POST', body: JSON.stringify(apiPayload) });
+        const res = await fetch(`${API_BASE_URL}/admin/verify`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(apiPayload) });
         const data = await res.json();
         
         if (data.status === 'success') {
@@ -734,7 +734,7 @@ async function handlePassportAuth() {
         async function loadAdminData() {
             setLoader('กำลังโหลดเคสล่าสุด...');
             try {
-                const res = await fetch(`${GAS_WEBAPP_URL}?action=getComplaints`);
+                const res = await fetch(`${API_BASE_URL}/complaints`);
                 const result = await res.json(); 
                 globalComplaints = result.data.reverse(); 
                 
@@ -827,19 +827,7 @@ async function handlePassportAuth() {
             e.preventDefault(); $('#adminEditModal').addClass('hidden'); setLoader('กำลังบันทึกข้อมูล...');
             const payload = { action: 'updateAdmin', id: $('#adminEditRowId').val(), adminStatus: $('#updateStatus').val(), responsible: $('#updateResponsible').val() || "-", resolution: $('#updateResolution').val() || "-", remarks: $('#updateRemarks').val() || "-" };
             try {
-                const res = await fetch(GAS_WEBAPP_URL, { method: 'POST', body: JSON.stringify(payload) });
-                const result = await res.json();
-                if(result.status === 'success') { Swal.fire({icon:'success',title:'อัปเดตเรียบร้อย!',text:'ข้อมูลถูกบันทึกลงระบบแล้ว',confirmButtonColor:'#4A148C'}); loadAdminData(); }
-            } catch (error) { Swal.fire('Error', 'ไม่สามารถบันทึกได้', 'error'); }
-            hideLoader();
-        });
-
-        // ... โค้ดเก่าด้านบน ... 
-        $('#adminEditForm').on('submit', async function(e) {
-            e.preventDefault(); $('#adminEditModal').addClass('hidden'); setLoader('กำลังบันทึกข้อมูล...');
-            const payload = { action: 'updateAdmin', id: $('#adminEditRowId').val(), adminStatus: $('#updateStatus').val(), responsible: $('#updateResponsible').val() || "-", resolution: $('#updateResolution').val() || "-", remarks: $('#updateRemarks').val() || "-" };
-            try {
-                const res = await fetch(GAS_WEBAPP_URL, { method: 'POST', body: JSON.stringify(payload) });
+                const res = await fetch(`${API_BASE_URL}/admin/update`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
                 const result = await res.json();
                 if(result.status === 'success') { Swal.fire({icon:'success',title:'อัปเดตเรียบร้อย!',text:'ข้อมูลถูกบันทึกลงระบบแล้ว',confirmButtonColor:'#4A148C'}); loadAdminData(); }
             } catch (error) { Swal.fire('Error', 'ไม่สามารถบันทึกได้', 'error'); }
