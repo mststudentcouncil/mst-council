@@ -451,7 +451,7 @@
 
     <script>
         // ========================================================
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzgZ75s7SMTRbPx5Cq_iHKgS9qhDq1CiZwyLurGDuoyRFzXPdT-ppCTPF12PIPHNFxYTw/exec";
+        const WEB_APP_URL = "https://admission-backend-592123078141.asia-southeast1.run.app/api/admission";
         // API สำหรับส่งเข้าระบบรายงานตัว (REGIS)
         const REGIS_API_URL = "https://script.google.com/macros/s/AKfycbx7ujsszpBJ1nCZ8idqCaUDd6qmvr9sOvouGzpTuLv6GXe8SxCx5VHoqCOMvpSZu4Kqig/exec";
         // ========================================================
@@ -737,11 +737,13 @@
 }
 
         async function apiCall(payload) {
-            const response = await fetch(WEB_APP_URL, {
-                method: 'POST', redirect: 'follow', headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(payload)
-            });
-            return await response.json();
-        }
+    const response = await fetch(WEB_APP_URL, {
+        method: 'POST', 
+        headers: { "Content-Type": "application/json" }, // <--- บรรทัดนี้สำคัญที่สุด!
+        body: JSON.stringify(payload)
+    });
+    return await response.json();
+}
 
         // --- ส่วนการจัดการกรรมการ (Judge Management) ---
         async function fetchJudges() {
@@ -1069,7 +1071,26 @@
                     document.getElementById('systemStatusSelect').value = settings.SystemStatus || 'open';
                     document.getElementById('academicYearInput').value = settings.CurrentAcademicYear || '';
                     
-                    const safeTime = (t) => t ? t.toString().substring(0, 16) : '';
+                    const safeTime = (t) => {
+    if (!t) return '';
+    let str = String(t).trim();
+    
+    // 1. ถ้าเป็นแบบเว้นวรรค ให้เปลี่ยนเป็นตัว T
+    if (str.includes(' ')) {
+        str = str.replace(' ', 'T');
+    }
+    
+    // 2. จัดการเติมเลข 0 ให้ชั่วโมงและนาทีเป็น 2 หลักเสมอ
+    if (str.includes('T')) {
+        let parts = str.split('T');
+        let timeParts = parts[1].split(':');
+        let h = String(timeParts[0] || '00').padStart(2, '0');
+        let m = String(timeParts[1] || '00').padStart(2, '0');
+        return `${parts[0]}T${h}:${m}`;
+    }
+    
+    return str.substring(0, 16);
+};
                     document.getElementById('appStartTimeInput').value = safeTime(settings.AppStartTime);
                     document.getElementById('appEndTimeInput').value = safeTime(settings.AppEndTime);
                     document.getElementById('confirmStartTimeInput').value = safeTime(settings.ConfirmStartTime);

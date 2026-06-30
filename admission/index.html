@@ -297,7 +297,7 @@
 
     <script>
         // ========================================================
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzgZ75s7SMTRbPx5Cq_iHKgS9qhDq1CiZwyLurGDuoyRFzXPdT-ppCTPF12PIPHNFxYTw/exec";
+        const WEB_APP_URL = "https://admission-backend-592123078141.asia-southeast1.run.app/api/admission";
         // ========================================================
 
         const svgIconsHTML = {
@@ -342,11 +342,13 @@
         }
 
         async function apiCall(payload) {
-            const response = await fetch(WEB_APP_URL, {
-                method: 'POST', redirect: 'follow', headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(payload)
-            });
-            return await response.json();
-        }
+    const response = await fetch(WEB_APP_URL, {
+        method: 'POST', 
+        headers: { "Content-Type": "application/json" }, // <--- บรรทัดนี้สำคัญที่สุด!
+        body: JSON.stringify(payload)
+    });
+    return await response.json();
+}
 
         function decodeJwtResponse(token) {
             let base64Url = token.split('.')[1];

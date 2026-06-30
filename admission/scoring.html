@@ -230,7 +230,7 @@
 
     <script>
         // 🔴 ใส่ URL Web App ของคุณที่นี่
-        const API_URL = "https://script.google.com/macros/s/AKfycbzgZ75s7SMTRbPx5Cq_iHKgS9qhDq1CiZwyLurGDuoyRFzXPdT-ppCTPF12PIPHNFxYTw/exec"; 
+        const API_URL = "https://admission-backend-592123078141.asia-southeast1.run.app/api/admission"; 
         
         let currentQueue = [];
         let currentIndex = 0;
@@ -305,7 +305,11 @@
             showLoginLoader();
 
             try {
-                const res = await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "getInterviewQueue", email: currentUserEmail }) }).then(r => r.json());
+                const res = await fetch(API_URL, { 
+    method: "POST", 
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ action: "getInterviewQueue", email: currentUserEmail }) 
+}).then(r => r.json());
 
                 if(res.status === "error") {
                     localStorage.removeItem('mstsc_judge_login');
@@ -451,9 +455,10 @@
 
             try {
                 const res = await fetch(API_URL, {
-                    method: "POST",
-                    body: JSON.stringify(payload)
-                }).then(r => r.json());
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+}).then(r => r.json());
 
                 if(res.status === "success") {
                     let msg = actionType === "markAbsent" ? 'สถานะ: ขาดสอบ' : `บันทึกเรียบร้อย (รวม ${res.total} คะแนน)`;

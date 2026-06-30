@@ -1,0 +1,31 @@
+cat << 'EOF' > .env
+PORT=8080
+SHEET_ADMISSION_ID=1wVRwhr8sNTiSX6T2dlvx1z1KJx4bYB8u5_DBuscKYe8
+DRIVE_ADMISSION_FOLDER_ID=1H2NW2Nms4dv_PW8UlnrovwaqY2g-s625
+ONESIGNAL_APP_ID=78fd7e77-e56d-49eb-abf0-b3f258597987
+ONESIGNAL_REST_API_KEY=os_v2_app_pd6x457fnve6xk7qwpzfqwlzq5z6ze4fchmudzvxfgykvhqcs7xnyzpzgofnpy5fmjxfyfvvugf35r7ydedmeexbchs7cgcvkyfiypy
+EOF
+
+cat << 'EOF' > package.json
+{
+  "name": "admission-backend",
+  "version": "1.0.0",
+  "main": "index.js",
+  "dependencies": {
+    "axios": "^1.18.1",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "googleapis": "^173.0.0"
+  }
+}
+EOF
+
+cat << 'EOF' > Dockerfile
+FROM node:18-slim
+WORKDIR /usr/src/app
+COPY package*.json ./
+RUN npm install --only=production
+COPY . .
+CMD [ "node", "index.js" ]
+EOF
