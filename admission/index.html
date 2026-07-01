@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ระบบรับสมัครสภานักเรียน - ADMISSION MSTSC</title>
@@ -341,10 +344,14 @@
             return `${day}/${month}/${year} ${hours}:${minutes}`;
         }
 
-        async function apiCall(payload) {
+        // แก้ให้เป็นแบบนี้:
+async function apiCall(payload) {
     const response = await fetch(WEB_APP_URL, {
         method: 'POST', 
-        headers: { "Content-Type": "application/json" }, // <--- บรรทัดนี้สำคัญที่สุด!
+        headers: { 
+            "Content-Type": "application/json",
+            "Cache-Control": "no-cache"  // <--- เพิ่มบรรทัดนี้ลงไป
+        }, 
         body: JSON.stringify(payload)
     });
     return await response.json();
