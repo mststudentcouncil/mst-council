@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ปิดปรับปรุงระบบชั่วคราว - MSTSC</title>
+    
+    <!-- ฟอนต์และโลโก้ -->
+    <link rel="icon" type="image/webp" href="https://i.ibb.co/GQYCbXrc/logo.webp">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Anuphan', 'sans-serif'] },
+                    colors: { 
+                        mstPurple: '#4C1D95', 
+                        mstPurpleHover: '#3B1676', 
+                        mstYellow: '#FBBF24', 
+                        mstCream: '#FEFCF3' 
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body { 
+            background-color: #FEFCF3; 
+            color: #1f2937; 
+            overflow-x: hidden; 
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(76, 29, 149, 0.04) 0%, transparent 25%), 
+                radial-gradient(circle at 85% 30%, rgba(251, 191, 36, 0.08) 0%, transparent 25%);
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.85); 
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.7); 
+            box-shadow: 0 15px 35px -5px rgba(76, 29, 149, 0.08); 
+            border-radius: 1.5rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .glass-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px -5px rgba(76, 29, 149, 0.15);
+            border-color: rgba(251, 191, 36, 0.5);
+        }
+
+        .fade-in-up { animation: fadeInUp 0.7s cubic-bezier(0.4, 0, 0.2, 1) forwards; opacity: 0; }
+        .delay-100 { animation-delay: 100ms; }
+        .delay-200 { animation-delay: 200ms; }
+        
+        @keyframes fadeInUp { 
+            from { opacity: 0; transform: translateY(20px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+
+        /* Floating Blobs (Decoration) */
+        .blob-1 { position: fixed; top: -10%; right: -10%; width: 40vw; height: 40vw; min-width: 300px; min-height: 300px; background: #c4b5fd; border-radius: 50%; filter: blur(100px); opacity: 0.4; z-index: -1; animation: float 10s infinite alternate ease-in-out; }
+        .blob-2 { position: fixed; bottom: -10%; left: -10%; width: 40vw; height: 40vw; min-width: 300px; min-height: 300px; background: #fde68a; border-radius: 50%; filter: blur(100px); opacity: 0.4; z-index: -1; animation: float 12s infinite alternate-reverse ease-in-out; }
+        
+        @keyframes float {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(30px, -30px); }
+        }
+        
+        /* Bounce Animation for the icon */
+        .animate-float-slow {
+            animation: floatSlow 4s ease-in-out infinite;
+        }
+        @keyframes floatSlow {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col relative antialiased selection:bg-mstPurple selection:text-white">
+    <!-- Background Decor -->
+    <div class="blob-1"></div>
+    <div class="blob-2"></div>
+
+    <!-- Main Content -->
+    <main class="flex-1 w-full max-w-3xl mx-auto px-4 flex flex-col items-center justify-center text-center z-10 fade-in-up">
+        
+        <!-- Logo Section -->
+        <div class="relative group cursor-pointer mb-6">
+            <div class="absolute inset-0 bg-mstYellow rounded-full blur-xl opacity-40 transition duration-500"></div>
+            <img src="https://i.ibb.co/GQYCbXrc/logo.webp" alt="MSTSC Logo" class="w-28 h-28 md:w-32 md:h-32 object-contain relative z-10 drop-shadow-2xl">
+        </div>
+        
+        <!-- Maintenance Icon -->
+        <div class="text-6xl md:text-7xl text-mstPurple mb-6 animate-float-slow drop-shadow-sm fade-in-up delay-100">
+            <i class="fa-solid fa-shield-halved"></i>
+        </div>
+        
+        <!-- Text Content -->
+        <div class="fade-in-up delay-100">
+            <h1 class="text-2xl md:text-4xl font-extrabold text-mstPurple mb-3">
+                ประกาศปิดปรับปรุงระบบชั่วคราว
+            </h1>
+            
+            <h2 class="text-lg md:text-xl font-bold text-gray-700 mb-6">
+                System Maintenance
+            </h2>
+        </div>
+        
+        <div class="bg-white/60 backdrop-blur-md rounded-2xl p-6 md:p-8 border border-white/80 shadow-sm mb-8 max-w-2xl fade-in-up delay-200 text-left">
+            <p class="text-gray-600 font-medium mb-4 leading-relaxed text-sm md:text-base indent-8">
+                เนื่องด้วยทางคณะกรรมการสภานักเรียน โรงเรียนเมืองสุราษฎร์ธานี มีความจำเป็นต้องปิดปรับปรุงระบบเว็บไซต์ชั่วคราว เพื่อพัฒนาระบบและปรับปรุงฐานข้อมูลให้สอดคล้องกับ <strong>พระราชบัญญัติคุ้มครองข้อมูลส่วนบุคคล (PDPA)</strong> อย่างเคร่งครัด
+            </p>
+            <p class="text-gray-600 font-medium leading-relaxed text-sm md:text-base indent-8">
+                ทางเราขออภัยในความไม่สะดวกที่เกิดขึ้น <strong>กรุณาลองเข้าใช้งานใหม่อีกครั้งในภายหลัง</strong> โดยทางคณะกรรมการฯ จะดำเนินการแจ้งให้ทราบอีกครั้งเมื่อระบบพร้อมเปิดให้บริการตามปกติ
+            </p>
+        </div>
+
+        <!-- Contact/Facebook Button -->
+        <a href="https://www.facebook.com/mstcouncil" target="_blank" class="glass-card px-8 py-4 flex items-center justify-center gap-3 text-mstPurple font-bold hover:bg-mstPurple hover:text-white transition-all group fade-in-up delay-200">
+            <i class="fa-brands fa-facebook text-xl group-hover:scale-110 transition-transform"></i>
+            <span>ติดตามประกาศผ่านทาง Facebook</span>
+        </a>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="w-full text-center py-8 text-xs text-gray-400 font-medium z-10 mt-auto bg-white/30 backdrop-blur-sm border-t border-white/50">
+        <p class="mb-1">&copy; <script>document.write(new Date().getFullYear())</script> Muangsuratthani Student Council. All Rights Reserved.</p>
+        <p class="flex items-center justify-center gap-1">
+            <i class="fas fa-shield-check text-mstPurple opacity-70"></i> 
+            <span class="opacity-80">PDPA Compliance Maintenance</span>
+        </p>
+    </footer>
+
+</body>
+</html>
