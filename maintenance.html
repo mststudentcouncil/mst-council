@@ -90,22 +90,19 @@
     <div class="blob-2"></div>
 
     <!-- Main Content -->
-    <main class="flex-1 w-full max-w-3xl mx-auto px-4 flex flex-col items-center justify-center text-center z-10 fade-in-up">
+    <!-- เพิ่ม px-6 md:px-8 เพื่อดันขอบซ้ายขวาให้เข้าหากันมากขึ้นบนมือถือ -->
+    <main class="flex-1 w-full max-w-3xl mx-auto px-6 md:px-8 flex flex-col items-center justify-center text-center z-10 fade-in-up">
         
         <!-- Logo Section -->
-        <div class="relative group cursor-pointer mb-6">
+        <div class="relative group cursor-pointer mb-6 mt-6">
             <div class="absolute inset-0 bg-mstYellow rounded-full blur-xl opacity-40 transition duration-500"></div>
             <img src="https://i.ibb.co/GQYCbXrc/logo.webp" alt="MSTSC Logo" class="w-28 h-28 md:w-32 md:h-32 object-contain relative z-10 drop-shadow-2xl">
         </div>
         
-        <!-- Maintenance Icon -->
-        <div class="text-6xl md:text-7xl text-mstPurple mb-6 animate-float-slow drop-shadow-sm fade-in-up delay-100">
-            <i class="fa-solid fa-shield-halved"></i>
-        </div>
-        
         <!-- Text Content -->
-        <div class="fade-in-up delay-100">
-            <h1 class="text-2xl md:text-4xl font-extrabold text-mstPurple mb-3">
+        <div class="fade-in-up delay-100 w-full">
+            <!-- เพิ่ม px-2 และ leading-tight เพื่อให้เวลาข้อความขึ้นบรรทัดใหม่ดูสวยงาม -->
+            <h1 class="text-2xl md:text-4xl font-extrabold text-mstPurple mb-3 leading-tight px-2">
                 ประกาศปิดปรับปรุงระบบชั่วคราว
             </h1>
             
@@ -114,7 +111,9 @@
             </h2>
         </div>
         
-        <div class="bg-white/60 backdrop-blur-md rounded-2xl p-6 md:p-8 border border-white/80 shadow-sm mb-8 max-w-2xl fade-in-up delay-200 text-left">
+        <!-- Box Content -->
+        <!-- เพิ่ม w-full ให้เต็มพื้นที่ที่จำกัดขอบไว้ และปรับขอบมนเป็น rounded-3xl ให้ดูนุ่มนวลขึ้น -->
+        <div class="bg-white/60 backdrop-blur-md rounded-3xl p-6 md:p-8 border border-white/80 shadow-sm mb-8 w-full max-w-2xl fade-in-up delay-200 text-left">
             <p class="text-gray-600 font-medium mb-4 leading-relaxed text-sm md:text-base indent-8">
                 เนื่องด้วยทางคณะกรรมการสภานักเรียน โรงเรียนเมืองสุราษฎร์ธานี มีความจำเป็นต้องปิดปรับปรุงระบบเว็บไซต์ชั่วคราว เพื่อพัฒนาระบบและปรับปรุงฐานข้อมูลให้สอดคล้องกับ <strong>พระราชบัญญัติคุ้มครองข้อมูลส่วนบุคคล (PDPA)</strong> อย่างเคร่งครัด
             </p>
@@ -124,18 +123,18 @@
         </div>
 
         <!-- Contact/Facebook Button -->
-        <a href="https://www.facebook.com/mstcouncil" target="_blank" class="glass-card px-8 py-4 flex items-center justify-center gap-3 text-mstPurple font-bold hover:bg-mstPurple hover:text-white transition-all group fade-in-up delay-200">
+        <a href="https://www.facebook.com/mstcouncil" target="_blank" class="glass-card w-full sm:w-auto px-6 py-4 flex items-center justify-center gap-3 text-mstPurple font-bold hover:bg-mstPurple hover:text-white transition-all group fade-in-up delay-200">
             <i class="fa-brands fa-facebook text-xl group-hover:scale-110 transition-transform"></i>
-            <span>ติดตามประกาศผ่านทาง Facebook</span>
+            <span class="text-sm md:text-base">ติดตามประกาศผ่านทาง Facebook</span>
         </a>
 
     </main>
 
     <!-- Footer -->
-    <footer class="w-full text-center py-8 text-xs text-gray-400 font-medium z-10 mt-auto bg-white/30 backdrop-blur-sm border-t border-white/50">
+    <!-- เพิ่ม px-4 กันข้อความชนขอบหน้าจอ -->
+    <footer class="w-full text-center py-8 px-4 text-xs text-gray-400 font-medium z-10 mt-auto bg-white/30 backdrop-blur-sm border-t border-white/50">
         <p class="mb-1">&copy; <script>document.write(new Date().getFullYear())</script> Muangsuratthani Student Council. All Rights Reserved.</p>
         <p class="flex items-center justify-center gap-1">
-            <i class="fas fa-shield-check text-mstPurple opacity-70"></i> 
             <span class="opacity-80">PDPA Compliance Maintenance</span>
         </p>
     </footer>
