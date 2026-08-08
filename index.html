@@ -2,261 +2,421 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MSTSC</title>
     
-    <!-- ฟอนต์และโลโก้ -->
+    <!-- Cross-Platform & PWA Optimization -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#4C1D95">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
+    <!-- Open Graph (SEO & Social Sharing) -->
+    <meta property="og:title" content="สภานักเรียนโรงเรียนเมืองสุราษฎร์ธานี (MSTSC)">
+    <meta property="og:description" content="ระบบบริหารจัดการเนื้อหาและบริการดิจิทัล เพื่อวิถีประชาธิปไตยในโรงเรียน">
+    <meta property="og:image" content="https://images.unsplash.com/photo-1546410531-d7ce16fcee16?q=80&w=1200">
+    <meta property="og:type" content="website">
+
+    <title>สภานักเรียนโรงเรียนเมืองสุราษฎร์ธานี (MSTSC)</title>
+    
     <link rel="icon" type="image/webp" href="https://i.ibb.co/GQYCbXrc/logo.webp">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="apple-touch-icon" href="https://i.ibb.co/GQYCbXrc/logo.webp">
+    
+    <!-- Fonts & Scripts -->
     <link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: { sans: ['Anuphan', 'sans-serif'] },
-                    colors: { 
-                        mstPurple: '#4C1D95', 
-                        mstPurpleHover: '#3B1676', 
-                        mstYellow: '#FBBF24', 
-                        mstCream: '#FEFCF3' 
-                    }
-                }
-            }
-        }
+        tailwind.config = { theme: { extend: { fontFamily: { sans: ['Anuphan', 'sans-serif'] }, colors: { mstPurple: '#4C1D95', mstYellow: '#FBBF24', mstCream: '#FEFCF5', mstDark: '#1E1B4B' } } } }
     </script>
-    
     <style>
-        body { 
-            background-color: #FEFCF3; 
-            color: #1f2937; 
-            overflow-x: hidden; 
-            background-image: 
-                radial-gradient(circle at 15% 50%, rgba(76, 29, 149, 0.04) 0%, transparent 25%), 
-                radial-gradient(circle at 85% 30%, rgba(251, 191, 36, 0.08) 0%, transparent 25%);
-        }
+        body { scroll-behavior: smooth; background-color: #FEFCF5; overflow-x: hidden; padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); }
+        .glass { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.8); box-shadow: 0 10px 30px rgba(76, 29, 149, 0.05); }
+        .glass-dark { background: rgba(30, 27, 75, 0.8); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .glass-hover:hover { transform: translateY(-5px); box-shadow: 0 15px 35px rgba(76, 29, 149, 0.1); border-color: #FBBF24; cursor: pointer; }
+        .blob-1 { position: absolute; top: -10%; left: -10%; width: 50vw; height: 50vw; background: rgba(251, 191, 36, 0.3); border-radius: 50%; filter: blur(100px); z-index: -1; animation: float 12s infinite alternate ease-in-out; }
+        .blob-2 { position: absolute; top: 20%; right: -10%; width: 40vw; height: 40vw; background: rgba(76, 29, 149, 0.2); border-radius: 50%; filter: blur(100px); z-index: -1; animation: float 10s infinite alternate-reverse ease-in-out; }
+        @keyframes float { 0% { transform: translate(0,0); } 100% { transform: translate(50px,-50px); } }
+        .section-title { position: relative; display: inline-block; padding-bottom: 0.5rem; }
+        .section-title::after { content: ''; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 60px; height: 4px; background-color: #FBBF24; border-radius: 2px; }
+        .fade-in-up { animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards; opacity: 0; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        ::-webkit-scrollbar { width: 8px; } ::-webkit-scrollbar-track { background: #FEFCF5; } ::-webkit-scrollbar-thumb { background: #d8b4fe; border-radius: 4px; }
         
-        .glass-card {
-            background: rgba(255, 255, 255, 0.85); 
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.7); 
-            box-shadow: 0 15px 35px -5px rgba(76, 29, 149, 0.08); 
-            border-radius: 1.5rem;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
+        .modal-overlay { background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(8px); z-index: 100; opacity: 0; visibility: hidden; transition: all 0.3s ease; padding-top: env(safe-area-inset-top); }
+        .modal-overlay.active { opacity: 1; visibility: visible; }
+        .modal-content { transform: scale(0.95) translateY(20px); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .modal-overlay.active .modal-content { transform: scale(1) translateY(0); }
         
-        .glass-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 40px -5px rgba(76, 29, 149, 0.15);
-            border-color: rgba(251, 191, 36, 0.5); /* Hover border yellow */
-        }
-
-        .fade-in-up { animation: fadeInUp 0.7s cubic-bezier(0.4, 0, 0.2, 1) forwards; opacity: 0; }
-        .delay-100 { animation-delay: 100ms; }
-        .delay-200 { animation-delay: 200ms; }
-        .delay-300 { animation-delay: 300ms; }
-        .delay-400 { animation-delay: 400ms; }
-        .delay-500 { animation-delay: 500ms; }
-        
-        @keyframes fadeInUp { 
-            from { opacity: 0; transform: translateY(20px); } 
-            to { opacity: 1; transform: translateY(0); } 
-        }
-
-        /* Floating Blobs (Decoration) */
-        .blob-1 { position: fixed; top: -10%; right: -10%; width: 40vw; height: 40vw; min-width: 300px; min-height: 300px; background: #c4b5fd; border-radius: 50%; filter: blur(100px); opacity: 0.4; z-index: -1; animation: float 10s infinite alternate ease-in-out; }
-        .blob-2 { position: fixed; bottom: -10%; left: -10%; width: 40vw; height: 40vw; min-width: 300px; min-height: 300px; background: #fde68a; border-radius: 50%; filter: blur(100px); opacity: 0.4; z-index: -1; animation: float 12s infinite alternate-reverse ease-in-out; }
-        
-        @keyframes float {
-            0% { transform: translate(0, 0); }
-            100% { transform: translate(30px, -30px); }
-        }
-
-        .category-title {
-            position: relative;
-            display: inline-block;
-            margin-bottom: 1.5rem;
-        }
-        .category-title::after {
-            content: '';
-            position: absolute;
-            bottom: -0.5rem;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 50px;
-            height: 3px;
-            background-color: #FBBF24;
-            border-radius: 2px;
-        }
+        /* สไตล์สำหรับเนื้อหาข่าวที่แอดมินจัดหน้ามา */
+        .rich-text-content p { margin-bottom: 1em; }
+        .rich-text-content ul { list-style-type: disc; margin-left: 1.5em; margin-bottom: 1em; }
+        .rich-text-content ol { list-style-type: decimal; margin-left: 1.5em; margin-bottom: 1em; }
+        .rich-text-content a { color: #4C1D95; text-decoration: underline; }
     </style>
 </head>
-<body class="min-h-screen flex flex-col relative antialiased selection:bg-mstPurple selection:text-white">
-    <!-- Background Decor -->
-    <div class="blob-1"></div>
-    <div class="blob-2"></div>
+<body class="text-gray-800 antialiased relative">
 
-    <!-- Header Section -->
-    <header class="w-full pt-12 pb-8 px-4 flex flex-col items-center justify-center text-center fade-in-up z-10">
-        <div class="relative group cursor-pointer mb-6">
-            <div class="absolute inset-0 bg-mstYellow rounded-full blur-xl opacity-30 group-hover:opacity-60 transition duration-500"></div>
-            <img src="https://i.ibb.co/GQYCbXrc/logo.webp" alt="MSTSC Logo" class="w-28 h-28 md:w-36 md:h-36 object-contain relative z-10 drop-shadow-2xl transform group-hover:scale-105 transition duration-300">
+    <div class="blob-1"></div><div class="blob-2"></div>
+
+    <nav class="fixed w-full z-50 glass transition-all duration-300 top-0 pt-[env(safe-area-inset-top)]" id="navbar">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-20 items-center">
+                <div class="flex items-center gap-4 cursor-pointer" onclick="window.scrollTo(0,0)">
+                    <img src="https://i.ibb.co/GQYCbXrc/logo.webp" alt="Logo" class="h-12 w-12 drop-shadow-md">
+                    <div>
+                        <h1 class="font-black text-mstPurple text-xl leading-tight drop-shadow-sm">STUDENT COUNCIL</h1>
+                        <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest hidden sm:block">Muangsuratthani School</p>
+                    </div>
+                </div>
+                <div class="hidden lg:flex items-center space-x-6 text-sm font-bold text-gray-600">
+                    <a href="#services" class="hover:text-mstPurple transition">ศูนย์บริการ</a>
+                    <a href="#projects" class="hover:text-mstPurple transition">ติดตามโครงการ</a>
+                    <a href="#board" class="hover:text-mstPurple transition">คณะกรรมการ</a>
+                    <a href="#news" class="hover:text-mstPurple transition">ข่าวสาร</a>
+                    <a href="./admin.html" class="bg-gradient-to-r from-mstPurple to-purple-800 text-white px-6 py-2.5 rounded-full hover:shadow-lg transition flex items-center gap-2 border border-purple-400">
+                        <i class="fa-solid fa-shield-halved"></i> เจ้าหน้าที่
+                    </a>
+                </div>
+                <button id="mobileMenuBtn" onclick="toggleMobileMenu()" class="lg:hidden text-gray-600 text-2xl"><i class="fa-solid fa-bars-staggered"></i></button>
+            </div>
         </div>
-        
-        <h1 class="text-2xl md:text-4xl font-extrabold text-mstPurple mb-2 tracking-tight">คณะกรรมการสภานักเรียน</h1>
-        <h2 class="text-lg md:text-2xl font-bold text-gray-700 mb-4">โรงเรียนเมืองสุราษฎร์ธานี</h2>
-        
-        <div class="flex flex-wrap justify-center gap-2 mt-1">
-            <span class="bg-purple-100/80 text-mstPurple text-[10px] md:text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-wider border border-purple-200 backdrop-blur-sm shadow-sm">
-                Muangsuratthani Student Council
-            </span>
-            <span class="bg-yellow-100/80 text-yellow-700 text-[10px] md:text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-wider border border-yellow-200 backdrop-blur-sm shadow-sm">
-                MSTSC
-            </span>
+        <div id="mobileMenu" class="hidden lg:hidden glass absolute w-full left-0 border-t border-white/50 pb-[env(safe-area-inset-bottom)]">
+            <div class="flex flex-col px-6 py-6 space-y-5 text-base font-bold text-gray-700 text-center">
+                <a href="#services" onclick="toggleMobileMenu()" class="hover:text-mstPurple">ศูนย์บริการ</a>
+                <a href="#projects" onclick="toggleMobileMenu()" class="hover:text-mstPurple">ติดตามโครงการ</a>
+                <a href="#board" onclick="toggleMobileMenu()" class="hover:text-mstPurple">คณะกรรมการ</a>
+                <a href="#news" onclick="toggleMobileMenu()" class="hover:text-mstPurple">ข่าวสาร</a>
+                <a href="./admin.html" class="bg-mstPurple text-white px-4 py-3 rounded-xl mt-2">เข้าสู่ระบบเจ้าหน้าที่</a>
+            </div>
         </div>
-    </header>
+    </nav>
 
-    <!-- Main Navigation Content -->
-    <main class="flex-1 w-full max-w-6xl mx-auto px-4 pb-16 z-10">
-        
-        <!-- Section: ระบบบริการหลัก (Core Services) -->
-        <div class="text-center mt-4 mb-6 fade-in-up delay-100">
-            <h3 class="text-xl font-bold text-mstPurple category-title"><i class="fa-solid fa-server mr-2 text-mstYellow"></i>ระบบบริการหลัก</h3>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full mb-12">
-
-            <!-- Card 3: Public Hearing -->
-            <a href="./feedback/index.html" class="glass-card p-8 flex flex-col items-center text-center group fade-in-up delay-300 block relative overflow-hidden">
-                <div class="absolute -right-6 -top-6 w-24 h-24 bg-blue-100 rounded-full blur-2xl opacity-50 group-hover:opacity-100 transition-opacity"></div>
-                <div class="w-16 h-16 bg-gradient-to-br from-cyan-500 to-blue-600 text-white rounded-[1.25rem] flex items-center justify-center text-3xl mb-5 shadow-lg shadow-blue-500/30 group-hover:scale-110 transition-transform duration-300">
-                    <i class="fa-solid fa-bullhorn"></i>
-                </div>
-                <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">Public Hearing</h3>
-                <p class="text-sm text-gray-500 font-medium">ศูนย์รับฟังความคิดเห็นและรับเรื่องร้องเรียน</p>
-                <div class="mt-5 flex-grow flex items-end">
-                    <span class="text-blue-600 text-sm font-bold bg-blue-50 px-4 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-all transform translate-y-2 group-hover:translate-y-0 flex items-center gap-2">เสนอความคิดเห็น <i class="fas fa-arrow-right text-xs"></i></span>
-                </div>
-            </a>
-
-            <!-- Card 5: Admission -->
-            <a href="./admission/index.html" class="glass-card p-8 flex flex-col items-center text-center group fade-in-up delay-500 block relative overflow-hidden">
-                <div class="absolute -right-6 -top-6 w-24 h-24 bg-amber-100 rounded-full blur-2xl opacity-50 group-hover:opacity-100 transition-opacity"></div>
-                <div class="w-16 h-16 bg-gradient-to-br from-amber-400 to-orange-500 text-white rounded-[1.25rem] flex items-center justify-center text-3xl mb-5 shadow-lg shadow-orange-500/30 group-hover:scale-110 transition-transform duration-300">
-                    <i class="fa-solid fa-user-graduate"></i>
-                </div>
-                <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-orange-600 transition-colors">SC Admission</h3>
-                <p class="text-sm text-gray-500 font-medium">ระบบรับสมัครคณะกรรมการสภานักเรียน</p>
-                <div class="mt-5 flex-grow flex items-end">
-                    <span class="text-orange-600 text-sm font-bold bg-orange-50 px-4 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-all transform translate-y-2 group-hover:translate-y-0 flex items-center gap-2">ดูรายละเอียด <i class="fas fa-arrow-right text-xs"></i></span>
-                </div>
-            </a>
-
-            <a href="./regis/index.html" class="glass-card p-8 flex flex-col items-center text-center group fade-in-up delay-400 block relative overflow-hidden">
-                <div class="absolute -right-6 -top-6 w-24 h-24 bg-emerald-100 rounded-full blur-2xl opacity-50 group-hover:opacity-100 transition-opacity"></div>
-                <div class="w-16 h-16 bg-gradient-to-br from-teal-400 to-emerald-600 text-white rounded-[1.25rem] flex items-center justify-center text-3xl mb-5 shadow-lg shadow-emerald-500/30 group-hover:scale-110 transition-transform duration-300">
-                    <i class="fa-solid fa-folder-open"></i>
-                </div>
-                <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-emerald-600 transition-colors">SC Regis</h3>
-                <p class="text-sm text-gray-500 font-medium">ระบบทะเบียนและจัดเก็บข้อมูลประวัติของคณะกรรมการสภานักเรียน</p>
-                <div class="mt-5 flex-grow flex items-end">
-                    <span class="text-emerald-600 text-sm font-bold bg-emerald-50 px-4 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-all transform translate-y-2 group-hover:translate-y-0 flex items-center gap-2">จัดการข้อมูล <i class="fas fa-arrow-right text-xs"></i></span>
-                </div>
-            </a>
-
-            <!-- Card 4: Vault -->
-            <a href="./vault/index.html" class="glass-card p-8 flex flex-col items-center text-center group fade-in-up delay-500 block relative overflow-hidden">
-                <div class="absolute -right-6 -top-6 w-24 h-24 bg-pink-100 rounded-full blur-2xl opacity-50 group-hover:opacity-100 transition-opacity"></div>
-                <div class="w-16 h-16 bg-gradient-to-br from-[#833AB4] to-[#E1306C] text-white rounded-[1.25rem] flex items-center justify-center text-3xl mb-5 shadow-lg shadow-pink-500/30 group-hover:scale-110 transition-transform duration-300">
-                    <i class="fa-solid fa-vault"></i>
-                </div>
-                <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-pink-600 transition-colors">SC Vault</h3>
-                <p class="text-sm text-gray-500 font-medium">คลังเก็บเกียรติบัตรและผลงานส่วนตัว ของคณะกรรมการสภานักเรียน</p>
-                <div class="mt-5 flex-grow flex items-end">
-                    <span class="text-pink-600 text-sm font-bold bg-pink-50 px-4 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-all transform translate-y-2 group-hover:translate-y-0 flex items-center gap-2">เข้าสู่คลังผลงาน <i class="fas fa-arrow-right text-xs"></i></span>
-                </div>
-            </a>
-
-        </div>
-
-        <!-- Section: บริการและข้อมูลโรงเรียน (School Info & Services) -->
-        <div class="text-center mt-12 mb-6 fade-in-up delay-500">
-            <h3 class="text-xl font-bold text-gray-700 category-title"><i class="fa-solid fa-school mr-2 text-gray-400"></i>บริการและข้อมูลอื่นๆ</h3>
-        </div>
-
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 w-full mb-12 fade-in-up delay-500">
-            
-            <!-- SGS -->
-            <a href="https://sgs.bopp-obec.info/sgss/TblStudentsInfo/Show-TblStudentsInfo-Table.aspx" target="_blank" class="glass-card p-4 flex flex-col items-center text-center shadow-sm hover:shadow-md transition-all group">
-                <div class="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-lg mb-2 group-hover:bg-blue-500 group-hover:text-white transition-colors"><i class="fa-solid fa-graduation-cap"></i></div>
-                <span class="font-bold text-gray-700 text-xs">ผลการเรียน SGS</span>
-            </a>
-
-            <!-- ข้อมูลสุขภาพ -->
-            <a href="https://liff.line.me/2008988681-suVlGOQh" class="glass-card p-4 flex flex-col items-center text-center shadow-sm hover:shadow-md transition-all group">
-                <div class="w-10 h-10 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center text-lg mb-2 group-hover:bg-rose-500 group-hover:text-white transition-colors"><i class="fa-solid fa-heart-pulse"></i></div>
-                <span class="font-bold text-gray-700 text-xs">ข้อมูลสุขภาพ</span>
-            </a>
-
-            <!-- ค่าเทอม -->
-            <a href="https://schoolbillingdev31.com/SBMST/Pages/PrintReportPayInForStudent.aspx" target="_blank" class="glass-card p-4 flex flex-col items-center text-center shadow-sm hover:shadow-md transition-all group">
-                <div class="w-10 h-10 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-lg mb-2 group-hover:bg-green-500 group-hover:text-white transition-colors"><i class="fa-solid fa-magnifying-glass-dollar"></i></div>
-                <span class="font-bold text-gray-700 text-xs">ค่าบำรุงการศึกษา</span>
-            </a>
-
-            <!-- สมัครเรียน -->
-            <a href="https://mst-muangsuratthani.pawano.net/mst-muangsuratthani" target="_blank" class="glass-card p-4 flex flex-col items-center text-center shadow-sm hover:shadow-md transition-all group">
-                <div class="w-10 h-10 bg-sky-100 text-sky-600 rounded-full flex items-center justify-center text-lg mb-2 group-hover:bg-sky-500 group-hover:text-white transition-colors"><i class="fa-solid fa-user-plus"></i></div>
-                <span class="font-bold text-gray-700 text-xs">รับสมัครนักเรียนใหม่</span>
-            </a>
-
-            <!-- ชุมนุม -->
-            <a href="https://mst.activities-club.com/" target="_blank" class="glass-card p-4 flex flex-col items-center text-center shadow-sm hover:shadow-md transition-all group">
-                <div class="w-10 h-10 bg-fuchsia-100 text-fuchsia-600 rounded-full flex items-center justify-center text-lg mb-2 group-hover:bg-fuchsia-500 group-hover:text-white transition-colors"><i class="fa-solid fa-users"></i></div>
-                <span class="font-bold text-gray-700 text-xs">ลงทะเบียนชุมนุม</span>
-            </a>
-
-            <!-- ห้องสมุด -->
-            <a href="http://mst.vlcloud.net" target="_blank" class="glass-card p-4 flex flex-col items-center text-center shadow-sm hover:shadow-md transition-all group">
-                <div class="w-10 h-10 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center text-lg mb-2 group-hover:bg-amber-500 group-hover:text-white transition-colors"><i class="fa-solid fa-book-open-reader"></i></div>
-                <span class="font-bold text-gray-700 text-xs">ห้องสมุดดิจิทัล</span>
-            </a>
-        </div>
-
-        <!-- Social Media Section -->
-        <div class="mt-16 text-center fade-in-up delay-500">
-            <p class="text-xs font-bold text-gray-400 mb-4 uppercase tracking-[0.2em] flex items-center justify-center gap-3">
-                <span class="w-10 h-[1px] bg-gray-300"></span>
-                ติดต่อและติดตามข่าวสาร
-                <span class="w-10 h-[1px] bg-gray-300"></span>
+    <section class="pt-40 pb-32 px-4 text-center min-h-[85vh] flex flex-col justify-center items-center relative">
+        <div class="max-w-4xl mx-auto fade-in-up relative z-10">
+            <span class="glass text-mstPurple text-xs font-bold px-6 py-2 rounded-full uppercase tracking-widest mb-6 inline-block shadow-sm">MSTSC Official</span>
+            <h2 class="text-5xl md:text-7xl font-black mb-6 leading-tight text-mstDark drop-shadow-md">
+                รวมพลังความคิด<br>เพื่อ <span class="text-transparent bg-clip-text bg-gradient-to-r from-mstPurple to-purple-500">วิถีประชาธิปไตย</span>
+            </h2>
+            <p class="text-lg md:text-xl text-gray-600 mb-10 font-medium leading-relaxed max-w-2xl mx-auto">
+                ขับเคลื่อนกิจกรรมและการบริหารงานของสภานักเรียนโรงเรียนเมืองสุราษฎร์ธานี ด้วยความโปร่งใส น้อมนำหลักธรรมาภิบาล และจิตอาสาเพื่อส่วนรวม
             </p>
-            <div class="flex justify-center gap-5">
-                <a href="https://www.facebook.com/mstcouncil" target="_blank" class="w-12 h-12 bg-white rounded-full flex items-center justify-center text-blue-600 text-xl shadow-sm border border-gray-100 hover:bg-blue-600 hover:text-white transition-all transform hover:scale-110 hover:shadow-lg">
-                    <i class="fa-brands fa-facebook-f"></i>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="#news" class="bg-gradient-to-r from-mstPurple to-indigo-600 text-white font-bold px-8 py-4 rounded-full shadow-lg hover:shadow-xl transition transform hover:-translate-y-1 flex items-center justify-center gap-2 text-lg">
+                    <i class="fa-solid fa-newspaper"></i> ข่าวสารล่าสุด
                 </a>
-                <a href="https://instagram.com/MST.STUDENTCOUNCIL" target="_blank" class="w-12 h-12 bg-white rounded-full flex items-center justify-center text-pink-600 text-xl shadow-sm border border-gray-100 hover:bg-gradient-to-tr hover:from-yellow-400 hover:via-pink-500 hover:to-purple-600 hover:text-white transition-all transform hover:scale-110 hover:shadow-lg hover:border-transparent">
-                    <i class="fa-brands fa-instagram"></i>
-                </a>
-                <!-- ลิงก์ LINE ให้วิ่งไปที่หน้าแอดเพื่อนหรือแชทตรงของ MSTSC -->
-                <a href="https://lin.ee/PriqD2o" target="_blank" class="w-12 h-12 bg-white rounded-full flex items-center justify-center text-[#06C755] text-xl shadow-sm border border-gray-100 hover:bg-[#06C755] hover:text-white transition-all transform hover:scale-110 hover:shadow-lg">
-                    <i class="fa-brands fa-line"></i>
+                <a href="#services" class="glass text-mstPurple font-bold px-8 py-4 rounded-full hover:bg-white transition transform hover:-translate-y-1 flex items-center justify-center gap-2 text-lg">
+                    <i class="fa-solid fa-layer-group"></i> ศูนย์บริการ
                 </a>
             </div>
         </div>
-    </main>
+    </section>
 
-    <!-- Footer -->
-    <footer class="w-full text-center py-8 text-xs text-gray-400 font-medium z-10 mt-auto bg-white/30 backdrop-blur-sm border-t border-white/50">
-        <p class="mb-1">&copy; <script>document.write(new Date().getFullYear())</script> Muangsuratthani Student Council. All Rights Reserved.</p>
-        <p class="flex items-center justify-center gap-1">
-            <i class="fas fa-code text-mstPurple opacity-70"></i> 
-            <span class="opacity-80">Developed by MSTSC Tech Team</span>
-        </p>
+    <section id="services" class="py-24 relative z-20">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="text-center mb-16 fade-in-up">
+                <h3 class="text-3xl md:text-4xl font-black text-gray-900 section-title">ศูนย์รวมบริการดิจิทัล</h3>
+                <p class="text-gray-500 font-medium mt-4">บริการอิเล็กทรอนิกส์เพื่อความสะดวกของนักเรียน</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 fade-in-up" style="animation-delay: 0.2s;">
+                <!-- แทนที่ปุ่ม Public Hearing เดิมด้วยโค้ดนี้ -->
+<a href="https://mstsc.pages.dev/feedback/" target="_blank" class="glass glass-hover p-8 rounded-[2rem] text-center block transition-all duration-300 group">
+    <div class="w-20 h-20 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-6 group-hover:scale-110 group-hover:rotate-3 transition shadow-sm"><i class="fa-solid fa-bullhorn"></i></div>
+    <h4 class="font-black text-gray-900 mb-2 text-lg">Public Hearing</h4>
+    <p class="text-sm text-gray-500">ส่งเรื่องร้องเรียน เสนอแนะ ถึงสภานักเรียนโดยตรง</p>
+</a>
+                <!-- แทนที่โค้ดเดิมในส่วนของการ์ด SC Vault -->
+<a href="https://mstsc.pages.dev/vault/" target="_blank" class="glass glass-hover p-8 rounded-[2rem] text-center block transition-all duration-300 group">
+    <div class="w-20 h-20 bg-pink-100 text-pink-600 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-6 group-hover:scale-110 group-hover:-rotate-3 transition shadow-sm"><i class="fa-solid fa-vault"></i></div>
+    <h4 class="font-black text-gray-900 mb-2 text-lg">SC Vault</h4>
+    <p class="text-sm text-gray-500">ระบบคลังจัดเก็บเกียรติบัตรและแฟ้มผลงานส่วนตัวแบบดิจิทัล</p>
+</a>
+
+<!-- แทนที่โค้ดเดิมในส่วนของการ์ด SC Admission -->
+<a href="https://mstsc.pages.dev/admission/" target="_blank" class="glass glass-hover p-8 rounded-[2rem] text-center block transition-all duration-300 group">
+    <div class="w-20 h-20 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-6 group-hover:scale-110 group-hover:rotate-3 transition shadow-sm"><i class="fa-solid fa-user-graduate"></i></div>
+    <h4 class="font-black text-gray-900 mb-2 text-lg">SC Admission</h4>
+    <p class="text-sm text-gray-500">ระบบรับสมัครคณะกรรมการและผู้ช่วยสภานักเรียน</p>
+</a>
+
+<!-- แทนที่โค้ดเดิมในส่วนของการ์ด SC Regis -->
+<a href="https://mstsc.pages.dev/regis" target="_blank" class="glass glass-hover p-8 rounded-[2rem] text-center block transition-all duration-300 group">
+    <div class="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-6 group-hover:scale-110 group-hover:-rotate-3 transition shadow-sm"><i class="fa-solid fa-folder-open"></i></div>
+    <h4 class="font-black text-gray-900 mb-2 text-lg">SC Regis</h4>
+    <p class="text-sm text-gray-500">ระบบทะเบียนและจัดการข้อมูลประวัติของคณะกรรมการ</p>
+</a>
+            </div>
+        </div>
+    </section>
+
+    <section id="projects" class="py-24 relative">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="text-center mb-16">
+                <h3 class="text-3xl md:text-4xl font-black text-gray-900 section-title mx-auto block">ความคืบหน้านโยบายและโครงการ</h3>
+                <p class="text-gray-500 font-medium mt-4">บริหารจัดการโปร่งใส ตรวจสอบได้ ตามวงจรคุณภาพ (PDCA)</p>
+            </div>
+            <div id="projectGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Skeleton Loading (ระหว่างรอโหลด) -->
+                <div class="col-span-full flex justify-center py-10"><div class="animate-spin rounded-full h-12 w-12 border-4 border-mstYellow border-t-mstPurple"></div></div>
+            </div>
+        </div>
+    </section>
+
+    <section id="board" class="py-24">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <h3 class="text-3xl md:text-4xl font-black text-gray-900 section-title mx-auto" id="boardTitle">ทำเนียบคณะกรรมการสภานักเรียน</h3>
+            
+            <div id="yearSelectorContainer" class="mt-8 hidden fade-in-up">
+                <div class="inline-flex items-center bg-white p-2 rounded-2xl shadow-sm border border-gray-200">
+                    <label for="boardYearSelect" class="text-gray-500 font-bold px-4"><i class="fa-solid fa-calendar-days mr-2 text-mstPurple"></i> เลือกปีการศึกษา</label>
+                    <select id="boardYearSelect" onchange="changeBoardYear()" class="bg-gray-50 border border-gray-200 text-mstPurple font-black text-lg rounded-xl px-6 py-2 focus:outline-none focus:ring-2 focus:ring-mstPurple cursor-pointer">
+                    </select>
+                </div>
+            </div>
+
+            <div id="boardContainer" class="space-y-12 mt-12 min-h-[400px]">
+                <div class="flex justify-center pt-20"><div class="animate-spin rounded-full h-12 w-12 border-4 border-mstYellow border-t-mstPurple"></div></div>
+            </div>
+            
+            <div class="mt-20 glass-dark text-white p-8 md:p-12 rounded-[3rem] shadow-2xl flex flex-col md:flex-row justify-center items-center gap-10 md:gap-24 relative overflow-hidden">
+                <div class="text-center relative z-10">
+                    <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center text-2xl mx-auto mb-4 backdrop-blur-md border border-white/30"><i class="fa-solid fa-user-tie"></i></div>
+                    <p class="text-xs text-mstYellow font-bold uppercase tracking-wider mb-2">ผู้อำนวยการโรงเรียน</p>
+                    <p class="font-black text-2xl drop-shadow-md" id="displayDirector"><i class="fa-solid fa-ellipsis text-gray-400"></i></p>
+                </div>
+                <div class="hidden md:block w-px h-24 bg-white/20 relative z-10"></div>
+                <div class="text-center relative z-10">
+                    <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center text-2xl mx-auto mb-4 backdrop-blur-md border border-white/30"><i class="fa-solid fa-chalkboard-user"></i></div>
+                    <p class="text-xs text-mstYellow font-bold uppercase tracking-wider mb-2">ครูที่ปรึกษา</p>
+                    <p class="font-black text-2xl drop-shadow-md" id="displayAdvisor"><i class="fa-solid fa-ellipsis text-gray-400"></i></p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-24">
+        <div class="max-w-7xl mx-auto px-4">
+            <div id="news" class="mb-24">
+                <h3 class="text-3xl md:text-4xl font-black text-gray-900 section-title mx-auto text-center block">ข่าวสารและประกาศ</h3>
+                <div id="publicNewsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-12">
+                    <div class="col-span-full flex justify-center py-10"><div class="animate-spin rounded-full h-12 w-12 border-4 border-mstYellow border-t-mstPurple"></div></div>
+                </div>
+            </div>
+            <div id="mou" class="glass p-8 md:p-12 rounded-[3rem] text-center relative overflow-hidden">
+                <div class="absolute inset-0 bg-white/40"></div>
+                <div class="relative z-10">
+                    <h3 class="text-2xl font-black text-gray-900 mb-2">เครือข่ายสภานักเรียน (MOU)</h3>
+                    <p class="text-gray-600 text-sm mb-10 font-medium">ประสานความร่วมมือ แลกเปลี่ยนเรียนรู้ เพื่อพัฒนาศักยภาพเยาวชนระดับประเทศ</p>
+                    <div id="mouGrid" class="flex flex-wrap justify-center items-center gap-8 md:gap-16">
+                        <div class="animate-spin rounded-full h-8 w-8 border-4 border-mstYellow border-t-mstPurple"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="bg-mstDark text-gray-300 pt-16 pb-8 border-t-[10px] border-mstYellow">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <div class="inline-block bg-white p-2 rounded-full mb-6 shadow-xl">
+                <img src="https://i.ibb.co/GQYCbXrc/logo.webp" alt="Logo" class="h-16 w-16">
+            </div>
+            <h4 class="font-black text-2xl text-white mb-2 tracking-wide">คณะกรรมการสภานักเรียนโรงเรียนเมืองสุราษฎร์ธานี</h4>
+            <p class="text-sm text-gray-400 mb-8 max-w-lg mx-auto leading-relaxed">
+                ห้องคณะกรรมการสภานักเรียน อาคารทรง จีระกุล <br> 223 หมู่ 4 ถนนลูกเสือ อำเภอเมือง จังหวัดสุราษฎร์ธานี 84000
+            </p>
+            <div class="flex justify-center gap-4 mb-10">
+                <a href="https://www.facebook.com/mstcouncil" target="_blank" class="w-12 h-12 rounded-full glass-dark flex items-center justify-center hover:bg-blue-600 hover:border-blue-600 text-white transition text-xl"><i class="fa-brands fa-facebook-f"></i></a>
+                <a href="https://instagram.com/MST.STUDENTCOUNCIL" target="_blank" class="w-12 h-12 rounded-full glass-dark flex items-center justify-center hover:bg-pink-600 hover:border-pink-600 text-white transition text-xl"><i class="fa-brands fa-instagram"></i></a>
+            </div>
+            <div class="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center text-xs text-gray-500 pb-[env(safe-area-inset-bottom)]">
+                <p>&copy; <script>document.write(new Date().getFullYear())</script> MSTSC. All rights reserved.</p>
+                <p class="mt-2 md:mt-0 font-bold"><i class="fa-solid fa-code text-mstPurple mr-1"></i> Developed by MSTSC Tech Team</p>
+            </div>
+        </div>
     </footer>
 
+    <!-- HTML: Modal หน้าต่างอ่านข่าว -->
+    <div id="newsModal" class="modal-overlay fixed inset-0 flex items-center justify-center p-4 md:p-8">
+        <div class="modal-content bg-white w-full max-w-3xl max-h-[90vh] rounded-[2rem] shadow-2xl overflow-hidden flex flex-col relative">
+            <button onclick="closeNewsModal()" class="absolute top-4 right-4 w-10 h-10 bg-black/50 hover:bg-red-500 text-white rounded-full flex items-center justify-center transition z-20 backdrop-blur-md"><i class="fa-solid fa-xmark"></i></button>
+            <div class="h-64 sm:h-80 w-full relative bg-gray-200 shrink-0">
+                <img id="modalImg" src="" class="w-full h-full object-cover">
+                <div id="modalCat" class="absolute top-4 left-4 text-white text-[10px] font-bold px-4 py-1.5 rounded-full shadow-md">หมวดหมู่</div>
+            </div>
+            <div class="p-6 md:p-10 overflow-y-auto flex-1">
+                <p id="modalDate" class="text-sm font-bold text-gray-400 mb-2"><i class="fa-regular fa-clock"></i> วันที่</p>
+                <h3 id="modalTitle" class="text-2xl md:text-3xl font-black text-gray-900 mb-6 leading-tight">หัวข้อข่าว</h3>
+                <!-- เปลี่ยนเป็น innerHTML เพื่อรองรับ Rich Text จากแอดมิน -->
+                <div id="modalContent" class="text-gray-800 rich-text-content">เนื้อหาข่าว...</div>
+            </div>
+        </div>
+    </div>
+
+    
+
+    <!-- UI Core Script -->
+    <script>
+        window.newsDataList = []; 
+        window.allBoardMembers = [];
+
+        function toggleMobileMenu() { document.getElementById('mobileMenu').classList.toggle('hidden'); }
+        function showComingSoon() { Swal.fire({ title: 'กำลังพัฒนา!', text: 'ระบบนี้กำลังอยู่ระหว่างการพัฒนา จะเปิดให้บริการเร็วๆ นี้ครับ', icon: 'info', confirmButtonColor: '#4C1D95', customClass: { popup: 'rounded-3xl' } }); }
+        
+        function openNewsModal(index) {
+            const data = window.newsDataList[index];
+            if(!data) return;
+            document.getElementById('modalImg').src = data.image;
+            document.getElementById('modalTitle').innerText = data.title;
+            // รองรับ HTML จาก Quill
+            document.getElementById('modalContent').innerHTML = data.content;
+            document.getElementById('modalDate').innerHTML = `<i class="fa-regular fa-clock"></i> ${new Date(data.date).toLocaleDateString('th-TH', { year:'numeric', month:'long', day:'numeric' })}`;
+            const catBadge = document.getElementById('modalCat');
+            catBadge.innerText = data.category;
+            catBadge.className = `absolute top-4 left-4 text-white text-[10px] font-bold px-4 py-1.5 rounded-full shadow-md ${data.category==='ประกาศ'?'bg-red-500':(data.category==='กิจกรรม'?'bg-emerald-500':'bg-blue-500')}`;
+            document.getElementById('newsModal').classList.add('active'); document.body.style.overflow = 'hidden';
+        }
+        function closeNewsModal() { document.getElementById('newsModal').classList.remove('active'); document.body.style.overflow = 'auto'; }
+        function openFeedbackModal() { document.getElementById('feedbackModal').classList.add('active'); document.body.style.overflow = 'hidden'; }
+        function closeFeedbackModal() { document.getElementById('feedbackModal').classList.remove('active'); document.body.style.overflow = 'auto'; }
+
+        window.changeBoardYear = () => { renderBoard(document.getElementById('boardYearSelect').value); }
+
+        function renderBoard(targetYear) {
+            const container = document.getElementById('boardContainer');
+            document.getElementById('boardTitle').innerText = `ทำเนียบคณะกรรมการ ปีการศึกษา ${targetYear}`;
+            const members = window.allBoardMembers.filter(m => m.year == targetYear);
+            const grouped = members.reduce((acc, obj) => {
+                let key = obj.department || "คณะกรรมการทั่วไป";
+                if (!acc[key]) acc[key] = []; acc[key].push(obj); return acc;
+            }, {});
+
+            if(Object.keys(grouped).length === 0) { container.innerHTML = `<div class="text-center py-10 text-gray-500 font-bold glass rounded-3xl w-full">ไม่พบข้อมูลปีการศึกษา ${targetYear}</div>`; return; }
+
+            let presidentHtml = ''; let othersHtml = '';
+            for (const [dept, mems] of Object.entries(grouped)) {
+                let deptHtml = `<div class="mb-12"><h4 class="text-xl font-bold text-mstPurple border-b-2 border-mstYellow pb-2 mb-8 inline-block">${dept}</h4><div class="grid grid-cols-2 md:grid-cols-4 gap-6 justify-center">`;
+                mems.forEach(m => {
+                    let isPres = m.role.includes('ประธาน') && !m.role.includes('รอง');
+                    let card = `<div class="glass glass-hover p-6 rounded-3xl text-center group"><img src="${m.image}" class="w-24 h-24 object-cover rounded-full mx-auto mb-4 border-4 border-white shadow-md group-hover:scale-110 transition duration-300" onerror="this.src='https://i.ibb.co/GQYCbXrc/logo.webp'"><h4 class="font-bold text-gray-900">${m.name}</h4><p class="text-xs text-mstPurple font-bold mt-1">${m.role}</p></div>`;
+                    if (isPres) presidentHtml = `<div class="flex justify-center mb-16"><div class="glass glass-hover p-10 rounded-[3rem] w-full max-w-md text-center group"><div class="relative w-36 h-36 mx-auto mb-6"><div class="absolute inset-0 bg-mstYellow rounded-full blur-xl opacity-50 group-hover:opacity-100 transition"></div><img src="${m.image}" class="relative w-full h-full object-cover rounded-full border-4 border-white shadow-xl group-hover:scale-105 transition" onerror="this.src='https://i.ibb.co/GQYCbXrc/logo.webp'"></div><h4 class="text-3xl font-black text-gray-900 mb-1">${m.name}</h4><p class="text-mstDark font-bold text-sm bg-mstYellow px-4 py-1.5 rounded-full inline-block mt-2 shadow-sm">${m.role}</p></div></div>`;
+                    else deptHtml += card;
+                });
+                deptHtml += `</div></div>`;
+                if(mems.some(m => !m.role.includes('ประธาน') || m.role.includes('รอง'))) othersHtml += deptHtml;
+            }
+            container.innerHTML = presidentHtml + othersHtml;
+        }
+
+        window.addEventListener('scroll', () => {
+            const nav = document.getElementById('navbar');
+            if (window.scrollY > 20) { nav.classList.add('shadow-md'); nav.classList.replace('glass', 'bg-white/95'); }
+            else { nav.classList.remove('shadow-md'); nav.classList.replace('bg-white/95', 'glass'); }
+        });
+    </script>
+
+    <!-- Firebase Connection Script -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, getDoc, doc, query, orderBy, limit, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAaZXkpLEjASJY4Dc-il8FmjDiZgTDhwkc",
+            authDomain: "mstsc-official-portal.firebaseapp.com",
+            databaseURL: "https://mstsc-official-portal-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "mstsc-official-portal",
+            storageBucket: "mstsc-official-portal.firebasestorage.app",
+            messagingSenderId: "267251332849",
+            appId: "1:267251332849:web:c28f5fdc7327a324f2db50"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadSchoolInfo();
+            loadPublicBoard();
+            loadPublicNews();
+            loadProjects();
+            loadMOU();
+        });
+
+        async function loadSchoolInfo() {
+            try {
+                const docSnap = await getDoc(doc(db, "official_settings", "personnel"));
+                if (docSnap.exists()) {
+                    document.getElementById('displayDirector').innerText = docSnap.data().directorName || "-";
+                    document.getElementById('displayAdvisor').innerText = docSnap.data().advisorName || "-";
+                }
+            } catch (e) {}
+        }
+
+        async function loadPublicBoard() {
+            const container = document.getElementById('boardContainer');
+            const selectorContainer = document.getElementById('yearSelectorContainer');
+            const selector = document.getElementById('boardYearSelect');
+            try {
+                const q = query(collection(db, "official_board"), orderBy("timestamp", "asc"));
+                const qs = await getDocs(q);
+                if (qs.empty) { container.innerHTML = `<div class="text-center py-10 text-gray-500 font-bold glass rounded-3xl">ยังไม่มีข้อมูล</div>`; return; }
+
+                window.allBoardMembers = []; qs.forEach(d => window.allBoardMembers.push(d.data()));
+                const uniqueYears = [...new Set(window.allBoardMembers.map(m => m.year))].sort((a,b) => b-a);
+                
+                if(uniqueYears.length > 0) {
+                    selector.innerHTML = ''; uniqueYears.forEach(year => selector.innerHTML += `<option value="${year}">${year}</option>`);
+                    selectorContainer.classList.remove('hidden'); renderBoard(uniqueYears[0]);
+                }
+            } catch (e) { container.innerHTML = `<div class="text-center text-red-500">Error!</div>`; }
+        }
+
+        async function loadPublicNews() {
+            const grid = document.getElementById('publicNewsGrid');
+            try {
+                const q = query(collection(db, "official_news"), orderBy("timestamp", "desc"), limit(6));
+                const qs = await getDocs(q);
+                if (qs.empty) { grid.innerHTML = `<div class="col-span-full text-center py-10 text-gray-500 font-bold glass rounded-3xl">ไม่มีข่าวสาร</div>`; return; }
+                let html = ''; window.newsDataList = []; let index = 0;
+                qs.forEach(doc => {
+                    const n = doc.data(); window.newsDataList.push(n); 
+                    const thDate = new Date(n.date).toLocaleDateString('th-TH', { year:'numeric', month:'short', day:'numeric' });
+                    let bg = n.category==='ประกาศ'?'bg-red-500':(n.category==='กิจกรรม'?'bg-emerald-500':'bg-blue-500');
+                    
+                    // แปลงเนื้อหา HTML ให้เป็น Text ล้วนเพื่อทำเป็น Preview ในการ์ดข่าว
+                    const previewText = n.content.replace(/<[^>]+>/g, ' '); 
+
+                    html += `<article class="glass glass-hover rounded-[2rem] overflow-hidden flex flex-col group"><div class="relative h-56 overflow-hidden bg-gray-200"><img src="${n.image}" class="w-full h-full object-cover group-hover:scale-110 transition duration-700" onerror="this.src='https://i.ibb.co/GQYCbXrc/logo.webp'"><div class="absolute top-4 left-4 ${bg} text-white text-[10px] font-bold px-4 py-1.5 rounded-full shadow-md">${n.category}</div></div><div class="p-8 flex flex-col flex-1"><p class="text-xs font-bold text-gray-400 mb-3"><i class="fa-regular fa-clock"></i> ${thDate}</p><h4 class="text-xl font-black text-gray-900 mb-3 line-clamp-2">${n.title}</h4><p class="text-sm text-gray-600 mb-6 line-clamp-3">${previewText}</p><a onclick="openNewsModal(${index})" class="mt-auto text-mstPurple font-bold text-sm hover:underline flex items-center gap-1 group-hover:text-mstYellow transition cursor-pointer">อ่านรายละเอียด <i class="fa-solid fa-arrow-right text-xs"></i></a></div></article>`;
+                    index++;
+                }); 
+                grid.innerHTML = html;
+            } catch (e) { grid.innerHTML = `<div class="col-span-full text-center text-red-500">Error!</div>`; }
+        }
+
+        async function loadProjects() {
+            const grid = document.getElementById('projectGrid');
+            try {
+                const qs = await getDocs(query(collection(db, "official_projects"), orderBy("timestamp", "desc")));
+                if (qs.empty) { grid.innerHTML = `<div class="col-span-full text-center py-10 text-gray-500 glass rounded-3xl">ยังไม่มีข้อมูล</div>`; return; }
+                let html = '';
+                qs.forEach(doc => {
+                    const p = doc.data();
+                    let stepColor = p.step === 'Plan' ? 'bg-gray-200 text-gray-600' : (p.step === 'Do' ? 'bg-blue-100 text-blue-600' : (p.step === 'Check' ? 'bg-yellow-100 text-yellow-600' : 'bg-emerald-100 text-emerald-600'));
+                    html += `<div class="glass glass-hover p-8 rounded-3xl"><div class="flex justify-between items-start mb-6"><h4 class="font-bold text-gray-900 text-lg leading-tight w-2/3">${p.title}</h4><span class="${stepColor} text-xs font-bold px-3 py-1.5 rounded-lg border border-white/50">${p.step}</span></div><div class="w-full bg-gray-200/50 rounded-full h-3 mb-2 shadow-inner border border-white/50"><div class="bg-gradient-to-r from-mstPurple to-indigo-400 h-3 rounded-full shadow-md" style="width: ${p.progress}%"></div></div><div class="flex justify-between text-xs font-bold text-gray-500 mt-2"><span>ความคืบหน้า</span><span class="text-mstPurple text-sm">${p.progress}%</span></div></div>`;
+                }); grid.innerHTML = html;
+            } catch (e) { grid.innerHTML = ``; }
+        }
+
+        async function loadMOU() {
+            const grid = document.getElementById('mouGrid');
+            try {
+                const qs = await getDocs(collection(db, "official_mou"));
+                if (qs.empty) { grid.innerHTML = `<p class="text-gray-400">ยังไม่มีเครือข่าย</p>`; return; }
+                let html = '';
+                qs.forEach(doc => {
+                    const m = doc.data();
+                    html += `<div class="flex flex-col items-center group cursor-pointer bg-white/50 p-4 rounded-2xl border border-white/50 hover:bg-white transition shadow-sm hover:shadow-md"><img src="${m.logo}" class="w-16 h-16 md:w-20 md:h-20 object-contain grayscale group-hover:grayscale-0 transition duration-300 opacity-70 group-hover:opacity-100" title="${m.name}" onerror="this.style.display='none'"><p class="text-[10px] md:text-xs font-bold text-gray-500 mt-3 group-hover:text-mstPurple transition max-w-[120px] text-center leading-tight">${m.name}</p></div>`;
+                }); grid.innerHTML = html;
+            } catch (e) { grid.innerHTML = ``; }
+        }
+    </script>
 </body>
 </html>

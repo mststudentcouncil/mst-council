@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>MSTSC CMS - Admin Dashboard</title>
+    
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Quill.js Editor -->
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+
+    <!-- Tailwind & SweetAlert -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>tailwind.config = { theme: { extend: { fontFamily: { sans: ['Anuphan', 'sans-serif'] }, colors: { mstPurple: '#4C1D95', mstDark: '#0f172a' } } } }</script>
+    
+    <style>
+        ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .ql-editor { font-family: 'Anuphan', sans-serif; font-size: 14px; min-height: 150px; background: #f9fafb; border-bottom-left-radius: 0.75rem; border-bottom-right-radius: 0.75rem; }
+        .ql-toolbar.ql-snow { border-top-left-radius: 0.75rem; border-top-right-radius: 0.75rem; background: #ffffff; border-color: #d1d5db; }
+        .ql-container.ql-snow { border-color: #d1d5db; }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800 flex h-screen overflow-hidden antialiased pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
+
+    <!-- Login Overlay -->
+    <div id="loginOverlay" class="fixed inset-0 bg-mstDark/95 z-[100] flex items-center justify-center px-4 backdrop-blur-md">
+        <div class="bg-white p-8 md:p-10 rounded-[2rem] w-full max-w-md shadow-2xl relative overflow-hidden">
+            <div class="absolute -top-10 -right-10 w-32 h-32 bg-mstPurple rounded-full blur-2xl opacity-20"></div>
+            <div class="text-center mb-8 relative z-10">
+                <div class="w-16 h-16 bg-purple-100 text-mstPurple rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4"><i class="fa-solid fa-user-shield"></i></div>
+                <h2 class="text-2xl font-black text-gray-900">เข้าสู่ระบบเจ้าหน้าที่</h2>
+                <p class="text-sm text-gray-500 mt-2">MSTSC Content Management System</p>
+            </div>
+            <div class="space-y-5 relative z-10">
+                <button onclick="loginWithGoogle()" class="w-full bg-white border-2 border-gray-200 text-gray-700 font-bold py-3.5 rounded-xl shadow-sm hover:bg-gray-50 hover:border-gray-300 transition flex items-center justify-center gap-3">
+                    <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-5 h-5" alt="Google"> เข้าสู่ระบบด้วย @mst.ac.th
+                </button>
+                <div class="relative flex items-center py-2"><div class="flex-grow border-t border-gray-200"></div><span class="flex-shrink-0 mx-4 text-gray-400 text-xs font-bold uppercase">หรืออีเมลสำรอง</span><div class="flex-grow border-t border-gray-200"></div></div>
+                <form id="loginForm" class="space-y-4">
+                    <div><input type="email" id="loginEmail" placeholder="อีเมล" class="w-full border border-gray-300 rounded-xl p-3.5 text-sm focus:ring-2 focus:ring-mstPurple outline-none bg-gray-50"></div>
+                    <div><input type="password" id="loginPassword" placeholder="รหัสผ่าน" class="w-full border border-gray-300 rounded-xl p-3.5 text-sm focus:ring-2 focus:ring-mstPurple outline-none bg-gray-50"></div>
+                    <button type="submit" class="w-full bg-mstPurple text-white font-bold py-3.5 rounded-xl shadow-lg hover:-translate-y-1 transition mt-2">เข้าสู่ระบบ</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- UI หลัก -->
+    <div id="appWorkspace" class="flex h-screen w-full hidden">
+        <div id="sidebarOverlay" class="fixed inset-0 bg-black/50 z-30 hidden lg:hidden backdrop-blur-sm" onclick="toggleSidebar()"></div>
+
+        <!-- Sidebar -->
+        <aside id="sidebar" class="w-72 bg-mstDark text-white flex-col fixed lg:relative z-40 h-full transition-transform transform -translate-x-full lg:translate-x-0 flex shadow-2xl shrink-0 pb-[env(safe-area-inset-bottom)]">
+            <div class="p-6 border-b border-gray-800 flex items-center gap-4 relative overflow-hidden">
+                <div class="absolute -right-10 -top-10 w-32 h-32 bg-mstPurple rounded-full blur-2xl opacity-40"></div>
+                <div class="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center text-2xl relative z-10"><i class="fa-solid fa-layer-group"></i></div>
+                <div class="relative z-10"><h2 class="font-black text-lg text-white leading-tight">MSTSC CMS</h2><p class="text-[10px] text-gray-400 uppercase font-bold">Workspace</p></div>
+                <button onclick="toggleSidebar()" class="absolute top-6 right-4 text-gray-400 hover:text-white lg:hidden z-20"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            
+            <div class="p-4 flex-1 overflow-y-auto">
+                <p class="text-xs text-gray-500 font-bold uppercase tracking-wider mb-3 px-2 mt-2">เมนูการจัดการ</p>
+                <nav class="space-y-1.5">
+                    <button onclick="switchTab('dashTab', this, 'ภาพรวมระบบ (Dashboard)')" class="nav-btn active w-full flex items-center gap-3 px-4 py-3.5 bg-mstPurple rounded-xl text-white font-bold shadow-md transition"><i class="fa-solid fa-chart-pie w-5 text-center"></i> ภาพรวมระบบ</button>
+                    <button onclick="switchTab('feedbackTab', this, 'เรื่องร้องเรียน (Public Hearing)')" class="nav-btn w-full flex items-center gap-3 px-4 py-3.5 text-gray-400 hover:bg-white/10 hover:text-white rounded-xl font-bold transition relative"><i class="fa-solid fa-bullhorn w-5 text-center"></i> เรื่องร้องเรียน <span id="fbBadge" class="absolute right-3 bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full hidden">0</span></button>
+                    <button onclick="switchTab('newsTab', this, 'ข่าวสาร / ประกาศ')" class="nav-btn w-full flex items-center gap-3 px-4 py-3.5 text-gray-400 hover:bg-white/10 hover:text-white rounded-xl font-bold transition mt-2"><i class="fa-solid fa-newspaper w-5 text-center"></i> ข่าวสาร / ประกาศ</button>
+                    <button onclick="switchTab('boardTab', this, 'ทำเนียบสภานักเรียน')" class="nav-btn w-full flex items-center gap-3 px-4 py-3.5 text-gray-400 hover:bg-white/10 hover:text-white rounded-xl font-bold transition"><i class="fa-solid fa-users w-5 text-center"></i> ทำเนียบรุ่น (Bulk)</button>
+                    <button onclick="switchTab('projectsTab', this, 'ติดตามโครงการ (PDCA)')" class="nav-btn w-full flex items-center gap-3 px-4 py-3.5 text-gray-400 hover:bg-white/10 hover:text-white rounded-xl font-bold transition"><i class="fa-solid fa-chart-line w-5 text-center"></i> ความคืบหน้าโครงการ</button>
+                    <button onclick="switchTab('mouTab', this, 'เครือข่ายสภานักเรียน (MOU)')" class="nav-btn w-full flex items-center gap-3 px-4 py-3.5 text-gray-400 hover:bg-white/10 hover:text-white rounded-xl font-bold transition"><i class="fa-solid fa-handshake w-5 text-center"></i> เครือข่าย (MOU)</button>
+                    <button onclick="switchTab('settingsTab', this, 'ตั้งค่าระบบ')" class="nav-btn w-full flex items-center gap-3 px-4 py-3.5 text-gray-400 hover:bg-white/10 hover:text-white rounded-xl font-bold transition mt-6 border-t border-gray-800 pt-6"><i class="fa-solid fa-gear w-5 text-center"></i> ตั้งค่าข้อมูลพื้นฐาน</button>
+                </nav>
+            </div>
+            
+            <div class="p-4 bg-gray-900/50">
+                <a href="./index.html" target="_blank" class="w-full flex items-center justify-center gap-2 bg-white/5 text-gray-300 hover:bg-white/10 hover:text-white py-3 rounded-xl font-bold transition mb-3 text-sm"><i class="fa-solid fa-arrow-up-right-from-square"></i> ดูหน้าเว็บไซต์</a>
+                <button onclick="logoutAdmin()" class="w-full flex items-center justify-center gap-2 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white py-3 rounded-xl font-bold transition text-sm"><i class="fa-solid fa-power-off"></i> ออกจากระบบ</button>
+            </div>
+        </aside>
+
+        <!-- Main Workspace -->
+        <main class="flex-1 flex flex-col overflow-hidden w-full relative">
+            <header class="bg-white h-20 border-b border-gray-200 flex items-center justify-between px-4 sm:px-8 shrink-0 shadow-sm z-10">
+                <div class="flex items-center gap-4">
+                    <button onclick="toggleSidebar()" class="lg:hidden text-gray-500 hover:text-mstPurple text-2xl"><i class="fa-solid fa-bars-staggered"></i></button>
+                    <h1 class="text-xl sm:text-2xl font-black text-gray-900" id="headerTitle">ภาพรวมระบบ (Dashboard)</h1>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="text-right hidden md:block"><p id="adminUserName" class="text-sm font-bold text-gray-900 leading-none mb-1"></p><p id="adminUserEmail" class="text-xs font-bold text-mstPurple leading-none"></p></div>
+                    <img id="adminUserPhoto" src="https://ui-avatars.com/api/?name=Admin&background=4C1D95&color=fff" class="w-10 h-10 rounded-full border-2 border-mstPurple shadow-md object-cover" onerror="this.src='https://ui-avatars.com/api/?name=Admin&background=4C1D95&color=fff'">
+                </div>
+            </header>
+
+            <div class="flex-1 overflow-y-auto p-4 sm:p-8 bg-gray-50/50">
+                
+                <!-- Tab 0: Dashboard -->
+                <div id="dashTab" class="tab-content grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-[1400px] mx-auto">
+                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-200 flex items-center gap-4">
+                        <div class="w-14 h-14 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center text-2xl"><i class="fa-solid fa-newspaper"></i></div>
+                        <div><p class="text-sm text-gray-500 font-bold">ข่าวสารทั้งหมด</p><h3 class="text-3xl font-black text-gray-900" id="statNews">0</h3></div>
+                    </div>
+                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-200 flex items-center gap-4">
+                        <div class="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center text-2xl"><i class="fa-solid fa-chart-pie"></i></div>
+                        <div><p class="text-sm text-gray-500 font-bold">โครงการทั้งหมด</p><h3 class="text-3xl font-black text-gray-900" id="statProj">0</h3></div>
+                    </div>
+                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-200 flex items-center gap-4">
+                        <div class="w-14 h-14 bg-purple-100 text-mstPurple rounded-2xl flex items-center justify-center text-2xl"><i class="fa-solid fa-users"></i></div>
+                        <div><p class="text-sm text-gray-500 font-bold">คณะกรรมการ (รวม)</p><h3 class="text-3xl font-black text-gray-900" id="statBoard">0</h3></div>
+                    </div>
+                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-200 flex items-center gap-4 border-l-4 border-l-red-500">
+                        <div class="w-14 h-14 bg-red-100 text-red-600 rounded-2xl flex items-center justify-center text-2xl"><i class="fa-solid fa-bullhorn"></i></div>
+                        <div><p class="text-sm text-gray-500 font-bold">เรื่องร้องเรียน</p><h3 class="text-3xl font-black text-red-600" id="statFeedback">0</h3></div>
+                    </div>
+                    <div class="col-span-1 md:col-span-2 lg:col-span-4 bg-mstDark text-white p-10 rounded-[2rem] mt-4 relative overflow-hidden shadow-lg">
+                        <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-mstPurple rounded-full blur-3xl opacity-50"></div>
+                        <h2 class="text-3xl font-black mb-2 relative z-10">ยินดีต้อนรับสู่ระบบจัดการ MSTSC</h2>
+                        <p class="text-gray-400 relative z-10">ระบบบริหารจัดการเนื้อหาและบริการดิจิทัล สภานักเรียนโรงเรียนเมืองสุราษฎร์ธานี (Full Option)</p>
+                    </div>
+                </div>
+
+                <!-- Tab: Feedback -->
+                <div id="feedbackTab" class="tab-content hidden max-w-[1400px] mx-auto">
+                    <div class="bg-white p-8 rounded-[2rem] shadow-sm border border-gray-200 min-h-[500px] flex flex-col">
+                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                            <h3 class="text-xl font-black text-gray-900"><i class="fa-solid fa-bullhorn text-red-500 mr-2"></i> กล่องรับความคิดเห็นและร้องเรียน</h3>
+                            <button onclick="exportFeedbackCSV()" class="bg-emerald-500 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-md hover:bg-emerald-600 transition flex items-center gap-2"><i class="fa-solid fa-file-csv"></i> ดาวน์โหลด Excel (CSV)</button>
+                        </div>
+                        <div class="flex-1 overflow-auto border border-gray-200 rounded-2xl bg-gray-50">
+                            <table class="w-full text-left text-sm"><thead class="bg-gray-100 text-gray-700 sticky top-0 shadow-sm whitespace-nowrap"><tr><th class="p-4">วันที่</th><th class="p-4">ผู้ส่ง</th><th class="p-4 w-full">รายละเอียด</th><th class="p-4 text-center">จัดการ</th></tr></thead><tbody id="fbTableBody" class="divide-y divide-gray-200 bg-white"></tbody></table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab 1: ข่าวสาร -->
+                <div id="newsTab" class="tab-content hidden grid grid-cols-1 xl:grid-cols-12 gap-8 max-w-[1400px] mx-auto">
+                    <div class="xl:col-span-5 space-y-6">
+                        <div class="bg-white p-8 rounded-[2rem] shadow-sm border border-gray-200">
+                            <h3 class="text-xl font-black text-gray-900 mb-6 flex items-center gap-2"><div class="w-8 h-8 bg-purple-100 text-mstPurple rounded-lg flex items-center justify-center"><i class="fa-solid fa-pen"></i></div> สร้างโพสต์ใหม่</h3>
+                            <form id="newsForm" class="space-y-4">
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div><label class="block text-sm font-bold text-gray-700 mb-1">หมวดหมู่</label><select id="nCat" required class="w-full border border-gray-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-mstPurple outline-none bg-gray-50"><option value="ข่าวสาร">📰 ข่าวสาร</option><option value="กิจกรรม">📅 กิจกรรม</option><option value="ประกาศ">🚨 ประกาศ</option></select></div>
+                                    <div><label class="block text-sm font-bold text-gray-700 mb-1">วันที่</label><input type="date" id="nDate" required class="w-full border border-gray-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-mstPurple outline-none bg-gray-50"></div>
+                                </div>
+                                <div><label class="block text-sm font-bold text-gray-700 mb-1">หัวข้อ</label><input type="text" id="nTitle" required class="w-full border border-gray-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-mstPurple outline-none bg-gray-50"></div>
+                                
+                                <div>
+                                    <label class="block text-sm font-bold text-gray-700 mb-1">รูปภาพประกอบ (อัปโหลด หรือ วาง URL)</label>
+                                    <div class="flex flex-col gap-2">
+                                        <input type="file" id="nImgFile" accept="image/*" class="text-sm file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-purple-100 file:text-mstPurple hover:file:bg-purple-200 cursor-pointer">
+                                        <input type="url" id="nImgUrl" placeholder="หรือวางลิงก์รูปภาพที่นี่..." class="w-full border border-gray-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-mstPurple outline-none bg-gray-50">
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-bold text-gray-700 mb-1">รายละเอียด (จัดรูปแบบได้)</label>
+                                    <div id="editor-container"></div>
+                                </div>
+                                <button type="submit" class="w-full bg-mstPurple text-white font-bold py-3.5 rounded-xl shadow-md hover:-translate-y-1 transition mt-4"><i class="fa-solid fa-save mr-2"></i> บันทึกโพสต์</button>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="xl:col-span-7 bg-white p-8 rounded-[2rem] shadow-sm border border-gray-200 min-h-[500px] flex flex-col">
+                        <h3 class="text-xl font-black text-gray-900 mb-6"><i class="fa-solid fa-database text-mstPurple mr-2"></i> ฐานข้อมูล</h3>
+                        <div class="flex-1 overflow-auto border border-gray-200 rounded-2xl bg-gray-50">
+                            <table class="w-full text-left text-sm whitespace-nowrap"><thead class="bg-gray-100 text-gray-700 sticky top-0 shadow-sm"><tr><th class="p-4">ประเภท</th><th class="p-4 w-full">หัวข้อ</th><th class="p-4 text-center">จัดการ</th></tr></thead><tbody id="newsTableBody" class="divide-y divide-gray-200 bg-white"></tbody></table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab 2: ทำเนียบ -->
+                <div id="boardTab" class="tab-content hidden grid grid-cols-1 xl:grid-cols-12 gap-8 max-w-[1400px] mx-auto">
+                    <div class="xl:col-span-4 bg-white p-8 rounded-[2rem] shadow-sm border border-gray-200 h-fit">
+                        <h3 class="text-xl font-black text-gray-900 mb-2"><i class="fa-solid fa-users text-blue-600 mr-2"></i> เพิ่มคณะกรรมการ</h3>
+                        <p class="text-xs text-gray-500 mb-6">ก๊อปปี้จาก Excel มาวาง (ชื่อ | ตำแหน่ง | ฝ่าย | URLรูป)</p>
+                        <form id="boardForm" class="space-y-4">
+                            <div><label class="block text-sm font-bold mb-1">ปีการศึกษา</label><input type="number" id="bYear" value="2568" required class="w-full border border-gray-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 bg-gray-50 font-bold"></div>
+                            <div><label class="block text-sm font-bold mb-1">วางข้อมูล (Paste Here)</label><textarea id="bPaste" required rows="6" placeholder="นาย ก	ประธานฯ	-	https://..." class="w-full border border-gray-300 rounded-xl p-3 text-xs focus:ring-2 focus:ring-blue-500 bg-gray-50 font-mono resize-none whitespace-pre overflow-x-auto"></textarea></div>
+                            <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3.5 rounded-xl shadow-md hover:-translate-y-1 transition">นำเข้าข้อมูล</button>
+                        </form>
+                    </div>
+                    <div class="xl:col-span-8 bg-white p-8 rounded-[2rem] shadow-sm border border-gray-200 min-h-[500px] flex flex-col">
+                        <h3 class="text-xl font-black text-gray-900 mb-6">ฐานข้อมูลทำเนียบรุ่น</h3>
+                        <div class="flex-1 overflow-auto border border-gray-200 rounded-2xl bg-gray-50"><table class="w-full text-left text-sm whitespace-nowrap"><thead class="bg-gray-100 text-gray-700 sticky top-0 shadow-sm"><tr><th class="p-4 text-center">ปี</th><th class="p-4 w-full">ชื่อ-สกุล / ตำแหน่ง</th><th class="p-4 text-center">จัดการ</th></tr></thead><tbody id="boardTableBody" class="divide-y divide-gray-200 bg-white"></tbody></table></div>
+                    </div>
+                </div>
+
+                <!-- Tab 3: โครงการ PDCA -->
+                <div id="projectsTab" class="tab-content hidden grid grid-cols-1 xl:grid-cols-12 gap-8 max-w-[1400px] mx-auto">
+                    <div class="xl:col-span-4 bg-white p-8 rounded-[2rem] shadow-sm border border-gray-200 h-fit">
+                        <h3 class="text-xl font-black text-gray-900 mb-6"><i class="fa-solid fa-chart-pie text-emerald-500 mr-2"></i> เพิ่มโครงการ</h3>
+                        <form id="projForm" class="space-y-4">
+                            <div><label class="block text-sm font-bold mb-1">ชื่อโครงการ</label><input type="text" id="pTitle" required class="w-full border border-gray-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 bg-gray-50"></div>
+                            <div><label class="block text-sm font-bold mb-1">ขั้นตอน (PDCA)</label><select id="pStep" class="w-full border border-gray-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 bg-gray-50"><option value="Plan">Plan (วางแผน)</option><option value="Do">Do (กำลังดำเนินการ)</option><option value="Check">Check (ประเมินผล)</option><option value="Act">Act (เสร็จสมบูรณ์)</option></select></div>
+                            <div><label class="block text-sm font-bold mb-1">ความคืบหน้า (%)</label><input type="number" id="pProg" min="0" max="100" value="0" required class="w-full border border-gray-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 bg-gray-50"></div>
+                            <button type="submit" class="w-full bg-emerald-500 text-white font-bold py-3.5 rounded-xl shadow-md hover:-translate-y-1 transition">บันทึกโครงการ</button>
+                        </form>
+                    </div>
+                    <div class="xl:col-span-8 bg-white p-8 rounded-[2rem] shadow-sm border border-gray-200 min-h-[500px] flex flex-col">
+                        <h3 class="text-xl font-black text-gray-900 mb-6">ฐานข้อมูลโครงการ</h3>
+                        <div class="flex-1 overflow-auto border border-gray-200 rounded-2xl bg-gray-50"><table class="w-full text-left text-sm whitespace-nowrap"><thead class="bg-gray-100 text-gray-700 sticky top-0 shadow-sm"><tr><th class="p-4 w-full">ชื่อโครงการ</th><th class="p-4 text-center">สถานะ</th><th class="p-4 text-center">ความคืบหน้า</th><th class="p-4 text-center">จัดการ</th></tr></thead><tbody id="projTableBody" class="divide-y divide-gray-200 bg-white"></tbody></table></div>
+                    </div>
+                </div>
+
+                <!-- Tab 4: เครือข่าย MOU -->
+                <div id="mouTab" class="tab-content hidden grid grid-cols-1 xl:grid-cols-12 gap-8 max-w-[1400px] mx-auto">
+                    <div class="xl:col-span-4 bg-white p-8 rounded-[2rem] shadow-sm border border-gray-200 h-fit">
+                        <h3 class="text-xl font-black text-gray-900 mb-6"><i class="fa-solid fa-handshake text-orange-500 mr-2"></i> เพิ่มเครือข่าย</h3>
+                        <form id="mouForm" class="space-y-4">
+                            <div><label class="block text-sm font-bold mb-1">ชื่อโรงเรียนเครือข่าย</label><input type="text" id="mName" required class="w-full border border-gray-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-orange-500 bg-gray-50"></div>
+                            <div><label class="block text-sm font-bold mb-1">URL โลโก้</label><input type="url" id="mLogo" required class="w-full border border-gray-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-orange-500 bg-gray-50"></div>
+                            <button type="submit" class="w-full bg-orange-500 text-white font-bold py-3.5 rounded-xl shadow-md hover:-translate-y-1 transition">บันทึกเครือข่าย</button>
+                        </form>
+                    </div>
+                    <div class="xl:col-span-8 bg-white p-8 rounded-[2rem] shadow-sm border border-gray-200 min-h-[500px] flex flex-col">
+                        <h3 class="text-xl font-black text-gray-900 mb-6">ฐานข้อมูลเครือข่าย</h3>
+                        <div class="flex-1 overflow-auto border border-gray-200 rounded-2xl bg-gray-50"><table class="w-full text-left text-sm whitespace-nowrap"><thead class="bg-gray-100 text-gray-700 sticky top-0 shadow-sm"><tr><th class="p-4">โลโก้</th><th class="p-4 w-full">ชื่อโรงเรียน</th><th class="p-4 text-center">จัดการ</th></tr></thead><tbody id="mouTableBody" class="divide-y divide-gray-200 bg-white"></tbody></table></div>
+                    </div>
+                </div>
+
+                <!-- Tab 5: ตั้งค่าบุคลากร -->
+                <div id="settingsTab" class="tab-content hidden max-w-3xl mx-auto">
+                    <div class="bg-white p-10 rounded-[2rem] shadow-sm border border-gray-200">
+                        <h3 class="text-2xl font-black text-gray-900 mb-8"><i class="fa-solid fa-gear text-gray-400 mr-2"></i> ตั้งค่าผู้บริหารและที่ปรึกษา</h3>
+                        <form id="setForm" class="space-y-6">
+                            <div><label class="block text-sm font-bold mb-2">ผู้อำนวยการโรงเรียน</label><input type="text" id="sDir" required class="w-full border border-gray-300 rounded-xl p-4 text-base focus:ring-2 focus:ring-mstPurple bg-gray-50 font-bold"></div>
+                            <div><label class="block text-sm font-bold mb-2">ครูที่ปรึกษาและเลขานุการ</label><input type="text" id="sAdv" required class="w-full border border-gray-300 rounded-xl p-4 text-base focus:ring-2 focus:ring-mstPurple bg-gray-50 font-bold"></div>
+                            <button type="submit" class="w-full bg-gray-900 text-white font-bold py-4 rounded-xl shadow-md hover:-translate-y-1 transition text-lg mt-4">บันทึกการตั้งค่า</button>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- UI Core Script -->
+    <script>
+        // Init Quill Editor
+        var quill = new Quill('#editor-container', {
+            theme: 'snow',
+            placeholder: 'เขียนรายละเอียดข่าวสารที่นี่ (สามารถทำตัวหนา, ขีดเส้นใต้, จัดย่อหน้าได้)...',
+            modules: { toolbar: [ ['bold', 'italic', 'underline'], [{ 'list': 'ordered'}, { 'list': 'bullet' }], ['link'], ['clean'] ] }
+        });
+
+        window.toggleSidebar = () => { document.getElementById('sidebar').classList.toggle('-translate-x-full'); document.getElementById('sidebarOverlay').classList.toggle('hidden'); }
+        window.switchTab = (tabId, btnElement, title) => {
+            if (window.innerWidth < 1024) toggleSidebar();
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
+            document.getElementById(tabId).classList.remove('hidden');
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.className = "nav-btn w-full flex items-center gap-3 px-4 py-3.5 text-gray-400 hover:bg-white/10 hover:text-white rounded-xl font-bold transition relative");
+            btnElement.className = "nav-btn active w-full flex items-center gap-3 px-4 py-3.5 bg-mstPurple rounded-xl text-white font-bold shadow-md transition relative";
+            document.getElementById('headerTitle').innerText = title;
+        }
+        
+        // Export CSV Function
+        window.feedbackDataList = [];
+        window.exportFeedbackCSV = () => {
+            if(window.feedbackDataList.length === 0) return Swal.fire('ไม่มีข้อมูล', 'ยังไม่มีเรื่องร้องเรียนให้ดาวน์โหลด', 'warning');
+            let csv = '\uFEFFหัวข้อ,รายละเอียด,ผู้ส่ง,วันที่\n';
+            window.feedbackDataList.forEach(d => {
+                const dt = d.timestamp ? new Date(d.timestamp.toDate()).toLocaleString('th-TH') : 'ไม่ระบุ';
+                const topic = d.topic.replace(/"/g, '""');
+                const detail = d.detail.replace(/"/g, '""').replace(/\n/g, ' ');
+                csv += `"${topic}","${detail}","${d.sender}","${dt}"\n`;
+            });
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob); link.download = `MSTSC_Feedback_${new Date().getTime()}.csv`; link.click();
+        };
+    </script>
+
+    <!-- Firebase System Script -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, getDoc, deleteDoc, doc, setDoc, query, orderBy, serverTimestamp, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+        import { getAuth, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+        import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-storage.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAaZXkpLEjASJY4Dc-il8FmjDiZgTDhwkc",
+            authDomain: "mstsc-official-portal.firebaseapp.com",
+            databaseURL: "https://mstsc-official-portal-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "mstsc-official-portal",
+            storageBucket: "mstsc-official-portal.firebasestorage.app",
+            messagingSenderId: "267251332849",
+            appId: "1:267251332849:web:c28f5fdc7327a324f2db50"
+        };
+        
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        const storage = getStorage(app);
+
+        const googleProvider = new GoogleAuthProvider();
+        googleProvider.setCustomParameters({ hd: 'mst.ac.th' });
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                if (user.email.endsWith('@mst.ac.th') || user.email === 'studentcouncil@mst.ac.th') {
+                    document.getElementById('loginOverlay').classList.add('hidden');
+                    document.getElementById('appWorkspace').classList.remove('hidden');
+                    document.getElementById('adminUserName').innerText = user.displayName || 'ผู้ดูแลระบบ';
+                    document.getElementById('adminUserEmail').innerText = user.email;
+                    if(user.photoURL) document.getElementById('adminUserPhoto').src = user.photoURL;
+                    if(document.getElementById('nDate')) document.getElementById('nDate').valueAsDate = new Date();
+                    loadAllData();
+                } else {
+                    await signOut(auth);
+                    Swal.fire('การเข้าถึงถูกปฏิเสธ', 'กรุณาใช้บัญชีอีเมล @mst.ac.th', 'error');
+                }
+            } else {
+                document.getElementById('loginOverlay').classList.remove('hidden');
+                document.getElementById('appWorkspace').classList.add('hidden');
+            }
+        });
+
+        window.loginWithGoogle = async () => {
+            Swal.fire({title:'กำลังเชื่อมต่อ...', didOpen:()=>Swal.showLoading()});
+            try { await signInWithPopup(auth, googleProvider); Swal.close(); } catch (e) { if(e.code !== 'auth/popup-closed-by-user') Swal.fire('ผิดพลาด', e.message, 'error'); else Swal.close(); }
+        };
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault(); const email = document.getElementById('loginEmail').value; const pass = document.getElementById('loginPassword').value;
+            if(!email || !pass) return; Swal.fire({title:'กำลังตรวจสอบ...', didOpen:()=>Swal.showLoading()});
+            try { await signInWithEmailAndPassword(auth, email, pass); Swal.close(); } catch (e) { Swal.fire('ผิดพลาด', 'อีเมลหรือรหัสผ่านไม่ถูกต้อง', 'error'); }
+        });
+
+        window.logoutAdmin = () => Swal.fire({ title:'ออกจากระบบ?', icon:'question', showCancelButton:true }).then(r => { if(r.isConfirmed) signOut(auth); });
+
+        window.deleteDocHandler = (collectionName, id, refreshType) => {
+            Swal.fire({title:'ลบข้อมูลนี้?', icon:'warning', showCancelButton:true, confirmButtonColor:'#d33', confirmButtonText:'ลบเลย', customClass:{popup:'rounded-3xl'}}).then(async (res) => {
+                if(res.isConfirmed) { 
+                    try { await deleteDoc(doc(db, collectionName, id)); 
+                        if(refreshType === 'news') loadNews(); if(refreshType === 'board') loadBoard(); if(refreshType === 'proj') loadProj(); if(refreshType === 'mou') loadMOU(); if(refreshType === 'fb') loadFeedback();
+                        Swal.fire({icon: 'success', title: 'ลบสำเร็จ', showConfirmButton: false, timer: 1000});
+                    } catch(e) { Swal.fire('Error', e.message, 'error'); } 
+                }
+            });
+        }
+
+        async function loadFeedback() {
+            const tb = document.getElementById('fbTableBody'); tb.innerHTML = `<tr><td colspan="4" class="p-4 text-center">Loading...</td></tr>`;
+            try { 
+                const qs = await getDocs(query(collection(db, "official_feedback"), orderBy("timestamp", "desc"))); 
+                let h = ''; document.getElementById('statFeedback').innerText = qs.size; window.feedbackDataList = [];
+                if(qs.size > 0) { document.getElementById('fbBadge').innerText = qs.size; document.getElementById('fbBadge').classList.remove('hidden'); } else { document.getElementById('fbBadge').classList.add('hidden'); }
+                qs.forEach(d => { 
+                    const p = d.data(); window.feedbackDataList.push(p);
+                    const dt = p.timestamp ? new Date(p.timestamp.toDate()).toLocaleDateString('th-TH') : 'ไม่ระบุ';
+                    h += `<tr><td class="p-4 text-xs font-bold text-gray-500 whitespace-nowrap">${dt}</td><td class="p-4 font-bold text-gray-800 whitespace-nowrap">${p.sender}</td><td class="p-4 text-sm text-gray-600 min-w-[300px]"><strong class="text-mstPurple">${p.topic}</strong><br>${p.detail}</td><td class="p-4 text-center whitespace-nowrap"><button onclick="deleteDocHandler('official_feedback', '${d.id}', 'fb')" class="text-red-500 bg-red-50 p-2 rounded-lg hover:bg-red-500 hover:text-white transition"><i class="fa-solid fa-trash"></i></button></td></tr>`; 
+                }); 
+                tb.innerHTML = h || `<tr><td colspan="4" class="p-4 text-center text-gray-400">ยังไม่มีเรื่องร้องเรียน</td></tr>`; 
+            } catch(e) {}
+        }
+
+        // ระบบบันทึกข่าว พร้อมอัปโหลดรูปและดึงข้อมูลจาก Quill Editor
+        document.getElementById('newsForm').addEventListener('submit', async (e) => { 
+            e.preventDefault(); 
+            const c = document.getElementById('nCat').value; 
+            const title = document.getElementById('nTitle').value;
+            const date = document.getElementById('nDate').value;
+            
+            // ดึง HTML จาก Quill Editor
+            const contentHTML = quill.root.innerHTML;
+            if(quill.getText().trim().length === 0) return Swal.fire('แจ้งเตือน', 'กรุณากรอกรายละเอียดข่าว', 'warning');
+
+            let imgUrl = document.getElementById('nImgUrl').value || (c==='ประกาศ'?'https://images.unsplash.com/photo-1589829085413-56de8ae18c73?q=80&w=800':'https://images.unsplash.com/photo-1546410531-d7ce16fcee16?q=80&w=800');
+            const file = document.getElementById('nImgFile').files[0];
+
+            Swal.fire({title:'กำลังบันทึกข้อมูล...', html:'หากมีรูปภาพอาจใช้เวลาสักครู่', didOpen:()=>Swal.showLoading()});
+            
+            try {
+                if(file) {
+                    const storageRef = ref(storage, 'news/' + Date.now() + '_' + file.name);
+                    const snapshot = await uploadBytesResumable(storageRef, file);
+                    imgUrl = await getDownloadURL(snapshot.ref);
+                }
+                await addDoc(collection(db, "official_news"), { category: c, title: title, date: date, image: imgUrl, content: contentHTML, timestamp: serverTimestamp() });
+                Swal.fire({icon:'success',title:'สำเร็จ',timer:1500,showConfirmButton:false}); 
+                document.getElementById('newsForm').reset();
+                quill.setContents([]); // ล้างกล่องข้อความ
+                document.getElementById('nDate').valueAsDate = new Date();
+                loadNews();
+            } catch(e) { Swal.fire('ผิดพลาด', e.message, 'error'); }
+        });
+
+        async function loadNews() {
+            const tb = document.getElementById('newsTableBody'); tb.innerHTML = `<tr><td colspan="3" class="p-4 text-center">Loading...</td></tr>`;
+            try { const qs = await getDocs(query(collection(db, "official_news"), orderBy("timestamp", "desc"))); let h = ''; document.getElementById('statNews').innerText = qs.size; qs.forEach(d => { const p = d.data(); h += `<tr><td class="p-4 text-xs font-bold text-mstPurple">${p.category}</td><td class="p-4 font-bold text-gray-800">${p.title}</td><td class="p-4 text-center"><button onclick="deleteDocHandler('official_news', '${d.id}', 'news')" class="text-red-500 bg-red-50 p-2 rounded-lg hover:bg-red-500 hover:text-white transition"><i class="fa-solid fa-trash"></i></button></td></tr>`; }); tb.innerHTML = h || `<tr><td colspan="3" class="p-4 text-center text-gray-400">ไม่มีข้อมูล</td></tr>`; } catch(e) {}
+        }
+
+        document.getElementById('boardForm').addEventListener('submit', async (e) => { e.preventDefault(); Swal.fire({title:'กำลังนำเข้า...', didOpen:()=>Swal.showLoading()}); try { const batch = writeBatch(db); const rows = document.getElementById('bPaste').value.split('\n'); let c=0; rows.forEach(r => { const col = r.split('\t'); if(col.length>=2 && col[0].trim()!==''){ batch.set(doc(collection(db,"official_board")), {year:document.getElementById('bYear').value, name:col[0].trim(), role:col[1].trim(), department:col[2]?col[2].trim():'คณะกรรมการ', image:col[3]?col[3].trim():'https://i.ibb.co/GQYCbXrc/logo.webp', timestamp:serverTimestamp()}); c++; } }); if(c>0){ await batch.commit(); Swal.fire({icon:'success',title:`เพิ่ม ${c} คน สำเร็จ`}); document.getElementById('boardForm').reset(); loadBoard(); } } catch(e){} });
+        async function loadBoard() {
+            const tb = document.getElementById('boardTableBody'); tb.innerHTML = `<tr><td colspan="3" class="p-4 text-center">Loading...</td></tr>`;
+            try { const qs = await getDocs(query(collection(db, "official_board"), orderBy("timestamp", "desc"))); let h = ''; document.getElementById('statBoard').innerText = qs.size; qs.forEach(d => { const p = d.data(); h += `<tr><td class="p-4 text-center font-bold text-blue-500">${p.year}</td><td class="p-4 font-bold text-gray-800">${p.name} <span class="text-xs text-gray-500 font-normal ml-2">${p.role}</span></td><td class="p-4 text-center"><button onclick="deleteDocHandler('official_board', '${d.id}', 'board')" class="text-red-500 bg-red-50 p-2 rounded-lg hover:bg-red-500 hover:text-white transition"><i class="fa-solid fa-trash"></i></button></td></tr>`; }); tb.innerHTML = h || `<tr><td colspan="3" class="p-4 text-center text-gray-400">ไม่มีข้อมูล</td></tr>`; } catch(e) {}
+        }
+
+        document.getElementById('projForm').addEventListener('submit', (e) => { e.preventDefault(); Swal.fire({title:'กำลังบันทึก...', didOpen:()=>Swal.showLoading()}); addDoc(collection(db, "official_projects"), { title: document.getElementById('pTitle').value, step: document.getElementById('pStep').value, progress: parseInt(document.getElementById('pProg').value), timestamp: serverTimestamp() }).then(()=>{Swal.fire({icon:'success',title:'สำเร็จ',timer:1000,showConfirmButton:false}); document.getElementById('projForm').reset(); loadProj();}); });
+        async function loadProj() {
+            const tb = document.getElementById('projTableBody'); tb.innerHTML = `<tr><td colspan="4" class="p-4 text-center">Loading...</td></tr>`;
+            try { const qs = await getDocs(query(collection(db, "official_projects"), orderBy("timestamp", "desc"))); let h = ''; document.getElementById('statProj').innerText = qs.size; qs.forEach(d => { const p = d.data(); h += `<tr><td class="p-4 font-bold text-gray-800">${p.title}</td><td class="p-4 text-center"><span class="bg-gray-100 text-xs font-bold px-2 py-1 rounded">${p.step}</span></td><td class="p-4 text-center font-bold text-emerald-600">${p.progress}%</td><td class="p-4 text-center"><button onclick="deleteDocHandler('official_projects', '${d.id}', 'proj')" class="text-red-500 bg-red-50 p-2 rounded-lg hover:bg-red-500 hover:text-white transition"><i class="fa-solid fa-trash"></i></button></td></tr>`; }); tb.innerHTML = h || `<tr><td colspan="4" class="p-4 text-center text-gray-400">ไม่มีข้อมูล</td></tr>`; } catch(e) {}
+        }
+
+        document.getElementById('mouForm').addEventListener('submit', (e) => { e.preventDefault(); Swal.fire({title:'กำลังบันทึก...', didOpen:()=>Swal.showLoading()}); addDoc(collection(db, "official_mou"), { name: document.getElementById('mName').value, logo: document.getElementById('mLogo').value, timestamp: serverTimestamp() }).then(()=>{Swal.fire({icon:'success',title:'สำเร็จ',timer:1000,showConfirmButton:false}); document.getElementById('mouForm').reset(); loadMOU();}); });
+        async function loadMOU() {
+            const tb = document.getElementById('mouTableBody'); tb.innerHTML = `<tr><td colspan="3" class="p-4 text-center">Loading...</td></tr>`;
+            try { const qs = await getDocs(query(collection(db, "official_mou"), orderBy("timestamp", "desc"))); let h = ''; qs.forEach(d => { const p = d.data(); h += `<tr><td class="p-4"><img src="${p.logo}" class="w-8 h-8 object-contain"></td><td class="p-4 font-bold text-gray-800">${p.name}</td><td class="p-4 text-center"><button onclick="deleteDocHandler('official_mou', '${d.id}', 'mou')" class="text-red-500 bg-red-50 p-2 rounded-lg hover:bg-red-500 hover:text-white transition"><i class="fa-solid fa-trash"></i></button></td></tr>`; }); tb.innerHTML = h || `<tr><td colspan="3" class="p-4 text-center text-gray-400">ไม่มีข้อมูล</td></tr>`; } catch(e) {}
+        }
+
+        document.getElementById('setForm').addEventListener('submit', async (e) => { e.preventDefault(); Swal.fire({title:'กำลังบันทึก...', didOpen:()=>Swal.showLoading()}); try { await setDoc(doc(db,"official_settings","personnel"), {directorName:document.getElementById('sDir').value, advisorName:document.getElementById('sAdv').value, timestamp:serverTimestamp()},{merge:true}); Swal.fire({icon:'success',title:'สำเร็จ',timer:1000}); } catch(e){} });
+        async function loadSet() { try { const d = await getDoc(doc(db, "official_settings", "personnel")); if(d.exists()) { document.getElementById('sDir').value = d.data().directorName; document.getElementById('sAdv').value = d.data().advisorName; } } catch(e){} }
+
+        function loadAllData() { loadFeedback(); loadNews(); loadBoard(); loadProj(); loadMOU(); loadSet(); }
+    </script>
+</body>
+</html>
