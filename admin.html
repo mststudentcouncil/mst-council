@@ -67,7 +67,6 @@
                 <p class="text-xs text-gray-500 font-bold uppercase tracking-wider mb-3 px-2 mt-2">เมนูการจัดการ</p>
                 <nav class="space-y-1.5">
                     <button onclick="switchTab('dashTab', this, 'ภาพรวมระบบ (Dashboard)')" class="nav-btn active w-full flex items-center gap-3 px-4 py-3.5 bg-mstPurple rounded-xl text-white font-bold shadow-md transition"><i class="fa-solid fa-chart-pie w-5 text-center"></i> ภาพรวมระบบ</button>
-                    <button onclick="switchTab('feedbackTab', this, 'เรื่องร้องเรียน (Public Hearing)')" class="nav-btn w-full flex items-center gap-3 px-4 py-3.5 text-gray-400 hover:bg-white/10 hover:text-white rounded-xl font-bold transition relative"><i class="fa-solid fa-bullhorn w-5 text-center"></i> เรื่องร้องเรียน <span id="fbBadge" class="absolute right-3 bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full hidden">0</span></button>
                     <button onclick="switchTab('newsTab', this, 'ข่าวสาร / ประกาศ')" class="nav-btn w-full flex items-center gap-3 px-4 py-3.5 text-gray-400 hover:bg-white/10 hover:text-white rounded-xl font-bold transition mt-2"><i class="fa-solid fa-newspaper w-5 text-center"></i> ข่าวสาร / ประกาศ</button>
                     <button onclick="switchTab('boardTab', this, 'ทำเนียบสภานักเรียน')" class="nav-btn w-full flex items-center gap-3 px-4 py-3.5 text-gray-400 hover:bg-white/10 hover:text-white rounded-xl font-bold transition"><i class="fa-solid fa-users w-5 text-center"></i> ทำเนียบรุ่น (Bulk)</button>
                     <button onclick="switchTab('projectsTab', this, 'ติดตามโครงการ (PDCA)')" class="nav-btn w-full flex items-center gap-3 px-4 py-3.5 text-gray-400 hover:bg-white/10 hover:text-white rounded-xl font-bold transition"><i class="fa-solid fa-chart-line w-5 text-center"></i> ความคืบหน้าโครงการ</button>
@@ -110,10 +109,6 @@
                     <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-200 flex items-center gap-4">
                         <div class="w-14 h-14 bg-purple-100 text-mstPurple rounded-2xl flex items-center justify-center text-2xl"><i class="fa-solid fa-users"></i></div>
                         <div><p class="text-sm text-gray-500 font-bold">คณะกรรมการ (รวม)</p><h3 class="text-3xl font-black text-gray-900" id="statBoard">0</h3></div>
-                    </div>
-                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-200 flex items-center gap-4 border-l-4 border-l-red-500">
-                        <div class="w-14 h-14 bg-red-100 text-red-600 rounded-2xl flex items-center justify-center text-2xl"><i class="fa-solid fa-bullhorn"></i></div>
-                        <div><p class="text-sm text-gray-500 font-bold">เรื่องร้องเรียน</p><h3 class="text-3xl font-black text-red-600" id="statFeedback">0</h3></div>
                     </div>
                     <div class="col-span-1 md:col-span-2 lg:col-span-4 bg-mstDark text-white p-10 rounded-[2rem] mt-4 relative overflow-hidden shadow-lg">
                         <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-mstPurple rounded-full blur-3xl opacity-50"></div>
@@ -256,21 +251,7 @@
             document.getElementById('headerTitle').innerText = title;
         }
         
-        // Export CSV Function
-        window.feedbackDataList = [];
-        window.exportFeedbackCSV = () => {
-            if(window.feedbackDataList.length === 0) return Swal.fire('ไม่มีข้อมูล', 'ยังไม่มีเรื่องร้องเรียนให้ดาวน์โหลด', 'warning');
-            let csv = '\uFEFFหัวข้อ,รายละเอียด,ผู้ส่ง,วันที่\n';
-            window.feedbackDataList.forEach(d => {
-                const dt = d.timestamp ? new Date(d.timestamp.toDate()).toLocaleString('th-TH') : 'ไม่ระบุ';
-                const topic = d.topic.replace(/"/g, '""');
-                const detail = d.detail.replace(/"/g, '""').replace(/\n/g, ' ');
-                csv += `"${topic}","${detail}","${d.sender}","${dt}"\n`;
-            });
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement("a");
-            link.href = URL.createObjectURL(blob); link.download = `MSTSC_Feedback_${new Date().getTime()}.csv`; link.click();
-        };
+        
     </script>
 
     <!-- Firebase System Script -->
@@ -393,11 +374,38 @@
             try { const qs = await getDocs(query(collection(db, "official_news"), orderBy("timestamp", "desc"))); let h = ''; document.getElementById('statNews').innerText = qs.size; qs.forEach(d => { const p = d.data(); h += `<tr><td class="p-4 text-xs font-bold text-mstPurple">${p.category}</td><td class="p-4 font-bold text-gray-800">${p.title}</td><td class="p-4 text-center"><button onclick="deleteDocHandler('official_news', '${d.id}', 'news')" class="text-red-500 bg-red-50 p-2 rounded-lg hover:bg-red-500 hover:text-white transition"><i class="fa-solid fa-trash"></i></button></td></tr>`; }); tb.innerHTML = h || `<tr><td colspan="3" class="p-4 text-center text-gray-400">ไม่มีข้อมูล</td></tr>`; } catch(e) {}
         }
 
-        document.getElementById('boardForm').addEventListener('submit', async (e) => { e.preventDefault(); Swal.fire({title:'กำลังนำเข้า...', didOpen:()=>Swal.showLoading()}); try { const batch = writeBatch(db); const rows = document.getElementById('bPaste').value.split('\n'); let c=0; rows.forEach(r => { const col = r.split('\t'); if(col.length>=2 && col[0].trim()!==''){ batch.set(doc(collection(db,"official_board")), {year:document.getElementById('bYear').value, name:col[0].trim(), role:col[1].trim(), department:col[2]?col[2].trim():'คณะกรรมการ', image:col[3]?col[3].trim():'https://i.ibb.co/GQYCbXrc/logo.webp', timestamp:serverTimestamp()}); c++; } }); if(c>0){ await batch.commit(); Swal.fire({icon:'success',title:`เพิ่ม ${c} คน สำเร็จ`}); document.getElementById('boardForm').reset(); loadBoard(); } } catch(e){} });
-        async function loadBoard() {
-            const tb = document.getElementById('boardTableBody'); tb.innerHTML = `<tr><td colspan="3" class="p-4 text-center">Loading...</td></tr>`;
-            try { const qs = await getDocs(query(collection(db, "official_board"), orderBy("timestamp", "desc"))); let h = ''; document.getElementById('statBoard').innerText = qs.size; qs.forEach(d => { const p = d.data(); h += `<tr><td class="p-4 text-center font-bold text-blue-500">${p.year}</td><td class="p-4 font-bold text-gray-800">${p.name} <span class="text-xs text-gray-500 font-normal ml-2">${p.role}</span></td><td class="p-4 text-center"><button onclick="deleteDocHandler('official_board', '${d.id}', 'board')" class="text-red-500 bg-red-50 p-2 rounded-lg hover:bg-red-500 hover:text-white transition"><i class="fa-solid fa-trash"></i></button></td></tr>`; }); tb.innerHTML = h || `<tr><td colspan="3" class="p-4 text-center text-gray-400">ไม่มีข้อมูล</td></tr>`; } catch(e) {}
-        }
+        document.getElementById('boardForm').addEventListener('submit', async (e) => { 
+    e.preventDefault(); 
+    Swal.fire({title:'กำลังนำเข้า...', didOpen:()=>Swal.showLoading()}); 
+    try { 
+        const batch = writeBatch(db); 
+        const rows = document.getElementById('bPaste').value.split('\n'); 
+        let c=0; 
+        rows.forEach(r => { 
+            const col = r.split('\t'); 
+            if(col.length>=2 && col[0].trim()!==''){ 
+                // หากไม่มี URL รูปภาพ ให้สร้าง Auto Avatar จากชื่อแทนที่โลโก้โรงเรียน
+                let defaultImg = `https://ui-avatars.com/api/?name=${encodeURIComponent(col[0].trim())}&background=4C1D95&color=fff&size=200`;
+                
+                batch.set(doc(collection(db,"official_board")), {
+                    year:document.getElementById('bYear').value, 
+                    name:col[0].trim(), 
+                    role:col[1].trim(), 
+                    department:col[2] ? col[2].trim() : 'คณะกรรมการ', 
+                    image:col[3] ? col[3].trim() : defaultImg, 
+                    timestamp:serverTimestamp()
+                }); 
+                c++; 
+            } 
+        }); 
+        if(c>0){ 
+            await batch.commit(); 
+            Swal.fire({icon:'success',title:`เพิ่ม ${c} คน สำเร็จ`}); 
+            document.getElementById('boardForm').reset(); 
+            loadBoard(); 
+        } 
+    } catch(e){} 
+});
 
         document.getElementById('projForm').addEventListener('submit', (e) => { e.preventDefault(); Swal.fire({title:'กำลังบันทึก...', didOpen:()=>Swal.showLoading()}); addDoc(collection(db, "official_projects"), { title: document.getElementById('pTitle').value, step: document.getElementById('pStep').value, progress: parseInt(document.getElementById('pProg').value), timestamp: serverTimestamp() }).then(()=>{Swal.fire({icon:'success',title:'สำเร็จ',timer:1000,showConfirmButton:false}); document.getElementById('projForm').reset(); loadProj();}); });
         async function loadProj() {
