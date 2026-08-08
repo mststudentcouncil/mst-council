@@ -82,21 +82,13 @@
                 <i class="fas fa-concierge-bell text-mstYellow text-xl"></i> เมนูบริการนักเรียน
             </h2>
             <div class="grid grid-cols-2 gap-4">
-                <a href="https://mstsc.pages.dev/passport" class="bg-white/80 border border-gray-100 rounded-2xl p-4 text-center shadow-sm hover:shadow-md transition-all flex flex-col items-center gap-3 group">
-                    <div class="w-12 h-12 bg-gradient-to-br from-violet-400 to-violet-600 text-white rounded-full flex items-center justify-center text-xl shadow-inner group-hover:scale-110 transition-transform"><i class="fa-solid fa-passport"></i></div>
-                    <span class="font-bold text-gray-700 text-xs">MST Passport</span>
-                </a>
-                <a href="https://liff.line.me/2008923798-Py9KNvvH" class="bg-white/80 border border-gray-100 rounded-2xl p-4 text-center shadow-sm hover:shadow-md transition-all flex flex-col items-center gap-3 group">
-                    <div class="w-12 h-12 bg-gradient-to-br from-emerald-400 to-emerald-600 text-white rounded-full flex items-center justify-center text-xl shadow-inner group-hover:scale-110 transition-transform"><i class="fa-solid fa-id-card"></i></div>
-                    <span class="font-bold text-gray-700 text-xs">Digital ID</span>
-                </a>
-                <a href="https://mstsc.pages.dev/evoting" class="bg-white/80 border border-gray-100 rounded-2xl p-4 text-center shadow-sm hover:shadow-md transition-all flex flex-col items-center gap-3 group">
-                    <div class="w-12 h-12 bg-gradient-to-br from-red-400 to-red-600 text-white rounded-full flex items-center justify-center text-xl shadow-inner group-hover:scale-110 transition-transform"><i class="fa-solid fa-check-to-slot"></i></div>
-                    <span class="font-bold text-gray-700 text-xs">e-Voting</span>
-                </a>
                 <a href="https://sgs.bopp-obec.info/sgss/TblStudentsInfo/Show-TblStudentsInfo-Table.aspx" class="bg-white/80 border border-gray-100 rounded-2xl p-4 text-center shadow-sm hover:shadow-md transition-all flex flex-col items-center gap-3 group">
                     <div class="w-12 h-12 bg-gradient-to-br from-blue-400 to-blue-600 text-white rounded-full flex items-center justify-center text-xl shadow-inner group-hover:scale-110 transition-transform"><i class="fa-solid fa-graduation-cap"></i></div>
                     <span class="font-bold text-gray-700 text-xs">ผลการเรียน SGS</span>
+                </a>
+                <a onclick="openOsModal(event)" class="cursor-pointer bg-white/80 border border-gray-100 rounded-2xl p-4 text-center shadow-sm hover:shadow-md transition-all flex flex-col items-center gap-3 group">
+                    <div class="w-12 h-12 bg-gradient-to-br from-orange-400 to-orange-600 text-white rounded-full flex items-center justify-center text-xl shadow-inner group-hover:scale-110 transition-transform"><i class="fa-solid fa-star"></i></div>
+                    <span class="font-bold text-gray-700 text-xs">คะแนนความประพฤติ</span>
                 </a>
                 <a href="https://liff.line.me/2008988681-suVlGOQh" class="bg-white/80 border border-gray-100 rounded-2xl p-4 text-center shadow-sm hover:shadow-md transition-all flex flex-col items-center gap-3 group">
                     <div class="w-12 h-12 bg-gradient-to-br from-rose-400 to-rose-600 text-white rounded-full flex items-center justify-center text-xl shadow-inner group-hover:scale-110 transition-transform"><i class="fa-solid fa-heart-pulse"></i></div>
@@ -113,14 +105,6 @@
                 <a onclick="fetchSchedule('teacher')" class="cursor-pointer bg-white/80 border border-gray-100 rounded-2xl p-4 text-center shadow-sm hover:shadow-md transition-all flex flex-col items-center gap-3 group">
                     <div class="w-12 h-12 bg-gradient-to-br from-purple-400 to-purple-600 text-white rounded-full flex items-center justify-center text-xl shadow-inner group-hover:scale-110 transition-transform"><i class="fa-solid fa-chalkboard-user"></i></div>
                     <span class="font-bold text-gray-700 text-xs">ตารางสอนครู</span>
-                </a>
-                <a onclick="openOsModal(event)" class="cursor-pointer bg-white/80 border border-gray-100 rounded-2xl p-4 text-center shadow-sm hover:shadow-md transition-all flex flex-col items-center gap-3 group">
-                    <div class="w-12 h-12 bg-gradient-to-br from-orange-400 to-orange-600 text-white rounded-full flex items-center justify-center text-xl shadow-inner group-hover:scale-110 transition-transform"><i class="fa-solid fa-star"></i></div>
-                    <span class="font-bold text-gray-700 text-xs">คะแนนความประพฤติ</span>
-                </a>
-                <a href="https://sites.google.com/mst.ac.th/register-mst" class="bg-white/80 border border-gray-100 rounded-2xl p-4 text-center shadow-sm hover:shadow-md transition-all flex flex-col items-center gap-3 group">
-                    <div class="w-12 h-12 bg-gradient-to-br from-indigo-400 to-indigo-600 text-white rounded-full flex items-center justify-center text-xl shadow-inner group-hover:scale-110 transition-transform"><i class="fa-solid fa-clipboard-list"></i></div>
-                    <span class="font-bold text-gray-700 text-xs">งานทะเบียนวัดผล</span>
                 </a>
             </div>
         </div>
