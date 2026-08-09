@@ -1,8 +1,6 @@
-// auth.js
 import { auth, db } from "./firebase-config.js"; 
-import { onAuthStateChanged, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-// 🌟 เปลี่ยนจาก firebase-database เป็น firebase-firestore
-import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js"; 
+import { onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+import { doc, getDoc, getDocs, collection, query, where, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
 // ==========================================
 // 1. ฟังก์ชันจัดการหน้าจอโหลดและหน้าจอ Error แบบเต็มจอ
@@ -155,3 +153,151 @@ window.loginAsAdmin = () => {
         }
     });
 };
+
+// ==========================================
+// 5. ระบบเข้าสู่ระบบด้วย LINE (LIFF + Account Linking)
+// ==========================================
+const lineLoginBtn = document.getElementById("lineLoginBtn");
+let currentLineUid = null; // ตัวแปรเก็บ LINE UID ชั่วคราว
+
+if (lineLoginBtn) {
+    // ⚠️ สำคัญ: ต้องใส่ LIFF ID ที่ได้จาก LINE Developers Console ตรงนี้
+    const MY_LIFF_ID = "2008923798-hd6mzZd8"; 
+
+    lineLoginBtn.addEventListener("click", () => {
+        showFullScreenLoading("กำลังเชื่อมต่อ LINE...");
+        
+        liff.init({ liffId: MY_LIFF_ID }).then(() => {
+            if (!liff.isLoggedIn()) {
+                // ถ้ายังไม่ล็อกอิน ให้พาไปหน้าล็อกอินของ LINE
+                liff.login();
+            } else {
+                // ถ้าล็อกอินแล้ว ดึงข้อมูลโปรไฟล์
+                liff.getProfile().then(profile => {
+                    currentLineUid = profile.userId;
+                    checkLineAccount(currentLineUid);
+                }).catch(err => {
+                    showFullScreenError("เกิดข้อผิดพลาด", "ไม่สามารถดึงข้อมูลจาก LINE ได้");
+                });
+            }
+        }).catch((err) => {
+            showFullScreenError("เกิดข้อผิดพลาด", "ระบบ LINE LIFF เริ่มต้นไม่สำเร็จ");
+        });
+    });
+}
+
+// ฟังก์ชันตรวจสอบว่า LINE นี้เคยผูกกับรหัสใครไว้หรือยัง
+async function checkLineAccount(lineUid) {
+    showFullScreenLoading("กำลังตรวจสอบสิทธิ์...");
+    try {
+        const q = query(collection(db, "students"), where("lineUid", "==", lineUid));
+        const querySnapshot = await getDocs(q);
+
+        if (!querySnapshot.empty) {
+            // กรณีเคยผูกไว้แล้ว (เจอข้อมูลในฐาน) -> เข้าสู่ระบบได้เลย
+            const studentDoc = querySnapshot.docs[0];
+            const studentData = studentDoc.data();
+            
+            // ใช้ Anonymous Auth ของ Firebase เพื่อให้มีสิทธิ์อ่านเขียนฐานข้อมูลได้
+            await signInAnonymously(auth);
+            
+            const profile = {
+                id: studentDoc.id,
+                name: studentData.name, 
+                level: studentData.level,
+                room: studentData.room,
+                loginMethod: 'line'
+            };
+            sessionStorage.setItem("mst_voter_profile", JSON.stringify(profile));
+            window.location.href = "student.html";
+        } else {
+            // กรณีไม่เคยผูกบัญชี -> เปิดหน้าต่างให้กรอกข้อมูลเชื่อมบัญชี
+            overlay.classList.add('hidden'); // ปิดหน้าต่างโหลด
+            document.getElementById('line-link-modal').classList.remove('hidden');
+            document.getElementById('line-link-modal').classList.add('flex');
+        }
+    } catch (error) {
+        showFullScreenError("เกิดข้อผิดพลาด", "ไม่สามารถตรวจสอบฐานข้อมูลได้");
+    }
+}
+
+// ==========================================
+// 6. กดปุ่มยืนยันการเชื่อมต่อ (ใน Modal)
+// ==========================================
+const confirmLinkBtn = document.getElementById("confirmLinkBtn");
+if (confirmLinkBtn) {
+    confirmLinkBtn.addEventListener("click", async () => {
+        const inputId = document.getElementById("linkStudentId").value.trim();
+        const inputName = document.getElementById("linkStudentName").value.trim();
+
+        if (inputId.length !== 5 || inputName === "") {
+            Swal.fire({ icon: 'warning', title: 'ข้อมูลไม่ครบ', text: 'กรุณากรอกรหัสนักเรียน 5 หลัก และชื่อ-สกุลให้ครบถ้วน', confirmButtonColor: '#06C755', customClass: { popup: 'rounded-3xl' }});
+            return;
+        }
+
+        // 1. ดึงข้อมูลนักเรียนจากรหัสที่กรอก
+        document.getElementById('line-link-modal').classList.add('hidden');
+        showFullScreenLoading("กำลังตรวจสอบข้อมูล...");
+
+        try {
+            const studentRef = doc(db, "students", inputId);
+            const docSnap = await getDoc(studentRef);
+
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                
+                // 2. เช็คว่ารหัสนี้ถูกคนอื่นเอาไปผูก LINE ไว้ก่อนแล้วหรือไม่
+                if (data.lineUid) {
+                    showFullScreenError("เชื่อมต่อไม่สำเร็จ", "รหัสนักเรียนนี้ถูกเชื่อมต่อกับบัญชี LINE อื่นไปแล้ว");
+                    return;
+                }
+
+                // 3. เช็คชื่อ-สกุล ว่าตรงกับฐานข้อมูลไหม (ตัดช่องว่างออกเพื่อเทียบ)
+                const dbNameClean = data.name.replace(/\s+/g, '');
+                const inputNameClean = inputName.replace(/\s+/g, '');
+
+                if (dbNameClean === inputNameClean) {
+                    // 4. ชื่อตรงรหัสตรง! -> แจ้งเตือนข้อตกลงครั้งสุดท้าย
+                    overlay.classList.add('hidden'); // ซ่อนตัวโหลด
+
+                    Swal.fire({
+                        title: 'ยืนยันการเชื่อมต่อบัญชี?',
+                        html: `<div class="bg-yellow-50 text-yellow-700 p-4 rounded-xl text-sm font-bold border border-yellow-200 text-left">
+                               <p>หากยืนยันการเชื่อมต่อบัญชี LINE นี้กับรหัสนักเรียน <b class="text-lg">${inputId}</b> แล้ว</p>
+                               <p class="text-red-500 mt-2">⚠️ จะไม่สามารถยกเลิก และจะไม่สามารถแก้ไขได้ในภายหลัง</p>
+                               </div>`,
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonColor: '#06C755',
+                        cancelButtonColor: '#d1d5db',
+                        confirmButtonText: 'ยืนยันผูกบัญชีถาวร',
+                        cancelButtonText: 'ยกเลิก',
+                        customClass: { popup: 'rounded-[2rem]' }
+                    }).then(async (result) => {
+                        if (result.isConfirmed) {
+                            showFullScreenLoading("กำลังบันทึกข้อมูล...");
+                            // อัปเดต lineUid ลงในฐานข้อมูล
+                            await updateDoc(studentRef, { lineUid: currentLineUid });
+                            // ล็อกอินแบบเงียบแล้วพาไปหน้าโหวต
+                            await signInAnonymously(auth);
+                            sessionStorage.setItem("mst_voter_profile", JSON.stringify({
+                                id: docSnap.id, name: data.name, level: data.level, room: data.room, loginMethod: 'line'
+                            }));
+                            window.location.href = "student.html";
+                        } else {
+                            // ถ้ายกเลิก ให้โชว์ Modal กลับมา
+                            document.getElementById('line-link-modal').classList.remove('hidden');
+                        }
+                    });
+
+                } else {
+                    showFullScreenError("ข้อมูลไม่ตรงกัน", "ชื่อ-สกุลที่กรอก ไม่ตรงกับฐานข้อมูลของรหัสนักเรียนนี้ (ตรวจสอบการเว้นวรรคและตัวสะกด)");
+                }
+            } else {
+                showFullScreenError("ไม่พบข้อมูล", "ไม่พบรหัสนักเรียนนี้ในระบบ กรุณาตรวจสอบอีกครั้ง");
+            }
+        } catch (error) {
+            showFullScreenError("เกิดข้อผิดพลาด", error.message);
+        }
+    });
+}
