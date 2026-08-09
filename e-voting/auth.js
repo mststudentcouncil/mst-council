@@ -47,8 +47,11 @@ if (loginBtn) {
     loginBtn.addEventListener("click", async () => {
         showFullScreenLoading("กำลังเข้าสู่ระบบด้วย Google...");
         const provider = new GoogleAuthProvider();
+        
+        // เพิ่ม prompt: 'select_account' เพื่อบังคับให้เลือกบัญชีใหม่ทุกครั้ง
         provider.setCustomParameters({
-            hd: 'mst.ac.th' 
+            hd: 'mst.ac.th',
+            prompt: 'select_account' 
         });
 
         try {
@@ -73,7 +76,7 @@ if (loginBtn) {
             const emailPrefix = email.split('@')[0];
             if (!/^\d{7}$/.test(emailPrefix)) {
                 await auth.signOut();
-                showFullScreenError('รูปแบบอีเมลไม่ถูกต้อง', 'อีเมลนี้ไม่ใช่อีเมลของนักเรียน (ต้องการรูปแบบ 68XXXXX@mst.ac.th)');
+                showFullScreenError('รูปแบบอีเมลไม่ถูกต้อง', 'อีเมลนี้ไม่ใช่อีเมลของนักเรียน (ต้องการรูปแบบ YYNNNNN@mst.ac.th)');
                 return;
             }
 
