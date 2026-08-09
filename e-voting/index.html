@@ -144,10 +144,11 @@ window.confirmContactSupport = function() {
     </button>
 </div>
 <!-- ============================================================== -->
-<!-- หน้าต่างยืนยันเชื่อมต่อบัญชี LINE (อัปเดตเป็น Full-screen สกรอลล์ได้) -->
+<!-- หน้าต่างยืนยันเชื่อมต่อบัญชี LINE (แก้ขอบบนล้น และ ป๊อปอัปทับ) -->
 <!-- ============================================================== -->
-<div id="line-link-modal" class="fixed inset-0 z-[9999] hidden overflow-y-auto bg-white sm:bg-gray-900/50 sm:backdrop-blur-sm transition-opacity duration-300">
-    <div class="min-h-screen flex flex-col items-center justify-center p-4 py-8 sm:p-6">
+<div id="line-link-modal" class="fixed inset-0 z-[100] hidden overflow-y-auto bg-white sm:bg-gray-900/50 sm:backdrop-blur-sm transition-opacity duration-300">
+    <!-- 🌟 เปลี่ยน justify-center เป็น justify-start บนมือถือ และเพิ่ม pt-12 ให้มีขอบบน -->
+    <div class="min-h-screen flex flex-col items-center justify-start sm:justify-center p-4 pt-12 pb-24 sm:p-6">
         <div class="bg-white p-4 sm:p-8 sm:rounded-[2rem] sm:shadow-2xl w-full max-w-md relative fade-in flex flex-col justify-center">
             
             <div class="w-16 h-16 bg-green-50 text-green-500 rounded-full flex items-center justify-center mb-4 border-4 border-green-100 mx-auto shrink-0">
