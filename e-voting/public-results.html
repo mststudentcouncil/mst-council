@@ -169,20 +169,33 @@
 
     <!-- Firebase Logic & Render -->
     <script type="module">
+        // 1. อย่าลืมเพิ่ม onAuthStateChanged ในบรรทัด import
         import { auth, db } from "./firebase-config.js";
-        import { signInAnonymously } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+        import { signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
         import { collection, doc, getDocs, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
         let unsubscribe = null;
+        let isInitialized = false; // เพิ่มตัวแปรเช็คการโหลด
 
-        async function initialize() {
-            try {
-                await signInAnonymously(auth);
-                await loadCampaigns();
-            } catch (error) {
-                console.error("Initialization Error:", error);
-                document.getElementById("resultsContainer").innerHTML = `<div class="text-center text-red-500 text-xl font-bold mt-20 bg-red-50 p-6 rounded-3xl border border-red-200 shadow-sm max-w-md mx-auto">ไม่สามารถเชื่อมต่อระบบได้<br><span class="text-sm font-normal text-red-400 mt-2 block">กรุณาตรวจสอบอินเทอร์เน็ตและรีเฟรชหน้าเว็บ</span></div>`;
-            }
+        // 2. เปลี่ยนฟังก์ชัน initialize() ใหม่ทั้งหมด
+        function initialize() {
+            onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    // ถ้ามีคนล็อกอินอยู่แล้ว (เช่น แอดมิน) ให้ข้ามการ login แบบ anonymous ไปเลย
+                    if (!isInitialized) {
+                        isInitialized = true;
+                        await loadCampaigns();
+                    }
+                } else {
+                    // ถ้าไม่มีใครล็อกอิน ค่อยเข้าสู่ระบบแบบผู้เยี่ยมชม
+                    try {
+                        await signInAnonymously(auth);
+                    } catch (error) {
+                        console.error("Initialization Error:", error);
+                        document.getElementById("resultsContainer").innerHTML = `<div class="text-center text-red-500 text-xl font-bold mt-20 bg-red-50 p-6 rounded-3xl border border-red-200 shadow-sm max-w-md mx-auto">ไม่สามารถเชื่อมต่อระบบได้<br><span class="text-sm font-normal text-red-400 mt-2 block">กรุณาตรวจสอบอินเทอร์เน็ตและรีเฟรชหน้าเว็บ</span></div>`;
+                    }
+                }
+            });
         }
 
         async function loadCampaigns() {
