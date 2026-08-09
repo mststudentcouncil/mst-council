@@ -231,15 +231,16 @@ if (confirmLinkBtn) {
     confirmLinkBtn.addEventListener("click", async () => {
         const inputId = document.getElementById("linkStudentId").value.trim();
         const inputName = document.getElementById("linkStudentName").value.trim();
+        const inputRoom = document.getElementById("linkStudentRoom").value.trim(); // รับค่าห้อง
 
-        if (inputId.length !== 5 || inputName === "") {
-            Swal.fire({ icon: 'warning', title: 'ข้อมูลไม่ครบ', text: 'กรุณากรอกรหัสนักเรียน 5 หลัก และชื่อ-สกุลให้ครบถ้วน', confirmButtonColor: '#06C755', customClass: { popup: 'rounded-3xl' }});
+        // ตรวจสอบว่ากรอกครบทั้ง 3 ช่องหรือไม่
+        if (inputId.length !== 5 || inputName === "" || inputRoom === "") {
+            Swal.fire({ icon: 'warning', title: 'ข้อมูลไม่ครบถ้วน', text: 'กรุณากรอกรหัสนักเรียน ชื่อ-สกุล และห้องเรียน ให้ครบถ้วน', confirmButtonColor: '#06C755', customClass: { popup: 'rounded-3xl' }});
             return;
         }
 
-        // 1. ดึงข้อมูลนักเรียนจากรหัสที่กรอก
         document.getElementById('line-link-modal').classList.add('hidden');
-        showFullScreenLoading("กำลังตรวจสอบข้อมูล...");
+        showFullScreenLoading("กำลังตรวจสอบความถูกต้อง...");
 
         try {
             const studentRef = doc(db, "students", inputId);
@@ -248,40 +249,46 @@ if (confirmLinkBtn) {
             if (docSnap.exists()) {
                 const data = docSnap.data();
                 
-                // 2. เช็คว่ารหัสนี้ถูกคนอื่นเอาไปผูก LINE ไว้ก่อนแล้วหรือไม่
                 if (data.lineUid) {
-                    showFullScreenError("เชื่อมต่อไม่สำเร็จ", "รหัสนักเรียนนี้ถูกเชื่อมต่อกับบัญชี LINE อื่นไปแล้ว");
+                    showFullScreenError("เชื่อมต่อไม่สำเร็จ", "รหัสนักเรียนนี้ถูกเชื่อมต่อกับบัญชี LINE อื่นไปแล้วอย่างถาวร");
                     return;
                 }
 
-                // 3. เช็คชื่อ-สกุล ว่าตรงกับฐานข้อมูลไหม (ตัดช่องว่างออกเพื่อเทียบ)
+                // การตรวจสอบชื่อ-สกุล (ตัดช่องว่างออกทั้งหมดก่อนเทียบ)
                 const dbNameClean = data.name.replace(/\s+/g, '');
                 const inputNameClean = inputName.replace(/\s+/g, '');
 
-                if (dbNameClean === inputNameClean) {
-                    // 4. ชื่อตรงรหัสตรง! -> แจ้งเตือนข้อตกลงครั้งสุดท้าย
-                    overlay.classList.add('hidden'); // ซ่อนตัวโหลด
+                // การตรวจสอบห้องเรียน (ตัดคำว่า ม. และช่องว่างออก เพื่อรองรับการพิมพ์ทั้ง 4/1 และ ม.4/1)
+                const dbRoomClean = (data.room || "").replace(/\s+/g, '').replace(/ม\.?/g, '');
+                const inputRoomClean = inputRoom.replace(/\s+/g, '').replace(/ม\.?/g, '');
+
+                if (dbNameClean === inputNameClean && dbRoomClean === inputRoomCheck) {
+                    // ทุกอย่างตรงกัน แจ้งเตือนขู่ขั้นสุดท้ายก่อนผูกถาวร
+                    overlay.classList.add('hidden'); 
 
                     Swal.fire({
-                        title: 'ยืนยันการเชื่อมต่อบัญชี?',
-                        html: `<div class="bg-yellow-50 text-yellow-700 p-4 rounded-xl text-sm font-bold border border-yellow-200 text-left">
-                               <p>หากยืนยันการเชื่อมต่อบัญชี LINE นี้กับรหัสนักเรียน <b class="text-lg">${inputId}</b> แล้ว</p>
-                               <p class="text-red-500 mt-2">⚠️ จะไม่สามารถยกเลิก และจะไม่สามารถแก้ไขได้ในภายหลัง</p>
+                        title: 'ยืนยันการผูกบัญชีถาวร?',
+                        html: `<div class="bg-red-50 text-red-700 p-4 rounded-xl text-sm border border-red-200 text-left">
+                               <p class="font-bold mb-2 flex items-center gap-2">
+                                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                                   กรุณาตรวจสอบให้แน่ใจ
+                               </p>
+                               <p class="mb-2">บัญชี LINE ของท่านจะถูกผูกกับรหัส <b>${inputId}</b></p>
+                               <p class="font-bold underline">การดำเนินการนี้ไม่สามารถแก้ไข หรือยกเลิกได้อีกตลอดไป</p>
                                </div>`,
-                        icon: 'question',
+                        icon: 'warning',
                         showCancelButton: true,
-                        confirmButtonColor: '#06C755',
+                        confirmButtonColor: '#d33',
                         cancelButtonColor: '#d1d5db',
-                        confirmButtonText: 'ยืนยันผูกบัญชีถาวร',
+                        confirmButtonText: 'รับทราบ ยืนยันผูกบัญชี',
                         cancelButtonText: 'ยกเลิก',
                         customClass: { popup: 'rounded-[2rem]' }
                     }).then(async (result) => {
                         if (result.isConfirmed) {
                             showFullScreenLoading("กำลังบันทึกข้อมูล...");
-                            // อัปเดต lineUid ลงในฐานข้อมูล
+                            // อัปเดต lineUid ลงในฐานข้อมูลนักเรียน
                             await updateDoc(studentRef, { lineUid: currentLineUid });
-                            // ล็อกอินแบบเงียบแล้วพาไปหน้าโหวต
-                            await signInAnonymously(auth);
+                            // สร้าง Session เพื่อเข้าสู่ระบบ
                             sessionStorage.setItem("mst_voter_profile", JSON.stringify({
                                 id: docSnap.id, name: data.name, level: data.level, room: data.room, loginMethod: 'line'
                             }));
@@ -293,13 +300,14 @@ if (confirmLinkBtn) {
                     });
 
                 } else {
-                    showFullScreenError("ข้อมูลไม่ตรงกัน", "ชื่อ-สกุลที่กรอก ไม่ตรงกับฐานข้อมูลของรหัสนักเรียนนี้ (ตรวจสอบการเว้นวรรคและตัวสะกด)");
+                    showFullScreenError("ข้อมูลไม่ถูกต้อง", "ชื่อ-สกุล หรือ ห้องเรียน ไม่ตรงกับฐานข้อมูลของรหัสนักเรียนนี้ (ตรวจสอบการเว้นวรรคให้ถูกต้อง)");
                 }
             } else {
                 showFullScreenError("ไม่พบข้อมูล", "ไม่พบรหัสนักเรียนนี้ในระบบ กรุณาตรวจสอบอีกครั้ง");
             }
         } catch (error) {
-            showFullScreenError("เกิดข้อผิดพลาด", error.message);
+            console.error("Link Error:", error);
+            showFullScreenError("เกิดข้อผิดพลาด", "ไม่สามารถประมวลผลได้ โปรดแจ้งผู้ดูแลระบบ");
         }
     });
 }
