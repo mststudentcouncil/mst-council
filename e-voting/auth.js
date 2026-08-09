@@ -190,6 +190,9 @@ if (lineLoginBtn) {
 async function checkLineAccount(lineUid) {
     showFullScreenLoading("กำลังตรวจสอบสิทธิ์...");
     try {
+        // [จุดที่แก้ไข]: ต้องสั่งให้ Firebase ล็อกอินแบบ Anonymous "ก่อน" ที่จะดึงข้อมูล
+        await signInAnonymously(auth);
+
         const q = query(collection(db, "students"), where("lineUid", "==", lineUid));
         const querySnapshot = await getDocs(q);
 
@@ -197,9 +200,6 @@ async function checkLineAccount(lineUid) {
             // กรณีเคยผูกไว้แล้ว (เจอข้อมูลในฐาน) -> เข้าสู่ระบบได้เลย
             const studentDoc = querySnapshot.docs[0];
             const studentData = studentDoc.data();
-            
-            // ใช้ Anonymous Auth ของ Firebase เพื่อให้มีสิทธิ์อ่านเขียนฐานข้อมูลได้
-            await signInAnonymously(auth);
             
             const profile = {
                 id: studentDoc.id,
@@ -212,12 +212,14 @@ async function checkLineAccount(lineUid) {
             window.location.href = "student.html";
         } else {
             // กรณีไม่เคยผูกบัญชี -> เปิดหน้าต่างให้กรอกข้อมูลเชื่อมบัญชี
-            overlay.classList.add('hidden'); // ปิดหน้าต่างโหลด
+            overlay.classList.add('hidden'); 
             document.getElementById('line-link-modal').classList.remove('hidden');
             document.getElementById('line-link-modal').classList.add('flex');
         }
     } catch (error) {
-        showFullScreenError("เกิดข้อผิดพลาด", "ไม่สามารถตรวจสอบฐานข้อมูลได้");
+        // พิมพ์ Error ลง Console เพื่อให้แอดมินตรวจสอบได้ง่ายขึ้นหากติดปัญหาอื่น
+        console.error("Firebase Database Error: ", error); 
+        showFullScreenError("เกิดข้อผิดพลาด", "ไม่สามารถตรวจสอบฐานข้อมูลได้ (โปรดแจ้งผู้ดูแลระบบ)");
     }
 }
 
