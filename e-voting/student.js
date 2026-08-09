@@ -54,13 +54,19 @@ onAuthStateChanged(auth, async (user) => {
     const blocker = document.getElementById("auth-blocker");
     const profileStr = sessionStorage.getItem("mst_voter_profile");
 
-    // ถ้าไม่มี user จาก Google ถือว่ายังไม่ได้ล็อกอิน
+    // 1. ถ้าไม่มี user เลย (ยังไม่ได้ล็อกอินอะไรเลย) ให้เด้งกลับหน้าแรกทันที
     if (!user) { 
         window.location.href = "index.html"; 
         return; 
     } 
     
-    // ถ้ามี Profile ที่ได้มาจาก auth.js
+    // 2. ตรวจสอบบัญชีแอดมิน
+    if (user.email === "studentcouncil@mst.ac.th") {
+        window.location.href = "admin.html";
+        return;
+    }
+
+    // 3. ตรวจสอบว่ามีข้อมูลโปรไฟล์นักเรียนที่ส่งมาจาก index.html หรือไม่
     if (profileStr) {
         try {
             const ssoData = JSON.parse(profileStr);
@@ -118,12 +124,18 @@ onAuthStateChanged(auth, async (user) => {
             }
             
         } catch (e) {
-            showAuthError("ประมวลผลล้มเหลว", "เกิดข้อผิดพลาดในการจัดรูปแบบข้อมูล");
+            // ถ้าระบบประมวลผล Profile พัง ให้เคลียร์ข้อมูลและเด้งกลับไปหน้าแรกล็อกอินใหม่
+            signOut(auth).then(() => {
+                sessionStorage.removeItem("mst_voter_profile");
+                window.location.href = "index.html";
+            });
         }
-    } else if (user.email === "studentcouncil@mst.ac.th") {
-        window.location.href = "admin.html";
     } else {
-        showAuthError("ปฏิเสธการเข้าถึง", "ไม่พบข้อมูลสิทธิ์กรุณาเข้าสู่ระบบใหม่");
+        // 4. กรณีมี User แต่ไม่มีข้อมูลโปรไฟล์ (เปิดลิงก์ส่งมาตรงๆ หรือเป็นผู้เยี่ยมชมจากหน้า Results)
+        // ให้เตะออกและเด้งกลับหน้า index.html อัตโนมัติ (ไม่ต้องแสดง Error ค้างไว้)
+        signOut(auth).then(() => {
+            window.location.href = "index.html";
+        });
     }
 });
 
