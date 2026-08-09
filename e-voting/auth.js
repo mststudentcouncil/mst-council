@@ -231,7 +231,13 @@ if (confirmLinkBtn) {
     confirmLinkBtn.addEventListener("click", async () => {
         const inputId = document.getElementById("linkStudentId").value.trim();
         const inputName = document.getElementById("linkStudentName").value.trim();
-        const inputRoom = document.getElementById("linkStudentRoom").value.trim(); // รับค่าห้อง
+        const inputRoom = document.getElementById("linkStudentRoom").value.trim();
+        const pdpaConsent = document.getElementById("pdpaConsent").checked; // 🌟 รับค่า Checkbox
+
+        if (!pdpaConsent) {
+            Swal.fire({ icon: 'warning', title: 'กรุณากดยอมรับเงื่อนไข', text: 'คุณต้องยินยอมให้ระบบประมวลผลข้อมูลส่วนบุคคลก่อนทำรายการ', confirmButtonColor: '#06C755', customClass: { popup: 'rounded-3xl' }});
+            return;
+        }
 
         // ตรวจสอบว่ากรอกครบทั้ง 3 ช่องหรือไม่
         if (inputId.length !== 5 || inputName === "" || inputRoom === "") {

@@ -182,6 +182,19 @@ window.confirmContactSupport = function() {
                         หากระบบตรวจพบการจงใจสวมรอยใช้สิทธิ์ผู้อื่น ระบบจะบันทึกข้อมูลและ <b>"ตัดสิทธิ์การลงคะแนนของท่านทันที"</b>
                     </p>
                 </div>
+
+                <!-- Checkbox PDPA -->
+<div class="mt-4 mb-4">
+    <label class="flex items-start gap-3 cursor-pointer group">
+        <div class="relative flex items-center justify-center shrink-0 mt-0.5">
+            <input type="checkbox" id="pdpaConsent" class="peer appearance-none w-5 h-5 border-2 border-gray-300 rounded-md checked:bg-[#06C755] checked:border-[#06C755] transition-colors cursor-pointer">
+            <svg class="absolute w-3.5 h-3.5 text-white opacity-0 peer-checked:opacity-100 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+        </div>
+        <span class="text-xs text-gray-600 font-medium leading-relaxed">
+            ข้าพเจ้ายินยอมให้สภานักเรียนประมวลผลและจัดเก็บข้อมูลส่วนบุคคล (ชื่อ-สกุล, รหัสนักเรียน, ห้องเรียน และข้อมูลบัญชี LINE) เพื่อใช้ในการยืนยันตัวตนสำหรับการเลือกตั้ง ตามพ.ร.บ. คุ้มครองข้อมูลส่วนบุคคล
+        </span>
+    </label>
+</div>
                 
                 <button id="confirmLinkBtn" class="w-full mt-4 bg-[#06C755] hover:bg-[#05b34c] text-white font-bold py-4 rounded-xl shadow-md transition-all flex justify-center items-center gap-2">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> ยืนยันข้อมูลและผูกบัญชี
