@@ -262,7 +262,8 @@ if (confirmLinkBtn) {
                 const dbRoomClean = (data.room || "").replace(/\s+/g, '').replace(/ม\.?/g, '');
                 const inputRoomClean = inputRoom.replace(/\s+/g, '').replace(/ม\.?/g, '');
 
-                if (dbNameClean === inputNameClean && dbRoomClean === inputRoomCheck) {
+                // 🌟 แก้ไข: เปลี่ยน inputRoomCheck เป็น inputRoomClean
+                if (dbNameClean === inputNameClean && dbRoomClean === inputRoomClean) {
                     // ทุกอย่างตรงกัน แจ้งเตือนขู่ขั้นสุดท้ายก่อนผูกถาวร
                     overlay.classList.add('hidden'); 
 
