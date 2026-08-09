@@ -254,18 +254,31 @@ if (confirmLinkBtn) {
                     return;
                 }
 
-                // การตรวจสอบชื่อ-สกุล (ตัดช่องว่างออกทั้งหมดก่อนเทียบ)
-                const dbNameClean = data.name.replace(/\s+/g, '');
-                const inputNameClean = inputName.replace(/\s+/g, '');
+                // ==========================================
+                // 🌟 ส่วนที่แก้ไขใหม่ เพื่อแก้ปัญหาเทียบข้อมูลไม่ผ่าน
+                // ==========================================
 
-                // การตรวจสอบห้องเรียน (ตัดคำว่า ม. และช่องว่างออก เพื่อรองรับการพิมพ์ทั้ง 4/1 และ ม.4/1)
-                const dbRoomClean = (data.room || "").replace(/\s+/g, '').replace(/ม\.?/g, '');
+                // 1. การตรวจสอบชื่อ-สกุล (เผื่อนักเรียนเผลอพิมพ์คำนำหน้ามา ให้ตัดทิ้ง + ตัดช่องว่าง)
+                const prefixRegex = /^(ด\.ช\.|ด\.ญ\.|นาย|นางสาว|นาง|เด็กชาย|เด็กหญิง)\s*/;
+                const dbNameClean = data.name.replace(prefixRegex, '').replace(/\s+/g, '');
+                const inputNameClean = inputName.replace(prefixRegex, '').replace(/\s+/g, '');
+
+                // 2. การตรวจสอบห้องเรียน (ต้องเอาชั้นกับห้องมารวมกันก่อนเทียบ)
+                let dbFullRoom = data.room || "";
+                if (data.level && data.level !== "ครู/บุคลากร" && !dbFullRoom.includes("/")) {
+                    dbFullRoom = data.level + "/" + dbFullRoom; // จับคู่ ม.4 + / + 1 = ม.4/1
+                }
+                
+                // ตัดคำว่า "ม." และช่องว่างออก เพื่อให้เหลือแค่ "4/1" เท่ากันทั้งสองฝั่ง
+                const dbRoomClean = dbFullRoom.replace(/\s+/g, '').replace(/ม\.?/g, '');
                 const inputRoomClean = inputRoom.replace(/\s+/g, '').replace(/ม\.?/g, '');
 
-                // 🌟 แก้ไข: เปลี่ยน inputRoomCheck เป็น inputRoomClean
+                // ==========================================
+
+                // ตรวจสอบขั้นสุดท้าย
                 if (dbNameClean === inputNameClean && dbRoomClean === inputRoomClean) {
                     // ทุกอย่างตรงกัน แจ้งเตือนขู่ขั้นสุดท้ายก่อนผูกถาวร
-                    overlay.classList.add('hidden'); 
+                    overlay.classList.add('hidden');
 
                     Swal.fire({
                         title: 'ยืนยันการผูกบัญชีถาวร?',
