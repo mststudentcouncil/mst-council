@@ -42,6 +42,30 @@ function showFullScreenError(title, desc) {
 // ==========================================
 const loginBtn = document.getElementById("loginBtn");
 if (loginBtn) {
+    const ua = navigator.userAgent;
+    // 🌟 ดักจับแอพที่ฝังเบราว์เซอร์มาในตัว (FB, IG, Messenger, Twitter, TikTok, LINE ฯลฯ)
+    const isInAppBrowser = /FBAN|FBAV|Instagram|Twitter|Threads|TikTok|Snapchat|Line/i.test(ua);
+
+    if (isInAppBrowser) {
+        // 1. ทำปุ่มให้จางและปิดการคลิก (Tailwind classes)
+        loginBtn.classList.add("opacity-40", "pointer-events-none", "grayscale");
+        loginBtn.classList.remove("hover:border-primary", "hover:shadow-xl", "active:scale-95");
+        
+        // 2. เปลี่ยนข้อความในปุ่มให้ชัดเจนขึ้น
+        const spanText = loginBtn.querySelector("span");
+        if (spanText) spanText.innerText = "แอพนี้ไม่รองรับ Google";
+
+        // 3. แทรกข้อความแจ้งเตือนสีแดงแบบสะดุดตาไว้ใต้ปุ่ม
+        const warningMsg = document.createElement("div");
+        warningMsg.className = "text-red-600 text-xs font-bold mt-3 mb-2 leading-relaxed bg-red-50 p-3 rounded-xl border border-red-200 shadow-sm text-left";
+        warningMsg.innerHTML = `<span class="flex items-start gap-2">
+            <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+            <span>แอพพลิเคชันนี้ปิดกั้นการเข้าสู่ระบบ<br>กรุณากดเมนู (...) มุมเครื่อง แล้วเลือก<br><b class="underline">"เปิดในเบราว์เซอร์เริ่มต้น"</b> (Safari / Chrome)</span>
+        </span>`;
+        
+        loginBtn.parentNode.insertBefore(warningMsg, loginBtn.nextSibling);
+    }
+
     loginBtn.addEventListener("click", async () => {
         showFullScreenLoading("กำลังเข้าสู่ระบบด้วย Google...");
         const provider = new GoogleAuthProvider();
@@ -96,7 +120,7 @@ if (loginBtn) {
                 window.location.href = "student.html";
             } else {
                 await auth.signOut();
-                showFullScreenError('ไม่พบสิทธิ์การลงคะแนน', 'ไม่พบรายชื่อของคุณในฐานข้อมูลนักเรียนปัจจุบัน หรือคุณไม่มีสิทธิ์ในการโหวตรายการนี้');
+                showFullScreenError('ไม่พบสิทธิ์การลงคะแนน', 'ไม่พบรายชื่อของคุณในฐานข้อมูลนักเรียนปัจจุบัน หรือคุณไม่มีสิทธิ์ใช้งานระบบลงคะแนน กรุณาติดต่อผู้ดูแลระบบ');
             }
 
         } catch (error) {
@@ -155,6 +179,11 @@ const lineLoginBtn = document.getElementById("lineLoginBtn");
 let currentLineUid = null; 
 
 if (lineLoginBtn) {
+    // 🌟 เพิ่มโค้ดบล็อกนี้: ตรวจสอบเบราว์เซอร์ ถ้าไม่ใช่แอป LINE ให้ซ่อนปุ่มทันที
+    if (!navigator.userAgent.includes("Line")) {
+        lineLoginBtn.style.display = "none";
+    }
+
     const MY_LIFF_ID = "2008923798-hd6mzZd8"; 
 
     lineLoginBtn.addEventListener("click", () => {
