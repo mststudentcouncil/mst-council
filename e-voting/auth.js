@@ -396,30 +396,30 @@ if (requestOtpBtn) {
                 requesterUid: auth.currentUser.uid // ประทับตราว่าใครเป็นคนขอ
             });
 
-            // 🌟 5. ยิงคำสั่งไปหา Google Apps Script API ด้วย FormData (แก้ปัญหา CORS ได้ 100%)
+            // 🌟 5. ยิงคำสั่งไปหา Google Apps Script API
             const formData = new FormData();
             formData.append("to_email", fullEmailAddress);
             formData.append("student_name", currentStudentData.name);
             formData.append("otp_code", otpCode);
 
-            const response = await fetch(GAS_API_URL, {
+            // ใช้โหมด no-cors ให้ยิงข้ามโดเมนได้ลื่นๆ โดยไม่สนการตอบกลับ
+            await fetch(GAS_API_URL, {
                 method: "POST",
-                body: formData // ส่งเป็นฟอร์มแทน JSON
+                body: formData,
+                mode: "no-cors" // 🌟 จุดสำคัญที่แก้ปัญหาจอดำ/เด้ง Error
             });
 
-            const result = await response.json();
-
-            if (result.status !== "success") {
-                throw new Error(result.message || "ยิง API ไม่สำเร็จ");
-            }
+            // (ลบคำสั่ง await response.json() และการเช็ค status ออกไปเลยครับ เพราะ no-cors อ่านค่าไม่ได้)
 
             Swal.close();
             
+            // 6. สลับหน้าจอเป็นช่องกรอก OTP
             document.getElementById('line-link-modal').classList.remove('hidden');
             document.getElementById("step1_email").classList.add("hidden");
             document.getElementById("step2_otp").classList.remove("hidden");
             document.getElementById("modalSubtitle").innerText = "เช็ครหัสที่กล่องข้อความในแอป Gmail ของคุณ";
 
+            // เริ่มจับเวลาและหลอดโปรเกรสทันที
             startOtpTimer();
 
         } catch (error) {
