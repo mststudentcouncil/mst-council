@@ -179,20 +179,28 @@ const lineLoginBtn = document.getElementById("lineLoginBtn");
 let currentLineUid = null; 
 
 if (lineLoginBtn) {
-    // 🌟 เพิ่มโค้ดบล็อกนี้: ตรวจสอบเบราว์เซอร์ ถ้าไม่ใช่แอป LINE ให้ซ่อนปุ่มทันที
+    const MY_LIFF_ID = "2008923798-hd6mzZd8"; // ⚠️ ใช้ Liff ID เดิมของคุณ
+    
+    // ดักจับ User-Agent ซ่อนปุ่ม LINE ถ้านักเรียนไม่ได้เปิดผ่านแอปพลิเคชัน LINE
     if (!navigator.userAgent.includes("Line")) {
         lineLoginBtn.style.display = "none";
+    } else {
+        // 🌟 1. สั่งให้ LIFF เตรียมตัว (init) ทำงานรอไว้เบื้องหลังเลยตั้งแต่เปิดหน้าเว็บ
+        liff.init({ liffId: MY_LIFF_ID }).catch(err => {
+            console.error("LIFF Init Error:", err);
+        });
     }
-
-    const MY_LIFF_ID = "2008923798-hd6mzZd8"; 
 
     lineLoginBtn.addEventListener("click", () => {
         showFullScreenLoading("กำลังเชื่อมต่อ LINE...");
         
-        liff.init({ liffId: MY_LIFF_ID }).then(() => {
+        // 🌟 2. เมื่อกดปุ่ม ให้เช็คว่า LIFF เตรียมตัวเสร็จหรือยัง (ready) แล้วทำงานต่อทันที
+        liff.ready.then(() => {
             if (!liff.isLoggedIn()) {
+                // ถ้ายังไม่ล็อกอิน ให้ทำการล็อกอิน
                 liff.login();
             } else {
+                // ถ้าล็อกอินแล้ว ดึงโปรไฟล์ได้เลยแบบคลิกเดียวจบ!
                 liff.getProfile().then(profile => {
                     currentLineUid = profile.userId;
                     checkLineAccount(currentLineUid);
@@ -200,8 +208,6 @@ if (lineLoginBtn) {
                     showFullScreenError("เกิดข้อผิดพลาด", "ไม่สามารถดึงข้อมูลจาก LINE ได้");
                 });
             }
-        }).catch((err) => {
-            showFullScreenError("เกิดข้อผิดพลาด", "ระบบ LINE LIFF เริ่มต้นไม่สำเร็จ");
         });
     });
 }
@@ -334,7 +340,11 @@ function startOtpTimer() {
 // ----------------------------------------------------
 if (requestOtpBtn) {
     requestOtpBtn.addEventListener("click", async () => {
-        const emailInput = document.getElementById("linkEmailInput").value.trim().toLowerCase();
+        let emailInput = document.getElementById("linkEmailInput").value.trim().toLowerCase();
+        
+        // 🌟 1. ถ้านักเรียนเผลอก๊อปปี้ @mst.ac.th มาวางด้วย ให้ระบบใจดีช่วยตัดทิ้งให้เหลือแต่ตัวเลข
+        emailInput = emailInput.replace("@mst.ac.th", "").replace(/\s+/g, "");
+
         const pdpaConsent = document.getElementById("pdpaConsent").checked;
 
         if (!pdpaConsent) {
@@ -342,15 +352,17 @@ if (requestOtpBtn) {
             return;
         }
 
-        const emailRegex = /^\d{2}(\d{5})@mst\.ac\.th$/;
+        // 🌟 2. เช็คฟอร์แมตให้เหลือแค่ตัวเลข 7 หลัก (ปี 2 หลัก + รหัส 5 หลัก)
+        const emailRegex = /^(\d{2})(\d{5})$/;
         const match = emailInput.match(emailRegex);
 
         if (!match) {
-            Swal.fire({ icon: 'error', title: 'อีเมลไม่ถูกต้อง', text: 'กรุณาใช้อีเมลโรงเรียนรูปแบบ เช่น 6829903@mst.ac.th', confirmButtonColor: '#06C755', customClass: { popup: 'rounded-[2rem]' }});
+            Swal.fire({ icon: 'error', title: 'รูปแบบไม่ถูกต้อง', text: 'กรุณากรอกเฉพาะตัวเลข 7 หลัก (เช่น 6829903)', confirmButtonColor: '#06C755', customClass: { popup: 'rounded-[2rem]' }});
             return;
         }
 
-        currentStudentId = match[1];
+        currentStudentId = match[2]; // ดึงรหัสนักเรียน 5 หลักออกมา
+        const fullEmailAddress = emailInput + "@mst.ac.th"; // สร้างอีเมลเต็มเพื่อเตรียมส่ง OTP
 
         showFullScreenLoading("กำลังตรวจสอบฐานข้อมูล...");
 
@@ -386,7 +398,7 @@ if (requestOtpBtn) {
                 method: "POST",
                 headers: { "Content-Type": "text/plain;charset=utf-8" },
                 body: JSON.stringify({
-                    to_email: emailInput,
+                    to_email: fullEmailAddress, // 🌟 ใช้อีเมลที่ประกอบร่างแล้วส่งให้ Google Apps Script
                     student_name: currentStudentData.name,
                     otp_code: otpCode
                 })
@@ -402,7 +414,6 @@ if (requestOtpBtn) {
             document.getElementById("step2_otp").classList.remove("hidden");
             document.getElementById("modalSubtitle").innerText = "เช็ครหัสที่กล่องข้อความในแอป Gmail ของคุณ";
 
-            // 🌟 เริ่มจับเวลาและหลอดโปรเกรสทันที
             startOtpTimer();
 
         } catch (error) {

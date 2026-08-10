@@ -322,12 +322,12 @@ img[src*="Logo_mstsc"] {
                     <form id="addSingleStudentForm" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-3 items-end">
     <div>
         <label class="block text-xs font-bold text-blue-800 mb-1">รหัสนักเรียน</label>
-        <input type="text" id="singleStuId" placeholder="เช่น 29903" required pattern="[0-9]{5}" class="w-full border border-gray-300 p-2.5 rounded-lg text-sm bg-white focus:ring-2 focus:ring-blue-500">
+        <input type="text" id="singleStuId" placeholder="เช่น 12345" required pattern="[0-9]{5}" class="w-full border border-gray-300 p-2.5 rounded-lg text-sm bg-white focus:ring-2 focus:ring-blue-500">
     </div>
     <div class="md:col-span-2">
         <!-- 🌟 แก้ข้อความเป็น ไม่มีคำนำหน้า -->
         <label class="block text-xs font-bold text-blue-800 mb-1">ชื่อ-สกุล (ไม่มีคำนำหน้า)</label>
-        <input type="text" id="singleStuName" placeholder="เช่น วิริทธิ์พล สุบรรณ์" required class="w-full border border-gray-300 p-2.5 rounded-lg text-sm bg-white focus:ring-2 focus:ring-blue-500">
+        <input type="text" id="singleStuName" placeholder="เช่น สภา นักเรียน" required class="w-full border border-gray-300 p-2.5 rounded-lg text-sm bg-white focus:ring-2 focus:ring-blue-500">
     </div>
     <div>
         <label class="block text-xs font-bold text-blue-800 mb-1">ระดับชั้น</label>
@@ -411,7 +411,7 @@ img[src*="Logo_mstsc"] {
         <p>ระบบ e-Voting เข้าสู่ระบบด้วยอีเมลโรงเรียน (@mst.ac.th) โดยมีวิธีการจัดการสิทธิ์ดังนี้:</p>
         <ul class="list-disc pl-5 space-y-2 text-gray-700">
             <li><b>อัปโหลดไฟล์ Excel:</b> ผู้ดูแลระบบจำเป็นต้องอัปโหลดรายชื่อนักเรียนปัจจุบันเข้าระบบผ่านหน้า <b>"ฐานข้อมูลนักเรียน"</b> เพื่อให้ระบบมีข้อมูลอ้างอิง</li>
-            <li><b>การตรวจสอบสิทธิ์ล็อกอิน:</b> เมื่อนักเรียนล็อกอิน ระบบจะตัดรหัส 5 หลักจากอีเมล (เช่น 68<b>29903</b>@mst.ac.th) มาเทียบกับรายชื่อที่แอดมินอัปโหลด หากไม่มีรายชื่อ ระบบจะบล็อกการเข้าถึงอัตโนมัติ</li>
+            <li><b>การตรวจสอบสิทธิ์ล็อกอิน:</b> เมื่อนักเรียนล็อกอิน ระบบจะตัดรหัส 5 หลักจากอีเมล (เช่น 70<b>12345</b>@mst.ac.th) มาเทียบกับรายชื่อที่แอดมินอัปโหลด หากไม่มีรายชื่อ ระบบจะบล็อกการเข้าถึงอัตโนมัติ</li>
             <li><b>ป้องกันศิษย์เก่า:</b> อีเมลของศิษย์เก่าแม้จะเป็น @mst.ac.th แต่จะไม่มีรายชื่อในฐานข้อมูลนักเรียนปัจจุบันที่แอดมินอัปโหลด ทำให้ไม่สามารถเข้ามาโหวตได้</li>
         </ul>
     </div>
