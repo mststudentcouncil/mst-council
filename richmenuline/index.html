@@ -90,6 +90,14 @@
                     <div class="w-12 h-12 bg-gradient-to-br from-blue-400 to-blue-600 text-white rounded-full flex items-center justify-center text-xl shadow-inner group-hover:scale-110 transition-transform"><i class="fa-solid fa-graduation-cap"></i></div>
                     <span class="font-bold text-gray-700 text-xs">ผลการเรียน SGS</span>
                 </a>
+                <a onclick="fetchSchedule('student')" class="cursor-pointer bg-white/80 border border-gray-100 rounded-2xl p-4 text-center shadow-sm hover:shadow-md transition-all flex flex-col items-center gap-3 group">
+                    <div class="w-12 h-12 bg-gradient-to-br from-cyan-400 to-cyan-600 text-white rounded-full flex items-center justify-center text-xl shadow-inner group-hover:scale-110 transition-transform"><i class="fa-solid fa-calendar-days"></i></div>
+                    <span class="font-bold text-gray-700 text-xs">ตารางเรียนนักเรียน</span>
+                </a>
+                <a onclick="fetchSchedule('teacher')" class="cursor-pointer bg-white/80 border border-gray-100 rounded-2xl p-4 text-center shadow-sm hover:shadow-md transition-all flex flex-col items-center gap-3 group">
+                    <div class="w-12 h-12 bg-gradient-to-br from-purple-400 to-purple-600 text-white rounded-full flex items-center justify-center text-xl shadow-inner group-hover:scale-110 transition-transform"><i class="fa-solid fa-chalkboard-user"></i></div>
+                    <span class="font-bold text-gray-700 text-xs">ตารางสอนครู</span>
+                </a>
                 <a onclick="openOsModal(event)" class="cursor-pointer bg-white/80 border border-gray-100 rounded-2xl p-4 text-center shadow-sm hover:shadow-md transition-all flex flex-col items-center gap-3 group">
                     <div class="w-12 h-12 bg-gradient-to-br from-orange-400 to-orange-600 text-white rounded-full flex items-center justify-center text-xl shadow-inner group-hover:scale-110 transition-transform"><i class="fa-solid fa-star"></i></div>
                     <span class="font-bold text-gray-700 text-xs">คะแนนความประพฤติ</span>
@@ -105,14 +113,6 @@
                 <a href="https://sites.google.com/mst.ac.th/register-mst" class="bg-white/80 border border-gray-100 rounded-2xl p-4 text-center shadow-sm hover:shadow-md transition-all flex flex-col items-center gap-3 group">
                     <div class="w-12 h-12 bg-gradient-to-br from-indigo-400 to-indigo-600 text-white rounded-full flex items-center justify-center text-xl shadow-inner group-hover:scale-110 transition-transform"><i class="fa-solid fa-clipboard-list"></i></div>
                     <span class="font-bold text-gray-700 text-xs">งานทะเบียนวัดผล</span>
-                </a>
-                <a onclick="fetchSchedule('student')" class="cursor-pointer bg-white/80 border border-gray-100 rounded-2xl p-4 text-center shadow-sm hover:shadow-md transition-all flex flex-col items-center gap-3 group">
-                    <div class="w-12 h-12 bg-gradient-to-br from-cyan-400 to-cyan-600 text-white rounded-full flex items-center justify-center text-xl shadow-inner group-hover:scale-110 transition-transform"><i class="fa-solid fa-calendar-days"></i></div>
-                    <span class="font-bold text-gray-700 text-xs">ตารางเรียนนักเรียน</span>
-                </a>
-                <a onclick="fetchSchedule('teacher')" class="cursor-pointer bg-white/80 border border-gray-100 rounded-2xl p-4 text-center shadow-sm hover:shadow-md transition-all flex flex-col items-center gap-3 group">
-                    <div class="w-12 h-12 bg-gradient-to-br from-purple-400 to-purple-600 text-white rounded-full flex items-center justify-center text-xl shadow-inner group-hover:scale-110 transition-transform"><i class="fa-solid fa-chalkboard-user"></i></div>
-                    <span class="font-bold text-gray-700 text-xs">ตารางสอนครู</span>
                 </a>
             </div>
         </div>
