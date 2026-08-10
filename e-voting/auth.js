@@ -245,99 +245,154 @@ async function checkLineAccount(lineUid) {
 }
 
 // ==========================================
-// 6. กดปุ่มยืนยันการเชื่อมต่อ (ใน Modal)
+// 6. ระบบยืนยันตัวตนด้วยอีเมล (2FA OTP via EmailJS)
 // ==========================================
-const confirmLinkBtn = document.getElementById("confirmLinkBtn");
-if (confirmLinkBtn) {
-    confirmLinkBtn.addEventListener("click", async () => {
-        const inputId = document.getElementById("linkStudentId").value.trim();
-        const inputName = document.getElementById("linkStudentName").value.trim();
-        const inputRoom = document.getElementById("linkStudentRoom").value.trim();
+emailjs.init("MFkzI-tLNYd9Mmfcm"); // ⚠️ ต้องนำ Public Key จาก EmailJS มาใส่ตรงนี้
+
+const requestOtpBtn = document.getElementById("requestOtpBtn");
+const verifyOtpBtn = document.getElementById("verifyOtpBtn");
+let currentStudentId = null;
+let currentStudentData = null;
+
+// กดขอ OTP
+if (requestOtpBtn) {
+    requestOtpBtn.addEventListener("click", async () => {
+        const emailInput = document.getElementById("linkEmailInput").value.trim().toLowerCase();
         const pdpaConsent = document.getElementById("pdpaConsent").checked;
 
         if (!pdpaConsent) {
-            Swal.fire({ icon: 'warning', title: 'กรุณากดยอมรับเงื่อนไข', text: 'คุณต้องยินยอมให้ระบบประมวลผลข้อมูลส่วนบุคคลก่อนทำรายการ', confirmButtonColor: '#06C755', customClass: { popup: 'rounded-3xl' }});
+            Swal.fire({ icon: 'warning', title: 'กดยอมรับเงื่อนไข', text: 'คุณต้องยินยอมนโยบาย PDPA ก่อนทำรายการ', confirmButtonColor: '#06C755', customClass: { popup: 'rounded-[2rem]' }});
             return;
         }
 
-        if (inputId.length !== 5 || inputName === "" || inputRoom === "") {
-            Swal.fire({ icon: 'warning', title: 'ข้อมูลไม่ครบถ้วน', text: 'กรุณากรอกรหัสนักเรียน ชื่อ-สกุล และห้องเรียน ให้ครบถ้วน', confirmButtonColor: '#06C755', customClass: { popup: 'rounded-3xl' }});
+        // 1. เช็คฟอร์แมตอีเมล (YYNNNNN@mst.ac.th)
+        const emailRegex = /^\d{2}(\d{5})@mst\.ac\.th$/;
+        const match = emailInput.match(emailRegex);
+
+        if (!match) {
+            Swal.fire({ icon: 'error', title: 'อีเมลไม่ถูกต้อง', text: 'กรุณาใช้อีเมลโรงเรียนรูปแบบ เช่น 6829903@mst.ac.th', confirmButtonColor: '#06C755', customClass: { popup: 'rounded-[2rem]' }});
+            return;
+        }
+
+        currentStudentId = match[1]; // ดึงรหัส 5 หลักออกมา
+
+        showFullScreenLoading("กำลังตรวจสอบฐานข้อมูล...");
+
+        try {
+            // 2. เช็คว่ามีรหัสนี้ในฐานข้อมูลนักเรียนไหม
+            const studentRef = doc(db, "students", currentStudentId);
+            const docSnap = await getDoc(studentRef);
+
+            if (!docSnap.exists()) {
+                showFullScreenError("ไม่พบรายชื่อ", `ไม่พบรหัส ${currentStudentId} ในระบบฐานข้อมูลของโรงเรียน`);
+                return;
+            }
+
+            currentStudentData = docSnap.data();
+
+            if (currentStudentData.lineUid) {
+                showFullScreenError("เชื่อมต่อไม่สำเร็จ", `รหัส ${currentStudentId} ถูกผูกกับบัญชี LINE อื่นไปแล้ว`);
+                return;
+            }
+
+            overlay.classList.add('hidden');
+            document.getElementById('line-link-modal').classList.add('hidden');
+
+            Swal.fire({ title: 'กำลังสร้างรหัส OTP...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+            // 3. สร้าง OTP 6 หลัก
+            const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+
+            // 4. บันทึก OTP ลง Firestore (เก็บไว้ 5 นาที)
+            await setDoc(doc(db, "otp_requests", currentStudentId), {
+                otp: otpCode,
+                createdAt: new Date().getTime()
+            });
+
+            // 5. ส่งอีเมลผ่าน EmailJS
+            await emailjs.send(
+                "service_x1t2py9", // ⚠️ Service ID
+                "template_0kgyknc", // ⚠️ Template ID
+                {
+                    to_email: emailInput,
+                    student_name: currentStudentData.name,
+                    otp_code: otpCode
+                }
+            );
+
+            Swal.close();
+            
+            // 6. สลับหน้าจอเป็นช่องกรอก OTP
+            document.getElementById('line-link-modal').classList.remove('hidden');
+            document.getElementById("step1_email").classList.add("hidden");
+            document.getElementById("step2_otp").classList.remove("hidden");
+            document.getElementById("modalSubtitle").innerText = "เช็ครหัสที่กล่องข้อความในแอป Gmail ของคุณ";
+
+        } catch (error) {
+            console.error("OTP Error:", error);
+            showFullScreenError("เกิดข้อผิดพลาด", "ไม่สามารถส่งอีเมลได้ โปรดลองอีกครั้ง");
+        }
+    });
+}
+
+// กดยืนยัน OTP
+if (verifyOtpBtn) {
+    verifyOtpBtn.addEventListener("click", async () => {
+        const inputOtp = document.getElementById("linkOtpInput").value.trim();
+
+        if (inputOtp.length !== 6) {
+            Swal.fire({ icon: 'warning', title: 'รหัสไม่ครบ', text: 'กรุณากรอกรหัส OTP 6 หลักให้ครบถ้วน', confirmButtonColor: '#6b21a8', customClass: { popup: 'rounded-[2rem]' }});
             return;
         }
 
         document.getElementById('line-link-modal').classList.add('hidden');
-        showFullScreenLoading("กำลังตรวจสอบความถูกต้อง...");
+        showFullScreenLoading("กำลังตรวจสอบรหัส...");
 
         try {
-            const studentRef = doc(db, "students", inputId);
-            const docSnap = await getDoc(studentRef);
-
-            if (docSnap.exists()) {
-                const data = docSnap.data();
-                
-                if (data.lineUid) {
-                    showFullScreenError("เชื่อมต่อไม่สำเร็จ", "รหัสนักเรียนนี้ถูกเชื่อมต่อกับบัญชี LINE อื่นไปแล้วอย่างถาวร");
-                    return;
-                }
-
-                const prefixRegex = /^(ด\.ช\.|ด\.ญ\.|นาย|นางสาว|นาง|เด็กชาย|เด็กหญิง)\s*/;
-                const dbNameClean = data.name.replace(prefixRegex, '').replace(/\s+/g, '');
-                const inputNameClean = inputName.replace(prefixRegex, '').replace(/\s+/g, '');
-
-                let dbFullRoom = data.room || "";
-                if (data.level && data.level !== "ครู/บุคลากร" && !dbFullRoom.includes("/")) {
-                    dbFullRoom = data.level + "/" + dbFullRoom;
-                }
-                
-                const dbRoomClean = dbFullRoom.replace(/\s+/g, '').replace(/ม\.?/g, '');
-                const inputRoomClean = inputRoom.replace(/\s+/g, '').replace(/ม\.?/g, '');
-
-                if (dbNameClean === inputNameClean && dbRoomClean === inputRoomClean) {
-                    overlay.classList.add('hidden');
-
-                    Swal.fire({
-                        title: 'ยืนยันการผูกบัญชีถาวร?',
-                        html: `<div class="bg-red-50 text-red-700 p-4 rounded-xl text-sm border border-red-200 text-left">
-                               <p class="font-bold mb-2 flex items-center gap-2">
-                                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-                                   กรุณาตรวจสอบให้แน่ใจ
-                               </p>
-                               <p class="mb-2">บัญชี LINE ของท่านจะถูกผูกกับรหัส <b>${inputId}</b></p>
-                               <p class="font-bold underline">การดำเนินการนี้ไม่สามารถแก้ไข หรือยกเลิกได้อีกตลอดไป</p>
-                               </div>`,
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonColor: '#d33',
-                        cancelButtonColor: '#d1d5db',
-                        confirmButtonText: 'รับทราบ ยืนยันผูกบัญชี',
-                        cancelButtonText: 'ยกเลิก',
-                        customClass: { popup: 'rounded-[2rem]' }
-                    }).then(async (result) => {
-                        if (result.isConfirmed) {
-                            showFullScreenLoading("กำลังบันทึกข้อมูล...");
-                            
-                            // 🌟 [อัปเดตใหม่]: บันทึกข้อมูลแบบมัดรวม (เขียนลง 2 ที่)
-                            await updateDoc(studentRef, { lineUid: currentLineUid });
-                            await setDoc(doc(db, "line_links", currentLineUid), { studentId: inputId });
-                            
-                            sessionStorage.setItem("mst_voter_profile", JSON.stringify({
-                                id: docSnap.id, name: data.name, level: data.level, room: data.room, loginMethod: 'line'
-                            }));
-                            window.location.href = "student.html";
-                        } else {
-                            document.getElementById('line-link-modal').classList.remove('hidden');
-                        }
-                    });
-
-                } else {
-                    showFullScreenError("ข้อมูลไม่ถูกต้อง", "ชื่อ-สกุล หรือ ห้องเรียน ไม่ตรงกับฐานข้อมูลของรหัสนักเรียนนี้");
-                }
-            } else {
-                showFullScreenError("ไม่พบข้อมูล", "ไม่พบรหัสนักเรียนนี้ในระบบ กรุณาตรวจสอบอีกครั้ง");
+            // 1. ดึง OTP จากระบบมาตรวจสอบ
+            const otpDoc = await getDoc(doc(db, "otp_requests", currentStudentId));
+            
+            if (!otpDoc.exists()) {
+                showFullScreenError("รหัสหมดอายุ", "ไม่พบรหัสอ้างอิง หรือคุณยังไม่ได้กดขอรหัส");
+                return;
             }
+
+            const otpData = otpDoc.data();
+            const now = new Date().getTime();
+            
+            // หมดเวลา 5 นาที (300,000 มิลลิวินาที)
+            if (now - otpData.createdAt > 300000) {
+                showFullScreenError("รหัสหมดอายุ", "รหัส OTP หมดอายุแล้ว (เกิน 5 นาที) กรุณาทำรายการใหม่");
+                return;
+            }
+
+            if (inputOtp !== otpData.otp) {
+                overlay.classList.add('hidden');
+                document.getElementById('line-link-modal').classList.remove('hidden');
+                Swal.fire({ icon: 'error', title: 'รหัสไม่ถูกต้อง', text: 'รหัส OTP ไม่ตรงกัน กรุณาตรวจสอบอีเมลอีกครั้ง', confirmButtonColor: '#d33', customClass: { popup: 'rounded-[2rem]' }});
+                return;
+            }
+
+            // 2. รหัสตรง! ทำการผูกบัญชีถาวร
+            showFullScreenLoading("กำลังผูกบัญชีเข้ากับ LINE...");
+            
+            const studentRef = doc(db, "students", currentStudentId);
+            await updateDoc(studentRef, { lineUid: currentLineUid });
+            await setDoc(doc(db, "line_links", currentLineUid), { studentId: currentStudentId });
+            
+            sessionStorage.setItem("mst_voter_profile", JSON.stringify({
+                id: currentStudentId, 
+                name: currentStudentData.name, 
+                level: currentStudentData.level, 
+                room: currentStudentData.room, 
+                loginMethod: 'line'
+            }));
+            
+            window.location.href = "student.html";
+
         } catch (error) {
-            console.error("Link Error:", error);
-            showFullScreenError("เกิดข้อผิดพลาด", "ไม่สามารถประมวลผลได้ โปรดแจ้งผู้ดูแลระบบ");
+            console.error("Verify Error:", error);
+            showFullScreenError("เกิดข้อผิดพลาด", "ไม่สามารถตรวจสอบรหัสได้ โปรดลองอีกครั้ง");
         }
     });
 }

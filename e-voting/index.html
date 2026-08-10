@@ -29,6 +29,7 @@ window.confirmContactSupport = function() {
     <link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     
     <script>
         tailwind.config = { 
@@ -144,61 +145,53 @@ window.confirmContactSupport = function() {
     </button>
 </div>
 <!-- ============================================================== -->
-<!-- หน้าต่างยืนยันเชื่อมต่อบัญชี LINE (แก้ขอบบนล้น และ ป๊อปอัปทับ) -->
+<!-- หน้าต่างยืนยันเชื่อมต่อบัญชี LINE (ระบบ 2FA OTP) -->
 <!-- ============================================================== -->
 <div id="line-link-modal" class="fixed inset-0 z-[100] hidden overflow-y-auto bg-white sm:bg-gray-900/50 sm:backdrop-blur-sm transition-opacity duration-300">
-    <!-- 🌟 เปลี่ยน justify-center เป็น justify-start บนมือถือ และเพิ่ม pt-12 ให้มีขอบบน -->
     <div class="min-h-screen flex flex-col items-center justify-start sm:justify-center p-4 pt-12 pb-24 sm:p-6">
         <div class="bg-white p-4 sm:p-8 sm:rounded-[2rem] sm:shadow-2xl w-full max-w-md relative fade-in flex flex-col justify-center">
             
             <div class="w-16 h-16 bg-green-50 text-green-500 rounded-full flex items-center justify-center mb-4 border-4 border-green-100 mx-auto shrink-0">
-                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
             </div>
-            <h2 class="text-2xl font-black text-center text-gray-800 mb-2">เชื่อมต่อบัญชีนักเรียน</h2>
-            <p class="text-center text-sm text-gray-500 mb-6">กรอกข้อมูลให้ถูกต้องตรงกับฐานข้อมูลของโรงเรียน</p>
+            <h2 class="text-2xl font-black text-center text-gray-800 mb-2">ยืนยันตัวตนด้วยอีเมล</h2>
+            <p class="text-center text-sm text-gray-500 mb-6" id="modalSubtitle">กรุณากรอกอีเมลโรงเรียนเพื่อรับรหัส OTP</p>
             
             <div class="space-y-4">
-                <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-1">รหัสนักเรียน (5 หลัก)</label>
-                    <input type="text" id="linkStudentId" maxlength="5" class="w-full border border-gray-300 rounded-xl p-3 focus:ring-2 focus:ring-green-500 text-center text-lg tracking-widest font-mono font-bold text-green-700" placeholder="XXXXX">
-                </div>
-                <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-1">ชื่อ-สกุล (ไม่ต้องมีคำนำหน้า)</label>
-                    <input type="text" id="linkStudentName" class="w-full border border-gray-300 rounded-xl p-3 focus:ring-2 focus:ring-green-500 text-center" placeholder="เช่น สภา นักเรียน">
-                </div>
-                <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-1">ห้องเรียน</label>
-                    <input type="text" id="linkStudentRoom" class="w-full border border-gray-300 rounded-xl p-3 focus:ring-2 focus:ring-green-500 text-center" placeholder="เช่น ม.4/1 หรือ 4/1">
-                </div>
-
-                <!-- กล่องคำเตือน -->
-                <div class="mt-5 bg-red-50 border border-red-200 rounded-xl p-4 text-left shadow-sm">
-                    <div class="flex items-center gap-2 mb-2">
-                        <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-                        <span class="text-red-700 font-extrabold text-sm">คำเตือนจากระบบ</span>
+                <!-- ขั้นที่ 1: กรอกอีเมล -->
+                <div id="step1_email">
+                    <label class="block text-sm font-bold text-gray-700 mb-1">อีเมลโรงเรียน (@mst.ac.th)</label>
+                    <input type="email" id="linkEmailInput" class="w-full border border-gray-300 rounded-xl p-3 focus:ring-2 focus:ring-green-500 text-center font-medium" placeholder="เช่น 6829903@mst.ac.th">
+                    
+                    <!-- Checkbox PDPA -->
+                    <div class="mt-4 mb-4">
+                        <label class="flex items-start gap-3 cursor-pointer group">
+                            <div class="relative flex items-center justify-center shrink-0 mt-0.5">
+                                <input type="checkbox" id="pdpaConsent" class="peer appearance-none w-5 h-5 border-2 border-gray-300 rounded-md checked:bg-[#06C755] checked:border-[#06C755] transition-colors cursor-pointer">
+                                <svg class="absolute w-3.5 h-3.5 text-white opacity-0 peer-checked:opacity-100 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                            </div>
+                            <span class="text-xs text-gray-600 font-medium leading-relaxed">
+                                ข้าพเจ้ายินยอมให้ประมวลผลข้อมูลส่วนบุคคลเพื่อใช้ยืนยันตัวตนสำหรับการเลือกตั้ง ตามพ.ร.บ. คุ้มครองข้อมูลส่วนบุคคล
+                            </span>
+                        </label>
                     </div>
-                    <p class="text-red-600 text-[11px] font-medium leading-relaxed">
-                        บัญชี LINE ของท่านจะถูกผูกเข้ากับรหัสนักเรียนนี้อย่างถาวร <b>"และไม่สามารถยกเลิก ปลดล็อค หรือแก้ไขได้อีกต่อไป"</b><br><br>
-                        หากระบบตรวจพบการจงใจสวมรอยใช้สิทธิ์ผู้อื่น ระบบจะบันทึกข้อมูลและ <b>"ตัดสิทธิ์การลงคะแนนของท่านทันที"</b>
-                    </p>
+
+                    <button id="requestOtpBtn" class="w-full mt-2 bg-[#06C755] hover:bg-[#05b34c] text-white font-bold py-4 rounded-xl shadow-md transition-all">ขอรับรหัส OTP</button>
                 </div>
 
-                <!-- Checkbox PDPA -->
-<div class="mt-4 mb-4">
-    <label class="flex items-start gap-3 cursor-pointer group">
-        <div class="relative flex items-center justify-center shrink-0 mt-0.5">
-            <input type="checkbox" id="pdpaConsent" class="peer appearance-none w-5 h-5 border-2 border-gray-300 rounded-md checked:bg-[#06C755] checked:border-[#06C755] transition-colors cursor-pointer">
-            <svg class="absolute w-3.5 h-3.5 text-white opacity-0 peer-checked:opacity-100 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
-        </div>
-        <span class="text-xs text-gray-600 font-medium leading-relaxed">
-            ข้าพเจ้ายินยอมให้สภานักเรียนประมวลผลและจัดเก็บข้อมูลส่วนบุคคล (ชื่อ-สกุล, รหัสนักเรียน, ห้องเรียน และข้อมูลบัญชี LINE) เพื่อใช้ในการยืนยันตัวตนสำหรับการเลือกตั้ง ตามพ.ร.บ. คุ้มครองข้อมูลส่วนบุคคล
-        </span>
-    </label>
-</div>
-                
-                <button id="confirmLinkBtn" class="w-full mt-4 bg-[#06C755] hover:bg-[#05b34c] text-white font-bold py-4 rounded-xl shadow-md transition-all flex justify-center items-center gap-2">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> ยืนยันข้อมูลและผูกบัญชี
-                </button>
+                <!-- ขั้นที่ 2: กรอกรหัส OTP (ซ่อนไว้ก่อน) -->
+                <div id="step2_otp" class="hidden">
+                    <div class="bg-green-50 text-green-800 p-3 rounded-xl text-xs font-bold text-center mb-4 border border-green-200">
+                        ระบบได้ส่งรหัส 6 หลักไปที่อีเมลของท่านแล้ว<br>(รหัสมีอายุ 5 นาที)
+                    </div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">รหัส OTP 6 หลัก</label>
+                    <input type="text" id="linkOtpInput" maxlength="6" class="w-full border border-gray-300 rounded-xl p-4 focus:ring-2 focus:ring-green-500 text-center text-2xl tracking-[0.5em] font-mono font-black text-gray-800 uppercase" placeholder="------">
+                    
+                    <button id="verifyOtpBtn" class="w-full mt-4 bg-purple-600 hover:bg-purple-700 text-white font-bold py-4 rounded-xl shadow-md transition-all flex justify-center items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> ยืนยันรหัสและผูกบัญชี
+                    </button>
+                </div>
+
                 <button id="cancelLinkBtn" onclick="document.getElementById('line-link-modal').classList.add('hidden')" class="w-full mt-2 bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold py-3 rounded-xl transition-all">ยกเลิก</button>
             </div>
         </div>
