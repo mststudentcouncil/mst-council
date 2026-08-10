@@ -305,13 +305,16 @@ img[src*="Logo_mstsc"] {
     
     <button id="importStudentsBtn" class="bg-gray-100 text-gray-400 px-6 py-2.5 rounded-xl text-sm font-bold transition-all w-full max-w-xs pointer-events-none">กดยืนยันนำเข้าข้อมูล</button>
 </div>
-                <div class="glass-panel p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col justify-center">
-                    <h3 class="text-lg font-extrabold text-gray-800 mb-4">สถานะฐานข้อมูล</h3>
-                    <div class="bg-indigo-50 p-4 rounded-xl border border-indigo-100 mb-4 text-center">
-                        <p class="text-sm text-indigo-900 leading-relaxed" id="lastUpdatedText">กำลังโหลดข้อมูล...</p>
-                    </div>
-                    <button id="deleteStudentsBtn" class="text-red-500 font-bold text-sm hover:text-red-700 hover:underline mx-auto">ล้างฐานข้อมูลทั้งหมด</button>
-                </div>
+                <div class="glass-panel p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col h-full">
+    <h3 class="text-lg font-extrabold text-gray-800 mb-4">สถานะฐานข้อมูล</h3>
+    
+    <!-- 🌟 เพิ่ม flex-1, flex, flex-col, justify-center และเปลี่ยนจาก <p> เป็น <div> -->
+    <div class="bg-indigo-50 p-6 rounded-2xl border border-indigo-100 mb-5 text-center flex-1 flex flex-col justify-center">
+        <div id="lastUpdatedText" class="w-full text-indigo-900">กำลังโหลดข้อมูล...</div>
+    </div>
+    
+    <button id="deleteStudentsBtn" class="text-red-500 font-bold text-sm hover:text-red-700 hover:underline mx-auto pb-1 mt-auto">ล้างฐานข้อมูลทั้งหมด</button>
+</div>
             </div>
 
             <div class="glass-panel p-6 md:p-8 rounded-3xl shadow-sm border border-gray-100">
@@ -426,7 +429,7 @@ img[src*="Logo_mstsc"] {
                             <p>ไปที่เมนู <b>"จัดการการลงคะแนน"</b> และกด <b>"สร้างรายการใหม่"</b> โดยกำหนดค่าสำคัญดังนี้:</p>
                             <ul class="list-disc pl-5 space-y-2 text-gray-700">
                                 <li><b>กลุ่มผู้มีสิทธิ์:</b> เลือกระบุเฉพาะเจาะจงได้ตั้งแต่ระดับชั้น (ม.1-ม.6), ระบุห้อง (เช่น ม.6/1) หรือแม้แต่ระบุสิทธิ์ให้เฉพาะ <b>"ครู/บุคลากร"</b> ลงคะแนนได้</li>
-                                <li><b>การจัดการรูปภาพผู้สมัคร:</b> สามารถ <span class="text-blue-600 font-bold">อัปโหลดรูปจากคอมพิวเตอร์/มือถือได้โดยตรง</span> (ระบบฝากไฟล์ภาพไว้ที่ ImgBB ให้ทันที) หมดปัญหาเรื่องลิงก์ภาพเสีย</li>
+                                <li><b>การจัดการรูปภาพผู้สมัคร:</b> สามารถ <span class="text-blue-600 font-bold">อัปโหลดรูปจากคอมพิวเตอร์/มือถือได้โดยตรง</span> * จะต้องรอให้อัปโหลดสำเร็จก่อนกดบันทึก</li>
                                 <li><b>เพิ่มทีละหลายตัวเลือก:</b> หากมีตัวเลือกจำนวนมาก ยังสามารถใช้ปุ่ม "วางจาก Excel" โดยก๊อปปี้คอลัมน์ชื่อมาวางได้เช่นเดิม</li>
                             </ul>
                         </div>

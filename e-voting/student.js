@@ -442,7 +442,7 @@ function showReceipt(campaignName, voterName) {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }, 400);
 
-    const refId = "MST-" + Math.random().toString(36).substr(2, 8).toUpperCase();
+    const refId = "MSTSC-" + Math.random().toString(36).substr(2, 8).toUpperCase();
     const now = new Date();
     const timeStr = now.toLocaleDateString('th-TH') + " " + now.toLocaleTimeString('th-TH') + " น.";
 

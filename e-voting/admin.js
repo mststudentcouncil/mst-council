@@ -528,7 +528,7 @@ window.toggleStatus = async function(id, status) {
 window.deleteCampaign = async function(id) {
     Swal.fire({ 
         title: 'ยืนยันการลบ', 
-        text: "หากลบแล้ว ข้อมูลคะแนนและรูปภาพที่เกี่ยวข้องจะถูกลบทิ้งถาวร", 
+        text: "หากลบแล้ว ข้อมูลคะแนน บัตรโหวต และรูปภาพที่เกี่ยวข้องจะถูกลบทิ้งถาวร", 
         icon: 'warning', 
         showCancelButton: true, 
         confirmButtonColor: '#d33', 
@@ -536,7 +536,7 @@ window.deleteCampaign = async function(id) {
         cancelButtonText: 'ยกเลิก'
     }).then(async (result) => {
         if (result.isConfirmed) {
-            Swal.fire({ title: 'กำลังลบข้อมูลและคืนพื้นที่...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+            Swal.fire({ title: 'กำลังลบข้อมูลทั้งหมด...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
             try {
                 const campRef = doc(db, "campaigns", id);
                 const campSnap = await getDoc(campRef);
@@ -544,12 +544,11 @@ window.deleteCampaign = async function(id) {
                 if (campSnap.exists()) {
                     const data = campSnap.data();
                     
-                    // 🌟 วนลูปเช็คตัวเลือกทั้งหมด หากมีรูปภาพ ให้สั่งลบทิ้งจาก Storage
+                    // 1. ลบรูปภาพออกจาก Storage
                     if (data.options) {
                         for (const opt of data.options) {
                             if (opt.image && opt.image.includes('firebasestorage')) {
                                 try {
-                                    // แปลง URL กลับเป็น Reference แล้วสั่งลบ
                                     const imgRef = storageRef(storage, opt.image);
                                     await deleteObject(imgRef);
                                 } catch (imgErr) {
@@ -560,12 +559,36 @@ window.deleteCampaign = async function(id) {
                     }
                 }
                 
-                // ลบข้อมูลแคมเปญออกจากฐานข้อมูล Firestore
+                // 🌟 2. เข้าไปกวาดลบประวัติการโหวตทั้งหมดใน Subcollection "votes" 
+                const votesRef = collection(db, "campaigns", id, "votes");
+                const votesSnap = await getDocs(votesRef);
+                
+                // ใช้ writeBatch เพื่อลบข้อมูลทีละเยอะๆ ได้เร็วขึ้น (กรณีมีคนโหวตหลายพันคน)
+                let batch = writeBatch(db);
+                let count = 0;
+                
+                votesSnap.forEach((voteDoc) => {
+                    batch.delete(voteDoc.ref);
+                    count++;
+                    // Firestore จำกัดการลบ Batch ละ 500 รายการ เราจึงต้องสั่งลบทีละ 400 เพื่อความชัวร์
+                    if (count % 400 === 0) {
+                        batch.commit();
+                        batch = writeBatch(db);
+                    }
+                });
+                
+                // ลบเศษที่เหลือ
+                if (count % 400 !== 0) {
+                    await batch.commit();
+                }
+                
+                // 🌟 3. ลบข้อมูลแคมเปญหลักออกจากฐานข้อมูล Firestore เป็นขั้นตอนสุดท้าย
                 await deleteDoc(campRef);
                 
-                Swal.fire('สำเร็จ', 'ลบรายการและคืนพื้นที่จัดเก็บเรียบร้อยแล้ว', 'success');
+                Swal.fire('สำเร็จ', `ลบรายการและประวัติการโหวต ${count} รายการ เรียบร้อยแล้ว`, 'success');
                 loadCampaigns(); 
             } catch (err) {
+                console.error("Delete Error:", err);
                 Swal.fire('เกิดข้อผิดพลาด', err.message, 'error');
             }
         }
@@ -638,11 +661,22 @@ async function checkStudentCount() {
         window.globalStudents = []; 
         let levels = new Set();
         let roomNums = new Set(); 
+        
+        // 🌟 1. เพิ่มตัวแปรเก็บเวลาอัปเดตล่าสุด
+        let latestUpdate = null;
 
         snapshot.forEach(docSnap => { 
             let d = docSnap.data(); 
             let studentLevel = d.level || "-";
             let studentRoom = d.room || "-";
+            
+            // 🌟 2. ดึง timestamp มาเปรียบเทียบหาเวลาที่ใหม่ที่สุด
+            if (d.updatedAt) {
+                let docDate = d.updatedAt.toDate();
+                if (!latestUpdate || docDate > latestUpdate) {
+                    latestUpdate = docDate;
+                }
+            }
             
             if (studentLevel !== "-" && studentLevel !== "ครู/บุคลากร") {
                 if (studentRoom !== "-" && !studentRoom.includes("/")) {
@@ -664,14 +698,42 @@ async function checkStudentCount() {
             }
         });
 
+        // 🌟 3. แปลงเวลาที่ได้ให้อยู่ในรูปแบบภาษาไทย
+        let lastUpdatedStr = "ไม่ระบุ";
+        if (latestUpdate) {
+            lastUpdatedStr = latestUpdate.toLocaleString('th-TH', { 
+                day: '2-digit', month: 'short', year: '2-digit', 
+                hour: '2-digit', minute: '2-digit', second: '2-digit'
+            }) + " น.";
+        }
+
         if(document.getElementById("statTotalStudents")) document.getElementById("statTotalStudents").innerHTML = window.globalStudents.length;
+        
+        // 🌟 อัปเดตการแสดงผล HTML ที่จัด Layout ใหม่ให้เต็มกล่อง
         if(document.getElementById("lastUpdatedText")) {
-            document.getElementById("lastUpdatedText").innerHTML = `ข้อมูลนักเรียนในระบบ:<br><b class="text-indigo-600 text-lg">${window.globalStudents.length}</b> คน`;
+            document.getElementById("lastUpdatedText").innerHTML = `
+                <div class="flex flex-col items-center justify-center w-full">
+                    <div class="flex items-center justify-center gap-5 mb-6">
+                        <div class="w-14 h-14 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center shadow-inner shrink-0">
+                            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                        </div>
+                        <div class="text-left">
+                            <p class="text-sm text-indigo-500 font-bold mb-1">นักเรียนในระบบทั้งหมด</p>
+                            <p class="text-4xl font-black text-indigo-900 leading-none">${window.globalStudents.length} <span class="text-base font-bold text-indigo-600">คน</span></p>
+                        </div>
+                    </div>
+                    <div class="w-full max-w-[280px] pt-4 border-t border-indigo-200/80 flex items-center justify-center gap-2 mx-auto">
+                        <span class="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse shrink-0"></span>
+                        <span class="text-xs font-bold text-indigo-600 truncate">อัปเดตล่าสุด: ${lastUpdatedStr}</span>
+                    </div>
+                </div>
+            `;
         }
 
         const levelSelect = document.getElementById('studentLevelFilter');
         const roomSelect = document.getElementById('studentRoomFilter');
 
+        // ... โค้ดส่วนล่าง (levelSelect, roomSelect, renderStudentTable) คงเดิม ...
         if (levelSelect) {
             levelSelect.innerHTML = '<option value="all">ทุกระดับชั้น</option>';
             Array.from(levels).sort().forEach(l => {
@@ -715,8 +777,13 @@ window.renderStudentTable = function(data = window.globalStudents) {
                 <td class="p-4 font-medium text-gray-900">${student.name}</td>
                 <td class="p-4 text-center">${student.level}</td>
                 <td class="p-4 text-center">${roomDisplay}</td>
-                <td class="p-4 text-center">
-                    <button onclick="deleteSingleStudent('${student.id}')" class="text-red-500 hover:bg-red-50 p-2 rounded-lg transition-colors">
+                <td class="p-4 text-center flex justify-center gap-2">
+                    <!-- 🌟 ปุ่มแก้ไข (ใหม่) -->
+                    <button onclick="editSingleStudent('${student.id}')" class="text-blue-500 hover:bg-blue-50 p-2 rounded-lg transition-colors" title="แก้ไข">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                    </button>
+                    <!-- ปุ่มลบ (เดิม) -->
+                    <button onclick="deleteSingleStudent('${student.id}')" class="text-red-500 hover:bg-red-50 p-2 rounded-lg transition-colors" title="ลบ">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                     </button>
                 </td>
@@ -923,6 +990,97 @@ window.deleteSingleStudent = function(id) {
         }
     });
 }
+
+window.editSingleStudent = function(id) {
+    // 1. หาข้อมูลเดิมของนักเรียนจาก ID
+    const student = window.globalStudents.find(s => s.id === id);
+    if (!student) {
+        Swal.fire('ข้อผิดพลาด', 'ไม่พบข้อมูลนักเรียน', 'error');
+        return;
+    }
+
+    // 2. ดึงเฉพาะเลขห้องออกมาโชว์
+    let currentLevel = student.level;
+    let currentRoom = student.room.includes('/') ? student.room.split('/')[1] : student.room;
+    if (currentRoom === "-") currentRoom = "";
+
+    // 🌟 สร้างตัวเลือกห้อง 1-10 แบบอัตโนมัติ และตั้งค่าค่าที่เลือกไว้ปัจจุบัน (Selected)
+    let roomOptions = '<option value="">เลือกห้อง</option>';
+    for(let i = 1; i <= 10; i++) {
+        roomOptions += `<option value="${i}" ${currentRoom == i ? 'selected' : ''}>${i}</option>`;
+    }
+
+    // 3. แสดงหน้าต่าง SweetAlert2 ให้แก้ไขข้อมูล
+    Swal.fire({
+        title: 'แก้ไขข้อมูลนักเรียน',
+        html: `
+            <div class="text-left space-y-4 mt-2">
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 mb-1">รหัสนักเรียน (ไม่อนุญาตให้แก้)</label>
+                    <input type="text" value="${student.id}" disabled class="w-full border border-gray-200 p-3 rounded-xl text-sm bg-gray-50 text-gray-400 font-mono">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-blue-800 mb-1">ชื่อ-สกุล (ไม่มีคำนำหน้า)</label>
+                    <input type="text" id="editStuName" value="${student.name}" class="w-full border border-gray-300 p-3 rounded-xl text-sm bg-white focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="flex gap-3">
+                    <div class="flex-1">
+                        <label class="block text-xs font-bold text-blue-800 mb-1">ระดับชั้น</label>
+                        <select id="editStuLevel" class="w-full border border-gray-300 p-3 rounded-xl text-sm bg-white focus:ring-2 focus:ring-blue-500">
+                            ${['ม.1', 'ม.2', 'ม.3', 'ม.4', 'ม.5', 'ม.6', 'ครู/บุคลากร'].map(l => `<option value="${l}" ${l === currentLevel ? 'selected' : ''}>${l}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="flex-1">
+                        <label class="block text-xs font-bold text-blue-800 mb-1">ห้องที่</label>
+                        <!-- 🌟 เปลี่ยนจาก input text เป็น select -->
+                        <select id="editStuRoom" class="w-full border border-gray-300 p-3 rounded-xl text-sm bg-white focus:ring-2 focus:ring-blue-500">
+                            ${roomOptions}
+                        </select>
+                    </div>
+                </div>
+            </div>
+        `,
+        showCancelButton: true,
+        confirmButtonColor: '#2563eb', // สีฟ้าให้เข้ากับปุ่ม Edit
+        cancelButtonColor: '#e5e7eb',
+        confirmButtonText: 'บันทึกการแก้ไข',
+        cancelButtonText: '<span class="text-gray-700">ยกเลิก</span>',
+        customClass: { popup: 'rounded-3xl' },
+        preConfirm: () => {
+            const newName = document.getElementById('editStuName').value.trim();
+            const newLevel = document.getElementById('editStuLevel').value;
+            const newRoom = document.getElementById('editStuRoom').value.trim();
+            
+            if (!newName) {
+                Swal.showValidationMessage('กรุณากรอกชื่อ-สกุลด้วยครับ');
+                return false;
+            }
+            return { name: newName, level: newLevel, room: newRoom };
+        }
+    }).then(async (result) => {
+        if (result.isConfirmed) {
+            Swal.fire({ title: 'กำลังอัปเดตข้อมูล...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+            try {
+                const { name, level, room } = result.value;
+                // ลบคำนำหน้าชื่อทิ้งเผื่อแอดมินเผลอพิมพ์ใส่เข้ามา
+                let cleanName = name.replace(/^(ด\.ช\.|ด\.ญ\.|นาย|นางสาว|นาง|เด็กชาย|เด็กหญิง)\s*/, '').trim();
+                
+                // อัปเดตข้อมูลขึ้น Firebase
+                await updateDoc(doc(db, "students", id), {
+                    name: cleanName,
+                    level: level,
+                    room: room,
+                    updatedAt: serverTimestamp() // อัปเดตเวลาด้วย
+                });
+                
+                Swal.fire('สำเร็จ', 'อัปเดตข้อมูลนักเรียนเรียบร้อยแล้ว', 'success');
+                checkStudentCount(); // โหลดข้อมูลใหม่ทั้งหมดเพื่ออัปเดตตารางและเวลาล่าสุด
+            } catch (err) {
+                Swal.fire('เกิดข้อผิดพลาด', err.message, 'error');
+            }
+        }
+    });
+};
 
 // ==========================================
 // 7. จัดการข้อมูลสรุปผล (Results) & เซิร์ฟเวอร์
