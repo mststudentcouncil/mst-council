@@ -1,6 +1,6 @@
 import { auth, db } from "./firebase-config.js"; 
 import { onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-import { doc, getDoc, getDocs, collection, query, where, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+import { doc, getDoc, getDocs, collection, query, where, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
 // ==========================================
 // 1. ฟังก์ชันจัดการหน้าจอโหลดและหน้าจอ Error แบบเต็มจอ
@@ -46,7 +46,6 @@ if (loginBtn) {
         showFullScreenLoading("กำลังเข้าสู่ระบบด้วย Google...");
         const provider = new GoogleAuthProvider();
         
-        // เพิ่ม prompt: 'select_account' เพื่อบังคับให้เลือกบัญชีใหม่ทุกครั้ง
         provider.setCustomParameters({
             hd: 'mst.ac.th',
             prompt: 'select_account' 
@@ -57,20 +56,17 @@ if (loginBtn) {
             const user = result.user;
             const email = user.email;
 
-            // บัญชีแอดมิน ข้ามการตรวจสอบรหัสนักเรียน
             if (email === "studentcouncil@mst.ac.th") {
                 window.location.href = "admin.html";
                 return;
             }
 
-            // 2.1 ตรวจสอบโดเมน
             if (!email.endsWith("@mst.ac.th")) {
                 await auth.signOut();
                 showFullScreenError('ไม่มีสิทธิ์ใช้งาน', 'กรุณาใช้อีเมล @mst.ac.th ของโรงเรียนเท่านั้น');
                 return;
             }
 
-            // 2.2 แยกรหัสนักเรียนและปีที่จบ (รูปแบบเช่น 6829903)
             const emailPrefix = email.split('@')[0];
             if (!/^\d{7}$/.test(emailPrefix)) {
                 await auth.signOut();
@@ -81,15 +77,13 @@ if (loginBtn) {
             const gradYear = emailPrefix.substring(0, 2); 
             const studentId = emailPrefix.substring(2);   
 
-            // 2.3 ตรวจสอบรายชื่อจากฐานข้อมูลนักเรียนปัจจุบัน (Firestore)
             showFullScreenLoading("กำลังตรวจสอบสิทธิ์ผู้ลงคะแนน...");
             
-            // 🌟 เปลี่ยนคำสั่งเป็นของ Firestore
             const studentRef = doc(db, "students", studentId);
             const snapshot = await getDoc(studentRef);
 
             if (snapshot.exists()) {
-                const studentData = snapshot.data(); // 🌟 ใช้ .data() แทน .val()
+                const studentData = snapshot.data();
                 const profile = {
                     id: studentId,
                     email: email,
@@ -155,13 +149,12 @@ window.loginAsAdmin = () => {
 };
 
 // ==========================================
-// 5. ระบบเข้าสู่ระบบด้วย LINE (LIFF + Account Linking)
+// 5. ระบบเข้าสู่ระบบด้วย LINE (Enterprise Update)
 // ==========================================
 const lineLoginBtn = document.getElementById("lineLoginBtn");
-let currentLineUid = null; // ตัวแปรเก็บ LINE UID ชั่วคราว
+let currentLineUid = null; 
 
 if (lineLoginBtn) {
-    // ⚠️ สำคัญ: ต้องใส่ LIFF ID ที่ได้จาก LINE Developers Console ตรงนี้
     const MY_LIFF_ID = "2008923798-hd6mzZd8"; 
 
     lineLoginBtn.addEventListener("click", () => {
@@ -169,10 +162,8 @@ if (lineLoginBtn) {
         
         liff.init({ liffId: MY_LIFF_ID }).then(() => {
             if (!liff.isLoggedIn()) {
-                // ถ้ายังไม่ล็อกอิน ให้พาไปหน้าล็อกอินของ LINE
                 liff.login();
             } else {
-                // ถ้าล็อกอินแล้ว ดึงข้อมูลโปรไฟล์
                 liff.getProfile().then(profile => {
                     currentLineUid = profile.userId;
                     checkLineAccount(currentLineUid);
@@ -186,38 +177,39 @@ if (lineLoginBtn) {
     });
 }
 
-// ฟังก์ชันตรวจสอบว่า LINE นี้เคยผูกกับรหัสใครไว้หรือยัง
+// 🌟 [อัปเดตใหม่]: เช็คผ่านคอลเล็กชัน line_links แบบเจาะจง ไม่ค้นหากวาดรายชื่อทั้งหมด
 async function checkLineAccount(lineUid) {
     showFullScreenLoading("กำลังตรวจสอบสิทธิ์...");
     try {
-        // [จุดที่แก้ไข]: ต้องสั่งให้ Firebase ล็อกอินแบบ Anonymous "ก่อน" ที่จะดึงข้อมูล
         await signInAnonymously(auth);
 
-        const q = query(collection(db, "students"), where("lineUid", "==", lineUid));
-        const querySnapshot = await getDocs(q);
+        const lineLinkRef = doc(db, "line_links", lineUid);
+        const lineLinkSnap = await getDoc(lineLinkRef);
 
-        if (!querySnapshot.empty) {
-            // กรณีเคยผูกไว้แล้ว (เจอข้อมูลในฐาน) -> เข้าสู่ระบบได้เลย
-            const studentDoc = querySnapshot.docs[0];
-            const studentData = studentDoc.data();
+        if (lineLinkSnap.exists()) {
+            const studentId = lineLinkSnap.data().studentId;
+            const studentRef = doc(db, "students", studentId);
+            const studentSnap = await getDoc(studentRef);
             
-            const profile = {
-                id: studentDoc.id,
-                name: studentData.name, 
-                level: studentData.level,
-                room: studentData.room,
-                loginMethod: 'line'
-            };
-            sessionStorage.setItem("mst_voter_profile", JSON.stringify(profile));
-            window.location.href = "student.html";
+            if (studentSnap.exists()) {
+                const studentData = studentSnap.data();
+                const profile = {
+                    id: studentSnap.id,
+                    name: studentData.name, 
+                    level: studentData.level,
+                    room: studentData.room,
+                    loginMethod: 'line'
+                };
+                sessionStorage.setItem("mst_voter_profile", JSON.stringify(profile));
+                window.location.href = "student.html";
+            } else {
+                showFullScreenError("ข้อมูลสูญหาย", "พบประวัติการผูกบัญชี แต่ไม่พบรายชื่อในระบบฐานข้อมูล");
+            }
         } else {
-            // กรณีไม่เคยผูกบัญชี -> เปิดหน้าต่างให้กรอกข้อมูลเชื่อมบัญชี
             overlay.classList.add('hidden'); 
             document.getElementById('line-link-modal').classList.remove('hidden');
-            document.getElementById('line-link-modal').classList.add('flex');
         }
     } catch (error) {
-        // พิมพ์ Error ลง Console เพื่อให้แอดมินตรวจสอบได้ง่ายขึ้นหากติดปัญหาอื่น
         console.error("Firebase Database Error: ", error); 
         showFullScreenError("เกิดข้อผิดพลาด", "ไม่สามารถตรวจสอบฐานข้อมูลได้ (โปรดแจ้งผู้ดูแลระบบ)");
     }
@@ -232,14 +224,13 @@ if (confirmLinkBtn) {
         const inputId = document.getElementById("linkStudentId").value.trim();
         const inputName = document.getElementById("linkStudentName").value.trim();
         const inputRoom = document.getElementById("linkStudentRoom").value.trim();
-        const pdpaConsent = document.getElementById("pdpaConsent").checked; // 🌟 รับค่า Checkbox
+        const pdpaConsent = document.getElementById("pdpaConsent").checked;
 
         if (!pdpaConsent) {
             Swal.fire({ icon: 'warning', title: 'กรุณากดยอมรับเงื่อนไข', text: 'คุณต้องยินยอมให้ระบบประมวลผลข้อมูลส่วนบุคคลก่อนทำรายการ', confirmButtonColor: '#06C755', customClass: { popup: 'rounded-3xl' }});
             return;
         }
 
-        // ตรวจสอบว่ากรอกครบทั้ง 3 ช่องหรือไม่
         if (inputId.length !== 5 || inputName === "" || inputRoom === "") {
             Swal.fire({ icon: 'warning', title: 'ข้อมูลไม่ครบถ้วน', text: 'กรุณากรอกรหัสนักเรียน ชื่อ-สกุล และห้องเรียน ให้ครบถ้วน', confirmButtonColor: '#06C755', customClass: { popup: 'rounded-3xl' }});
             return;
@@ -260,30 +251,19 @@ if (confirmLinkBtn) {
                     return;
                 }
 
-                // ==========================================
-                // 🌟 ส่วนที่แก้ไขใหม่ เพื่อแก้ปัญหาเทียบข้อมูลไม่ผ่าน
-                // ==========================================
-
-                // 1. การตรวจสอบชื่อ-สกุล (เผื่อนักเรียนเผลอพิมพ์คำนำหน้ามา ให้ตัดทิ้ง + ตัดช่องว่าง)
                 const prefixRegex = /^(ด\.ช\.|ด\.ญ\.|นาย|นางสาว|นาง|เด็กชาย|เด็กหญิง)\s*/;
                 const dbNameClean = data.name.replace(prefixRegex, '').replace(/\s+/g, '');
                 const inputNameClean = inputName.replace(prefixRegex, '').replace(/\s+/g, '');
 
-                // 2. การตรวจสอบห้องเรียน (ต้องเอาชั้นกับห้องมารวมกันก่อนเทียบ)
                 let dbFullRoom = data.room || "";
                 if (data.level && data.level !== "ครู/บุคลากร" && !dbFullRoom.includes("/")) {
-                    dbFullRoom = data.level + "/" + dbFullRoom; // จับคู่ ม.4 + / + 1 = ม.4/1
+                    dbFullRoom = data.level + "/" + dbFullRoom;
                 }
                 
-                // ตัดคำว่า "ม." และช่องว่างออก เพื่อให้เหลือแค่ "4/1" เท่ากันทั้งสองฝั่ง
                 const dbRoomClean = dbFullRoom.replace(/\s+/g, '').replace(/ม\.?/g, '');
                 const inputRoomClean = inputRoom.replace(/\s+/g, '').replace(/ม\.?/g, '');
 
-                // ==========================================
-
-                // ตรวจสอบขั้นสุดท้าย
                 if (dbNameClean === inputNameClean && dbRoomClean === inputRoomClean) {
-                    // ทุกอย่างตรงกัน แจ้งเตือนขู่ขั้นสุดท้ายก่อนผูกถาวร
                     overlay.classList.add('hidden');
 
                     Swal.fire({
@@ -306,21 +286,22 @@ if (confirmLinkBtn) {
                     }).then(async (result) => {
                         if (result.isConfirmed) {
                             showFullScreenLoading("กำลังบันทึกข้อมูล...");
-                            // อัปเดต lineUid ลงในฐานข้อมูลนักเรียน
+                            
+                            // 🌟 [อัปเดตใหม่]: บันทึกข้อมูลแบบมัดรวม (เขียนลง 2 ที่)
                             await updateDoc(studentRef, { lineUid: currentLineUid });
-                            // สร้าง Session เพื่อเข้าสู่ระบบ
+                            await setDoc(doc(db, "line_links", currentLineUid), { studentId: inputId });
+                            
                             sessionStorage.setItem("mst_voter_profile", JSON.stringify({
                                 id: docSnap.id, name: data.name, level: data.level, room: data.room, loginMethod: 'line'
                             }));
                             window.location.href = "student.html";
                         } else {
-                            // ถ้ายกเลิก ให้โชว์ Modal กลับมา
                             document.getElementById('line-link-modal').classList.remove('hidden');
                         }
                     });
 
                 } else {
-                    showFullScreenError("ข้อมูลไม่ถูกต้อง", "ชื่อ-สกุล หรือ ห้องเรียน ไม่ตรงกับฐานข้อมูลของรหัสนักเรียนนี้ (ตรวจสอบการเว้นวรรคให้ถูกต้อง)");
+                    showFullScreenError("ข้อมูลไม่ถูกต้อง", "ชื่อ-สกุล หรือ ห้องเรียน ไม่ตรงกับฐานข้อมูลของรหัสนักเรียนนี้");
                 }
             } else {
                 showFullScreenError("ไม่พบข้อมูล", "ไม่พบรหัสนักเรียนนี้ในระบบ กรุณาตรวจสอบอีกครั้ง");

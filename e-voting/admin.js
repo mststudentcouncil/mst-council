@@ -1,6 +1,7 @@
 import { auth, db, storage } from "./firebase-config.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-import { collection, addDoc, getDocs, onSnapshot, serverTimestamp, query, orderBy, updateDoc, doc, getDoc, deleteDoc, setDoc, writeBatch, limit } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+// 🌟 เพิ่ม getCountFromServer เข้ามาเพื่อใช้นับจำนวนคนโหวตได้เร็วขึ้น
+import { collection, addDoc, getDocs, onSnapshot, serverTimestamp, query, orderBy, updateDoc, doc, getDoc, deleteDoc, setDoc, writeBatch, limit, getCountFromServer } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 import { ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-storage.js";
 
 window.liveResultListeners = {};
@@ -330,6 +331,7 @@ document.getElementById("createCampaignForm")?.addEventListener("submit", async 
     try {
         if (editingId) {
             const campRef = doc(db, "campaigns", editingId);
+            // 🌟 แม้ว่าเราจะไม่ใช้ votes_count ในการนับแล้ว แต่ยังเก็บไว้เพื่อป้องกันระบบ Error ตอนอัปเดตแคมเปญเก่า
             const oldVotes = (await getDoc(campRef)).data().votes_count || {};
             optionsData.forEach(opt => { if (oldVotes[opt.name] !== undefined) initialVotes[opt.name] = oldVotes[opt.name]; });
             payload.votes_count = initialVotes;
@@ -476,6 +478,7 @@ function isStudentEligible(campaignRules, studentInfo) {
     return false;
 }
 
+// 🌟 [อัปเดตใหม่]: นับยอดคนโหวตจาก Subcollection "votes" แบบ Real-time
 async function updateDashboardLiveStats(campaigns) {
     const statsContainer = document.getElementById("liveVotingStats");
     if(!statsContainer) return;
@@ -495,10 +498,12 @@ async function updateDashboardLiveStats(campaigns) {
             eligibleCount = window.globalStudents.filter(s => isStudentEligible(camp.allowed_voters, s)).length;
         }
 
-        if (camp.votes_count) {
-            Object.values(camp.votes_count).forEach(count => {
-                if (typeof count === 'number') totalVoters += count;
-            });
+        try {
+            // ดึงจำนวนคนโหวตจากกล่องบัตรคะแนน
+            const votesSnap = await getDocs(collection(db, "campaigns", camp.id, "votes"));
+            totalVoters = votesSnap.size;
+        } catch (error) {
+            console.error("Error fetching live stats:", error);
         }
 
         let percent = eligibleCount > 0 ? Math.round((totalVoters / eligibleCount) * 100) : 0;
@@ -539,13 +544,11 @@ function removeThaiPrefix(name) {
 }
 
 function formatStudentData(row, sheetName) {
-    // 🌟 ดึงข้อมูลเฉพาะจากคอลัมน์ที่ 1-4 (แถว[1] = รหัส, แถว[2] = คำนำหน้า, แถว[3] = ชื่อ, แถว[4] = นามสกุล)
     if (!row || row.length < 4 || isNaN(parseInt(row[1]))) return null;
 
     const studentId = String(row[1]).trim();
     if (studentId.length !== 5 || !/^\d+$/.test(studentId)) return null;
 
-    // 🌟 รวมชื่อและนามสกุลเข้าด้วยกัน
     const firstName = row[3] ? String(row[3]).trim() : "";
     const lastName = row[4] ? String(row[4]).trim() : "";
     let fullName = `${firstName} ${lastName}`.trim();
@@ -556,10 +559,8 @@ function formatStudentData(row, sheetName) {
     if (!fullName) return null;
 
     let rawRoom = "-";
-    // 🌟 ค้นหาข้อมูลห้องเรียนจากเซลล์หลังๆ ของแถว 
     for (let j = row.length - 1; j >= 0; j--) {
         const cellValue = String(row[j] || "").trim();
-        // ถ้าเป็นข้อความเช่น ม.6/1, 6/1, หรือตัวเลขเฉยๆ จะนำมาใช้เป็นห้อง
         if (cellValue.includes('/') || cellValue.includes('ม') || cellValue.toLowerCase().includes('m') || /^\d+$/.test(cellValue)) {
             rawRoom = cellValue;
             break;
@@ -574,11 +575,9 @@ function formatStudentData(row, sheetName) {
         level = parts[0].trim();
         room = parts[1].trim();
         
-        // ถ้าห้องมาในรูปแบบ "6/1" (ไม่มี ม. นำหน้า) ให้เติมให้สมบูรณ์
         if (!level.includes('ม') && !level.toLowerCase().includes('m')) {
             level = "ม." + level.replace(/[^0-9]/g, '');
         } else {
-            // ป้องกันรูปแบบ ม..6 ให้เหลือแค่ ม.6
             level = level.replace(/[mMม]\.?\.?\s*/g, 'ม.');
         }
     } else {
@@ -595,7 +594,6 @@ function formatStudentData(row, sheetName) {
     };
 }
 
-// 🌟 1. ฟังก์ชันดึงข้อมูลและจัดฟอร์แมตชั้น/ห้องให้ถูกต้อง
 async function checkStudentCount() {
     try { 
         const snapshot = await getDocs(collection(db, "students"));
@@ -608,7 +606,6 @@ async function checkStudentCount() {
             let studentLevel = d.level || "-";
             let studentRoom = d.room || "-";
             
-            // 🌟 แก้ไขบั๊กสถิติรวมกัน: นำชั้นมาต่อกับห้องให้เป็นรูปแบบ "ม.4/1" ป้องกันการทับซ้อน
             if (studentLevel !== "-" && studentLevel !== "ครู/บุคลากร") {
                 if (studentRoom !== "-" && !studentRoom.includes("/")) {
                     studentRoom = `${studentLevel}/${studentRoom}`;
@@ -619,10 +616,9 @@ async function checkStudentCount() {
                 id: docSnap.id, 
                 name: d.name || "ไม่ระบุชื่อ", 
                 level: studentLevel,
-                room: studentRoom // ตอนนี้จะถูกเก็บเป็น ม.4/1 แล้ว
+                room: studentRoom 
             }); 
             
-            // เก็บข้อมูลชั้นและห้องที่ใช้สร้างตัวกรอง (Dropdown)
             if (studentLevel !== "-") levels.add(studentLevel);
             if (studentRoom !== "-") {
                 let rNum = studentRoom.includes('/') ? studentRoom.split('/')[1] : studentRoom;
@@ -635,7 +631,6 @@ async function checkStudentCount() {
             document.getElementById("lastUpdatedText").innerHTML = `ข้อมูลนักเรียนในระบบ:<br><b class="text-indigo-600 text-lg">${window.globalStudents.length}</b> คน`;
         }
 
-        // อัปเดตตัวกรอง ระดับชั้น และ ห้องเรียน ให้มีตัวเลือกตามฐานข้อมูลจริง
         const levelSelect = document.getElementById('studentLevelFilter');
         const roomSelect = document.getElementById('studentRoomFilter');
 
@@ -664,7 +659,6 @@ async function checkStudentCount() {
     }
 }
 
-// 🌟 2. ปรับปรุงฟังก์ชัน Render ตาราง ให้รองรับการกรองข้อมูล
 window.renderStudentTable = function(data = window.globalStudents) {
     const tbody = document.getElementById('studentTableBody');
     if (!tbody) return;
@@ -675,7 +669,6 @@ window.renderStudentTable = function(data = window.globalStudents) {
     }
 
     let html = '';
-    // แสดงพรีวิวแค่ 100 รายการ ป้องกันเบราว์เซอร์ค้าง
     data.slice(0, 100).forEach(student => {
         const roomDisplay = student.room.includes('/') ? student.room.split('/')[1] : student.room;
         html += `
@@ -695,7 +688,6 @@ window.renderStudentTable = function(data = window.globalStudents) {
     tbody.innerHTML = html;
 }
 
-// 🌟 3. ระบบกรองตารางนักเรียน (ค้นหาชื่อ/รหัส, เลือกระดับชั้น, เลือกห้อง)
 window.filterStudentsTable = function() {
     const searchKw = (document.getElementById("studentSearchInput")?.value || "").toLowerCase();
     const levelKw = document.getElementById("studentLevelFilter")?.value || "all";
@@ -713,7 +705,6 @@ window.filterStudentsTable = function() {
     renderStudentTable(filteredData);
 };
 
-// นำฟังก์ชันไปผูกกับช่องกรอกข้อมูลและ Dropdown
 document.getElementById("studentSearchInput")?.addEventListener("input", filterStudentsTable);
 document.getElementById("studentLevelFilter")?.addEventListener("change", filterStudentsTable);
 document.getElementById("studentRoomFilter")?.addEventListener("change", filterStudentsTable);
@@ -898,6 +889,8 @@ window.deleteSingleStudent = function(id) {
 // ==========================================
 // 7. จัดการข้อมูลสรุปผล (Results) & เซิร์ฟเวอร์
 // ==========================================
+
+// 🌟 [อัปเดตใหม่]: นับคะแนนรวมจากบัตรโหวตในคอลเล็กชัน votes แทนการพึ่งพา votes_count
 window.viewResults = async function(campaignId) {
     const resultDiv = document.getElementById(`results_${campaignId}`);
     if (!resultDiv.classList.contains('hidden')) { resultDiv.classList.add('hidden'); return; }
@@ -909,10 +902,20 @@ window.viewResults = async function(campaignId) {
             const docSnap = await getDoc(doc(db, "campaigns", campaignId));
             if (!docSnap.exists()) { resultDiv.innerHTML = '<div class="text-center text-red-500">ไม่พบข้อมูล</div>'; return; }
 
-            const data = docSnap.data(); const votes = data.votes_count || {}; const title = data.title;
+            const data = docSnap.data(); 
+            const title = data.title;
             
+            // อ่านบัตรโหวตทั้งหมดในกล่อง
+            const votesSnap = await getDocs(collection(db, "campaigns", campaignId, "votes"));
+
+            // เริ่มต้นเซ็ตคะแนนผู้สมัครทุกคนเป็น 0
+            let actualVotes = {};
+            data.options.forEach(opt => actualVotes[opt.name] = 0);
+            actualVotes["ไม่ประสงค์ลงคะแนน"] = 0;
+
             let eligibleByRoom = {};
             let levelOfRoomMapping = {};
+            
             if(window.globalStudents) {
                 window.globalStudents.forEach(s => {
                     if(isStudentEligible(data.allowed_voters, s)) { 
@@ -923,13 +926,23 @@ window.viewResults = async function(campaignId) {
                 });
             }
 
-            const votersSnap = await getDocs(collection(db, "campaigns", campaignId, "voters"));
             let votedByRoom = {};
-            votersSnap.forEach(v => { 
-                let r = v.data().room || "ไม่ระบุ"; 
+            
+            // นำบัตรโหวตแต่ละใบมาแยกนับคะแนนและนับจำนวนคนมาโหวต
+            votesSnap.forEach(v => { 
+                let vData = v.data();
+                let r = vData.room || "ไม่ระบุ"; 
                 votedByRoom[r] = (votedByRoom[r] || 0) + 1; 
-                if(v.data().level) levelOfRoomMapping[r] = v.data().level;
+                if(vData.level) levelOfRoomMapping[r] = vData.level;
+                
+                let voteValue = vData.voteTo;
+                if(voteValue) {
+                    actualVotes[voteValue] = (actualVotes[voteValue] || 0) + 1;
+                }
             });
+
+            // ใช้ actualVotes เป็นคะแนนของระบบ
+            const votes = actualVotes;
 
             let statsByLevel = {};
             let sortedRooms = Object.keys(eligibleByRoom).sort((a,b) => a.localeCompare(b, 'th', {numeric:true}));
@@ -1012,13 +1025,45 @@ window.viewResults = async function(campaignId) {
     loadData(); 
 }
 
+// 🌟 [อัปเดตใหม่]: ระบบดึงออก Excel โดยนับบัตรโหวตจริง
 window.exportExcel = async function(campaignId) {
     try {
         Swal.fire({ title: 'กำลังสร้างไฟล์...', allowOutsideClick: false, didOpen: () => { Swal.showLoading() } });
         const docSnap = await getDoc(doc(db, "campaigns", campaignId));
         if (docSnap.exists()) {
-            const data = docSnap.data(); const votes = data.votes_count || {}; const safeTitle = data.title.replace(/[/\\?%*:|"<>]/g, '-'); 
+            const data = docSnap.data(); 
+            const safeTitle = data.title.replace(/[/\\?%*:|"<>]/g, '-'); 
             const wb = XLSX.utils.book_new();
+
+            const votesSnap = await getDocs(collection(db, "campaigns", campaignId, "votes"));
+
+            let actualVotes = {};
+            data.options.forEach(opt => actualVotes[opt.name] = 0);
+            actualVotes["ไม่ประสงค์ลงคะแนน"] = 0;
+
+            let eligibleByRoom = {}; let levelOfRoomMapping = {};
+            if(window.globalStudents) { 
+                window.globalStudents.forEach(s => { 
+                    if(isStudentEligible(data.allowed_voters, s)) { 
+                        let r = s.room || "ไม่ระบุ"; eligibleByRoom[r] = (eligibleByRoom[r] || 0) + 1; levelOfRoomMapping[r] = s.level || "อื่นๆ";
+                    } 
+                }); 
+            }
+
+            let votedByRoom = {}; 
+            votesSnap.forEach(v => { 
+                let vData = v.data();
+                let r = vData.room || "ไม่ระบุ"; 
+                votedByRoom[r] = (votedByRoom[r] || 0) + 1; 
+                if(vData.level) levelOfRoomMapping[r] = vData.level;
+                
+                let voteValue = vData.voteTo;
+                if(voteValue) {
+                    actualVotes[voteValue] = (actualVotes[voteValue] || 0) + 1;
+                }
+            });
+            
+            const votes = actualVotes;
 
             let totalVotes = 0; const validVotes = [];
             Object.entries(votes).forEach(([option, count]) => {
@@ -1032,21 +1077,6 @@ window.exportExcel = async function(campaignId) {
             });
             summaryData.push(["", "", ""]); summaryData.push(["รวมผู้ใช้สิทธิ์ทั้งหมด", totalVotes, "100%"]);
             XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(summaryData), "สรุปผลโหวต");
-
-            let eligibleByRoom = {}; let levelOfRoomMapping = {};
-            if(window.globalStudents) { 
-                window.globalStudents.forEach(s => { 
-                    if(isStudentEligible(data.allowed_voters, s)) { 
-                        let r = s.room || "ไม่ระบุ"; eligibleByRoom[r] = (eligibleByRoom[r] || 0) + 1; levelOfRoomMapping[r] = s.level || "อื่นๆ";
-                    } 
-                }); 
-            }
-
-            const votersSnap = await getDocs(collection(db, "campaigns", campaignId, "voters"));
-            let votedByRoom = {}; votersSnap.forEach(v => { 
-                let r = v.data().room || "ไม่ระบุ"; votedByRoom[r] = (votedByRoom[r] || 0) + 1; 
-                if(v.data().level) levelOfRoomMapping[r] = v.data().level;
-            });
             
             let statsByLevel = {};
             let sortedRooms = Object.keys(eligibleByRoom).sort((a,b) => a.localeCompare(b, 'th', {numeric:true}));

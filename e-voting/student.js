@@ -1,7 +1,6 @@
 import { auth, db } from "./firebase-config.js";
-// ✅ เพิ่ม signInAnonymously เข้ามาในปีกกา
 import { onAuthStateChanged, signOut, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-import { collection, doc, getDoc, getDocs, setDoc, updateDoc, increment, query, where, serverTimestamp, FieldPath } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+import { collection, doc, getDoc, getDocs, setDoc, query, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
 let currentUser = null;
 let studentData = null; 
@@ -10,14 +9,12 @@ let countdownIntervals = [];
 let currentBoothData = null; 
 let userSelectedOption = null; 
 
-// ฟังก์ชันเปลี่ยนหน้าจอเป็น Error พร้อมปุ่มย้อนกลับ (ปรับ UI ตรงกลางแล้ว)
 function showAuthError(title, desc) {
     const loadingDiv = document.getElementById("auth-loading");
     const contentDiv = document.getElementById("auth-content");
     
-    if (loadingDiv) loadingDiv.style.display = 'none'; // ซ่อนตัวโหลด
+    if (loadingDiv) loadingDiv.style.display = 'none'; 
     
-    // สร้าง HTML ชุดใหม่ที่จัดกึ่งกลางสมบูรณ์แบบ
     const errorHtml = `
         <div class="flex flex-col items-center justify-center w-full fade-in mt-2">
             <div class="w-20 h-20 bg-red-50 text-red-500 rounded-full flex items-center justify-center mb-5 border-4 border-red-100 mx-auto shadow-sm">
@@ -34,7 +31,6 @@ function showAuthError(title, desc) {
         </div>
     `;
     
-    // ป้องกันการสร้างกล่อง Error ซ้ำซ้อน
     if (!document.getElementById("error-wrapper-ui")) {
         const errorWrapper = document.createElement("div");
         errorWrapper.id = "error-wrapper-ui";
@@ -42,31 +38,26 @@ function showAuthError(title, desc) {
         errorWrapper.innerHTML = errorHtml;
         contentDiv.appendChild(errorWrapper);
 
-        // ผูกคำสั่งปุ่มย้อนกลับให้ Logout
         document.getElementById("authBackBtn").addEventListener("click", () => {
             signOut(auth).then(() => window.location.href = "index.html");
         });
     }
 }
 
-// ตรวจสอบสิทธิ์
 onAuthStateChanged(auth, async (user) => {
     const blocker = document.getElementById("auth-blocker");
     const profileStr = sessionStorage.getItem("mst_voter_profile");
 
-    // 1. ถ้าไม่มี user เลย (ยังไม่ได้ล็อกอินอะไรเลย) ให้เด้งกลับหน้าแรกทันที
     if (!user) { 
         window.location.href = "index.html"; 
         return; 
     } 
     
-    // 2. ตรวจสอบบัญชีแอดมิน
     if (user.email === "studentcouncil@mst.ac.th") {
         window.location.href = "admin.html";
         return;
     }
 
-    // 3. ตรวจสอบว่ามีข้อมูลโปรไฟล์นักเรียนที่ส่งมาจาก index.html หรือไม่
     if (profileStr) {
         try {
             const ssoData = JSON.parse(profileStr);
@@ -80,7 +71,6 @@ onAuthStateChanged(auth, async (user) => {
                 }
             }
 
-            // นำข้อมูลมาจัดเก็บ
             studentData = {
                 id: ssoData.id,
                 name: ssoData.name || "ไม่ระบุชื่อ",
@@ -88,7 +78,6 @@ onAuthStateChanged(auth, async (user) => {
                 room: formattedRoom
             };
 
-            // สร้างตัวอักษรย่อสำหรับแสดงในวงกลม Avatar
             let initials = "";
             const nameParts = studentData.name.split(" ");
             if (nameParts.length > 0 && nameParts[0].length > 0) initials += nameParts[0].charAt(0);
@@ -99,7 +88,6 @@ onAuthStateChanged(auth, async (user) => {
                 avatarEl.innerText = initials || "--";
             }
 
-            // ปิดม่านบังหน้าจอโหลด
             if (blocker) {
                 blocker.classList.add("opacity-0");
                 setTimeout(() => {
@@ -118,21 +106,17 @@ onAuthStateChanged(auth, async (user) => {
                 `;
             }
             
-            // สั่งโหลดรายการโหวต
             if (typeof fetchCampaigns === "function") {
                 fetchCampaigns(); 
             }
             
         } catch (e) {
-            // ถ้าระบบประมวลผล Profile พัง ให้เคลียร์ข้อมูลและเด้งกลับไปหน้าแรกล็อกอินใหม่
             signOut(auth).then(() => {
                 sessionStorage.removeItem("mst_voter_profile");
                 window.location.href = "index.html";
             });
         }
     } else {
-        // 4. กรณีมี User แต่ไม่มีข้อมูลโปรไฟล์ (เปิดลิงก์ส่งมาตรงๆ หรือเป็นผู้เยี่ยมชมจากหน้า Results)
-        // ให้เตะออกและเด้งกลับหน้า index.html อัตโนมัติ (ไม่ต้องแสดง Error ค้างไว้)
         signOut(auth).then(() => {
             window.location.href = "index.html";
         });
@@ -149,7 +133,7 @@ document.getElementById("logoutBtn").addEventListener("click", () => {
         cancelButtonText: 'ยกเลิก' 
     }).then((r) => { 
         if (r.isConfirmed) {
-            sessionStorage.removeItem("mst_voter_profile"); // ✅ เคลียร์ Session
+            sessionStorage.removeItem("mst_voter_profile"); 
             signOut(auth).then(() => window.location.href = "index.html"); 
         }
     });
@@ -209,7 +193,9 @@ async function renderCampaigns(campaignsToRender) {
 
     for (const data of campaignsToRender) {
         const campaignId = data.id;
-        const voterSnap = await getDoc(doc(db, "campaigns", campaignId, "voters", studentData.id));
+        
+        // 🌟 [อัปเดตใหม่]: เช็คว่าโหวตหรือยังจากกล่อง votes แทน voters
+        const voterSnap = await getDoc(doc(db, "campaigns", campaignId, "votes", studentData.id));
         
         const now = new Date().getTime();
         const startTimestamp = data.startTime ? new Date(data.startTime).getTime() : 0;
@@ -250,7 +236,6 @@ async function renderCampaigns(campaignsToRender) {
         if(data.options.length > 4) avatars += `<div class="w-12 h-12 rounded-full border-2 border-white bg-gray-100 text-gray-600 flex items-center justify-center text-xs font-bold shadow-sm z-20 relative">+${data.options.length-4}</div>`;
         avatars += '</div>';
 
-        // --- ส่วนที่คุณถามมา จะอยู่ตรงนี้ (รวมอยู่ใน Card HTML เรียบร้อยแล้ว) ---
         const targetText = getTargetGroupText(data.allowed_voters);
         
         const targetBadge = `
@@ -275,10 +260,8 @@ async function renderCampaigns(campaignsToRender) {
             ${buttonHtml}
         `;
         list.appendChild(card);
-        // ------------------------------------------------------------------
     }
 }
-
 
 function startCountdown(campaignId, targetTimeStr) {
     const end = new Date(targetTimeStr).getTime();
@@ -302,7 +285,6 @@ document.getElementById('searchInput').addEventListener('input', (e) => {
     renderCampaigns(allCampaigns.filter(c => c.title.toLowerCase().includes(kw) || (c.description && c.description.toLowerCase().includes(kw))));
 });
 
-// ================= ระบบคูหาลงคะแนน (Virtual Booth) เปลี่ยนรูปเป็นเบอร์/กากบาท =================
 window.enterBooth = function(campaignId) {
     currentBoothData = allCampaigns.find(c => c.id === campaignId);
     userSelectedOption = null;
@@ -330,13 +312,11 @@ window.enterBooth = function(campaignId) {
         if (isNoVote) {
             visualContent = `<div class="w-full h-full flex items-center justify-center bg-red-50 text-red-500 rounded-full border-4 border-gray-50 shadow-inner"><svg class="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M6 18L18 6M6 6l12 12"></path></svg></div>`;
         } else if (opt.image) {
-            // ถ้ามีรูป แต่โหลดไม่ได้ ก็จะซ่อนรูปแล้วให้เห็นเบอร์พื้นหลังแทน
             visualContent = `<div class="w-28 h-28 sm:w-32 sm:h-32 rounded-full border-4 border-gray-50 overflow-hidden shadow-inner relative bg-purple-50 flex items-center justify-center text-purple-300 font-black text-5xl">
                 <span>${index + 1}</span>
                 <img src="${opt.image}" class="w-full h-full object-cover absolute top-0 left-0 z-10" onerror="this.style.display='none'">
             </div>`;
         } else {
-            // ถ้าไม่ได้ใส่ลิงก์รูปมาแต่แรก ให้แสดงเบอร์เด่นๆ
             visualContent = `<div class="w-28 h-28 sm:w-32 sm:h-32 rounded-full border-4 border-purple-100 overflow-hidden shadow-inner bg-purple-50 flex items-center justify-center text-purple-700 font-black text-[3.5rem]">${index + 1}</div>`;
         }
         
@@ -411,6 +391,7 @@ window.confirmVote = function() {
     });
 }
 
+// 🌟 [อัปเดตใหม่]: ไม่สั่ง updateDoc คะแนนโหวตอีกต่อไป แต่โยนบัตรโหวตลงในโฟลเดอร์ votes แทน
 async function submitFinalVote() {
     const campaignId = currentBoothData.id;
     const voteValue = userSelectedOption;
@@ -423,35 +404,26 @@ async function submitFinalVote() {
     });
 
     try {
-        const voterRef = doc(db, "campaigns", campaignId, "voters", studentData.id);
+        const voterRef = doc(db, "campaigns", campaignId, "votes", studentData.id);
         
-        // 1. ตรวจสอบก่อนว่าเคยโหวตไปแล้วหรือยัง
         if ((await getDoc(voterRef)).exists()) { 
             Swal.fire('ข้อผิดพลาด', 'ท่านได้ใช้สิทธิ์ไปแล้ว', 'error'); 
             exitBooth(); 
             return; 
         }
 
-        // 2. อัปเดตบวกคะแนนเสียงในแคมเปญหลัก
-        const campaignRef = doc(db, "campaigns", campaignId);
-        await updateDoc(campaignRef, {
-            [`votes_count.${voteValue}`]: increment(1)
-        });
-
-        // 3. บันทึกประวัติการลงคะแนนของนักเรียน
-        const voteTimestamp = serverTimestamp();
         await setDoc(voterRef, { 
-            votedAt: voteTimestamp,
+            votedAt: serverTimestamp(),
             studentId: studentData.id, 
             name: studentData.name,
             room: studentData.room,
             level: studentData.level,
-            uidUsed: currentUser.uid 
+            uidUsed: currentUser.uid,
+            voteTo: voteValue // 🌟 เก็บข้อมูลตัวเลือกที่โหวตไว้ในบัตร
         });
 
         Swal.close();
         
-        // 4. แสดงสลิปใบเสร็จรับเงินดิจิทัล (E-Receipt)
         showReceipt(currentBoothData.title, studentData.name);
         
     } catch (error) { 
@@ -466,7 +438,6 @@ function showReceipt(campaignName, voterName) {
     document.getElementById("view-receipt").classList.remove("hidden");
     document.getElementById("stickySubmitBar").classList.add("translate-y-full");
     
-    // เพิ่มเวลาหน่วงเป็น 400 มิลลิวินาที รอให้ Pop-up ปิดสนิทก่อน
     setTimeout(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }, 400);
