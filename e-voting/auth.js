@@ -180,7 +180,7 @@ let currentLineUid = null;
 
 if (lineLoginBtn) {
     const MY_LIFF_ID = "2008923798-hd6mzZd8"; // ⚠️ ใช้ Liff ID เดิมของคุณ
-    
+
     // ดักจับ User-Agent ซ่อนปุ่ม LINE ถ้านักเรียนไม่ได้เปิดผ่านแอปพลิเคชัน LINE
     if (!navigator.userAgent.includes("Line")) {
         lineLoginBtn.style.display = "none";
@@ -393,21 +393,25 @@ if (requestOtpBtn) {
             await setDoc(doc(db, "otp_requests", currentStudentId), {
                 otp: otpCode,
                 createdAt: new Date().getTime(),
-                requesterUid: auth.currentUser.uid // 🌟 เพิ่มบรรทัดนี้: ประทับตราว่าใครเป็นคนขอ
+                requesterUid: auth.currentUser.uid // ประทับตราว่าใครเป็นคนขอ
             });
+
+            // 🌟 5. ยิงคำสั่งไปหา Google Apps Script API ด้วย FormData (แก้ปัญหา CORS ได้ 100%)
+            const formData = new FormData();
+            formData.append("to_email", fullEmailAddress);
+            formData.append("student_name", currentStudentData.name);
+            formData.append("otp_code", otpCode);
 
             const response = await fetch(GAS_API_URL, {
                 method: "POST",
-                headers: { "Content-Type": "text/plain;charset=utf-8" },
-                body: JSON.stringify({
-                    to_email: fullEmailAddress, // 🌟 ใช้อีเมลที่ประกอบร่างแล้วส่งให้ Google Apps Script
-                    student_name: currentStudentData.name,
-                    otp_code: otpCode
-                })
+                body: formData // ส่งเป็นฟอร์มแทน JSON
             });
 
             const result = await response.json();
-            if (result.status !== "success") throw new Error(result.message || "ยิง API ไม่สำเร็จ");
+
+            if (result.status !== "success") {
+                throw new Error(result.message || "ยิง API ไม่สำเร็จ");
+            }
 
             Swal.close();
             
