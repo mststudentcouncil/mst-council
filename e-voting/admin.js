@@ -2,7 +2,7 @@ import { auth, db, storage } from "./firebase-config.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
 // 🌟 เพิ่ม getCountFromServer เข้ามาเพื่อใช้นับจำนวนคนโหวตได้เร็วขึ้น
 import { collection, addDoc, getDocs, onSnapshot, serverTimestamp, query, orderBy, updateDoc, doc, getDoc, deleteDoc, setDoc, writeBatch, limit, getCountFromServer } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
-import { ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-storage.js";
+import { ref as storageRef, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-storage.js";
 
 window.liveResultListeners = {};
 window.globalStudents = []; 
@@ -526,10 +526,48 @@ window.toggleStatus = async function(id, status) {
     try { await updateDoc(doc(db, "campaigns", id), { status: status === "open" ? "closed" : "open" }); loadCampaigns(); } catch (e) {}
 }
 window.deleteCampaign = async function(id) {
-    Swal.fire({ title: 'ยืนยันการลบ', text: "หากลบแล้ว ข้อมูลคะแนนจะหายไปตลอดกาล", icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'ลบทิ้งเลย' })
-    .then(async (result) => {
+    Swal.fire({ 
+        title: 'ยืนยันการลบ', 
+        text: "หากลบแล้ว ข้อมูลคะแนนและรูปภาพที่เกี่ยวข้องจะถูกลบทิ้งถาวร", 
+        icon: 'warning', 
+        showCancelButton: true, 
+        confirmButtonColor: '#d33', 
+        confirmButtonText: 'ลบทิ้งเลย',
+        cancelButtonText: 'ยกเลิก'
+    }).then(async (result) => {
         if (result.isConfirmed) {
-            await deleteDoc(doc(db, "campaigns", id)); loadCampaigns(); 
+            Swal.fire({ title: 'กำลังลบข้อมูลและคืนพื้นที่...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+            try {
+                const campRef = doc(db, "campaigns", id);
+                const campSnap = await getDoc(campRef);
+                
+                if (campSnap.exists()) {
+                    const data = campSnap.data();
+                    
+                    // 🌟 วนลูปเช็คตัวเลือกทั้งหมด หากมีรูปภาพ ให้สั่งลบทิ้งจาก Storage
+                    if (data.options) {
+                        for (const opt of data.options) {
+                            if (opt.image && opt.image.includes('firebasestorage')) {
+                                try {
+                                    // แปลง URL กลับเป็น Reference แล้วสั่งลบ
+                                    const imgRef = storageRef(storage, opt.image);
+                                    await deleteObject(imgRef);
+                                } catch (imgErr) {
+                                    console.error("ไม่สามารถลบรูปภาพได้:", imgErr);
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                // ลบข้อมูลแคมเปญออกจากฐานข้อมูล Firestore
+                await deleteDoc(campRef);
+                
+                Swal.fire('สำเร็จ', 'ลบรายการและคืนพื้นที่จัดเก็บเรียบร้อยแล้ว', 'success');
+                loadCampaigns(); 
+            } catch (err) {
+                Swal.fire('เกิดข้อผิดพลาด', err.message, 'error');
+            }
         }
     });
 }

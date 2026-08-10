@@ -1,6 +1,6 @@
 import { auth, db } from "./firebase-config.js"; 
 import { onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-import { doc, getDoc, getDocs, collection, query, where, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+import { doc, getDoc, getDocs, collection, query, where, updateDoc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
 // ==========================================
 // 1. ฟังก์ชันจัดการหน้าจอโหลดและหน้าจอ Error แบบเต็มจอ
@@ -245,16 +245,93 @@ async function checkLineAccount(lineUid) {
 }
 
 // ==========================================
-// 6. ระบบยืนยันตัวตนด้วยอีเมล (2FA OTP via EmailJS)
+// 6. ระบบยืนยันตัวตนด้วยอีเมล (2FA OTP via Google Apps Script)
 // ==========================================
-emailjs.init("MFkzI-tLNYd9Mmfcm"); // ⚠️ ต้องนำ Public Key จาก EmailJS มาใส่ตรงนี้
+const GAS_API_URL = "https://script.google.com/macros/s/AKfycbxXJOY42Nk-C2pqS26dRW1AsJAHjr4yXqoGeqJg-R2HBQ2a4JcazfP5JwgUEytkef8D/exec"; // ⚠️ อย่าลืมใส่ URL
 
 const requestOtpBtn = document.getElementById("requestOtpBtn");
 const verifyOtpBtn = document.getElementById("verifyOtpBtn");
 let currentStudentId = null;
 let currentStudentData = null;
+let otpInterval; // ตัวแปรสำหรับหยุดเวลาถอยหลัง
 
+// 🌟 ฟังก์ชันกดยกเลิก (ซ่อนหน้าต่าง & ล้างเวลา)
+window.cancelOtpProcess = function() {
+    if(otpInterval) clearInterval(otpInterval);
+    document.getElementById('line-link-modal').classList.add('hidden');
+    // หน่วงเวลาเล็กน้อยให้หน้าต่างพับลงก่อนรีเซ็ตฟอร์ม
+    setTimeout(() => {
+        document.getElementById("step2_otp").classList.add("hidden");
+        document.getElementById("step1_email").classList.remove("hidden");
+        document.getElementById("linkOtpInput").value = "";
+        document.getElementById("modalSubtitle").innerText = "กรุณากรอกอีเมลโรงเรียนเพื่อรับรหัส OTP";
+    }, 300);
+}
+
+// 🌟 ฟังก์ชันนับเวลาถอยหลังและลดหลอดโปรเกรส
+function startOtpTimer() {
+    if (otpInterval) clearInterval(otpInterval);
+    let timeLeft = 300; // 5 นาที (300 วินาที)
+    
+    const timerText = document.getElementById("otpTimerText");
+    const progressBar = document.getElementById("otpProgressBar");
+    
+    // รีเซ็ตสีเริ่มต้น (สีเขียว)
+    timerText.innerText = "05:00";
+    timerText.className = "mt-1 font-black text-2xl tracking-wider transition-colors duration-500 text-green-600";
+    progressBar.style.width = "100%";
+    progressBar.className = "h-full rounded-full transition-all duration-1000 ease-linear bg-gradient-to-r from-green-500 to-emerald-500";
+
+    otpInterval = setInterval(() => {
+        timeLeft--;
+        
+        // คำนวณเวลาที่เหลือ
+        const m = Math.floor(timeLeft / 60);
+        const s = timeLeft % 60;
+        timerText.innerText = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+        
+        // คำนวณเปอร์เซ็นต์หลอด
+        const percent = (timeLeft / 300) * 100;
+        progressBar.style.width = `${percent}%`;
+
+        // แจ้งเตือนสีส้ม เมื่อเหลือ 2 นาที
+        if (timeLeft === 120) {
+            timerText.classList.replace("text-green-600", "text-orange-500");
+            progressBar.classList.replace("from-green-500", "from-orange-400");
+            progressBar.classList.replace("to-emerald-500", "to-orange-500");
+        } 
+        // แจ้งเตือนสีแดง เมื่อเหลือ 1 นาทีสุดท้าย
+        else if (timeLeft === 60) {
+            timerText.classList.replace("text-orange-500", "text-red-600");
+            progressBar.classList.replace("from-orange-400", "from-red-500");
+            progressBar.classList.replace("to-orange-500", "to-red-600");
+        }
+
+        // เมื่อหมดเวลา
+        if (timeLeft <= 0) {
+            clearInterval(otpInterval);
+            document.getElementById('line-link-modal').classList.add('hidden');
+            Swal.fire({ 
+                icon: 'error', 
+                title: 'หมดเวลา', 
+                text: 'รหัส OTP หมดอายุแล้ว กรุณาขอรับรหัสใหม่อีกครั้ง', 
+                confirmButtonColor: '#d33', 
+                customClass: { popup: 'rounded-[2rem]' }
+            }).then(() => {
+                // พากลับไปขั้นตอนที่ 1
+                document.getElementById("step2_otp").classList.add("hidden");
+                document.getElementById("step1_email").classList.remove("hidden");
+                document.getElementById("linkOtpInput").value = "";
+                document.getElementById("modalSubtitle").innerText = "กรุณากรอกอีเมลโรงเรียนเพื่อรับรหัส OTP";
+                document.getElementById('line-link-modal').classList.remove('hidden');
+            });
+        }
+    }, 1000);
+}
+
+// ----------------------------------------------------
 // กดขอ OTP
+// ----------------------------------------------------
 if (requestOtpBtn) {
     requestOtpBtn.addEventListener("click", async () => {
         const emailInput = document.getElementById("linkEmailInput").value.trim().toLowerCase();
@@ -265,7 +342,6 @@ if (requestOtpBtn) {
             return;
         }
 
-        // 1. เช็คฟอร์แมตอีเมล (YYNNNNN@mst.ac.th)
         const emailRegex = /^\d{2}(\d{5})@mst\.ac\.th$/;
         const match = emailInput.match(emailRegex);
 
@@ -274,12 +350,11 @@ if (requestOtpBtn) {
             return;
         }
 
-        currentStudentId = match[1]; // ดึงรหัส 5 หลักออกมา
+        currentStudentId = match[1];
 
         showFullScreenLoading("กำลังตรวจสอบฐานข้อมูล...");
 
         try {
-            // 2. เช็คว่ามีรหัสนี้ในฐานข้อมูลนักเรียนไหม
             const studentRef = doc(db, "students", currentStudentId);
             const docSnap = await getDoc(studentRef);
 
@@ -298,35 +373,37 @@ if (requestOtpBtn) {
             overlay.classList.add('hidden');
             document.getElementById('line-link-modal').classList.add('hidden');
 
-            Swal.fire({ title: 'กำลังสร้างรหัส OTP...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+            Swal.fire({ title: 'กำลังสร้างและส่งรหัส OTP...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
 
-            // 3. สร้าง OTP 6 หลัก
             const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
 
-            // 4. บันทึก OTP ลง Firestore (เก็บไว้ 5 นาที)
             await setDoc(doc(db, "otp_requests", currentStudentId), {
                 otp: otpCode,
                 createdAt: new Date().getTime()
             });
 
-            // 5. ส่งอีเมลผ่าน EmailJS
-            await emailjs.send(
-                "service_x1t2py9", // ⚠️ Service ID
-                "template_0kgyknc", // ⚠️ Template ID
-                {
+            const response = await fetch(GAS_API_URL, {
+                method: "POST",
+                headers: { "Content-Type": "text/plain;charset=utf-8" },
+                body: JSON.stringify({
                     to_email: emailInput,
                     student_name: currentStudentData.name,
                     otp_code: otpCode
-                }
-            );
+                })
+            });
+
+            const result = await response.json();
+            if (result.status !== "success") throw new Error(result.message || "ยิง API ไม่สำเร็จ");
 
             Swal.close();
             
-            // 6. สลับหน้าจอเป็นช่องกรอก OTP
             document.getElementById('line-link-modal').classList.remove('hidden');
             document.getElementById("step1_email").classList.add("hidden");
             document.getElementById("step2_otp").classList.remove("hidden");
             document.getElementById("modalSubtitle").innerText = "เช็ครหัสที่กล่องข้อความในแอป Gmail ของคุณ";
+
+            // 🌟 เริ่มจับเวลาและหลอดโปรเกรสทันที
+            startOtpTimer();
 
         } catch (error) {
             console.error("OTP Error:", error);
@@ -335,7 +412,9 @@ if (requestOtpBtn) {
     });
 }
 
+// ----------------------------------------------------
 // กดยืนยัน OTP
+// ----------------------------------------------------
 if (verifyOtpBtn) {
     verifyOtpBtn.addEventListener("click", async () => {
         const inputOtp = document.getElementById("linkOtpInput").value.trim();
@@ -349,19 +428,19 @@ if (verifyOtpBtn) {
         showFullScreenLoading("กำลังตรวจสอบรหัส...");
 
         try {
-            // 1. ดึง OTP จากระบบมาตรวจสอบ
-            const otpDoc = await getDoc(doc(db, "otp_requests", currentStudentId));
+            const otpDocRef = doc(db, "otp_requests", currentStudentId);
+            const otpDoc = await getDoc(otpDocRef);
             
             if (!otpDoc.exists()) {
-                showFullScreenError("รหัสหมดอายุ", "ไม่พบรหัสอ้างอิง หรือคุณยังไม่ได้กดขอรหัส");
+                showFullScreenError("รหัสหมดอายุ", "ไม่พบรหัสอ้างอิง หรือรหัสถูกใช้ไปแล้ว");
                 return;
             }
 
             const otpData = otpDoc.data();
             const now = new Date().getTime();
             
-            // หมดเวลา 5 นาที (300,000 มิลลิวินาที)
             if (now - otpData.createdAt > 300000) {
+                await deleteDoc(otpDocRef);
                 showFullScreenError("รหัสหมดอายุ", "รหัส OTP หมดอายุแล้ว (เกิน 5 นาที) กรุณาทำรายการใหม่");
                 return;
             }
@@ -373,12 +452,15 @@ if (verifyOtpBtn) {
                 return;
             }
 
-            // 2. รหัสตรง! ทำการผูกบัญชีถาวร
             showFullScreenLoading("กำลังผูกบัญชีเข้ากับ LINE...");
             
             const studentRef = doc(db, "students", currentStudentId);
             await updateDoc(studentRef, { lineUid: currentLineUid });
             await setDoc(doc(db, "line_links", currentLineUid), { studentId: currentStudentId });
+            
+            // ลบข้อมูล OTP และหยุดเวลาทันที
+            await deleteDoc(otpDocRef);
+            clearInterval(otpInterval);
             
             sessionStorage.setItem("mst_voter_profile", JSON.stringify({
                 id: currentStudentId, 
