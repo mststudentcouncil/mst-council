@@ -76,11 +76,19 @@ window.confirmContactSupport = function() {
     </div>
     <span class="text-md">เข้าสู่ระบบด้วย @mst.ac.th</span>
 </button>
-<button id="lineLoginBtn" class="group w-full mt-4 bg-[#06C755] hover:bg-[#05b34c] text-white font-bold py-4 px-6 rounded-2xl flex items-center justify-center gap-4 transition-all duration-300 shadow-sm hover:shadow-xl active:scale-95 border border-transparent">
-    <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M24 10.304c0-5.369-5.383-9.738-12-9.738-6.616 0-12 4.369-12 9.738 0 4.814 3.269 8.846 8.14 9.564.388.083.923.258 1.058.591.121.3.079.766.038 1.082l-.164 1c-.053.303-.243 1.157 1.014.629 1.258-.528 6.781-3.992 9.435-6.974C22.613 14.161 24 12.35 24 10.304z"/>
+<!-- ปุ่มเข้าสู่ระบบด้วย LINE (Modern Design) -->
+<button id="lineLoginBtn" class="w-full relative group overflow-hidden bg-[#06C755] hover:bg-[#05b34c] text-white font-bold py-3.5 px-6 rounded-2xl shadow-[0_8px_16px_rgba(6,199,85,0.25)] hover:shadow-[0_12px_20px_rgba(6,199,85,0.35)] transition-all duration-300 ease-out active:scale-[0.98] flex items-center justify-center gap-3">
+    
+    <!-- เอฟเฟกต์แสงวิ่งผ่าน (Shine Effect) เมื่อ Hover -->
+    <div class="absolute inset-0 -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/20 to-transparent z-0"></div>
+
+    <!-- ไอคอน LINE SVG คมชัด 100% -->
+    <svg class="w-6 h-6 z-10 drop-shadow-sm" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M24 10.304c0-5.369-5.383-9.738-12-9.738-6.616 0-12 4.369-12 9.738 0 4.814 4.269 8.846 10.036 9.608.391.084.922.258 1.057.592.122.303.079.778.039 1.085l-.171 1.027c-.053.303-.242 1.186 1.039.647 1.281-.54 6.911-4.069 9.428-6.967 1.739-1.907 2.572-3.843 2.572-5.992zM7.172 13.567H5.211c-.266 0-.482-.216-.482-.482v-5.61c0-.266.216-.482.482-.482h1.961c.266 0 .482.216.482.482v5.61c0 .266-.216.482-.482.482zm4.116 0H9.327c-.266 0-.482-.216-.482-.482v-5.61c0-.266.216-.482.482-.482h1.961c.266 0 .482.216.482.482v5.61c0 .266-.216.482-.482.482zm5.753-4.148h-1.638V8.437c0-.266-.216-.482-.482-.482h-1.391c-.266 0-.482.216-.482.482v5.61c0 .266.216.482.482.482h3.511c.266 0 .482-.216.482-.482v-1.129c0-.266-.216-.482-.482-.482zm4.356 2.054c0 .266-.216.482-.482.482h-1.996v1.129c0 .266-.216.482-.482.482h-1.391c-.266 0-.482-.216-.482-.482v-5.61c0-.266.216-.482.482-.482h1.391c.266 0 .482.216.482.482v1.543h1.996c.266 0 .482.216.482.482v3.085z"/>
     </svg>
-    <span class="text-md">เข้าสู่ระบบด้วย LINE</span>
+
+    <!-- ข้อความบนปุ่ม -->
+    <span class="z-10 tracking-wide text-lg text-shadow-sm">เข้าสู่ระบบด้วย LINE</span>
 </button>
         </div>
 
@@ -215,5 +223,13 @@ window.confirmContactSupport = function() {
         </div>
     </div>
 </div>
+<!-- 🌟 เพิ่มสไตล์สำหรับเอฟเฟกต์แสงวิ่ง (วางไว้ล่างสุดก่อนปิด </body> ก็ได้ครับ) -->
+<style>
+    @keyframes shimmer {
+        100% {
+            transform: translateX(100%);
+        }
+    }
+</style>
 </body>
 </html>

@@ -179,28 +179,21 @@ const lineLoginBtn = document.getElementById("lineLoginBtn");
 let currentLineUid = null; 
 
 if (lineLoginBtn) {
-    const MY_LIFF_ID = "2008923798-hd6mzZd8"; // ⚠️ ใช้ Liff ID เดิมของคุณ
-
-    // ดักจับ User-Agent ซ่อนปุ่ม LINE ถ้านักเรียนไม่ได้เปิดผ่านแอปพลิเคชัน LINE
-    if (!navigator.userAgent.includes("Line")) {
-        lineLoginBtn.style.display = "none";
-    } else {
-        // 🌟 1. สั่งให้ LIFF เตรียมตัว (init) ทำงานรอไว้เบื้องหลังเลยตั้งแต่เปิดหน้าเว็บ
-        liff.init({ liffId: MY_LIFF_ID }).catch(err => {
-            console.error("LIFF Init Error:", err);
-        });
-    }
+    const MY_LIFF_ID = "2008923798-hd6mzZd8"; // ใช้ Liff ID ของคุณ
+    
+    // 🌟 เอาการซ่อนปุ่มออก แล้วสั่งให้ LIFF เตรียมตัวรอไว้เลยในทุกเบราว์เซอร์
+    liff.init({ liffId: MY_LIFF_ID }).catch(err => {
+        console.error("LIFF Init Error:", err);
+    });
 
     lineLoginBtn.addEventListener("click", () => {
         showFullScreenLoading("กำลังเชื่อมต่อ LINE...");
         
-        // 🌟 2. เมื่อกดปุ่ม ให้เช็คว่า LIFF เตรียมตัวเสร็จหรือยัง (ready) แล้วทำงานต่อทันที
         liff.ready.then(() => {
             if (!liff.isLoggedIn()) {
-                // ถ้ายังไม่ล็อกอิน ให้ทำการล็อกอิน
+                // ถ้ากดผ่าน Safari/Chrome ระบบจะพาไปหน้าเว็บล็อกอินของ LINE (ใส่เมล/รหัส หรือสแกน QR)
                 liff.login();
             } else {
-                // ถ้าล็อกอินแล้ว ดึงโปรไฟล์ได้เลยแบบคลิกเดียวจบ!
                 liff.getProfile().then(profile => {
                     currentLineUid = profile.userId;
                     checkLineAccount(currentLineUid);
