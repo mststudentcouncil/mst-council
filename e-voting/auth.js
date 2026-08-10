@@ -357,7 +357,7 @@ if (requestOtpBtn) {
         const match = emailInput.match(emailRegex);
 
         if (!match) {
-            Swal.fire({ icon: 'error', title: 'รูปแบบไม่ถูกต้อง', text: 'กรุณากรอกเฉพาะตัวเลข 7 หลัก (เช่น 6829903)', confirmButtonColor: '#06C755', customClass: { popup: 'rounded-[2rem]' }});
+            Swal.fire({ icon: 'error', title: 'รูปแบบไม่ถูกต้อง', text: 'กรุณากรอกเฉพาะตัวเลข 7 หลัก (เช่น 7012345)', confirmButtonColor: '#06C755', customClass: { popup: 'rounded-[2rem]' }});
             return;
         }
 
@@ -389,9 +389,11 @@ if (requestOtpBtn) {
 
             const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
 
+            // 4. บันทึก OTP ลง Firestore (เก็บไว้ 5 นาที)
             await setDoc(doc(db, "otp_requests", currentStudentId), {
                 otp: otpCode,
-                createdAt: new Date().getTime()
+                createdAt: new Date().getTime(),
+                requesterUid: auth.currentUser.uid // 🌟 เพิ่มบรรทัดนี้: ประทับตราว่าใครเป็นคนขอ
             });
 
             const response = await fetch(GAS_API_URL, {
