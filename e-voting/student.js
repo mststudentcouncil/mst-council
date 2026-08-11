@@ -147,12 +147,16 @@ function isStudentEligible(campaignRules, studentInfo) {
     const { type, values } = campaignRules;
     const stuLevel = (studentInfo.level || "").replace(/[mM]\./, 'ม.'); 
     const stuRoom = studentInfo.room || ""; 
+    const stuDept = studentInfo.dept || studentInfo.room || ""; // 🌟 เพิ่มตัวแปรดึงกลุ่มสาระ (บุคลากรเก็บกลุ่มสาระไว้ใน room)
     
     if (type === "all") return true;
     if (type === "junior") return ["ม.1", "ม.2", "ม.3"].includes(stuLevel);
     if (type === "senior") return ["ม.4", "ม.5", "ม.6"].includes(stuLevel);
     if (type === "custom_level") return values.includes(stuLevel);
     if (type === "custom_room") return values.some(val => val.replace(/\s/g, '') === stuRoom.replace(/\s/g, ''));
+    // 🌟 เพิ่มเงื่อนไขเช็ค custom_dept
+    if (type === "custom_dept") return values.includes(stuDept); 
+    
     return false;
 }
 
@@ -181,6 +185,9 @@ function getTargetGroupText(allowedVoters) {
     if (type === "senior") return "เฉพาะมัธยมศึกษาตอนปลาย (ม.4 - ม.6)";
     if (type === "custom_level") return "เฉพาะ " + values.join(", ");
     if (type === "custom_room") return "เฉพาะ " + values.join(", ");
+    // 🌟 เพิ่มเงื่อนไขการแสดงผลข้อความสำหรับ custom_dept
+    if (type === "custom_dept") return "เฉพาะกลุ่มบุคลากรที่กำหนด"; 
+    
     return "กลุ่มเฉพาะ";
 }
 

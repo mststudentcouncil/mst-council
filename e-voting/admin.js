@@ -312,6 +312,10 @@ document.getElementById("createCampaignForm")?.addEventListener("submit", async 
         // 🌟 ดึงค่าจาก Checkbox ห้องที่ถูกติ๊ก
         payload.allowed_voters.values = Array.from(document.querySelectorAll("input[name='targetRoom']:checked")).map(cb => cb.value);
         if(!payload.allowed_voters.values.length) return Swal.fire('แจ้งเตือน', 'ระบุห้องเรียนอย่างน้อย 1 ห้อง', 'warning');
+    } else if (payload.allowed_voters.type === "custom_dept") {
+        // 🌟 [เพิ่มใหม่] ดึงค่าจาก Checkbox กลุ่มสาระที่ถูกติ๊ก
+        payload.allowed_voters.values = Array.from(document.querySelectorAll("input[name='targetDept']:checked")).map(cb => cb.value);
+        if(!payload.allowed_voters.values.length) return Swal.fire('แจ้งเตือน', 'ระบุกลุ่มสาระ/หน่วยงานอย่างน้อย 1 กลุ่ม', 'warning');
     }
 
     let optionsData = []; let initialVotes = {};
@@ -476,11 +480,16 @@ function isStudentEligible(campaignRules, studentInfo) {
     const { type, values } = campaignRules;
     const stuLevel = (studentInfo.level || "").replace(/[mM]\./, 'ม.'); 
     const stuRoom = studentInfo.room || ""; 
+    const stuDept = studentInfo.dept || studentInfo.room || ""; // 🌟 เพิ่มตัวแปรดึงกลุ่มสาระ (บุคลากรเก็บกลุ่มสาระไว้ใน room)
+    
     if (type === "all") return true;
     if (type === "junior") return ["ม.1", "ม.2", "ม.3"].includes(stuLevel);
     if (type === "senior") return ["ม.4", "ม.5", "ม.6"].includes(stuLevel);
     if (type === "custom_level") return values.includes(stuLevel);
     if (type === "custom_room") return values.some(val => val.replace(/\s/g, '') === stuRoom.replace(/\s/g, ''));
+    // 🌟 เพิ่มเงื่อนไขเช็ค custom_dept
+    if (type === "custom_dept") return values.includes(stuDept); 
+    
     return false;
 }
 
@@ -1343,14 +1352,14 @@ window.viewResults = async function(campaignId) {
                             <h4 class="font-bold text-gray-800 mb-4 bg-gray-50 p-2 rounded-lg text-center">สถิติการใช้สิทธิ์ ${level}</h4>
 <div class="rounded-xl border border-gray-200 overflow-hidden">
     <table class="w-full text-sm text-left border-collapse">
-        <thead class="bg-gray-100"><tr class="text-gray-600"><th class="p-3 border-b">ห้องเรียน</th><th class="p-3 border-b text-center">มีสิทธิ์ (คน)</th><th class="p-3 border-b text-center">มาโหวต</th><th class="p-3 border-b text-center">%</th></tr></thead>
+        <thead class="bg-gray-100"><tr class="text-gray-600"><th class="p-3 border-b">กลุ่ม</th><th class="p-3 border-b text-center">มีสิทธิ์ (คน)</th><th class="p-3 border-b text-center">มาโหวต</th><th class="p-3 border-b text-center">%</th></tr></thead>
         <tbody>
                     `;
                     statsByLevel[level].forEach(r => {
                         let eligible = eligibleByRoom[r]; let voted = votedByRoom[r] || 0;
                         let pct = eligible > 0 ? Math.round((voted/eligible)*100) : 0;
                         let pctColor = pct === 100 ? 'text-green-600' : (pct >= 50 ? 'text-blue-600' : 'text-red-500');
-                        let cleanRoomForDisplay = r.includes('/') ? "ห้อง " + r.split('/')[1] : r;
+                        let cleanRoomForDisplay = (level === 'ครู/บุคลากร') ? r : (r.includes('/') ? "ห้อง " + r.split('/')[1] : r);
                         resultHtml += `<tr class="hover:bg-gray-50"><td class="p-3 border-b font-bold text-gray-700">${cleanRoomForDisplay}</td><td class="p-3 border-b text-center">${eligible}</td><td class="p-3 border-b text-center font-black text-gray-900">${voted}</td><td class="p-3 border-b text-center font-bold ${pctColor}">${pct}%</td></tr>`;
                     });
 
@@ -1446,7 +1455,7 @@ window.exportExcel = async function(campaignId) {
                 statsByLevel[level].forEach(r => {
                     let eligible = eligibleByRoom[r]; let voted = votedByRoom[r] || 0; let pct = eligible > 0 ? ((voted/eligible)*100).toFixed(2) : 0;
                     totalLevelEligible += eligible; totalLevelVoted += voted; 
-                    let cleanRoomForDisplay = r.includes('/') ? "ห้อง " + r.split('/')[1] : r;
+                    let cleanRoomForDisplay = (level === 'ครู/บุคลากร') ? r : (r.includes('/') ? "ห้อง " + r.split('/')[1] : r);
                     levelData.push([cleanRoomForDisplay, eligible, voted, pct + "%"]);
                 });
                 let totalPct = totalLevelEligible > 0 ? ((totalLevelVoted/totalLevelEligible)*100).toFixed(2) : 0;
