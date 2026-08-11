@@ -52,6 +52,30 @@
         .rich-text-content ul { list-style-type: disc; margin-left: 1.5em; margin-bottom: 1em; }
         .rich-text-content ol { list-style-type: decimal; margin-left: 1.5em; margin-bottom: 1em; }
         .rich-text-content a { color: #4C1D95; text-decoration: underline; }
+
+        /* Marquee Animation สำหรับเครือข่าย MOU */
+        .marquee-container {
+            width: 100%;
+            overflow: hidden;
+            position: relative;
+            /* เพิ่มความเบลอขอบซ้ายขวาให้ดูเนียนตา */
+            -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+            mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+        }
+        .marquee-content {
+            display: flex;
+            width: max-content;
+            /* ปรับตัวเลข 20s ให้มากหรือน้อย เพื่อปรับความเร็วการเลื่อน */
+            animation: marqueeScroll 25s linear infinite; 
+        }
+        /* เมื่อเอาเมาส์ชี้ให้หยุดเลื่อน */
+        .marquee-content:hover {
+            animation-play-state: paused;
+        }
+        @keyframes marqueeScroll {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
     </style>
 </head>
 <!-- แก้จากอันเดิมเป็นแบบนี้ครับ -->
@@ -114,50 +138,63 @@
     </section>
 
     <section id="services" class="py-24 relative z-20">
-        <div class="max-w-7xl mx-auto px-4">
-            <div class="text-center mb-16 fade-in-up">
-                <h3 class="text-3xl md:text-4xl font-black text-gray-900 section-title">ศูนย์รวมบริการดิจิทัล</h3>
-                <p class="text-gray-500 font-medium mt-4">บริการอิเล็กทรอนิกส์เพื่อความสะดวกของนักเรียน</p>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 fade-in-up" style="animation-delay: 0.2s;">
-<!-- ระบบลงคะแนนอิเล็กทรอนิกส์ E-Voting -->
-<a href="/e-voting" class="glass glass-hover p-8 rounded-[2rem] text-center block transition-all duration-300 group">
-    <div class="w-20 h-20 bg-indigo-100 text-indigo-600 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-6 group-hover:scale-110 group-hover:rotate-3 transition shadow-sm">
-        <i class="fa-solid fa-check-to-slot"></i>
-    </div>
-    <h4 class="font-black text-gray-900 mb-2 text-lg">E-Voting</h4>
-    <p class="text-sm text-gray-500">ระบบลงคะแนนอิเล็กทรอนิกส์</p>
-</a>
-                <!-- แทนที่ปุ่ม Public Hearing เดิมด้วยโค้ดนี้ -->
-<a href="https://liff.line.me/2008923798-7EBZdt6r" target="_blank" class="glass glass-hover p-8 rounded-[2rem] text-center block transition-all duration-300 group">
-    <div class="w-20 h-20 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-6 group-hover:scale-110 group-hover:rotate-3 transition shadow-sm"><i class="fa-solid fa-bullhorn"></i></div>
-    <h4 class="font-black text-gray-900 mb-2 text-lg">Public Hearing</h4>
-    <p class="text-sm text-gray-500">ส่งเรื่องร้องเรียน เสนอแนะ ถึงสภานักเรียนโดยตรง</p>
-</a>
-                <!-- แทนที่โค้ดเดิมในส่วนของการ์ด SC Vault -->
-<a href="/vault" target="_blank" class="glass glass-hover p-8 rounded-[2rem] text-center block transition-all duration-300 group">
-    <div class="w-20 h-20 bg-pink-100 text-pink-600 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-6 group-hover:scale-110 group-hover:-rotate-3 transition shadow-sm"><i class="fa-solid fa-vault"></i></div>
-    <h4 class="font-black text-gray-900 mb-2 text-lg">SC Vault</h4>
-    <p class="text-sm text-gray-500">ระบบคลังจัดเก็บเกียรติบัตรและแฟ้มผลงานส่วนตัวแบบดิจิทัล</p>
-</a>
-
-<!-- แทนที่โค้ดเดิมในส่วนของการ์ด SC Admission -->
-<a href="/admission" target="_blank" class="glass glass-hover p-8 rounded-[2rem] text-center block transition-all duration-300 group">
-    <div class="w-20 h-20 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-6 group-hover:scale-110 group-hover:rotate-3 transition shadow-sm"><i class="fa-solid fa-user-graduate"></i></div>
-    <h4 class="font-black text-gray-900 mb-2 text-lg">SC Admission</h4>
-    <p class="text-sm text-gray-500">ระบบรับสมัครคณะกรรมการและผู้ช่วยสภานักเรียน</p>
-</a>
-
-<!-- แทนที่โค้ดเดิมในส่วนของการ์ด SC Regis -->
-<a href="/regis" target="_blank" class="glass glass-hover p-8 rounded-[2rem] text-center block transition-all duration-300 group">
-    <div class="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-6 group-hover:scale-110 group-hover:-rotate-3 transition shadow-sm"><i class="fa-solid fa-folder-open"></i></div>
-    <h4 class="font-black text-gray-900 mb-2 text-lg">SC Regis</h4>
-    <p class="text-sm text-gray-500">ระบบทะเบียนและจัดการข้อมูลประวัติของคณะกรรมการ</p>
-</a>
-            </div>
+    <div class="max-w-7xl mx-auto px-4">
+        <div class="text-center mb-16 fade-in-up">
+            <h3 class="text-3xl md:text-4xl font-black text-gray-900 section-title">ศูนย์รวมบริการดิจิทัล</h3>
+            <p class="text-gray-500 font-medium mt-4">บริการอิเล็กทรอนิกส์เพื่อความสะดวกของนักเรียน</p>
         </div>
-    </section>
+        
+        <!-- แบบ Flex จัดกึ่งกลางอัตโนมัติ -->
+        <div class="flex flex-wrap justify-center gap-6 fade-in-up" style="animation-delay: 0.2s;">
+            
+            <!-- ระบบลงคะแนนอิเล็กทรอนิกส์ E-Voting -->
+            <a href="/e-voting" class="glass glass-hover p-8 rounded-[2rem] text-center block transition-all duration-300 group w-full sm:w-[calc(50%-0.75rem)] lg:w-[calc(25%-1.125rem)] max-w-[300px]">
+                <div class="w-20 h-20 bg-indigo-100 text-indigo-600 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-6 group-hover:scale-110 group-hover:rotate-3 transition shadow-sm">
+                    <i class="fa-solid fa-check-to-slot"></i>
+                </div>
+                <h4 class="font-black text-gray-900 mb-2 text-lg">E-Voting</h4>
+                <p class="text-sm text-gray-500">ระบบลงคะแนนอิเล็กทรอนิกส์ สำหรับนักเรียนและบุคลากร</p>
+            </a>
+            
+            <!-- Public Hearing -->
+            <a href="https://liff.line.me/2008923798-7EBZdt6r" target="_blank" class="glass glass-hover p-8 rounded-[2rem] text-center block transition-all duration-300 group w-full sm:w-[calc(50%-0.75rem)] lg:w-[calc(25%-1.125rem)] max-w-[300px]">
+                <div class="w-20 h-20 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-6 group-hover:scale-110 group-hover:rotate-3 transition shadow-sm">
+                    <i class="fa-solid fa-bullhorn"></i>
+                </div>
+                <h4 class="font-black text-gray-900 mb-2 text-lg">Public Hearing</h4>
+                <p class="text-sm text-gray-500">ส่งเรื่องร้องเรียน เสนอแนะ ถึงสภานักเรียนโดยตรง</p>
+            </a>
+            
+            <!-- SC Vault -->
+            <a href="/vault" target="_blank" class="glass glass-hover p-8 rounded-[2rem] text-center block transition-all duration-300 group w-full sm:w-[calc(50%-0.75rem)] lg:w-[calc(25%-1.125rem)] max-w-[300px]">
+                <div class="w-20 h-20 bg-pink-100 text-pink-600 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-6 group-hover:scale-110 group-hover:-rotate-3 transition shadow-sm">
+                    <i class="fa-solid fa-vault"></i>
+                </div>
+                <h4 class="font-black text-gray-900 mb-2 text-lg">SC Vault</h4>
+                <p class="text-sm text-gray-500">ระบบคลังจัดเก็บเกียรติบัตรและแฟ้มผลงานส่วนตัวแบบดิจิทัล</p>
+            </a>
+
+            <!-- SC Admission -->
+            <a href="/admission" target="_blank" class="glass glass-hover p-8 rounded-[2rem] text-center block transition-all duration-300 group w-full sm:w-[calc(50%-0.75rem)] lg:w-[calc(25%-1.125rem)] max-w-[300px]">
+                <div class="w-20 h-20 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-6 group-hover:scale-110 group-hover:rotate-3 transition shadow-sm">
+                    <i class="fa-solid fa-user-graduate"></i>
+                </div>
+                <h4 class="font-black text-gray-900 mb-2 text-lg">SC Admission</h4>
+                <p class="text-sm text-gray-500">ระบบรับสมัครคณะกรรมการและผู้ช่วยสภานักเรียน</p>
+            </a>
+
+            <!-- SC Regis -->
+            <a href="/regis" target="_blank" class="glass glass-hover p-8 rounded-[2rem] text-center block transition-all duration-300 group w-full sm:w-[calc(50%-0.75rem)] lg:w-[calc(25%-1.125rem)] max-w-[300px]">
+                <div class="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-6 group-hover:scale-110 group-hover:-rotate-3 transition shadow-sm">
+                    <i class="fa-solid fa-folder-open"></i>
+                </div>
+                <h4 class="font-black text-gray-900 mb-2 text-lg">SC Regis</h4>
+                <p class="text-sm text-gray-500">ระบบทะเบียนและจัดการข้อมูลประวัติของคณะกรรมการ</p>
+            </a>
+            
+        </div>
+    </div>
+</section>
 
     <section id="projects" class="py-24 relative">
         <div class="max-w-7xl mx-auto px-4">
@@ -188,18 +225,9 @@
                 <div class="flex justify-center pt-20"><div class="animate-spin rounded-full h-12 w-12 border-4 border-mstYellow border-t-mstPurple"></div></div>
             </div>
             
-            <div class="mt-20 glass-dark text-white p-8 md:p-12 rounded-[3rem] shadow-2xl flex flex-col md:flex-row justify-center items-center gap-10 md:gap-24 relative overflow-hidden">
-                <div class="text-center relative z-10">
-                    <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center text-2xl mx-auto mb-4 backdrop-blur-md border border-white/30"><i class="fa-solid fa-user-tie"></i></div>
-                    <p class="text-xs text-mstYellow font-bold uppercase tracking-wider mb-2">ผู้อำนวยการโรงเรียน</p>
-                    <p class="font-black text-2xl drop-shadow-md" id="displayDirector"><i class="fa-solid fa-ellipsis text-gray-400"></i></p>
-                </div>
-                <div class="hidden md:block w-px h-24 bg-white/20 relative z-10"></div>
-                <div class="text-center relative z-10">
-                    <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center text-2xl mx-auto mb-4 backdrop-blur-md border border-white/30"><i class="fa-solid fa-chalkboard-user"></i></div>
-                    <p class="text-xs text-mstYellow font-bold uppercase tracking-wider mb-2">ครูที่ปรึกษา</p>
-                    <p class="font-black text-2xl drop-shadow-md" id="displayAdvisor"><i class="fa-solid fa-ellipsis text-gray-400"></i></p>
-                </div>
+            <!-- ตั้ง ID เพื่อให้ JavaScript นำข้อมูลมาแทรกอัตโนมัติ -->
+            <div id="schoolPersonnelContainer" class="mt-20 glass-dark text-white p-8 md:p-12 rounded-[3rem] shadow-2xl flex flex-col md:flex-row justify-center items-center gap-10 md:gap-16 relative overflow-hidden">
+                <div class="animate-spin rounded-full h-8 w-8 border-4 border-mstYellow border-t-white mx-auto"></div>
             </div>
         </div>
     </section>
@@ -217,8 +245,8 @@
                 <div class="relative z-10">
                     <h3 class="text-2xl font-black text-gray-900 mb-2">เครือข่ายสภานักเรียน (MOU)</h3>
                     <p class="text-gray-600 text-sm mb-10 font-medium">ประสานความร่วมมือ แลกเปลี่ยนเรียนรู้ เพื่อพัฒนาศักยภาพเยาวชนระดับประเทศ</p>
-                    <div id="mouGrid" class="flex flex-wrap justify-center items-center gap-8 md:gap-16">
-                        <div class="animate-spin rounded-full h-8 w-8 border-4 border-mstYellow border-t-mstPurple"></div>
+                    <div id="mouGrid" class="marquee-container mt-8">
+                        <div class="animate-spin rounded-full h-8 w-8 border-4 border-mstYellow border-t-mstPurple mx-auto"></div>
                     </div>
                 </div>
             </div>
@@ -313,19 +341,16 @@ function closeNewsModal() {
 
         function renderBoard(targetYear) {
             const container = document.getElementById('boardContainer');
-            document.getElementById('boardTitle').innerText = `ทำเนียบคณะกรรมการ ปีการศึกษา ${targetYear}`;
+            document.getElementById('boardTitle').innerText = `ทำเนียบคณะกรรมการ ปีการศึกษา ${targetYear}`; //[cite: 2]
             
-            // ดึงข้อมูลคณะกรรมการตามปีการศึกษา
-            let members = window.allBoardMembers.filter(m => m.year == targetYear);
+            let members = window.allBoardMembers.filter(m => m.year == targetYear); //[cite: 2]
 
             if(members.length === 0) { 
-                container.innerHTML = `<div class="text-center py-10 text-gray-500 font-bold glass rounded-3xl w-full">ไม่พบข้อมูลปีการศึกษา ${targetYear}</div>`; 
+                container.innerHTML = `<div class="text-center py-10 text-gray-500 font-bold glass rounded-3xl w-full">ไม่พบข้อมูลปีการศึกษา ${targetYear}</div>`; //[cite: 2]
                 return; 
             }
 
-            // ---------------------------------------------------------
-            // [แก้ไขข้อมูลสลับช่อง] (เผื่อมีคนกรอกสลับกันอยู่)
-            // ---------------------------------------------------------
+            // แก้ไขข้อมูลสลับช่อง (รองประธาน)
             members = members.map(m => {
                 let dept = m.department || "คณะกรรมการทั่วไป";
                 let role = m.role || "";
@@ -335,47 +360,59 @@ function closeNewsModal() {
                 }
                 return m;
             });
-            // ---------------------------------------------------------
 
-            // เตรียมตัวแปรเก็บ HTML แต่ละส่วน
-            let topExecutiveHtml = ''; // สำหรับประธาน และ รองประธาน
-            let departmentHtml = '';   // สำหรับฝ่ายอื่นๆ
+            const getWeight = (deptName) => {
+                if (!deptName) return 99;
+                if (deptName.includes("บริหาร") && !deptName.includes("ทั่วไป")) return 1;
+                if (deptName.includes("วิชาการ")) return 2;
+                if (deptName.includes("งบประมาณ")) return 3;
+                if (deptName.includes("กิจการ")) return 4;
+                if (deptName.includes("บริหารทั่วไป")) return 5;
+                if (deptName.includes("อำนวยการ")) return 6;
+                return 99; 
+            };
 
-            // ==========================================
-            // 1. แยกกลุ่ม "ประธาน" และ "รองประธาน" (เอาไปไว้บนสุด)
-            // ==========================================
-            const presidents = members.filter(m => m.role.includes('ประธาน') && !m.role.includes('รอง'));
-            const vicePresidents = members.filter(m => m.role.includes('รองประธาน'));
+            let topExecutiveHtml = ''; 
+            let departmentHtml = '';   
 
-            // จัดเรียงรองประธานตามตัวอักษร (เผื่อมีหลายคน)
-            vicePresidents.sort((a, b) => a.role.localeCompare(b.role, 'th'));
+            // แยกกลุ่ม "ประธาน" และ "รองประธาน"
+            const presidents = members.filter(m => m.role.includes('ประธาน') && !m.role.includes('รอง')); //[cite: 2]
+            const vicePresidents = members.filter(m => m.role.includes('รองประธาน')); //[cite: 2]
+
+            vicePresidents.sort((a, b) => {
+                let weightA = getWeight(a.department);
+                let weightB = getWeight(b.department);
+                if(weightA !== weightB) return weightA - weightB;
+                return a.name.localeCompare(b.name, 'th'); 
+            });
 
             let presHtml = '';
             let vicePresHtml = '';
 
-            // สร้างการ์ดให้ประธาน (แสดงเด่นตรงกลาง)
+            // 1. ส่วนของประธานนักเรียน
             presidents.forEach(m => {
                 let defaultImg = `https://ui-avatars.com/api/?name=${encodeURIComponent(m.name)}&background=4C1D95&color=fff&size=150`;
-                presHtml += `<div class="glass glass-hover p-10 rounded-[3rem] w-full max-w-md text-center group mx-auto mb-10"><div class="relative w-36 h-36 mx-auto mb-6"><div class="absolute inset-0 bg-mstYellow rounded-full blur-xl opacity-50 group-hover:opacity-100 transition"></div><img src="${m.image}" class="relative w-full h-full object-cover rounded-full border-4 border-white shadow-xl group-hover:scale-105 transition" onerror="this.src='${defaultImg}'"></div><h4 class="text-3xl font-black text-gray-900 mb-1">${m.name}</h4><p class="text-mstDark font-bold text-sm bg-mstYellow px-4 py-1.5 rounded-full inline-block mt-2 shadow-sm">${m.role}</p></div>`;
+                presHtml += `<div class="glass glass-hover p-10 rounded-[3rem] w-full max-w-md text-center group mx-auto mb-10"><div class="relative w-36 h-36 mx-auto mb-6"><div class="absolute inset-0 bg-mstYellow rounded-full blur-xl opacity-50 group-hover:opacity-100 transition"></div><img src="${m.image}" class="relative w-full h-full object-cover rounded-full border-4 border-white shadow-xl group-hover:scale-105 transition" onerror="this.src='${defaultImg}'"></div><h4 class="text-3xl font-black text-gray-900 mb-1">${m.name}</h4><p class="text-mstDark font-bold text-sm bg-mstYellow px-4 py-1.5 rounded-full inline-block mt-2 shadow-sm">${m.role}</p></div>`; //[cite: 2]
             });
 
-            // สร้างการ์ดให้รองประธาน (เรียงแถวใต้ประธาน)
+            // 2. ส่วนของรองประธานนักเรียน (เปลี่ยนจาก Grid เป็น Flex จัดกึ่งกลาง)
             if (vicePresidents.length > 0) {
-                vicePresHtml = `<div class="grid grid-cols-2 md:grid-cols-4 gap-6 justify-center mb-16">`;
+                // เปลี่ยนคลาสตรงนี้เป็น flex flex-wrap justify-center
+                vicePresHtml = `<div class="mb-12"><h4 class="text-xl font-bold text-mstPurple border-b-2 border-mstYellow pb-2 mb-8 inline-block">รองประธานนักเรียน</h4><div class="flex flex-wrap justify-center gap-6">`;
                 vicePresidents.forEach(m => {
                     let defaultImg = `https://ui-avatars.com/api/?name=${encodeURIComponent(m.name)}&background=4C1D95&color=fff&size=150`;
-                    vicePresHtml += `<div class="glass glass-hover p-6 rounded-3xl text-center group"><img src="${m.image}" class="w-24 h-24 object-cover rounded-full mx-auto mb-4 border-4 border-white shadow-md group-hover:scale-110 transition duration-300" onerror="this.src='${defaultImg}'"><h4 class="font-bold text-gray-900">${m.name}</h4><p class="text-xs text-mstPurple font-bold mt-1">${m.role}</p></div>`;
+                    let displayDept = m.department.includes("ฝ่าย") ? m.department : "ฝ่าย" + m.department;
+                    
+                    // เพิ่มคลาสกำหนดความกว้าง (w-[calc...]) ให้เท่ากันทุกใบ
+                    vicePresHtml += `<div class="glass glass-hover p-6 rounded-3xl text-center group w-[calc(50%-0.75rem)] md:w-[260px]"><img src="${m.image}" class="w-24 h-24 object-cover rounded-full mx-auto mb-4 border-4 border-white shadow-md group-hover:scale-110 transition duration-300" onerror="this.src='${defaultImg}'"><h4 class="font-bold text-gray-900">${m.name}</h4><p class="text-xs text-mstPurple font-bold mt-1">${displayDept}</p></div>`;
                 });
-                vicePresHtml += `</div>`;
+                vicePresHtml += `</div></div>`;
             }
 
             topExecutiveHtml = `<div class="flex flex-col justify-center w-full">` + presHtml + vicePresHtml + `</div>`;
 
-
-            // ==========================================
-            // 2. จัดกลุ่มคนที่เหลือเข้าฝ่าย (ไม่เอาประธานและรองประธานแล้ว)
-            // ==========================================
-            const otherMembers = members.filter(m => !m.role.includes('ประธาน'));
+            // 3. จัดกลุ่มคนที่เหลือเข้าฝ่าย
+            const otherMembers = members.filter(m => !m.role.includes('ประธาน')); //[cite: 2]
 
             const grouped = otherMembers.reduce((acc, obj) => {
                 let key = obj.department || "คณะกรรมการทั่วไป";
@@ -384,25 +421,12 @@ function closeNewsModal() {
                 return acc;
             }, {});
 
-            // เรียงลำดับฝ่ายที่แสดงผล
-            const sortedDepts = Object.keys(grouped).sort((a, b) => {
-                const getWeight = (deptName) => {
-                    if (deptName.includes("บริหาร") && !deptName.includes("ทั่วไป")) return 1;
-                    if (deptName.includes("วิชาการ")) return 2;
-                    if (deptName.includes("งบประมาณ")) return 3;
-                    if (deptName.includes("กิจการ")) return 4;
-                    if (deptName.includes("บริหารทั่วไป")) return 5;
-                    if (deptName.includes("อำนวยการ")) return 6;
-                    return 99; 
-                };
-                return getWeight(a) - getWeight(b);
-            });
+            const sortedDepts = Object.keys(grouped).sort((a, b) => getWeight(a) - getWeight(b));
 
             for (const dept of sortedDepts) {
                 const mems = grouped[dept];
                 const isExecutiveDept = dept.includes("บริหาร") && !dept.includes("ทั่วไป");
                 
-                // เรียงลำดับคนในฝ่าย
                 mems.sort((a, b) => {
                     if (isExecutiveDept) {
                         const getExecWeight = (role) => {
@@ -416,7 +440,7 @@ function closeNewsModal() {
                         return a.role.localeCompare(b.role, 'th'); 
                     } else {
                         const getOtherWeight = (role) => {
-                            if (role.startsWith("หัวหน้า")) return 1;     
+                            if (role.startsWith("หัวหน้า")) return 1;    
                             return 2;                                     
                         };
                         const weightA = getOtherWeight(a.role);
@@ -426,18 +450,20 @@ function closeNewsModal() {
                     }
                 });
 
-                let deptHtml = `<div class="mb-12"><h4 class="text-xl font-bold text-mstPurple border-b-2 border-mstYellow pb-2 mb-8 inline-block">${dept}</h4><div class="grid grid-cols-2 md:grid-cols-4 gap-6 justify-center">`;
+                // เปลี่ยนคลาสตรงนี้เป็น flex flex-wrap justify-center
+                let deptHtml = `<div class="mb-12"><h4 class="text-xl font-bold text-mstPurple border-b-2 border-mstYellow pb-2 mb-8 inline-block">${dept}</h4><div class="flex flex-wrap justify-center gap-6">`;
                 
                 mems.forEach(m => {
                     let defaultImg = `https://ui-avatars.com/api/?name=${encodeURIComponent(m.name)}&background=4C1D95&color=fff&size=150`;
-                    deptHtml += `<div class="glass glass-hover p-6 rounded-3xl text-center group"><img src="${m.image}" class="w-24 h-24 object-cover rounded-full mx-auto mb-4 border-4 border-white shadow-md group-hover:scale-110 transition duration-300" onerror="this.src='${defaultImg}'"><h4 class="font-bold text-gray-900">${m.name}</h4><p class="text-xs text-mstPurple font-bold mt-1">${m.role}</p></div>`;
+                    
+                    // เพิ่มคลาสกำหนดความกว้าง (w-[calc...]) ให้เท่ากันทุกใบ
+                    deptHtml += `<div class="glass glass-hover p-6 rounded-3xl text-center group w-[calc(50%-0.75rem)] md:w-[260px]"><img src="${m.image}" class="w-24 h-24 object-cover rounded-full mx-auto mb-4 border-4 border-white shadow-md group-hover:scale-110 transition duration-300" onerror="this.src='${defaultImg}'"><h4 class="font-bold text-gray-900">${m.name}</h4><p class="text-xs text-mstPurple font-bold mt-1">${m.role}</p></div>`;
                 });
                 deptHtml += `</div></div>`;
                 
                 departmentHtml += deptHtml;
             }
 
-            // นำส่วนประธานและรองประธาน มารวมกับส่วนฝ่ายที่เหลือ
             container.innerHTML = topExecutiveHtml + departmentHtml;
         }
 
@@ -475,13 +501,47 @@ function closeNewsModal() {
         });
 
         async function loadSchoolInfo() {
+            const container = document.getElementById('schoolPersonnelContainer');
             try {
                 const docSnap = await getDoc(doc(db, "official_settings", "personnel"));
                 if (docSnap.exists()) {
-                    document.getElementById('displayDirector').innerText = docSnap.data().directorName || "-";
-                    document.getElementById('displayAdvisor').innerText = docSnap.data().advisorName || "-";
+                    const data = docSnap.data();
+                    const directorName = data.directorName || "-";
+                    const advisorNameRaw = data.advisorName || "-";
+                    
+                    // แยกระหว่างชื่อด้วยเครื่องหมายลูกน้ำ (,) หรือการขึ้นบรรทัดใหม่
+                    const advisors = advisorNameRaw.split(/,|\n/).map(n => n.trim()).filter(n => n !== "");
+
+                    // นำรายชื่อครูที่แยกได้มาสร้างเป็นแท็ก <p>
+                    let advisorsHtml = '';
+                    advisors.forEach(adv => {
+                        advisorsHtml += `<p class="font-black text-xl md:text-2xl drop-shadow-md whitespace-nowrap">${adv}</p>`;
+                    });
+
+                    // นำข้อมูลไปแสดงผลแทนที่ของเดิม (รองรับครูหลายคนด้วย flex-wrap)
+                    container.innerHTML = `
+                        <div class="text-center relative z-10">
+                            <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center text-2xl mx-auto mb-4 backdrop-blur-md border border-white/30"><i class="fa-solid fa-user-tie"></i></div>
+                            <p class="text-xs text-mstYellow font-bold uppercase tracking-wider mb-2">ผู้อำนวยการโรงเรียน</p>
+                            <p class="font-black text-xl md:text-2xl drop-shadow-md whitespace-nowrap">${directorName}</p>
+                        </div>
+                        
+                        <div class="hidden md:block w-px h-24 bg-white/20 relative z-10"></div>
+                        
+                        <div class="text-center relative z-10">
+                            <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center text-2xl mx-auto mb-4 backdrop-blur-md border border-white/30"><i class="fa-solid fa-chalkboard-user"></i></div>
+                            <p class="text-xs text-mstYellow font-bold uppercase tracking-wider mb-2">ครูที่ปรึกษา</p>
+                            
+                            <!-- จัดเรียงรายชื่อครู ถ้ามีหลายคนจะต่อแถวไปเรื่อยๆ อัตโนมัติ -->
+                            <div class="flex flex-col md:flex-row flex-wrap justify-center items-center gap-x-8 gap-y-2">
+                                ${advisorsHtml || '<p class="font-black text-2xl drop-shadow-md">-</p>'}
+                            </div>
+                        </div>
+                    `;
                 }
-            } catch (e) {}
+            } catch (e) {
+                container.innerHTML = `<p class="text-white/50 text-center w-full">ไม่สามารถโหลดข้อมูลผู้บริหารได้</p>`;
+            }
         }
 
         async function loadPublicBoard() {
@@ -504,37 +564,69 @@ function closeNewsModal() {
         }
 
         async function loadPublicNews() {
+            // [แก้ไขจาก grid เป็น flex]
             const grid = document.getElementById('publicNewsGrid');
+            grid.className = "flex flex-wrap justify-center gap-8 mt-12"; 
+            
             try {
                 const q = query(collection(db, "official_news"), orderBy("timestamp", "desc"), limit(6));
                 const qs = await getDocs(q);
-                if (qs.empty) { grid.innerHTML = `<div class="col-span-full text-center py-10 text-gray-500 font-bold glass rounded-3xl">ไม่มีข่าวสาร</div>`; return; }
+                if (qs.empty) { grid.innerHTML = `<div class="w-full text-center py-10 text-gray-500 font-bold glass rounded-3xl">ไม่มีข่าวสาร</div>`; return; }
+                
                 let html = ''; window.newsDataList = []; let index = 0;
                 qs.forEach(doc => {
                     const n = doc.data(); window.newsDataList.push(n); 
                     const thDate = new Date(n.date).toLocaleDateString('th-TH', { year:'numeric', month:'short', day:'numeric' });
                     let bg = n.category==='ประกาศ'?'bg-red-500':(n.category==='กิจกรรม'?'bg-emerald-500':'bg-blue-500');
                     
-                    // แปลงเนื้อหา HTML ให้เป็น Text ล้วนเพื่อทำเป็น Preview ในการ์ดข่าว
                     const previewText = n.content.replace(/<[^>]+>/g, ' '); 
 
-                    html += `<article class="glass glass-hover rounded-[2rem] overflow-hidden flex flex-col group"><div class="relative h-56 overflow-hidden bg-gray-200"><img src="${n.image}" class="w-full h-full object-cover group-hover:scale-110 transition duration-700" onerror="this.src='https://i.ibb.co/GQYCbXrc/logo.webp'"><div class="absolute top-4 left-4 ${bg} text-white text-[10px] font-bold px-4 py-1.5 rounded-full shadow-md">${n.category}</div></div><div class="p-8 flex flex-col flex-1"><p class="text-xs font-bold text-gray-400 mb-3"><i class="fa-regular fa-clock"></i> ${thDate}</p><h4 class="text-xl font-black text-gray-900 mb-3 line-clamp-2">${n.title}</h4><p class="text-sm text-gray-600 mb-6 line-clamp-3">${previewText}</p><a onclick="openNewsModal(${index})" class="mt-auto text-mstPurple font-bold text-sm hover:underline flex items-center gap-1 group-hover:text-mstYellow transition cursor-pointer">อ่านรายละเอียด <i class="fa-solid fa-arrow-right text-xs"></i></a></div></article>`;
+                    // [เพิ่มคลาสกำหนดความกว้างของการ์ด w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.5rem)]]
+                    html += `<article class="glass glass-hover rounded-[2rem] overflow-hidden flex flex-col group w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.5rem)] max-w-[400px]">
+                                <div class="relative h-56 overflow-hidden bg-gray-200">
+                                    <img src="${n.image}" class="w-full h-full object-cover group-hover:scale-110 transition duration-700" onerror="this.src='https://i.ibb.co/GQYCbXrc/logo.webp'">
+                                    <div class="absolute top-4 left-4 ${bg} text-white text-[10px] font-bold px-4 py-1.5 rounded-full shadow-md">${n.category}</div>
+                                </div>
+                                <div class="p-8 flex flex-col flex-1">
+                                    <p class="text-xs font-bold text-gray-400 mb-3"><i class="fa-regular fa-clock"></i> ${thDate}</p>
+                                    <h4 class="text-xl font-black text-gray-900 mb-3 line-clamp-2">${n.title}</h4>
+                                    <p class="text-sm text-gray-600 mb-6 line-clamp-3">${previewText}</p>
+                                    <a onclick="openNewsModal(${index})" class="mt-auto text-mstPurple font-bold text-sm hover:underline flex items-center gap-1 group-hover:text-mstYellow transition cursor-pointer">อ่านรายละเอียด <i class="fa-solid fa-arrow-right text-xs"></i></a>
+                                </div>
+                             </article>`;
                     index++;
                 }); 
                 grid.innerHTML = html;
-            } catch (e) { grid.innerHTML = `<div class="col-span-full text-center text-red-500">Error!</div>`; }
+            } catch (e) { grid.innerHTML = `<div class="w-full text-center text-red-500">Error!</div>`; }
         }
 
         async function loadProjects() {
+            // [แก้ไขจาก grid เป็น flex]
             const grid = document.getElementById('projectGrid');
+            grid.className = "flex flex-wrap justify-center gap-8"; 
+
             try {
                 const qs = await getDocs(query(collection(db, "official_projects"), orderBy("timestamp", "desc")));
-                if (qs.empty) { grid.innerHTML = `<div class="col-span-full text-center py-10 text-gray-500 glass rounded-3xl">ยังไม่มีข้อมูล</div>`; return; }
+                if (qs.empty) { grid.innerHTML = `<div class="w-full text-center py-10 text-gray-500 glass rounded-3xl">ยังไม่มีข้อมูล</div>`; return; }
                 let html = '';
                 qs.forEach(doc => {
                     const p = doc.data();
                     let stepColor = p.step === 'Plan' ? 'bg-gray-200 text-gray-600' : (p.step === 'Do' ? 'bg-blue-100 text-blue-600' : (p.step === 'Check' ? 'bg-yellow-100 text-yellow-600' : 'bg-emerald-100 text-emerald-600'));
-                    html += `<div class="glass glass-hover p-8 rounded-3xl"><div class="flex justify-between items-start mb-6"><h4 class="font-bold text-gray-900 text-lg leading-tight w-2/3">${p.title}</h4><span class="${stepColor} text-xs font-bold px-3 py-1.5 rounded-lg border border-white/50">${p.step}</span></div><div class="w-full bg-gray-200/50 rounded-full h-3 mb-2 shadow-inner border border-white/50"><div class="bg-gradient-to-r from-mstPurple to-indigo-400 h-3 rounded-full shadow-md" style="width: ${p.progress}%"></div></div><div class="flex justify-between text-xs font-bold text-gray-500 mt-2"><span>ความคืบหน้า</span><span class="text-mstPurple text-sm">${p.progress}%</span></div></div>`;
+                    
+                    // [เพิ่มคลาสกำหนดความกว้างของการ์ด]
+                    html += `<div class="glass glass-hover p-8 rounded-3xl w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.5rem)] max-w-[400px]">
+                                <div class="flex justify-between items-start mb-6">
+                                    <h4 class="font-bold text-gray-900 text-lg leading-tight w-2/3">${p.title}</h4>
+                                    <span class="${stepColor} text-xs font-bold px-3 py-1.5 rounded-lg border border-white/50">${p.step}</span>
+                                </div>
+                                <div class="w-full bg-gray-200/50 rounded-full h-3 mb-2 shadow-inner border border-white/50">
+                                    <div class="bg-gradient-to-r from-mstPurple to-indigo-400 h-3 rounded-full shadow-md" style="width: ${p.progress}%"></div>
+                                </div>
+                                <div class="flex justify-between text-xs font-bold text-gray-500 mt-2">
+                                    <span>ความคืบหน้า</span>
+                                    <span class="text-mstPurple text-sm">${p.progress}%</span>
+                                </div>
+                             </div>`;
                 }); grid.innerHTML = html;
             } catch (e) { grid.innerHTML = ``; }
         }
@@ -543,12 +635,22 @@ function closeNewsModal() {
             const grid = document.getElementById('mouGrid');
             try {
                 const qs = await getDocs(collection(db, "official_mou"));
-                if (qs.empty) { grid.innerHTML = `<p class="text-gray-400">ยังไม่มีเครือข่าย</p>`; return; }
-                let html = '';
+                if (qs.empty) { grid.innerHTML = `<p class="text-gray-400 text-center">ยังไม่มีเครือข่าย</p>`; return; }
+                
+                let itemsHtml = '';
                 qs.forEach(doc => {
                     const m = doc.data();
-                    html += `<div class="flex flex-col items-center group cursor-pointer bg-white/50 p-4 rounded-2xl border border-white/50 hover:bg-white transition shadow-sm hover:shadow-md"><img src="${m.logo}" class="w-16 h-16 md:w-20 md:h-20 object-contain grayscale group-hover:grayscale-0 transition duration-300 opacity-70 group-hover:opacity-100" title="${m.name}" onerror="this.style.display='none'"><p class="text-[10px] md:text-xs font-bold text-gray-500 mt-3 group-hover:text-mstPurple transition max-w-[120px] text-center leading-tight">${m.name}</p></div>`;
-                }); grid.innerHTML = html;
+                    // เพิ่ม mx-4 และ flex-shrink-0 เพื่อป้องกันการ์ดหดตัวและมีระยะห่าง
+                    itemsHtml += `<div class="flex-shrink-0 flex flex-col items-center group cursor-pointer bg-white/50 p-4 rounded-2xl border border-white/50 hover:bg-white transition shadow-sm hover:shadow-md w-32 md:w-40 mx-3 md:mx-6">
+                        <img src="${m.logo}" class="w-16 h-16 md:w-20 md:h-20 object-contain transition duration-300"  title="${m.name}" onerror="this.style.display='none'">
+                        <p class="text-[10px] md:text-xs font-bold text-gray-500 mt-3 group-hover:text-mstPurple transition max-w-[120px] text-center leading-tight">${m.name}</p>
+                    </div>`;
+                }); 
+                
+                // คัดลอกข้อมูลซ้ำ 4 ชุด เพื่อให้ยาวเพียงพอสำหรับการเลื่อนแบบ Infinite 
+                const repeatedHtml = itemsHtml.repeat(4);
+                
+                grid.innerHTML = `<div class="marquee-content">${repeatedHtml}</div>`;
             } catch (e) { grid.innerHTML = ``; }
         }
     </script>
