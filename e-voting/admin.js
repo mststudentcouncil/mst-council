@@ -1352,7 +1352,7 @@ window.viewResults = async function(campaignId) {
                             <h4 class="font-bold text-gray-800 mb-4 bg-gray-50 p-2 rounded-lg text-center">สถิติการใช้สิทธิ์ ${level}</h4>
 <div class="rounded-xl border border-gray-200 overflow-hidden">
     <table class="w-full text-sm text-left border-collapse">
-        <thead class="bg-gray-100"><tr class="text-gray-600"><th class="p-3 border-b">กลุ่ม</th><th class="p-3 border-b text-center">มีสิทธิ์ (คน)</th><th class="p-3 border-b text-center">มาโหวต</th><th class="p-3 border-b text-center">%</th></tr></thead>
+        <thead class="bg-gray-100"><tr class="text-gray-600"><th class="p-3 border-b">สังกัด</th><th class="p-3 border-b text-center">มีสิทธิ์ (คน)</th><th class="p-3 border-b text-center">มาโหวต</th><th class="p-3 border-b text-center">%</th></tr></thead>
         <tbody>
                     `;
                     statsByLevel[level].forEach(r => {
