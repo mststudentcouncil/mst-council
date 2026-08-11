@@ -285,19 +285,27 @@
         function showComingSoon() { Swal.fire({ title: 'กำลังพัฒนา!', text: 'ระบบนี้กำลังอยู่ระหว่างการพัฒนา จะเปิดให้บริการเร็วๆ นี้ครับ', icon: 'info', confirmButtonColor: '#4C1D95', customClass: { popup: 'rounded-3xl' } }); }
         
         function openNewsModal(index) {
-            const data = window.newsDataList[index];
-            if(!data) return;
-            document.getElementById('modalImg').src = data.image;
-            document.getElementById('modalTitle').innerText = data.title;
-            // รองรับ HTML จาก Quill
-            document.getElementById('modalContent').innerHTML = data.content;
-            document.getElementById('modalDate').innerHTML = `<i class="fa-regular fa-clock"></i> ${new Date(data.date).toLocaleDateString('th-TH', { year:'numeric', month:'long', day:'numeric' })}`;
-            const catBadge = document.getElementById('modalCat');
-            catBadge.innerText = data.category;
-            catBadge.className = `absolute top-4 left-4 text-white text-[10px] font-bold px-4 py-1.5 rounded-full shadow-md ${data.category==='ประกาศ'?'bg-red-500':(data.category==='กิจกรรม'?'bg-emerald-500':'bg-blue-500')}`;
-            document.getElementById('newsModal').classList.add('active'); document.body.style.overflow = 'hidden';
-        }
-        function closeNewsModal() { document.getElementById('newsModal').classList.remove('active'); document.body.style.overflow = 'auto'; }
+    const data = window.newsDataList[index];
+    if(!data) return;
+    document.getElementById('modalImg').src = data.image;
+    document.getElementById('modalTitle').innerText = data.title;
+    document.getElementById('modalContent').innerHTML = data.content;
+    document.getElementById('modalDate').innerHTML = `<i class="fa-regular fa-clock"></i> ${new Date(data.date).toLocaleDateString('th-TH', { year:'numeric', month:'long', day:'numeric' })}`;
+    const catBadge = document.getElementById('modalCat');
+    catBadge.innerText = data.category;
+    catBadge.className = `absolute top-4 left-4 text-white text-[10px] font-bold px-4 py-1.5 rounded-full shadow-md ${data.category==='ประกาศ'?'bg-red-500':(data.category==='กิจกรรม'?'bg-emerald-500':'bg-blue-500')}`;
+    document.getElementById('newsModal').classList.add('active'); 
+    
+    // เปลี่ยนมาล็อคแค่แกน Y (แนวตั้ง) ป้องกันการกระทบกับแกน X
+    document.body.style.overflowY = 'hidden'; 
+}
+
+function closeNewsModal() { 
+    document.getElementById('newsModal').classList.remove('active'); 
+    
+    // ล้างค่า overflow ออก เพื่อให้กลับไปใช้ CSS คลาส overflow-x-hidden ตามปกติ
+    document.body.style.overflow = ''; 
+}
         function openFeedbackModal() { document.getElementById('feedbackModal').classList.add('active'); document.body.style.overflow = 'hidden'; }
         function closeFeedbackModal() { document.getElementById('feedbackModal').classList.remove('active'); document.body.style.overflow = 'auto'; }
 
@@ -306,30 +314,107 @@
         function renderBoard(targetYear) {
             const container = document.getElementById('boardContainer');
             document.getElementById('boardTitle').innerText = `ทำเนียบคณะกรรมการ ปีการศึกษา ${targetYear}`;
+            
+            // ดึงข้อมูลคณะกรรมการตามปีการศึกษา[cite: 1]
             const members = window.allBoardMembers.filter(m => m.year == targetYear);
+
+            // จัดกลุ่มข้อมูลตามฝ่าย[cite: 1]
             const grouped = members.reduce((acc, obj) => {
                 let key = obj.department || "คณะกรรมการทั่วไป";
-                if (!acc[key]) acc[key] = []; acc[key].push(obj); return acc;
+                if (!acc[key]) acc[key] = []; 
+                acc[key].push(obj); 
+                return acc;
             }, {});
 
-            if(Object.keys(grouped).length === 0) { container.innerHTML = `<div class="text-center py-10 text-gray-500 font-bold glass rounded-3xl w-full">ไม่พบข้อมูลปีการศึกษา ${targetYear}</div>`; return; }
+            if(Object.keys(grouped).length === 0) { 
+                container.innerHTML = `<div class="text-center py-10 text-gray-500 font-bold glass rounded-3xl w-full">ไม่พบข้อมูลปีการศึกษา ${targetYear}</div>`; 
+                return; 
+            }
 
-            let presidentHtml = ''; let othersHtml = '';
-            for (const [dept, mems] of Object.entries(grouped)) {
+            // 1. เรียงลำดับฝ่าย
+            const sortedDepts = Object.keys(grouped).sort((a, b) => {
+                const getWeight = (deptName) => {
+                    if (deptName.includes("บริหาร") && !deptName.includes("ทั่วไป")) return 1;
+                    if (deptName.includes("วิชาการ")) return 2;
+                    if (deptName.includes("กิจการ")) return 3;
+                    if (deptName.includes("บริหารทั่วไป")) return 4;
+                    if (deptName.includes("อำนวยการ")) return 5;
+                    return 99; 
+                };
+                return getWeight(a) - getWeight(b);
+            });
+
+            let presidentHtml = ''; 
+            let othersHtml = '';
+
+            for (const dept of sortedDepts) {
+                const mems = grouped[dept];
+                
+                // เช็คว่านี่คือ "ฝ่ายบริหาร" (ที่ไม่ใช่ฝ่ายบริหารทั่วไป) หรือไม่
+                const isExecutiveDept = dept.includes("บริหาร") && !dept.includes("ทั่วไป");
+                
+                // 2. เรียงลำดับคนในฝ่าย
+                mems.sort((a, b) => {
+                    
+                    if (isExecutiveDept) {
+                        // --- กฎเฉพาะสำหรับ "ฝ่ายบริหาร" ---
+                        const getExecWeight = (role) => {
+                            if (role.includes("รองประธาน")) return 1;
+                            if (role.includes("เลขานุการ") && !role.includes("ผู้ช่วย")) return 2;
+                            if (role.includes("ผู้ช่วยเลขานุการ")) return 3;
+                            return 4;
+                        };
+                        
+                        const weightA = getExecWeight(a.role);
+                        const weightB = getExecWeight(b.role);
+                        
+                        if (weightA !== weightB) {
+                            return weightA - weightB;
+                        }
+                        return a.role.localeCompare(b.role, 'th'); 
+                        
+                    } else {
+                        // --- กฎสำหรับฝ่ายอื่นๆ (รองประธาน > หัวหน้า > อื่นๆ) ---
+                        
+                        const getOtherWeight = (role) => {
+                            if (role.includes("รองประธาน")) return 1; // รองประธานต้องมาก่อน
+                            if (role.startsWith("หัวหน้า")) return 2;     // หัวหน้าตามมา
+                            return 3;                                     // ที่เหลือ
+                        };
+
+                        const weightA = getOtherWeight(a.role);
+                        const weightB = getOtherWeight(b.role);
+
+                        if (weightA !== weightB) {
+                            return weightA - weightB;
+                        }
+                        
+                        return a.role.localeCompare(b.role, 'th'); // คนที่เหลือเรียงตามตำแหน่ง (ตัวอักษร)
+                    }
+                });
+
                 let deptHtml = `<div class="mb-12"><h4 class="text-xl font-bold text-mstPurple border-b-2 border-mstYellow pb-2 mb-8 inline-block">${dept}</h4><div class="grid grid-cols-2 md:grid-cols-4 gap-6 justify-center">`;
+                
                 mems.forEach(m => {
-    let isPres = m.role.includes('ประธาน') && !m.role.includes('รอง');
-    
-    // สร้างรูประบบแทนที่อัตโนมัติจากชื่อ (พื้นหลังสีม่วง ตัวหนังสือสีขาว)
-    let defaultImg = `https://ui-avatars.com/api/?name=${encodeURIComponent(m.name)}&background=4C1D95&color=fff&size=150`;
-    
-    let card = `<div class="glass glass-hover p-6 rounded-3xl text-center group"><img src="${m.image}" class="w-24 h-24 object-cover rounded-full mx-auto mb-4 border-4 border-white shadow-md group-hover:scale-110 transition duration-300" onerror="this.src='${defaultImg}'"><h4 class="font-bold text-gray-900">${m.name}</h4><p class="text-xs text-mstPurple font-bold mt-1">${m.role}</p></div>`;
-    
-    if (isPres) presidentHtml = `<div class="flex justify-center mb-16"><div class="glass glass-hover p-10 rounded-[3rem] w-full max-w-md text-center group"><div class="relative w-36 h-36 mx-auto mb-6"><div class="absolute inset-0 bg-mstYellow rounded-full blur-xl opacity-50 group-hover:opacity-100 transition"></div><img src="${m.image}" class="relative w-full h-full object-cover rounded-full border-4 border-white shadow-xl group-hover:scale-105 transition" onerror="this.src='${defaultImg}'"></div><h4 class="text-3xl font-black text-gray-900 mb-1">${m.name}</h4><p class="text-mstDark font-bold text-sm bg-mstYellow px-4 py-1.5 rounded-full inline-block mt-2 shadow-sm">${m.role}</p></div></div>`;
-    else deptHtml += card;
-});
+                    let isPres = m.role.includes('ประธาน') && !m.role.includes('รอง');
+                    
+                    // สร้างรูประบบแทนที่อัตโนมัติ[cite: 1]
+                    let defaultImg = `https://ui-avatars.com/api/?name=${encodeURIComponent(m.name)}&background=4C1D95&color=fff&size=150`;
+                    
+                    let card = `<div class="glass glass-hover p-6 rounded-3xl text-center group"><img src="${m.image}" class="w-24 h-24 object-cover rounded-full mx-auto mb-4 border-4 border-white shadow-md group-hover:scale-110 transition duration-300" onerror="this.src='${defaultImg}'"><h4 class="font-bold text-gray-900">${m.name}</h4><p class="text-xs text-mstPurple font-bold mt-1">${m.role}</p></div>`;
+                    
+                    if (isPres) {
+                        presidentHtml = `<div class="flex justify-center mb-16"><div class="glass glass-hover p-10 rounded-[3rem] w-full max-w-md text-center group"><div class="relative w-36 h-36 mx-auto mb-6"><div class="absolute inset-0 bg-mstYellow rounded-full blur-xl opacity-50 group-hover:opacity-100 transition"></div><img src="${m.image}" class="relative w-full h-full object-cover rounded-full border-4 border-white shadow-xl group-hover:scale-105 transition" onerror="this.src='${defaultImg}'"></div><h4 class="text-3xl font-black text-gray-900 mb-1">${m.name}</h4><p class="text-mstDark font-bold text-sm bg-mstYellow px-4 py-1.5 rounded-full inline-block mt-2 shadow-sm">${m.role}</p></div></div>`;
+                    } else {
+                        deptHtml += card;
+                    }
+                });
                 deptHtml += `</div></div>`;
-                if(mems.some(m => !m.role.includes('ประธาน') || m.role.includes('รอง'))) othersHtml += deptHtml;
+                
+                // ตรวจสอบว่าฝ่ายนี้มีคนอื่นนอกจากประธานหรือไม่ ถ้ามีจึงเพิ่มเข้าสู่หน้าเว็บ[cite: 1]
+                if(mems.some(m => !m.role.includes('ประธาน') || m.role.includes('รอง'))) {
+                    othersHtml += deptHtml;
+                }
             }
             container.innerHTML = presidentHtml + othersHtml;
         }
