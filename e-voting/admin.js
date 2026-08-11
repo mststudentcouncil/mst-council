@@ -895,15 +895,71 @@ document.getElementById('importStudentsBtn')?.addEventListener('click', () => {
         let studentsToUpload = [];
 
         workbook.SheetNames.forEach((sheetName, index) => {
+            // 🌟 ข้ามชีตที่ถูกซ่อนอยู่ (ไม่ต้องดึงมา)
             const sheetState = workbook.Workbook && workbook.Workbook.Sheets && workbook.Workbook.Sheets[index] ? workbook.Workbook.Sheets[index].Hidden : 0;
             if (sheetState !== 0 && sheetState !== undefined) return; 
 
             const worksheet = workbook.Sheets[sheetName];
             const json = XLSX.utils.sheet_to_json(worksheet, {header: 1});
 
+            let currentLevel = "-";
+            let currentRoom = "-";
+
             for (let i = 0; i < json.length; i++) {
-                const student = formatStudentData(json[i], sheetName);
-                if (student) studentsToUpload.push(student);
+                const row = json[i];
+                if (!row) continue;
+
+                // 🌟 1. ดักจับหัวตารางที่ระบุห้อง เช่น "ห้อง ม.1/1" เพื่อจำค่าไว้ใช้กับนักเรียนด้านล่าง
+                for (let c = 0; c < Math.min(row.length, 4); c++) {
+                    const cellVal = String(row[c] || "").trim();
+                    if (cellVal.includes('ห้อง') || cellVal.includes('ม.')) {
+                        const match = cellVal.match(/ม\.?\s*(\d+)\s*\/\s*(\d+)/i) || 
+                                      cellVal.match(/ม\.?\s*(\d+)\s*ห้อง\s*(\d+)/i) || 
+                                      cellVal.match(/ห้อง\s*ม\.?\s*(\d+)\/(\d+)/i);
+                        if (match) {
+                            currentLevel = "ม." + match[1];
+                            currentRoom = match[2];
+                        }
+                    }
+                }
+
+                // หากยังไม่ได้ระดับชั้น พยายามดึงจากชื่อชีตแทน
+                if (currentLevel === "-") {
+                    const matchSheet = sheetName.match(/[mMม]\.?\s*(\d)/i);
+                    if (matchSheet) currentLevel = "ม." + matchSheet[1];
+                }
+
+                // 🌟 2. เช็คว่าเป็นบรรทัดนักเรียนหรือไม่ (หารหัส 5 หลัก)
+                let studentId = String(row[1] || "").trim();
+                let nameColOffset = 0;
+                
+                if (!/^\d{5}$/.test(studentId)) {
+                    studentId = String(row[0] || "").trim();
+                    if (/^\d{5}$/.test(studentId)) {
+                        nameColOffset = -1;
+                    }
+                }
+
+                if (/^\d{5}$/.test(studentId)) {
+                    const prefix = String(row[2 + nameColOffset] || "").trim();
+                    const firstName = String(row[3 + nameColOffset] || "").trim();
+                    const lastName = String(row[4 + nameColOffset] || "").trim();
+                    
+                    let fullName = `${firstName} ${lastName}`.trim();
+                    if (!fullName) fullName = prefix;
+                    
+                    // ตัดคำนำหน้าออก
+                    fullName = fullName.replace(/^(ด\.ช\.|ด\.ญ\.|นาย|นางสาว|นาง|เด็กชาย|เด็กหญิง)\s*/, '').trim();
+
+                    if (fullName) {
+                        studentsToUpload.push({
+                            id: studentId,
+                            name: fullName,
+                            level: currentLevel,
+                            room: currentRoom !== "-" ? `${currentLevel}/${currentRoom}` : "-"
+                        });
+                    }
+                }
             }
         });
 
@@ -923,8 +979,22 @@ document.getElementById('importStudentsBtn')?.addEventListener('click', () => {
             if (result.isConfirmed) {
                 Swal.fire({ title: 'กำลังนำเข้าข้อมูล...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
                 try {
+                    // 🌟 3. ดึงรายชื่อเก่า (เฉพาะนักเรียน ไม่ดึงบุคลากร)
+                    const existingSnapshot = await getDocs(collection(db, "students"));
+                    const existingIds = new Set();
+                    existingSnapshot.forEach(docSnap => {
+                        const data = docSnap.data();
+                        if (data.level !== "ครู/บุคลากร" && data.role !== "staff") {
+                            existingIds.add(docSnap.id);
+                        }
+                    });
+
+                    const newIds = new Set(studentsToUpload.map(s => s.id));
+
                     let batch = writeBatch(db);
                     let count = 0;
+                    let deleteCount = 0;
+
                     for (const student of studentsToUpload) {
                         const studentRef = doc(db, "students", student.id);
                         batch.set(studentRef, {
@@ -939,11 +1009,26 @@ document.getElementById('importStudentsBtn')?.addEventListener('click', () => {
                             batch = writeBatch(db);
                         }
                     }
+
+                    // 🌟 4. รหัสไหนมีในระบบเก่า แต่ไม่มีในไฟล์ใหม่ ให้ลบทิ้ง (และจะไม่ไปยุ่งกับบุคลากรแน่นอน)
+                    for (const oldId of existingIds) {
+                        if (!newIds.has(oldId)) {
+                            const oldRef = doc(db, "students", oldId);
+                            batch.delete(oldRef);
+                            deleteCount++;
+                            count++;
+                            if (count % 400 === 0) {
+                                await batch.commit();
+                                batch = writeBatch(db);
+                            }
+                        }
+                    }
+
                     if (count % 400 !== 0) {
                         await batch.commit();
                     }
 
-                    Swal.fire('สำเร็จ', `นำเข้าข้อมูลนักเรียน ${count} รายการเรียบร้อยแล้ว`, 'success');
+                    Swal.fire('สำเร็จ', `อัปเดตสำเร็จ! เพิ่ม/อัปเดต ${studentsToUpload.length} คน (ลบออก ${deleteCount} คนที่ไม่มียอดในไฟล์)`, 'success');
                     checkStudentCount();
                     fileInput.value = '';
                     
@@ -982,11 +1067,11 @@ document.getElementById('excelFileInput')?.addEventListener('change', function(e
 document.getElementById('deleteStudentsBtn')?.addEventListener('click', () => {
     Swal.fire({
         title: 'ยืนยันการล้างข้อมูล?',
-        text: "ข้อมูลนักเรียนทั้งหมดจะถูกลบ! (ไม่ส่งผลกระทบต่อคะแนนที่โหวตไปแล้ว)",
+        text: "ข้อมูลนักเรียนทั้งหมดจะถูกลบ! (รายชื่อครู/บุคลากร จะไม่ถูกลบ)",
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#d33',
-        confirmButtonText: 'ล้างข้อมูลทั้งหมด',
+        confirmButtonText: 'ล้างข้อมูลนักเรียน',
         cancelButtonText: 'ยกเลิก'
     }).then(async (result) => {
         if (result.isConfirmed) {
@@ -997,17 +1082,21 @@ document.getElementById('deleteStudentsBtn')?.addEventListener('click', () => {
                 let count = 0;
                 
                 snapshot.forEach((document) => {
-                    batch.delete(document.ref);
-                    count++;
-                    if (count % 400 === 0) {
-                        batch.commit();
-                        batch = writeBatch(db);
+                    const data = document.data();
+                    // 🌟 เพิ่มเงื่อนไขให้ข้ามบุคลากร (ลบเฉพาะนักเรียน)
+                    if (data.level !== "ครู/บุคลากร" && data.role !== "staff") {
+                        batch.delete(document.ref);
+                        count++;
+                        if (count % 400 === 0) {
+                            batch.commit();
+                            batch = writeBatch(db);
+                        }
                     }
                 });
                 
                 if(count % 400 !== 0) await batch.commit();
                 
-                Swal.fire('สำเร็จ', 'ล้างข้อมูลนักเรียนเรียบร้อยแล้ว', 'success');
+                Swal.fire('สำเร็จ', `ล้างข้อมูลนักเรียนเรียบร้อยแล้ว (${count} รายการ)`, 'success');
                 checkStudentCount();
             } catch (err) {
                 Swal.fire('เกิดข้อผิดพลาด', err.message, 'error');

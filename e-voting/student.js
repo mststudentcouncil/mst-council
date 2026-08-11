@@ -97,12 +97,15 @@ onAuthStateChanged(auth, async (user) => {
             }
 
             let statusDisplay = ssoData.level === 'ครู/บุคลากร' ? `บุคลากร: ${ssoData.room || '-'}` : `นักเรียน: ${formattedRoom}`;
+            
+            // 🌟 เพิ่มเงื่อนไขเช็คคำนำหน้า ID
+            let idLabel = ssoData.level === 'ครู/บุคลากร' ? 'ชื่อผู้ใช้' : 'รหัส';
 
             const userEmailEl = document.getElementById("userEmail");
             if (userEmailEl) {
                 userEmailEl.innerHTML = `
                     <div class="font-bold text-sm tracking-wide text-white drop-shadow-md truncate">${studentData.name}</div>
-                    <div class="text-[11px] text-purple-200 mt-0.5"> ${statusDisplay} | รหัส: ${studentData.id}</div>
+                    <div class="text-[11px] text-purple-200 mt-0.5"> ${statusDisplay} | ${idLabel}: ${studentData.id}</div>
                 `;
             }
             
