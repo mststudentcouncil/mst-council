@@ -331,15 +331,16 @@ function closeNewsModal() {
                 return; 
             }
 
-            // 1. เรียงลำดับฝ่าย
+            // 1. เรียงลำดับฝ่าย (เพิ่ม งบประมาณ เข้ามา)
             const sortedDepts = Object.keys(grouped).sort((a, b) => {
                 const getWeight = (deptName) => {
                     if (deptName.includes("บริหาร") && !deptName.includes("ทั่วไป")) return 1;
                     if (deptName.includes("วิชาการ")) return 2;
-                    if (deptName.includes("กิจการ")) return 3;
-                    if (deptName.includes("บริหารทั่วไป")) return 4;
-                    if (deptName.includes("อำนวยการ")) return 5;
-                    return 99; 
+                    if (deptName.includes("งบประมาณ")) return 3; // เพิ่มงบประมาณ
+                    if (deptName.includes("กิจการ")) return 4;
+                    if (deptName.includes("บริหารทั่วไป")) return 5;
+                    if (deptName.includes("อำนวยการ")) return 6;
+                    return 99; // ฝ่ายอื่นๆ
                 };
                 return getWeight(a) - getWeight(b);
             });
@@ -350,7 +351,7 @@ function closeNewsModal() {
             for (const dept of sortedDepts) {
                 const mems = grouped[dept];
                 
-                // เช็คว่านี่คือ "ฝ่ายบริหาร" (ที่ไม่ใช่ฝ่ายบริหารทั่วไป) หรือไม่
+                // เช็คว่านี่คือ "ฝ่ายบริหาร" (ที่ไม่ใช่บริหารทั่วไป) หรือไม่
                 const isExecutiveDept = dept.includes("บริหาร") && !dept.includes("ทั่วไป");
                 
                 // 2. เรียงลำดับคนในฝ่าย
@@ -359,7 +360,7 @@ function closeNewsModal() {
                     if (isExecutiveDept) {
                         // --- กฎเฉพาะสำหรับ "ฝ่ายบริหาร" ---
                         const getExecWeight = (role) => {
-                            if (role.includes("รองประธาน")) return 1;
+                            if (role.includes("รองประธาน")) return 1; // รองประธานบริหาร
                             if (role.includes("เลขานุการ") && !role.includes("ผู้ช่วย")) return 2;
                             if (role.includes("ผู้ช่วยเลขานุการ")) return 3;
                             return 4;
@@ -375,11 +376,13 @@ function closeNewsModal() {
                         
                     } else {
                         // --- กฎสำหรับฝ่ายอื่นๆ (รองประธาน > หัวหน้า > อื่นๆ) ---
-                        
                         const getOtherWeight = (role) => {
-                            if (role.includes("รองประธาน")) return 1; // รองประธานต้องมาก่อน
-                            if (role.startsWith("หัวหน้า")) return 2;     // หัวหน้าตามมา
-                            return 3;                                     // ที่เหลือ
+                            // ให้รองประธานประจำฝ่ายขึ้นก่อนเพื่อน
+                            if (role.includes("รองประธาน")) return 1; 
+                            // ตามด้วยหัวหน้าฝ่าย
+                            if (role.startsWith("หัวหน้า")) return 2;     
+                            // ที่เหลือเป็นกรรมการหรือตำแหน่งอื่น
+                            return 3;                                     
                         };
 
                         const weightA = getOtherWeight(a.role);
@@ -389,13 +392,15 @@ function closeNewsModal() {
                             return weightA - weightB;
                         }
                         
-                        return a.role.localeCompare(b.role, 'th'); // คนที่เหลือเรียงตามตำแหน่ง (ตัวอักษร)
+                        // คนที่เหลือที่มีน้ำหนักเท่ากัน (เช่น กรรมการหลายคน) ให้เรียงตามตำแหน่ง (ตัวอักษร ก-ฮ)
+                        return a.role.localeCompare(b.role, 'th'); 
                     }
                 });
 
                 let deptHtml = `<div class="mb-12"><h4 class="text-xl font-bold text-mstPurple border-b-2 border-mstYellow pb-2 mb-8 inline-block">${dept}</h4><div class="grid grid-cols-2 md:grid-cols-4 gap-6 justify-center">`;
                 
                 mems.forEach(m => {
+                    // ประธานนักเรียน (ดึงแยก)
                     let isPres = m.role.includes('ประธาน') && !m.role.includes('รอง');
                     
                     // สร้างรูประบบแทนที่อัตโนมัติ[cite: 1]
