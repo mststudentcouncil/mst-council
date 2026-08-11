@@ -80,6 +80,7 @@ if (loginBtn) {
             const user = result.user;
             const email = user.email;
 
+            // (ข้างบนบรรทัดนี้ใน auth.js คือ const email = user.email;)
             if (email === "studentcouncil@mst.ac.th") {
                 window.location.href = "admin.html";
                 return;
@@ -92,35 +93,55 @@ if (loginBtn) {
             }
 
             const emailPrefix = email.split('@')[0];
-            if (!/^\d{7}$/.test(emailPrefix)) {
-                await auth.signOut();
-                showFullScreenError('รูปแบบอีเมลไม่ถูกต้อง', 'อีเมลนี้ไม่ใช่อีเมลของนักเรียน (ต้องการรูปแบบ YYNNNNN@mst.ac.th)');
-                return;
-            }
+            const isStudent = /^\d{7}$/.test(emailPrefix); // เช็คว่าเป็นนักเรียนหรือไม่
 
-            const gradYear = emailPrefix.substring(0, 2); 
-            const studentId = emailPrefix.substring(2);   
+            showFullScreenLoading("กำลังตรวจสอบสิทธิ์...");
 
-            showFullScreenLoading("กำลังตรวจสอบสิทธิ์ผู้ลงคะแนน...");
-            
-            const studentRef = doc(db, "students", studentId);
-            const snapshot = await getDoc(studentRef);
+            if (isStudent) {
+                // =============== กรณีเป็นนักเรียน ===============
+                const gradYear = emailPrefix.substring(0, 2); 
+                const studentId = emailPrefix.substring(2);   
+                
+                const studentRef = doc(db, "students", studentId);
+                const snapshot = await getDoc(studentRef);
 
-            if (snapshot.exists()) {
-                const studentData = snapshot.data();
-                const profile = {
-                    id: studentId,
-                    email: email,
-                    name: studentData.name || user.displayName, 
-                    level: studentData.level,
-                    room: studentData.room,
-                    gradYear: gradYear
-                };
-                sessionStorage.setItem("mst_voter_profile", JSON.stringify(profile));
-                window.location.href = "student.html";
+                if (snapshot.exists()) {
+                    const studentData = snapshot.data();
+                    const profile = {
+                        id: studentId, email: email, name: studentData.name, level: studentData.level, room: studentData.room, gradYear: gradYear
+                    };
+                    sessionStorage.setItem("mst_voter_profile", JSON.stringify(profile));
+                    window.location.href = "student.html";
+                } else {
+                    await auth.signOut();
+                    showFullScreenError('ไม่พบสิทธิ์การลงคะแนน', 'ไม่พบรายชื่อของคุณในฐานข้อมูล กรุณาติดต่อผู้ดูแลระบบ');
+                }
             } else {
-                await auth.signOut();
-                showFullScreenError('ไม่พบสิทธิ์การลงคะแนน', 'ไม่พบรายชื่อของคุณในฐานข้อมูลนักเรียนปัจจุบัน หรือคุณไม่มีสิทธิ์ใช้งานระบบลงคะแนน กรุณาติดต่อผู้ดูแลระบบ');
+                // =============== กรณีเป็นครู / บุคลากร ===============
+                const staffId = emailPrefix; // เช่น somchai.k
+                const staffRef = doc(db, "students", staffId);
+                const snapshot = await getDoc(staffRef);
+
+                if (snapshot.exists()) {
+                    const staffData = snapshot.data();
+                    if (staffData.status === 'suspended') {
+                        await auth.signOut();
+                        showFullScreenError('ถูกระงับการใช้งาน', 'บัญชีนี้ถูกระงับการใช้งานในระบบ e-Voting กรุณาติดต่อแอดมิน');
+                        return;
+                    }
+                    const profile = {
+                        id: staffId, email: email, name: staffData.name, level: "ครู/บุคลากร", room: staffData.room, role: "staff"
+                    };
+                    sessionStorage.setItem("mst_voter_profile", JSON.stringify(profile));
+                    window.location.href = "student.html";
+                } else {
+                    // หากยังไม่เคยลงทะเบียน ให้แสดงหน้าต่างลงทะเบียน
+                    window.currentStaffReg = { id: staffId, email: email };
+                    overlay.classList.add('hidden');
+                    overlay.classList.remove('flex');
+                    document.getElementById('staffRegModal').classList.remove('hidden');
+                    document.getElementById('staffRegModal').classList.add('flex');
+                }
             }
 
         } catch (error) {
@@ -132,6 +153,63 @@ if (loginBtn) {
                 overlay.classList.add('hidden');
                 overlay.classList.remove('flex');
             }
+        }
+    });
+}
+
+// 🌟 เพิ่มสคริปต์จัดการฟอร์มลงทะเบียนครู
+const regStaffDept = document.getElementById('regStaffDept');
+if (regStaffDept) {
+    regStaffDept.addEventListener('change', (e) => {
+        const otherDiv = document.getElementById('regStaffOtherDiv');
+        const otherInput = document.getElementById('regStaffOther');
+        if (e.target.value === 'อื่นๆ') {
+            otherDiv.classList.remove('hidden');
+            otherInput.required = true;
+        } else {
+            otherDiv.classList.add('hidden');
+            otherInput.required = false;
+        }
+    });
+}
+
+window.cancelStaffReg = async function() {
+    document.getElementById('staffRegModal').classList.add('hidden');
+    document.getElementById('staffRegModal').classList.remove('flex');
+    await auth.signOut();
+};
+
+const staffRegForm = document.getElementById('staffRegForm');
+if (staffRegForm) {
+    staffRegForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const name = document.getElementById('regStaffName').value.trim();
+        let dept = document.getElementById('regStaffDept').value;
+        if (dept === 'อื่นๆ') dept = document.getElementById('regStaffOther').value.trim();
+
+        if (!name || !dept) return;
+
+        document.getElementById('staffRegModal').classList.add('hidden');
+        document.getElementById('staffRegModal').classList.remove('flex');
+        showFullScreenLoading("กำลังสร้างบัญชีใช้งาน...");
+
+        try {
+            await setDoc(doc(db, "students", window.currentStaffReg.id), {
+                name: name,
+                level: "ครู/บุคลากร",
+                room: dept,
+                role: "staff",
+                status: "active",
+                updatedAt: serverTimestamp() // บันทึกเวลา
+            });
+
+            const profile = {
+                id: window.currentStaffReg.id, email: window.currentStaffReg.email, name: name, level: "ครู/บุคลากร", room: dept, role: "staff"
+            };
+            sessionStorage.setItem("mst_voter_profile", JSON.stringify(profile));
+            window.location.href = "student.html";
+        } catch (error) {
+            showFullScreenError("ลงทะเบียนล้มเหลว", error.message);
         }
     });
 }
@@ -488,3 +566,67 @@ if (verifyOtpBtn) {
         }
     });
 }
+
+// =====================================
+// ระบบจัดการตารางและสถานะบุคลากร
+// =====================================
+window.renderStaffTable = function(data = window.globalStaff) {
+    const tbody = document.getElementById('staffTableBody');
+    if (!tbody) return;
+    
+    if (data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="p-8 text-center text-gray-500">ยังไม่มีข้อมูลบุคลากร</td></tr>';
+        return;
+    }
+
+    let html = '';
+    data.forEach(staff => {
+        let isSuspended = staff.status === 'suspended';
+        let statusBadge = isSuspended 
+            ? '<span class="bg-red-100 text-red-600 px-3 py-1 rounded-full text-xs font-bold">ระงับใช้งาน</span>' 
+            : '<span class="bg-green-100 text-green-600 px-3 py-1 rounded-full text-xs font-bold">ปกติ</span>';
+            
+        let toggleAction = isSuspended 
+            ? `<button onclick="toggleStaffStatus('${staff.id}', 'active')" class="text-green-500 hover:bg-green-50 p-2 rounded-lg" title="ปลดแบน"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></button>`
+            : `<button onclick="toggleStaffStatus('${staff.id}', 'suspended')" class="text-orange-500 hover:bg-orange-50 p-2 rounded-lg" title="ระงับใช้งาน"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg></button>`;
+
+        html += `
+            <tr class="hover:bg-gray-50 border-b border-gray-50 ${isSuspended ? 'bg-red-50/30' : ''}">
+                <td class="p-4 font-mono text-gray-600">${staff.id}</td>
+                <td class="p-4 font-medium text-gray-900">${staff.name}</td>
+                <td class="p-4 text-gray-700">${staff.dept}</td>
+                <td class="p-4 text-center">${statusBadge}</td>
+                <td class="p-4 text-center flex justify-center gap-1">
+                    ${toggleAction}
+                    <button onclick="deleteSingleStudent('${staff.id}')" class="text-red-500 hover:bg-red-50 p-2 rounded-lg transition-colors" title="ลบทิ้ง"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
+                </td>
+            </tr>
+        `;
+    });
+    tbody.innerHTML = html;
+}
+
+window.toggleStaffStatus = async function(id, newStatus) {
+    try {
+        await updateDoc(doc(db, "students", id), { status: newStatus, updatedAt: serverTimestamp() });
+        checkStudentCount();
+    } catch (err) { Swal.fire('เกิดข้อผิดพลาด', err.message, 'error'); }
+}
+
+document.getElementById("staffSearchInput")?.addEventListener("input", (e) => {
+    const kw = e.target.value.toLowerCase();
+    renderStaffTable(window.globalStaff.filter(s => s.id.toLowerCase().includes(kw) || s.name.toLowerCase().includes(kw)));
+});
+
+// =====================================
+// เพิ่มการรับค่า custom_dept ในการสร้างแคมเปญ
+// =====================================
+document.getElementById("voterTargetType")?.addEventListener("change", (e) => {
+    document.getElementById("customLevelContainer").classList.add("hidden");
+    document.getElementById("customRoomContainer").classList.add("hidden");
+    document.getElementById("customDeptContainer").classList.add("hidden"); // ปิดอันใหม่
+    
+    if(e.target.value === "custom_level") document.getElementById("customLevelContainer").classList.remove("hidden");
+    if(e.target.value === "custom_room") document.getElementById("customRoomContainer").classList.remove("hidden");
+    if(e.target.value === "custom_dept") document.getElementById("customDeptContainer").classList.remove("hidden"); // เปิดอันใหม่
+});

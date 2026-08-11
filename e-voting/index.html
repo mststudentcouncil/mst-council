@@ -48,10 +48,91 @@ window.confirmContactSupport = function() {
         @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
         .fade-in { animation: fadeIn 0.4s ease-out forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* =========================================
+           อัปเกรด SweetAlert2 ให้เป็น Full-Screen Overlay 
+           ========================================= */
+        body.swal2-shown .swal2-container {
+            padding: 0 !important;
+        }
+        /* พื้นหลังเบลอแบบกระจก (Glassmorphism) */
+        .swal2-container.swal2-backdrop-show {
+            background: rgba(244, 247, 254, 0.92) !important; 
+            backdrop-filter: blur(16px) !important; 
+        }
+        /* บังคับหน้าต่างให้กว้างและสูงเต็ม 100% */
+        .swal2-popup:not(.swal2-toast) {
+            width: 100vw !important;
+            height: 100dvh !important;
+            max-width: 100vw !important;
+            border-radius: 0 !important;
+            background: transparent !important; /* ให้หน้าต่างใสกลืนไปกับพื้นหลัง */
+            box-shadow: none !important;
+            border: none !important;
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: center !important;
+            align-items: center !important;
+            padding: 2rem !important;
+        }
+        /* ปรับสไตล์ตัวหนังสือหัวข้อ */
+        .swal2-title {
+            color: #581c87 !important; 
+            font-size: 2.2rem !important;
+            font-weight: 800 !important;
+            margin-bottom: 0.5rem !important;
+        }
+        /* กำหนดขนาดกล่องข้อความ/ฟอร์มด้านในให้อยู่ตรงกลาง */
+        .swal2-html-container {
+            width: 100% !important;
+            max-width: 500px !important;
+            margin: 1rem auto !important;
+            overflow-x: hidden !important;
+        }
+        /* ปรับปุ่มกด */
+        .swal2-actions {
+            width: 100% !important;
+            max-width: 500px !important;
+            display: flex !important;
+            flex-direction: column !important; /* มือถือให้ปุ่มเรียงแนวตั้ง */
+            gap: 1rem !important;
+            margin: 2rem auto 0 !important;
+        }
+        .swal2-confirm, .swal2-cancel {
+            width: 100% !important;
+            margin: 0 !important;
+            border-radius: 1rem !important;
+            padding: 1rem !important;
+            font-size: 1.1rem !important;
+            font-weight: 700 !important;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+        }
+        .swal2-cancel {
+            background-color: #f3f4f6 !important;
+            color: #4b5563 !important;
+        }
+        /* ปรับปุ่ม (X) ปิดหน้าต่าง */
+        .swal2-close {
+            position: absolute !important;
+            top: 1.5rem !important;
+            right: 1.5rem !important;
+            width: 3rem !important;
+            height: 3rem !important;
+            background: white !important;
+            border-radius: 50% !important;
+            color: #6b7280 !important;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+        }
+        /* สำหรับหน้าจอคอมพิวเตอร์ให้ปุ่มเรียงแนวนอนคู่กัน */
+        @media (min-width: 640px) {
+            .swal2-actions {
+                flex-direction: row !important; 
+            }
+        }
     </style>
 </head>
 <body class="text-gray-800 antialiased">
-    <div id="auth-overlay" class="fixed inset-0 bg-white z-[9999] hidden flex-col items-center justify-center transition-opacity duration-300">
+    <div id="auth-overlay" class="fixed inset-0 bg-white/90 backdrop-blur-md z-[9999] hidden flex-col items-center justify-center transition-opacity duration-300">
         <div id="auth-overlay-content" class="flex flex-col items-center text-center px-6 w-full max-w-sm fade-in">
             </div>
     </div>
@@ -147,9 +228,10 @@ window.confirmContactSupport = function() {
 <!-- ============================================================== -->
 <!-- หน้าต่างยืนยันเชื่อมต่อบัญชี LINE (ระบบ 2FA OTP) -->
 <!-- ============================================================== -->
-<div id="line-link-modal" class="fixed inset-0 z-[100] hidden overflow-y-auto bg-white sm:bg-gray-900/50 sm:backdrop-blur-sm transition-opacity duration-300">
-    <div class="min-h-screen flex flex-col items-center justify-start sm:justify-center p-4 pt-12 pb-24 sm:p-6">
-        <div class="bg-white p-4 sm:p-8 sm:rounded-[2rem] sm:shadow-2xl w-full max-w-md relative fade-in flex flex-col justify-center">
+<!-- 🌟 บังคับเต็มจอด้วยพื้นหลังเบลอกระจก และนำกรอบสี่เหลี่ยมทึบออก -->
+<div id="line-link-modal" class="fixed inset-0 z-[100] hidden overflow-y-auto bg-white/95 backdrop-blur-xl transition-opacity duration-300">
+    <div class="min-h-screen flex flex-col items-center justify-center p-6 w-full max-w-md mx-auto relative fade-in">
+        <div class="w-full flex flex-col justify-center">
             
             <div class="w-16 h-16 bg-green-50 text-green-500 rounded-full flex items-center justify-center mb-4 border-4 border-green-100 mx-auto shrink-0">
                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
@@ -215,5 +297,49 @@ window.confirmContactSupport = function() {
         </div>
     </div>
 </div>
+<!-- ============================================================== -->
+    <!-- หน้าต่างลงทะเบียนสำหรับครู/บุคลากร (เข้าใช้งานครั้งแรก) -->
+    <!-- ============================================================== -->
+    <!-- 🌟 เปลี่ยนพื้นหลังเป็นสีขาวโปร่งแสงเบลอๆ และลบกรอบสี่เหลี่ยมด้านในออกให้กลืนกับหน้าจอ -->
+    <div id="staffRegModal" class="fixed inset-0 z-[100] hidden bg-white/95 backdrop-blur-xl flex-col items-center justify-center p-6 transition-opacity">
+        <div class="w-full max-w-md relative fade-in flex flex-col justify-center">
+            <h2 class="text-3xl font-black text-purple-800 mb-2 text-center">ลงทะเบียนบุคลากร</h2>
+            <p class="text-sm text-gray-500 mb-8 text-center">ตรวจพบการเข้าใช้งานครั้งแรก กรุณากรอกข้อมูลของท่าน</p>
+            <form id="staffRegForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">ชื่อ-สกุล (ไม่มีคำนำหน้า)</label>
+                    <input type="text" id="regStaffName" required placeholder="เช่น สมชาย ใจดี" class="w-full border border-gray-300 rounded-xl p-3 focus:ring-2 focus:ring-purple-500 bg-gray-50 focus:bg-white transition-colors">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">กลุ่มสาระ / หน่วยงาน</label>
+                    <select id="regStaffDept" required class="w-full border border-gray-300 rounded-xl p-3 focus:ring-2 focus:ring-purple-500 bg-gray-50 focus:bg-white">
+                        <option value="">เลือกหน่วยงานของท่าน</option>
+                        <option value="บุคลากร">บุคลากร</option>
+                        <option value="กลุ่มสาระวิทยาศาสตร์และเทคโนโลยี">กลุ่มสาระวิทยาศาสตร์และเทคโนโลยี</option>
+                        <option value="กลุ่มสาระคณิตศาสตร์">กลุ่มสาระคณิตศาสตร์</option>
+                        <option value="กลุ่มสาระภาษาต่างประเทศ">กลุ่มสาระภาษาต่างประเทศ</option>
+                        <option value="กลุ่มสาระภาษาไทย">กลุ่มสาระภาษาไทย</option>
+                        <option value="กลุ่มสาระสังคมศึกษาฯ">กลุ่มสาระสังคมศึกษาฯ</option>
+                        <option value="กลุ่มสาระศิลปะ">กลุ่มสาระศิลปะ</option>
+                        <option value="กลุ่มสาระการงานอาชีพ">กลุ่มสาระการงานอาชีพ</option>
+                        <option value="งานแนะแนว">งานแนะแนว</option>
+                        <option value="กลุ่มสาระสุขศึกษาและพลศึกษา">กลุ่มสาระสุขศึกษาและพลศึกษา</option>
+                        <option value="ครูอัตราจ้าง">ครูอัตราจ้าง</option>
+                        <option value="เจ้าหน้าที่ประจำสำนักงาน">เจ้าหน้าที่ประจำสำนักงาน</option>
+                        <option value="ลูกจ้างประจำ/ลูกจ้างชั่วคราว">ลูกจ้างประจำ/ลูกจ้างชั่วคราว</option>
+                        <option value="อื่นๆ">อื่นๆ</option>
+                    </select>
+                </div>
+                <div id="regStaffOtherDiv" class="hidden">
+                    <label class="block text-sm font-bold text-gray-700 mb-1">โปรดระบุชื่อหน่วยงาน</label>
+                    <input type="text" id="regStaffOther" placeholder="พิมพ์ชื่อหน่วยงาน..." class="w-full border border-gray-300 rounded-xl p-3 focus:ring-2 focus:ring-purple-500 bg-gray-50">
+                </div>
+                <div class="pt-2">
+                    <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3.5 rounded-xl transition-all shadow-md">ยืนยันการลงทะเบียน</button>
+                    <button type="button" onclick="cancelStaffReg()" class="w-full text-gray-500 font-bold py-3 mt-2 hover:bg-gray-100 rounded-xl transition-colors">ยกเลิก</button>
+                </div>
+            </form>
+        </div>
+    </div>
 </body>
 </html>

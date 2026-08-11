@@ -65,7 +65,86 @@ img[src*="Logo_mstsc"] {
     padding-bottom: calc(0.5rem + env(safe-area-inset-bottom));
 }
 
-
+/* =========================================
+           อัปเกรด SweetAlert2 ให้เป็น Full-Screen Overlay 
+           ========================================= */
+        body.swal2-shown .swal2-container {
+            padding: 0 !important;
+        }
+        /* พื้นหลังเบลอแบบกระจก (Glassmorphism) */
+        .swal2-container.swal2-backdrop-show {
+            background: rgba(244, 247, 254, 0.92) !important; 
+            backdrop-filter: blur(16px) !important; 
+        }
+        /* บังคับหน้าต่างให้กว้างและสูงเต็ม 100% */
+        .swal2-popup:not(.swal2-toast) {
+            width: 100vw !important;
+            height: 100dvh !important;
+            max-width: 100vw !important;
+            border-radius: 0 !important;
+            background: transparent !important; /* ให้หน้าต่างใสกลืนไปกับพื้นหลัง */
+            box-shadow: none !important;
+            border: none !important;
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: center !important;
+            align-items: center !important;
+            padding: 2rem !important;
+        }
+        /* ปรับสไตล์ตัวหนังสือหัวข้อ */
+        .swal2-title {
+            color: #581c87 !important; 
+            font-size: 2.2rem !important;
+            font-weight: 800 !important;
+            margin-bottom: 0.5rem !important;
+        }
+        /* กำหนดขนาดกล่องข้อความ/ฟอร์มด้านในให้อยู่ตรงกลาง */
+        .swal2-html-container {
+            width: 100% !important;
+            max-width: 500px !important;
+            margin: 1rem auto !important;
+            overflow-x: hidden !important;
+        }
+        /* ปรับปุ่มกด */
+        .swal2-actions {
+            width: 100% !important;
+            max-width: 500px !important;
+            display: flex !important;
+            flex-direction: column !important; /* มือถือให้ปุ่มเรียงแนวตั้ง */
+            gap: 1rem !important;
+            margin: 2rem auto 0 !important;
+        }
+        .swal2-confirm, .swal2-cancel {
+            width: 100% !important;
+            margin: 0 !important;
+            border-radius: 1rem !important;
+            padding: 1rem !important;
+            font-size: 1.1rem !important;
+            font-weight: 700 !important;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+        }
+        .swal2-cancel {
+            background-color: #f3f4f6 !important;
+            color: #4b5563 !important;
+        }
+        /* ปรับปุ่ม (X) ปิดหน้าต่าง */
+        .swal2-close {
+            position: absolute !important;
+            top: 1.5rem !important;
+            right: 1.5rem !important;
+            width: 3rem !important;
+            height: 3rem !important;
+            background: white !important;
+            border-radius: 50% !important;
+            color: #6b7280 !important;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+        }
+        /* สำหรับหน้าจอคอมพิวเตอร์ให้ปุ่มเรียงแนวนอนคู่กัน */
+        @media (min-width: 640px) {
+            .swal2-actions {
+                flex-direction: row !important; 
+            }
+        }
     </style>
 </head>
 <body class="flex flex-col md:flex-row min-h-screen text-gray-800">
@@ -109,8 +188,11 @@ img[src*="Logo_mstsc"] {
                 <svg class="w-5 h-5 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg> จัดการการลงคะแนน
             </button>
             <button onclick="switchTab('students')" class="nav-link w-full flex items-center gap-3 px-4 py-3.5 rounded-xl hover:bg-white/5 transition-all text-purple-200 hover:text-white" id="btn-students">
-    <svg class="w-5 h-5 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg> ฐานข้อมูลนักเรียน
-</button>
+                <svg class="w-5 h-5 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg> ฐานข้อมูลนักเรียน
+            </button>
+            <button onclick="switchTab('staff')" class="nav-link w-full flex items-center gap-3 px-4 py-3.5 rounded-xl hover:bg-white/5 transition-all text-purple-200 hover:text-white" id="btn-staff">
+                <svg class="w-5 h-5 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg> ฐานข้อมูลบุคลากร
+            </button>
             <!-- ปุ่มคู่มือ (ใส่คลาส Active ให้เป็นสีขาว) -->
             <button onclick="switchTab('manual')" class="nav-link w-full flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all bg-white/10 text-white border border-white/5" id="btn-manual">
                 <svg class="w-5 h-5 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg> คู่มือการใช้งาน
@@ -236,7 +318,8 @@ img[src*="Logo_mstsc"] {
     <option value="junior">เฉพาะ ม.ต้น (ม.1 - ม.3)</option>
     <option value="senior">เฉพาะ ม.ปลาย (ม.4 - ม.6)</option>
     <option value="custom_level">ระบุกลุ่ม/ชั้นปีเอง</option>
-    <option value="custom_room">ระบุห้องเรียน/หน่วยงานเอง</option>
+    <option value="custom_room">ระบุห้องเรียนเอง (เฉพาะนักเรียน)</option>
+    <option value="custom_dept">ระบุกลุ่มสาระ/หน่วยงานเอง (เฉพาะบุคลากร)</option>
 </select>
 
 <!-- เพิ่มตัวเลือก ครู/บุคลากร ในส่วนของการระบุชั้นปีเอง -->
@@ -250,8 +333,38 @@ img[src*="Logo_mstsc"] {
     <label class="flex items-center gap-2 bg-purple-50 p-2 rounded-lg border border-purple-200 col-span-2 sm:col-span-2 text-purple-800 font-bold"><input type="checkbox" name="targetLevel" value="ครู/บุคลากร"> ครู / บุคลากร</label>
 </div>
 
+<!-- 🌟 ส่วนที่ 1: เปลี่ยนระบุห้องเป็นแบบ Checkbox (ม.1/1 ถึง ม.6/10) -->
 <div id="customRoomContainer" class="hidden mt-4">
-    <input type="text" id="customRoomInput" class="w-full border border-indigo-200 rounded-xl p-3" placeholder="เช่น ม.1/1, ม.6/1, งานแนะแนว (คั่นด้วยลูกน้ำ)">
+    <div class="bg-white border border-indigo-200 rounded-xl p-4 max-h-[300px] overflow-y-auto shadow-inner">
+        <p class="text-xs font-bold text-indigo-500 mb-3">เลือกห้องเรียนที่ต้องการ (ม.1 - ม.6):</p>
+        <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
+            <!-- สร้างตัวเลือกห้อง ม.1 - ม.6 -->
+            <script>
+                for(let m = 1; m <= 6; m++) {
+                    for(let r = 1; r <= 10; r++) {
+                        document.write(`<label class="flex items-center gap-2 bg-gray-50 p-2 rounded-lg border border-gray-100 text-sm font-medium hover:bg-indigo-50 transition-colors cursor-pointer"><input type="checkbox" name="targetRoom" value="ม.${m}/${r}"> ม.${m}/${r}</label>`);
+                    }
+                }
+            </script>
+        </div>
+    </div>
+</div>
+
+<!-- 🌟 ส่วนที่ 2: แก้ชื่อข้อความกลุ่มสาระให้เต็มตามชื่อฐานข้อมูล -->
+<div id="customDeptContainer" class="hidden mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+    <label class="flex items-center gap-2 bg-white p-2 rounded-lg border border-indigo-100 text-sm font-medium"><input type="checkbox" name="targetDept" value="บุคลากร"> บุคลากร</label>
+    <label class="flex items-center gap-2 bg-white p-2 rounded-lg border border-indigo-100 text-sm font-medium"><input type="checkbox" name="targetDept" value="กลุ่มสาระวิทยาศาสตร์และเทคโนโลยี"> กลุ่มสาระวิทยาศาสตร์และเทคโนโลยี</label>
+    <label class="flex items-center gap-2 bg-white p-2 rounded-lg border border-indigo-100 text-sm font-medium"><input type="checkbox" name="targetDept" value="กลุ่มสาระคณิตศาสตร์"> กลุ่มสาระคณิตศาสตร์</label>
+    <label class="flex items-center gap-2 bg-white p-2 rounded-lg border border-indigo-100 text-sm font-medium"><input type="checkbox" name="targetDept" value="กลุ่มสาระภาษาต่างประเทศ"> กลุ่มสาระภาษาต่างประเทศ</label>
+    <label class="flex items-center gap-2 bg-white p-2 rounded-lg border border-indigo-100 text-sm font-medium"><input type="checkbox" name="targetDept" value="กลุ่มสาระภาษาไทย"> กลุ่มสาระภาษาไทย</label>
+    <label class="flex items-center gap-2 bg-white p-2 rounded-lg border border-indigo-100 text-sm font-medium"><input type="checkbox" name="targetDept" value="กลุ่มสาระสังคมศึกษาฯ"> กลุ่มสาระสังคมศึกษาฯ</label>
+    <label class="flex items-center gap-2 bg-white p-2 rounded-lg border border-indigo-100 text-sm font-medium"><input type="checkbox" name="targetDept" value="กลุ่มสาระศิลปะ"> กลุ่มสาระศิลปะ</label>
+    <label class="flex items-center gap-2 bg-white p-2 rounded-lg border border-indigo-100 text-sm font-medium"><input type="checkbox" name="targetDept" value="กลุ่มสาระการงานอาชีพ"> กลุ่มสาระการงานอาชีพ</label>
+    <label class="flex items-center gap-2 bg-white p-2 rounded-lg border border-indigo-100 text-sm font-medium"><input type="checkbox" name="targetDept" value="งานแนะแนว"> งานแนะแนว</label>
+    <label class="flex items-center gap-2 bg-white p-2 rounded-lg border border-indigo-100 text-sm font-medium"><input type="checkbox" name="targetDept" value="กลุ่มสาระสุขศึกษาและพลศึกษา"> กลุ่มสาระสุขศึกษาและพลศึกษา</label>
+    <label class="flex items-center gap-2 bg-white p-2 rounded-lg border border-indigo-100 text-sm font-medium"><input type="checkbox" name="targetDept" value="ครูอัตราจ้าง"> ครูอัตราจ้าง</label>
+    <label class="flex items-center gap-2 bg-white p-2 rounded-lg border border-indigo-100 text-sm font-medium"><input type="checkbox" name="targetDept" value="เจ้าหน้าที่ประจำสำนักงาน"> เจ้าหน้าที่ประจำสำนักงาน</label>
+    <label class="flex items-center gap-2 bg-white p-2 rounded-lg border border-indigo-100 text-sm font-medium"><input type="checkbox" name="targetDept" value="ลูกจ้างประจำ/ลูกจ้างชั่วคราว"> ลูกจ้างประจำ/ลูกจ้างชั่วคราว</label>
 </div>
                             </div>
 
@@ -270,14 +383,16 @@ img[src*="Logo_mstsc"] {
                             </div>
                         </div>
 
-                        <div class="flex flex-col h-full">
-                            <div class="p-5 rounded-2xl border border-gray-200 bg-gray-50 flex-1 flex flex-col">
+                        <!-- 🌟 ส่วนที่ 3: ปลดล็อกความสูงของกล่องรายชื่อผู้สมัคร (ลบ h-full, max-h, overflow ออก) -->
+                        <div class="flex flex-col">
+                            <div class="p-5 rounded-2xl border border-gray-200 bg-gray-50">
                                 <label class="block text-sm font-bold text-gray-800 mb-4 flex items-center gap-2"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg> รายชื่อผู้สมัคร / ตัวเลือก</label>
-                                <div id="optionsContainer" class="space-y-3 overflow-y-auto max-h-[400px] pr-2 mb-4 flex-1">
-                                    </div>
-                                <div class="grid grid-cols-2 gap-3 mt-auto">
+                                <div id="optionsContainer" class="space-y-3 mb-4 w-full">
+                                    <!-- ตัวเลือกจะถูกแทรกลงตรงนี้ -->
+                                </div>
+                                <div class="grid grid-cols-2 gap-3">
                                     <button type="button" id="addOptionBtn" class="border-2 border-dashed border-gray-300 text-gray-600 hover:border-purple-400 hover:text-purple-700 font-bold py-3 rounded-xl text-sm transition-colors flex items-center justify-center gap-2"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg> เพิ่มช่องใหม่</button>
-                                    <button type="button" id="bulkAddBtn" class="bg-purple-100 text-purple-700 hover:bg-purple-200 font-bold py-3 rounded-xl text-sm transition-colors flex items-center justify-center gap-2"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg> วางจาก Excel</button>
+                                    <button type="button" id="bulkAddBtn" class="bg-purple-100 text-purple-700 hover:bg-purple-200 font-bold py-3 rounded-xl text-sm transition-colors flex items-center justify-center gap-2"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg> วางจาก Excel</button>
                                 </div>
                             </div>
                             
@@ -396,6 +511,97 @@ img[src*="Logo_mstsc"] {
             </div>
         </section>
 
+        <section id="tab-staff" class="tab-content hidden">
+            <!-- 🌟 ส่วนบน: สถานะ และ เพิ่มบุคลากร -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                <!-- กล่องสถานะ -->
+                <div class="glass-panel p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col h-full">
+                    <h3 class="text-lg font-extrabold text-gray-800 mb-4">สถานะฐานข้อมูลบุคลากร</h3>
+                    <div class="bg-indigo-50 p-6 rounded-2xl border border-indigo-100 mb-5 text-center flex-1 flex flex-col justify-center">
+                        <div id="staffCountText" class="w-full text-indigo-900">กำลังโหลดข้อมูล...</div>
+                    </div>
+                </div>
+
+                <!-- กล่องเพิ่มรายชื่อ -->
+                <div class="bg-blue-50 p-5 rounded-3xl border border-blue-100 flex flex-col justify-center">
+                    <h4 class="text-sm font-bold text-blue-900 mb-4 flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path></svg> 
+                        เพิ่มรายชื่อบุคลากรใหม่ (รายบุคคล)
+                    </h4>
+                    <form id="addSingleStaffForm" class="grid grid-cols-1 sm:grid-cols-2 gap-3 items-end">
+                        <div>
+                            <label class="block text-xs font-bold text-blue-800 mb-1">อีเมล / รหัส</label>
+                            <input type="text" id="singleStaffId" placeholder="เช่น somchai.k" required class="w-full border border-gray-300 p-2.5 rounded-lg text-sm bg-white focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-blue-800 mb-1">ชื่อ-สกุล (ไม่มีคำนำหน้า)</label>
+                            <input type="text" id="singleStaffName" placeholder="เช่น สมชาย ใจดี" required class="w-full border border-gray-300 p-2.5 rounded-lg text-sm bg-white focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div class="sm:col-span-2 flex gap-2">
+                            <div class="flex-1">
+                                <label class="block text-xs font-bold text-blue-800 mb-1">กลุ่มสาระ / หน่วยงาน</label>
+                                <select id="singleStaffDept" required class="w-full border border-gray-300 p-2.5 rounded-lg text-sm bg-white focus:ring-2 focus:ring-blue-500">
+                                    <option value="">เลือกหน่วยงาน</option>
+                                    <option value="บุคลากร">บุคลากร</option>
+                                    <option value="กลุ่มสาระวิทยาศาสตร์และเทคโนโลยี">กลุ่มสาระวิทยาศาสตร์และเทคโนโลยี</option>
+                                    <option value="กลุ่มสาระคณิตศาสตร์">กลุ่มสาระคณิตศาสตร์</option>
+                                    <option value="กลุ่มสาระภาษาต่างประเทศ">กลุ่มสาระภาษาต่างประเทศ</option>
+                                    <option value="กลุ่มสาระภาษาไทย">กลุ่มสาระภาษาไทย</option>
+                                    <option value="กลุ่มสาระสังคมศึกษาฯ">กลุ่มสาระสังคมศึกษาฯ</option>
+                                    <option value="กลุ่มสาระศิลปะ">กลุ่มสาระศิลปะ</option>
+                                    <option value="กลุ่มสาระการงานอาชีพ">กลุ่มสาระการงานอาชีพ</option>
+                                    <option value="งานแนะแนว">งานแนะแนว</option>
+                                    <option value="กลุ่มสาระสุขศึกษาและพลศึกษา">กลุ่มสาระสุขศึกษาและพลศึกษา</option>
+                                    <option value="ครูอัตราจ้าง">ครูอัตราจ้าง</option>
+                                    <option value="เจ้าหน้าที่ประจำสำนักงาน">เจ้าหน้าที่ประจำสำนักงาน</option>
+                                    <option value="ลูกจ้างประจำ/ลูกจ้างชั่วคราว">ลูกจ้างประจำ/ลูกจ้างชั่วคราว</option>
+                                    <option value="อื่นๆ">อื่นๆ</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-5 rounded-lg font-bold shadow transition-colors shrink-0 h-[42px] mt-auto">เพิ่ม</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- 🌟 ส่วนล่าง: ตารางและตัวกรอง -->
+            <div class="glass-panel p-6 md:p-8 rounded-3xl shadow-sm border border-gray-100">
+                <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6 pb-4 border-b border-gray-200">
+                    <h3 class="text-2xl font-extrabold text-gray-800">รายชื่อบุคลากร</h3>
+                    
+                    <div class="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
+                        <input type="text" id="staffSearchInput" class="px-4 py-2 border border-gray-300 rounded-xl text-sm w-full sm:w-56 focus:ring-2 focus:ring-purple-500" placeholder="ค้นหาชื่อ หรือรหัส...">
+                        <select id="staffDeptFilter" class="px-4 py-2 border border-gray-300 rounded-xl text-sm font-medium focus:ring-2 focus:ring-purple-500 bg-white">
+                            <option value="all">ทุกกลุ่มสาระ/หน่วยงาน</option>
+                        </select>
+                        <select id="staffStatusFilter" class="px-4 py-2 border border-gray-300 rounded-xl text-sm font-medium focus:ring-2 focus:ring-purple-500 bg-white">
+                            <option value="all">ทุกสถานะ</option>
+                            <option value="active">ปกติ</option>
+                            <option value="suspended">ระงับใช้งาน</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="border border-gray-200 rounded-2xl overflow-hidden">
+                    <div class="overflow-x-auto max-h-[500px] overflow-y-auto relative">
+                        <table class="w-full text-sm text-left whitespace-nowrap">
+                            <thead class="bg-gray-100 text-gray-700 sticky top-0 shadow-sm z-10">
+                                <tr>
+                                    <th class="p-4 font-bold border-b">อีเมล / รหัส</th>
+                                    <th class="p-4 font-bold border-b">ชื่อ-สกุล</th>
+                                    <th class="p-4 font-bold border-b">กลุ่มสาระ / หน่วยงาน</th>
+                                    <th class="p-4 font-bold border-b text-center w-28">สถานะ</th>
+                                    <th class="p-4 font-bold border-b text-center w-24">จัดการ</th>
+                                </tr>
+                            </thead>
+                            <tbody id="staffTableBody" class="divide-y divide-gray-100">
+                                <tr><td colspan="5" class="p-8 text-center text-gray-500">กำลังโหลดข้อมูล...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <!-- เอาคลาส hidden ออกจาก tab-manual -->
         <section id="tab-manual" class="tab-content fade-in">
             <div class="glass-panel p-6 md:p-8 rounded-3xl shadow-sm border border-gray-100">
@@ -500,6 +706,7 @@ function switchTab(tabName) {
         'dashboard': 'ภาพรวมระบบ', 
         'campaigns': 'จัดการการลงคะแนน', 
         'students': 'ฐานข้อมูลนักเรียน',
+        'staff': 'ฐานข้อมูลบุคลากร / ครู',
         'manual': 'คู่มือการใช้งานระบบ'
     };
 
@@ -507,6 +714,7 @@ function switchTab(tabName) {
         'dashboard': 'สรุปสถิติผู้ใช้งานและสถานะระบบแบบเรียลไทม์',
         'campaigns': 'สร้าง แก้ไข และจัดการรายการลงคะแนนทั้งหมดในระบบ',
         'students': 'จัดการรายชื่อผู้มีสิทธิ์ลงคะแนนและตรวจสอบฐานข้อมูล',
+        'staff': 'จัดการรายชื่อบุคลากร ตรวจสอบและระงับสิทธิ์การใช้งาน',
         'manual': 'เรียนรู้ขั้นตอนการใช้งานและข้อปฏิบัติสำหรับผู้ดูแลระบบ'
     };
 

@@ -309,7 +309,8 @@ document.getElementById("createCampaignForm")?.addEventListener("submit", async 
         payload.allowed_voters.values = Array.from(document.querySelectorAll("input[name='targetLevel']:checked")).map(cb => cb.value);
         if(!payload.allowed_voters.values.length) return Swal.fire('แจ้งเตือน', 'เลือกระดับชั้นอย่างน้อย 1 ระดับ', 'warning');
     } else if (payload.allowed_voters.type === "custom_room") {
-        payload.allowed_voters.values = document.getElementById("customRoomInput").value.split(",").map(r => r.trim()).filter(r => r);
+        // 🌟 ดึงค่าจาก Checkbox ห้องที่ถูกติ๊ก
+        payload.allowed_voters.values = Array.from(document.querySelectorAll("input[name='targetRoom']:checked")).map(cb => cb.value);
         if(!payload.allowed_voters.values.length) return Swal.fire('แจ้งเตือน', 'ระบุห้องเรียนอย่างน้อย 1 ห้อง', 'warning');
     }
 
@@ -363,7 +364,12 @@ window.editCampaign = async function(campaignId) {
             document.getElementById("voterTargetType").value = data.allowed_voters.type;
             document.getElementById("voterTargetType").dispatchEvent(new Event('change'));
             if(data.allowed_voters.type === 'custom_level') { document.querySelectorAll("input[name='targetLevel']").forEach(cb => cb.checked = data.allowed_voters.values.includes(cb.value)); } 
-            else if(data.allowed_voters.type === 'custom_room') { document.getElementById("customRoomInput").value = data.allowed_voters.values.join(", "); }
+            else if(data.allowed_voters.type === 'custom_room') { 
+                // 🌟 สั่งติ๊กถูก Checkbox ห้องตามข้อมูลเดิมในฐานข้อมูล
+                document.querySelectorAll("input[name='targetRoom']").forEach(cb => cb.checked = data.allowed_voters.values.includes(cb.value)); 
+            }
+            // 🌟 เพิ่มบรรทัดนี้ลงไป เพื่อให้ติ๊กถูกกลุ่มสาระ/หน่วยงาน ตอนกดแก้ไข
+            else if(data.allowed_voters.type === 'custom_dept') { document.querySelectorAll("input[name='targetDept']").forEach(cb => cb.checked = data.allowed_voters.values.includes(cb.value)); }
         }
 
         optionsContainer.innerHTML = "";
@@ -494,8 +500,10 @@ async function updateDashboardLiveStats(campaigns) {
         let totalVoters = 0;
         let eligibleCount = 0;
         
-        if(window.globalStudents && window.globalStudents.length > 0) {
-            eligibleCount = window.globalStudents.filter(s => isStudentEligible(camp.allowed_voters, s)).length;
+        // 🌟 เอาครูและนักเรียนมารวมกันก่อนเช็คสิทธิ์
+        const allUsers = [...(window.globalStudents || []), ...(window.globalStaff || [])];
+        if(allUsers.length > 0) {
+            eligibleCount = allUsers.filter(s => isStudentEligible(camp.allowed_voters, s)).length;
         }
 
         try {
@@ -659,6 +667,8 @@ async function checkStudentCount() {
     try { 
         const snapshot = await getDocs(collection(db, "students"));
         window.globalStudents = []; 
+        window.globalStaff = []; // 🌟 เก็บข้อมูลครูแยกไว้
+        
         let levels = new Set();
         let roomNums = new Set(); 
         
@@ -667,8 +677,6 @@ async function checkStudentCount() {
 
         snapshot.forEach(docSnap => { 
             let d = docSnap.data(); 
-            let studentLevel = d.level || "-";
-            let studentRoom = d.room || "-";
             
             // 🌟 2. ดึง timestamp มาเปรียบเทียบหาเวลาที่ใหม่ที่สุด
             if (d.updatedAt) {
@@ -678,23 +686,40 @@ async function checkStudentCount() {
                 }
             }
             
-            if (studentLevel !== "-" && studentLevel !== "ครู/บุคลากร") {
-                if (studentRoom !== "-" && !studentRoom.includes("/")) {
-                    studentRoom = `${studentLevel}/${studentRoom}`;
+            // 🌟 เช็คว่าเป็นครู/บุคลากรหรือไม่
+            if (d.level === "ครู/บุคลากร" || d.role === "staff") {
+                window.globalStaff.push({ 
+                    id: docSnap.id, 
+                    name: d.name || "ไม่ระบุชื่อ", 
+                    dept: d.room || "ไม่ระบุ",
+                    status: d.status || 'active',
+                    // 🌟 เพิ่ม 2 บรรทัดนี้ เพื่อให้ระบบสถิตินำไปคำนวณได้
+                    level: d.level || "ครู/บุคลากร", 
+                    room: d.room || "ไม่ระบุ"
+                });
+            } else {
+                // 🌟 กรณีเป็นนักเรียน
+                let studentLevel = d.level || "-";
+                let studentRoom = d.room || "-";
+                
+                if (studentLevel !== "-" && studentLevel !== "ครู/บุคลากร") {
+                    if (studentRoom !== "-" && !studentRoom.includes("/")) {
+                        studentRoom = `${studentLevel}/${studentRoom}`;
+                    }
                 }
-            }
-            
-            window.globalStudents.push({ 
-                id: docSnap.id, 
-                name: d.name || "ไม่ระบุชื่อ", 
-                level: studentLevel,
-                room: studentRoom 
-            }); 
-            
-            if (studentLevel !== "-") levels.add(studentLevel);
-            if (studentRoom !== "-") {
-                let rNum = studentRoom.includes('/') ? studentRoom.split('/')[1] : studentRoom;
-                roomNums.add(rNum);
+                
+                window.globalStudents.push({ 
+                    id: docSnap.id, 
+                    name: d.name || "ไม่ระบุชื่อ", 
+                    level: studentLevel,
+                    room: studentRoom 
+                }); 
+                
+                if (studentLevel !== "-") levels.add(studentLevel);
+                if (studentRoom !== "-") {
+                    let rNum = studentRoom.includes('/') ? studentRoom.split('/')[1] : studentRoom;
+                    roomNums.add(rNum);
+                }
             }
         });
 
@@ -733,7 +758,6 @@ async function checkStudentCount() {
         const levelSelect = document.getElementById('studentLevelFilter');
         const roomSelect = document.getElementById('studentRoomFilter');
 
-        // ... โค้ดส่วนล่าง (levelSelect, roomSelect, renderStudentTable) คงเดิม ...
         if (levelSelect) {
             levelSelect.innerHTML = '<option value="all">ทุกระดับชั้น</option>';
             Array.from(levels).sort().forEach(l => {
@@ -749,10 +773,51 @@ async function checkStudentCount() {
                 }
             });
         }
+
+        // 🌟 1. อัปเดตกล่องสถานะบุคลากร
+        if (document.getElementById("staffCountText")) {
+            let activeStaff = window.globalStaff.filter(s => s.status === 'active').length;
+            let suspendedStaff = window.globalStaff.filter(s => s.status === 'suspended').length;
+            
+            document.getElementById("staffCountText").innerHTML = `
+                <div class="flex flex-col items-center justify-center w-full">
+                    <div class="flex items-center justify-center gap-5 mb-6">
+                        <div class="w-14 h-14 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center shadow-inner shrink-0">
+                            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                        </div>
+                        <div class="text-left">
+                            <p class="text-sm text-indigo-500 font-bold mb-1">บุคลากรในระบบทั้งหมด</p>
+                            <p class="text-4xl font-black text-indigo-900 leading-none">${window.globalStaff.length} <span class="text-base font-bold text-indigo-600">คน</span></p>
+                        </div>
+                    </div>
+                    <div class="w-full max-w-[280px] pt-4 border-t border-indigo-200/80 flex items-center justify-center gap-4 mx-auto">
+                        <span class="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded-md">ปกติ: ${activeStaff}</span>
+                        <span class="text-xs font-bold text-red-500 bg-red-50 px-2 py-1 rounded-md">ระงับ: ${suspendedStaff}</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 🌟 2. ดึงกลุ่มสาระที่มีอยู่มาใส่ใน Dropdown ตัวกรอง
+        const staffDeptSelect = document.getElementById('staffDeptFilter');
+        if (staffDeptSelect) {
+            let staffDepts = new Set(window.globalStaff.map(s => s.dept));
+            staffDeptSelect.innerHTML = '<option value="all">ทุกกลุ่มสาระ/หน่วยงาน</option>';
+            Array.from(staffDepts).sort().forEach(d => {
+                if (d && d !== "ไม่ระบุ") {
+                    staffDeptSelect.innerHTML += `<option value="${d}">${d}</option>`;
+                }
+            });
+        }
         
         loadCampaigns(); 
         checkSystemHealth();
         renderStudentTable(); 
+        
+        // 🌟 สั่งให้เรนเดอร์ตารางบุคลากร (ผ่านตัวกรอง)
+        if (window.filterStaffTable) {
+            window.filterStaffTable(); 
+        }
     } catch (e) { 
         console.error("เชื่อมต่อฐานข้อมูลไม่สำเร็จ:", e);
         if(document.getElementById("lastUpdatedText")) document.getElementById("lastUpdatedText").innerText = "โหลดข้อมูลผิดพลาด"; 
@@ -1112,8 +1177,10 @@ window.viewResults = async function(campaignId) {
             let eligibleByRoom = {};
             let levelOfRoomMapping = {};
             
-            if(window.globalStudents) {
-                window.globalStudents.forEach(s => {
+            // 🌟 เอาครูและนักเรียนมารวมกันตอนออกรายงาน
+            const allUsers = [...(window.globalStudents || []), ...(window.globalStaff || [])];
+            if(allUsers.length > 0) {
+                allUsers.forEach(s => {
                     if(isStudentEligible(data.allowed_voters, s)) { 
                         let r = s.room || "ไม่ระบุ"; 
                         eligibleByRoom[r] = (eligibleByRoom[r] || 0) + 1; 
@@ -1238,9 +1305,11 @@ window.exportExcel = async function(campaignId) {
             actualVotes["ไม่ประสงค์ลงคะแนน"] = 0;
 
             let eligibleByRoom = {}; let levelOfRoomMapping = {};
-            if(window.globalStudents) { 
-                window.globalStudents.forEach(s => { 
-                    if(isStudentEligible(data.allowed_voters, s)) { 
+            // 🌟 เอาครูและนักเรียนมารวมกันตอนออกรายงาน
+            const allUsers = [...(window.globalStudents || []), ...(window.globalStaff || [])];
+            if(allUsers.length > 0) {
+                allUsers.forEach(s => {
+                    if(isStudentEligible(data.allowed_voters, s)) {
                         let r = s.room || "ไม่ระบุ"; eligibleByRoom[r] = (eligibleByRoom[r] || 0) + 1; levelOfRoomMapping[r] = s.level || "อื่นๆ";
                     } 
                 }); 
@@ -1369,3 +1438,117 @@ async function checkSystemHealth() {
 }
 
 setInterval(checkSystemHealth, 300000);
+
+// =====================================
+// 8. ระบบจัดการบุคลากร (Staff Management)
+// =====================================
+
+// 8.1 จัดการตัวเลือกแคมเปญให้รองรับ custom_dept
+document.getElementById("voterTargetType")?.addEventListener("change", (e) => {
+    document.getElementById("customLevelContainer")?.classList.add("hidden");
+    document.getElementById("customRoomContainer")?.classList.add("hidden");
+    document.getElementById("customDeptContainer")?.classList.add("hidden");
+    
+    if(e.target.value === "custom_level") document.getElementById("customLevelContainer")?.classList.remove("hidden");
+    if(e.target.value === "custom_room") document.getElementById("customRoomContainer")?.classList.remove("hidden");
+    if(e.target.value === "custom_dept") document.getElementById("customDeptContainer")?.classList.remove("hidden");
+});
+
+// 8.2 วาดตารางบุคลากร
+window.renderStaffTable = function(data = window.globalStaff) {
+    const tbody = document.getElementById('staffTableBody');
+    if (!tbody) return;
+    
+    if (!data || data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="p-8 text-center text-gray-500">ยังไม่มีข้อมูลบุคลากรในระบบ</td></tr>';
+        return;
+    }
+
+    let html = '';
+    data.forEach(staff => {
+        let isSuspended = staff.status === 'suspended';
+        let statusBadge = isSuspended 
+            ? '<span class="bg-red-100 text-red-600 px-3 py-1 rounded-full text-xs font-bold">ระงับใช้งาน</span>' 
+            : '<span class="bg-green-100 text-green-600 px-3 py-1 rounded-full text-xs font-bold">ปกติ</span>';
+            
+        let toggleAction = isSuspended 
+            ? `<button onclick="toggleStaffStatus('${staff.id}', 'active')" class="text-green-500 hover:bg-green-50 p-2 rounded-lg" title="ปลดแบน"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></button>`
+            : `<button onclick="toggleStaffStatus('${staff.id}', 'suspended')" class="text-orange-500 hover:bg-orange-50 p-2 rounded-lg" title="ระงับใช้งาน"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg></button>`;
+
+        html += `
+            <tr class="hover:bg-gray-50 border-b border-gray-50 ${isSuspended ? 'bg-red-50/30' : ''}">
+                <td class="p-4 font-mono text-gray-600">${staff.id}</td>
+                <td class="p-4 font-medium text-gray-900">${staff.name}</td>
+                <td class="p-4 text-gray-700">${staff.dept}</td>
+                <td class="p-4 text-center">${statusBadge}</td>
+                <td class="p-4 text-center flex justify-center gap-1">
+                    ${toggleAction}
+                    <button onclick="deleteSingleStudent('${staff.id}')" class="text-red-500 hover:bg-red-50 p-2 rounded-lg transition-colors" title="ลบทิ้ง"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
+                </td>
+            </tr>
+        `;
+    });
+    tbody.innerHTML = html;
+}
+
+// 8.3 สลับสถานะ แบน/ปลดแบน
+window.toggleStaffStatus = async function(id, newStatus) {
+    try {
+        await updateDoc(doc(db, "students", id), { status: newStatus, updatedAt: serverTimestamp() });
+        checkStudentCount(); 
+    } catch (err) { Swal.fire('เกิดข้อผิดพลาด', err.message, 'error'); }
+}
+
+// 8.4 ตัวกรองตารางบุคลากร
+window.filterStaffTable = function() {
+    const searchInputEl = document.getElementById("staffSearchInput");
+    const searchKw = (searchInputEl?.value || "").toLowerCase();
+    const deptKw = document.getElementById("staffDeptFilter")?.value || "all";
+    const statusKw = document.getElementById("staffStatusFilter")?.value || "all";
+
+    const filteredData = (window.globalStaff || []).filter(s => {
+        const matchSearch = s.id.toLowerCase().includes(searchKw) || s.name.toLowerCase().includes(searchKw);
+        const matchDept = deptKw === "all" || s.dept === deptKw;
+        const matchStatus = statusKw === "all" || s.status === statusKw;
+
+        return matchSearch && matchDept && matchStatus;
+    });
+
+    if (window.renderStaffTable) window.renderStaffTable(filteredData);
+};
+
+// เคลียร์ Event เก่าและผูก Event ใหม่ให้ช่องค้นหา
+const currentStaffSearchInput = document.getElementById("staffSearchInput");
+if(currentStaffSearchInput) {
+    const newStaffSearch = currentStaffSearchInput.cloneNode(true);
+    currentStaffSearchInput.parentNode.replaceChild(newStaffSearch, currentStaffSearchInput);
+    newStaffSearch.addEventListener("input", window.filterStaffTable);
+}
+document.getElementById("staffDeptFilter")?.addEventListener("change", window.filterStaffTable);
+document.getElementById("staffStatusFilter")?.addEventListener("change", window.filterStaffTable);
+
+// 8.5 เพิ่มบุคลากรรายบุคคล
+document.getElementById('addSingleStaffForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const id = document.getElementById('singleStaffId').value.trim();
+    const nameEl = document.getElementById('singleStaffName');
+    const name = window.removeThaiPrefix ? window.removeThaiPrefix(nameEl.value) : nameEl.value.trim();
+    const dept = document.getElementById('singleStaffDept').value;
+
+    Swal.fire({ title: 'กำลังเพิ่มข้อมูล...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+    try {
+        await setDoc(doc(db, "students", id), {
+            name: name,
+            level: "ครู/บุคลากร",
+            room: dept,
+            role: "staff",
+            status: "active",
+            updatedAt: serverTimestamp()
+        });
+        Swal.fire('สำเร็จ', 'เพิ่มข้อมูลบุคลากรเรียบร้อยแล้ว', 'success');
+        document.getElementById('addSingleStaffForm').reset();
+        checkStudentCount();
+    } catch (err) {
+        Swal.fire('เกิดข้อผิดพลาด', err.message, 'error');
+    }
+});
