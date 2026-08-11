@@ -315,84 +315,113 @@ function closeNewsModal() {
             const container = document.getElementById('boardContainer');
             document.getElementById('boardTitle').innerText = `ทำเนียบคณะกรรมการ ปีการศึกษา ${targetYear}`;
             
-            // ดึงข้อมูลคณะกรรมการตามปีการศึกษา[cite: 1]
-            const members = window.allBoardMembers.filter(m => m.year == targetYear);
+            // ดึงข้อมูลคณะกรรมการตามปีการศึกษา
+            let members = window.allBoardMembers.filter(m => m.year == targetYear);
 
-            // จัดกลุ่มข้อมูลตามฝ่าย[cite: 1]
-            const grouped = members.reduce((acc, obj) => {
+            if(members.length === 0) { 
+                container.innerHTML = `<div class="text-center py-10 text-gray-500 font-bold glass rounded-3xl w-full">ไม่พบข้อมูลปีการศึกษา ${targetYear}</div>`; 
+                return; 
+            }
+
+            // ---------------------------------------------------------
+            // [แก้ไขข้อมูลสลับช่อง] (เผื่อมีคนกรอกสลับกันอยู่)
+            // ---------------------------------------------------------
+            members = members.map(m => {
+                let dept = m.department || "คณะกรรมการทั่วไป";
+                let role = m.role || "";
+                if (dept.includes("รองประธาน")) {
+                    let actualDept = role.replace("ฝ่าย", "").trim(); 
+                    return { ...m, department: actualDept, role: dept };
+                }
+                return m;
+            });
+            // ---------------------------------------------------------
+
+            // เตรียมตัวแปรเก็บ HTML แต่ละส่วน
+            let topExecutiveHtml = ''; // สำหรับประธาน และ รองประธาน
+            let departmentHtml = '';   // สำหรับฝ่ายอื่นๆ
+
+            // ==========================================
+            // 1. แยกกลุ่ม "ประธาน" และ "รองประธาน" (เอาไปไว้บนสุด)
+            // ==========================================
+            const presidents = members.filter(m => m.role.includes('ประธาน') && !m.role.includes('รอง'));
+            const vicePresidents = members.filter(m => m.role.includes('รองประธาน'));
+
+            // จัดเรียงรองประธานตามตัวอักษร (เผื่อมีหลายคน)
+            vicePresidents.sort((a, b) => a.role.localeCompare(b.role, 'th'));
+
+            let presHtml = '';
+            let vicePresHtml = '';
+
+            // สร้างการ์ดให้ประธาน (แสดงเด่นตรงกลาง)
+            presidents.forEach(m => {
+                let defaultImg = `https://ui-avatars.com/api/?name=${encodeURIComponent(m.name)}&background=4C1D95&color=fff&size=150`;
+                presHtml += `<div class="glass glass-hover p-10 rounded-[3rem] w-full max-w-md text-center group mx-auto mb-10"><div class="relative w-36 h-36 mx-auto mb-6"><div class="absolute inset-0 bg-mstYellow rounded-full blur-xl opacity-50 group-hover:opacity-100 transition"></div><img src="${m.image}" class="relative w-full h-full object-cover rounded-full border-4 border-white shadow-xl group-hover:scale-105 transition" onerror="this.src='${defaultImg}'"></div><h4 class="text-3xl font-black text-gray-900 mb-1">${m.name}</h4><p class="text-mstDark font-bold text-sm bg-mstYellow px-4 py-1.5 rounded-full inline-block mt-2 shadow-sm">${m.role}</p></div>`;
+            });
+
+            // สร้างการ์ดให้รองประธาน (เรียงแถวใต้ประธาน)
+            if (vicePresidents.length > 0) {
+                vicePresHtml = `<div class="grid grid-cols-2 md:grid-cols-4 gap-6 justify-center mb-16">`;
+                vicePresidents.forEach(m => {
+                    let defaultImg = `https://ui-avatars.com/api/?name=${encodeURIComponent(m.name)}&background=4C1D95&color=fff&size=150`;
+                    vicePresHtml += `<div class="glass glass-hover p-6 rounded-3xl text-center group"><img src="${m.image}" class="w-24 h-24 object-cover rounded-full mx-auto mb-4 border-4 border-white shadow-md group-hover:scale-110 transition duration-300" onerror="this.src='${defaultImg}'"><h4 class="font-bold text-gray-900">${m.name}</h4><p class="text-xs text-mstPurple font-bold mt-1">${m.role}</p></div>`;
+                });
+                vicePresHtml += `</div>`;
+            }
+
+            topExecutiveHtml = `<div class="flex flex-col justify-center w-full">` + presHtml + vicePresHtml + `</div>`;
+
+
+            // ==========================================
+            // 2. จัดกลุ่มคนที่เหลือเข้าฝ่าย (ไม่เอาประธานและรองประธานแล้ว)
+            // ==========================================
+            const otherMembers = members.filter(m => !m.role.includes('ประธาน'));
+
+            const grouped = otherMembers.reduce((acc, obj) => {
                 let key = obj.department || "คณะกรรมการทั่วไป";
                 if (!acc[key]) acc[key] = []; 
                 acc[key].push(obj); 
                 return acc;
             }, {});
 
-            if(Object.keys(grouped).length === 0) { 
-                container.innerHTML = `<div class="text-center py-10 text-gray-500 font-bold glass rounded-3xl w-full">ไม่พบข้อมูลปีการศึกษา ${targetYear}</div>`; 
-                return; 
-            }
-
-            // 1. เรียงลำดับฝ่าย (เพิ่ม งบประมาณ เข้ามา)
+            // เรียงลำดับฝ่ายที่แสดงผล
             const sortedDepts = Object.keys(grouped).sort((a, b) => {
                 const getWeight = (deptName) => {
                     if (deptName.includes("บริหาร") && !deptName.includes("ทั่วไป")) return 1;
                     if (deptName.includes("วิชาการ")) return 2;
-                    if (deptName.includes("งบประมาณ")) return 3; // เพิ่มงบประมาณ
+                    if (deptName.includes("งบประมาณ")) return 3;
                     if (deptName.includes("กิจการ")) return 4;
                     if (deptName.includes("บริหารทั่วไป")) return 5;
                     if (deptName.includes("อำนวยการ")) return 6;
-                    return 99; // ฝ่ายอื่นๆ
+                    return 99; 
                 };
                 return getWeight(a) - getWeight(b);
             });
 
-            let presidentHtml = ''; 
-            let othersHtml = '';
-
             for (const dept of sortedDepts) {
                 const mems = grouped[dept];
-                
-                // เช็คว่านี่คือ "ฝ่ายบริหาร" (ที่ไม่ใช่บริหารทั่วไป) หรือไม่
                 const isExecutiveDept = dept.includes("บริหาร") && !dept.includes("ทั่วไป");
                 
-                // 2. เรียงลำดับคนในฝ่าย
+                // เรียงลำดับคนในฝ่าย
                 mems.sort((a, b) => {
-                    
                     if (isExecutiveDept) {
-                        // --- กฎเฉพาะสำหรับ "ฝ่ายบริหาร" ---
                         const getExecWeight = (role) => {
-                            if (role.includes("รองประธาน")) return 1; // รองประธานบริหาร
-                            if (role.includes("เลขานุการ") && !role.includes("ผู้ช่วย")) return 2;
-                            if (role.includes("ผู้ช่วยเลขานุการ")) return 3;
-                            return 4;
+                            if (role.includes("เลขานุการ") && !role.includes("ผู้ช่วย")) return 1;
+                            if (role.includes("ผู้ช่วยเลขานุการ")) return 2;
+                            return 3;
                         };
-                        
                         const weightA = getExecWeight(a.role);
                         const weightB = getExecWeight(b.role);
-                        
-                        if (weightA !== weightB) {
-                            return weightA - weightB;
-                        }
+                        if (weightA !== weightB) return weightA - weightB;
                         return a.role.localeCompare(b.role, 'th'); 
-                        
                     } else {
-                        // --- กฎสำหรับฝ่ายอื่นๆ (รองประธาน > หัวหน้า > อื่นๆ) ---
                         const getOtherWeight = (role) => {
-                            // ให้รองประธานประจำฝ่ายขึ้นก่อนเพื่อน
-                            if (role.includes("รองประธาน")) return 1; 
-                            // ตามด้วยหัวหน้าฝ่าย
-                            if (role.startsWith("หัวหน้า")) return 2;     
-                            // ที่เหลือเป็นกรรมการหรือตำแหน่งอื่น
-                            return 3;                                     
+                            if (role.startsWith("หัวหน้า")) return 1;     
+                            return 2;                                     
                         };
-
                         const weightA = getOtherWeight(a.role);
                         const weightB = getOtherWeight(b.role);
-
-                        if (weightA !== weightB) {
-                            return weightA - weightB;
-                        }
-                        
-                        // คนที่เหลือที่มีน้ำหนักเท่ากัน (เช่น กรรมการหลายคน) ให้เรียงตามตำแหน่ง (ตัวอักษร ก-ฮ)
+                        if (weightA !== weightB) return weightA - weightB;
                         return a.role.localeCompare(b.role, 'th'); 
                     }
                 });
@@ -400,28 +429,16 @@ function closeNewsModal() {
                 let deptHtml = `<div class="mb-12"><h4 class="text-xl font-bold text-mstPurple border-b-2 border-mstYellow pb-2 mb-8 inline-block">${dept}</h4><div class="grid grid-cols-2 md:grid-cols-4 gap-6 justify-center">`;
                 
                 mems.forEach(m => {
-                    // ประธานนักเรียน (ดึงแยก)
-                    let isPres = m.role.includes('ประธาน') && !m.role.includes('รอง');
-                    
-                    // สร้างรูประบบแทนที่อัตโนมัติ[cite: 1]
                     let defaultImg = `https://ui-avatars.com/api/?name=${encodeURIComponent(m.name)}&background=4C1D95&color=fff&size=150`;
-                    
-                    let card = `<div class="glass glass-hover p-6 rounded-3xl text-center group"><img src="${m.image}" class="w-24 h-24 object-cover rounded-full mx-auto mb-4 border-4 border-white shadow-md group-hover:scale-110 transition duration-300" onerror="this.src='${defaultImg}'"><h4 class="font-bold text-gray-900">${m.name}</h4><p class="text-xs text-mstPurple font-bold mt-1">${m.role}</p></div>`;
-                    
-                    if (isPres) {
-                        presidentHtml = `<div class="flex justify-center mb-16"><div class="glass glass-hover p-10 rounded-[3rem] w-full max-w-md text-center group"><div class="relative w-36 h-36 mx-auto mb-6"><div class="absolute inset-0 bg-mstYellow rounded-full blur-xl opacity-50 group-hover:opacity-100 transition"></div><img src="${m.image}" class="relative w-full h-full object-cover rounded-full border-4 border-white shadow-xl group-hover:scale-105 transition" onerror="this.src='${defaultImg}'"></div><h4 class="text-3xl font-black text-gray-900 mb-1">${m.name}</h4><p class="text-mstDark font-bold text-sm bg-mstYellow px-4 py-1.5 rounded-full inline-block mt-2 shadow-sm">${m.role}</p></div></div>`;
-                    } else {
-                        deptHtml += card;
-                    }
+                    deptHtml += `<div class="glass glass-hover p-6 rounded-3xl text-center group"><img src="${m.image}" class="w-24 h-24 object-cover rounded-full mx-auto mb-4 border-4 border-white shadow-md group-hover:scale-110 transition duration-300" onerror="this.src='${defaultImg}'"><h4 class="font-bold text-gray-900">${m.name}</h4><p class="text-xs text-mstPurple font-bold mt-1">${m.role}</p></div>`;
                 });
                 deptHtml += `</div></div>`;
                 
-                // ตรวจสอบว่าฝ่ายนี้มีคนอื่นนอกจากประธานหรือไม่ ถ้ามีจึงเพิ่มเข้าสู่หน้าเว็บ[cite: 1]
-                if(mems.some(m => !m.role.includes('ประธาน') || m.role.includes('รอง'))) {
-                    othersHtml += deptHtml;
-                }
+                departmentHtml += deptHtml;
             }
-            container.innerHTML = presidentHtml + othersHtml;
+
+            // นำส่วนประธานและรองประธาน มารวมกับส่วนฝ่ายที่เหลือ
+            container.innerHTML = topExecutiveHtml + departmentHtml;
         }
 
         window.addEventListener('scroll', () => {
