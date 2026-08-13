@@ -88,7 +88,7 @@ if (loginBtn) {
 
             if (!email.endsWith("@mst.ac.th")) {
                 await auth.signOut();
-                showFullScreenError('ไม่มีสิทธิ์ใช้งาน', 'กรุณาใช้อีเมล @mst.ac.th ของโรงเรียนเท่านั้น');
+                showFullScreenError('ไม่มีสิทธิ์ใช้งานระบบ', 'กรุณาใช้อีเมล @mst.ac.th ของโรงเรียนเท่านั้น');
                 return;
             }
 
@@ -114,7 +114,7 @@ if (loginBtn) {
                     window.location.href = "student.html";
                 } else {
                     await auth.signOut();
-                    showFullScreenError('ไม่พบสิทธิ์การลงคะแนน', 'ไม่พบรายชื่อของคุณในฐานข้อมูล กรุณาติดต่อผู้ดูแลระบบ');
+                    showFullScreenError('ไม่มีสิทธิ์ใช้งานระบบ', 'ไม่พบรายชื่อของคุณในฐานข้อมูลนักเรียนปัจจุบัน กรุณาติดต่อผู้ดูแลระบบ');
                 }
             } else {
                 // =============== กรณีเป็นครู / บุคลากร ===============
@@ -309,7 +309,7 @@ async function checkLineAccount(lineUid) {
                 sessionStorage.setItem("mst_voter_profile", JSON.stringify(profile));
                 window.location.href = "student.html";
             } else {
-                showFullScreenError("ข้อมูลสูญหาย", "พบประวัติการผูกบัญชี แต่ไม่พบรายชื่อในระบบฐานข้อมูล");
+                showFullScreenError("ไม่มีสิทธิ์ใช้งานระบบ", "พบประวัติการผูกบัญชี แต่ไม่พบรายชื่อในระบบฐานข้อมูลนักเรียนปัจจุบัน");
             }
         } else {
             overlay.classList.add('hidden'); 
@@ -442,14 +442,14 @@ if (requestOtpBtn) {
             const docSnap = await getDoc(studentRef);
 
             if (!docSnap.exists()) {
-                showFullScreenError("ไม่พบรายชื่อ", `ไม่พบรหัส ${currentStudentId} ในระบบฐานข้อมูลของโรงเรียน`);
+                showFullScreenError("ไม่พบข้อมูล", `ไม่พบรหัสนักเรียน ${currentStudentId} ในระบบฐานข้อมูลของโรงเรียน`);
                 return;
             }
 
             currentStudentData = docSnap.data();
 
             if (currentStudentData.lineUid) {
-                showFullScreenError("เชื่อมต่อไม่สำเร็จ", `รหัส ${currentStudentId} ถูกผูกกับบัญชี LINE อื่นไปแล้ว`);
+                showFullScreenError("เชื่อมต่อไม่สำเร็จ", `รหัสนักเรียน ${currentStudentId} ถูกผูกกับบัญชี LINE อื่นไปแล้ว`);
                 return;
             }
 
@@ -520,7 +520,7 @@ if (verifyOtpBtn) {
             const otpDoc = await getDoc(otpDocRef);
             
             if (!otpDoc.exists()) {
-                showFullScreenError("รหัสหมดอายุ", "ไม่พบรหัสอ้างอิง หรือรหัสถูกใช้ไปแล้ว");
+                showFullScreenError("รหัส OTP หมดอายุ", "ไม่พบรหัสอ้างอิง หรือรหัสถูกใช้ไปแล้ว");
                 return;
             }
 
@@ -529,7 +529,7 @@ if (verifyOtpBtn) {
             
             if (now - otpData.createdAt > 300000) {
                 await deleteDoc(otpDocRef);
-                showFullScreenError("รหัสหมดอายุ", "รหัส OTP หมดอายุแล้ว (เกิน 5 นาที) กรุณาทำรายการใหม่");
+                showFullScreenError("รหัส OTP หมดอายุ", "ท่านใช้เวลานานเกิน 5 นาที กรุณาทำรายการใหม่");
                 return;
             }
 
