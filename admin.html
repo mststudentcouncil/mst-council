@@ -52,6 +52,7 @@
     <!-- UI หลัก -->
     <div id="appWorkspace" class="flex h-screen w-full hidden">
         <!-- Sidebar -->
+         <div id="sidebarOverlay" class="fixed inset-0 bg-black/50 z-30 hidden lg:hidden backdrop-blur-sm" onclick="toggleSidebar()"></div>
         <aside id="sidebar" class="w-72 bg-mstDark text-white flex-col fixed lg:relative z-40 h-full transition-transform transform -translate-x-full lg:translate-x-0 flex shadow-2xl shrink-0 pb-[env(safe-area-inset-bottom)]">
             <div class="p-6 border-b border-gray-800 flex items-center gap-4 relative overflow-hidden">
                 <div class="absolute -right-10 -top-10 w-32 h-32 bg-mstPurple rounded-full blur-2xl opacity-40"></div>
@@ -215,7 +216,7 @@
             modules: { toolbar: [ ['bold', 'italic', 'underline'], [{ 'list': 'ordered'}, { 'list': 'bullet' }], ['link'], ['clean'] ] }
         });
 
-        window.toggleSidebar = () => { document.getElementById('sidebar').classList.toggle('-translate-x-full'); document.getElementById('sidebarOverlay').classList.toggle('hidden'); };
+        window.toggleSidebar = () => { document.getElementById('sidebar').classList.toggle('-translate-x-full'); };
         window.switchTab = (tabId, btnElement, title) => {
             if (window.innerWidth < 1024) toggleSidebar();
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
