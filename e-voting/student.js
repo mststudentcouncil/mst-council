@@ -24,7 +24,7 @@ let studentData = null;
 let allCampaigns = []; 
 let countdownIntervals = []; 
 let currentBoothData = null; 
-let userSelectedOption = null; 
+let userSelectedOptions = [];
 
 function showAuthError(title, desc) {
     const loadingDiv = document.getElementById("auth-loading");
@@ -314,14 +314,22 @@ document.getElementById('searchInput').addEventListener('input', (e) => {
 
 window.enterBooth = function(campaignId) {
     currentBoothData = allCampaigns.find(c => c.id === campaignId);
-    userSelectedOption = null;
+    userSelectedOptions = [];
 
     document.getElementById("view-home").classList.add("hidden");
     document.getElementById("view-booth").classList.remove("hidden");
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
+    const maxVotes = currentBoothData.maxVotes || 1;
     document.getElementById("boothCampaignTitle").innerText = currentBoothData.title;
-    document.getElementById("boothCampaignDesc").innerText = currentBoothData.description || 'โปรดเลือกหมายเลขที่คุณต้องการเพียง 1 หมายเลข';
+    
+    // อัปเดตข้อความให้สอดคล้องกับจำนวนโควตาที่แอดมินตั้งไว้
+    if (maxVotes > 1) {
+        document.getElementById("boothCampaignDesc").innerText = currentBoothData.description || `โปรดเลือกหมายเลขที่คุณต้องการไม่เกิน ${maxVotes} หมายเลข`;
+    } else {
+        document.getElementById("boothCampaignDesc").innerText = currentBoothData.description || 'โปรดเลือกหมายเลขที่คุณต้องการเพียง 1 หมายเลข';
+    }
+    
     document.getElementById("stickySubmitBar").classList.add("translate-y-full");
     document.getElementById("selectedCandidateName").innerText = "-";
 
@@ -353,7 +361,7 @@ window.enterBooth = function(campaignId) {
 
         grid.innerHTML += `
             <div class="candidate-card bg-white rounded-3xl p-4 shadow-sm relative cursor-pointer flex flex-col items-center text-center fade-in" 
-                 onclick="selectOption(this, '${opt.name}')" style="animation-delay: ${index * 0.05}s">
+                 onclick="selectOption(this, '${opt.name}')" data-name="${opt.name}" style="animation-delay: ${index * 0.05}s">
                 ${numberLabel}
                 <div class="absolute top-4 right-4 w-6 h-6 rounded-full border-2 border-gray-300 flex items-center justify-center check-circle transition-colors z-20 bg-white">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
@@ -376,11 +384,40 @@ window.exitBooth = function() {
 }
 
 window.selectOption = function(element, optName) {
-    document.querySelectorAll(".candidate-card").forEach(el => el.classList.remove("selected"));
-    element.classList.add("selected");
-    userSelectedOption = optName;
-    document.getElementById("selectedCandidateName").innerText = optName;
-    document.getElementById("stickySubmitBar").classList.remove("translate-y-full");
+    const isNoVote = optName === "ไม่ประสงค์ลงคะแนน";
+    const maxVotesAllowed = currentBoothData.maxVotes || 1;
+
+    if (isNoVote) {
+        document.querySelectorAll(".candidate-card").forEach(el => el.classList.remove("selected"));
+        userSelectedOptions = ["ไม่ประสงค์ลงคะแนน"];
+        element.classList.add("selected");
+    } else {
+        const noVoteCard = document.querySelector(".candidate-card[data-name='ไม่ประสงค์ลงคะแนน']");
+        if(noVoteCard) noVoteCard.classList.remove("selected");
+        
+        const noVoteIndex = userSelectedOptions.indexOf("ไม่ประสงค์ลงคะแนน");
+        if (noVoteIndex > -1) userSelectedOptions.splice(noVoteIndex, 1);
+
+        if (userSelectedOptions.includes(optName)) {
+            userSelectedOptions = userSelectedOptions.filter(name => name !== optName);
+            element.classList.remove("selected");
+        } else {
+            if (userSelectedOptions.length >= maxVotesAllowed) {
+                Swal.fire('คำเตือน', `คุณสามารถเลือกได้สูงสุด ${maxVotesAllowed} หมายเลขเท่านั้น`, 'warning');
+                return;
+            }
+            userSelectedOptions.push(optName);
+            element.classList.add("selected");
+        }
+    }
+
+    document.getElementById("selectedCandidateName").innerText = userSelectedOptions.length > 0 ? userSelectedOptions.join(", ") : "-";
+    
+    if (userSelectedOptions.length > 0) {
+        document.getElementById("stickySubmitBar").classList.remove("translate-y-full");
+    } else {
+        document.getElementById("stickySubmitBar").classList.add("translate-y-full");
+    }
 }
 
 window.showPolicy = function(name, imageUrl) {
@@ -395,14 +432,13 @@ window.showPolicy = function(name, imageUrl) {
     });
 }
 
-// ================= ระบบยืนยันการโหวต =================
 window.confirmVote = function() {
-    if (!userSelectedOption || !currentBoothData) return;
+    if (userSelectedOptions.length === 0 || !currentBoothData) return;
     
-    const isNoVote = userSelectedOption === "ไม่ประสงค์ลงคะแนน";
+    const isNoVote = userSelectedOptions.includes("ไม่ประสงค์ลงคะแนน");
     const titleHtml = isNoVote 
         ? `<b class="text-red-500 text-2xl">ไม่ประสงค์ลงคะแนน</b>` 
-        : `หมายเลขที่ท่านเลือกคือ <br><b class="text-purple-700 text-2xl mt-2 block">${userSelectedOption}</b>`;
+        : `รายการที่ท่านเลือกคือ <br><b class="text-purple-700 text-2xl mt-2 block">${userSelectedOptions.join("<br>")}</b>`;
 
     Swal.fire({
         title: 'ยืนยันการลงคะแนน',
@@ -418,13 +454,8 @@ window.confirmVote = function() {
     });
 }
 
-// 🌟 [อัปเดตใหม่]: ไม่สั่ง updateDoc คะแนนโหวตอีกต่อไป แต่โยนบัตรโหวตลงในโฟลเดอร์ votes แทน
 async function submitFinalVote() {
     const campaignId = currentBoothData.id;
-    const voteValue = userSelectedOption;
-    
-    // 🌟 ป้องกัน Error จากชื่อห้องที่มี (/) และจุด (.) โดยเปลี่ยนเป็น (_) ทั้งหมด
-    // เช่น ม.6/1 จะถูกแปลงเป็น ม_6_1 เก็บในฐานข้อมูลอย่างปลอดภัย
     const voterRoom = studentData.room || "ไม่ระบุ";
     const safeRoomKey = voterRoom.replace(/[\/\.]/g, '_');
 
@@ -447,27 +478,25 @@ async function submitFinalVote() {
 
         const batch = writeBatch(db);
 
-        // 1. หย่อนบัตรโหวตลงหีบ (เอาไว้ตรวจสอบหลักฐาน)
+        // 1. หย่อนบัตรโหวตลงหีบ (เปลี่ยน voteTo เป็นบันทึก Array)
         batch.set(voterRef, { 
             votedAt: serverTimestamp(), 
             studentId: studentData.id, 
             name: studentData.name,
-            room: voterRoom, // ในบัตรโหวตยังเก็บเป็น "ม.6/1" เหมือนเดิม
+            room: voterRoom, 
             level: studentData.level, 
             uidUsed: currentUser.uid, 
-            voteTo: voteValue
+            voteTo: userSelectedOptions 
         });
 
-        // 2. บวกคะแนนสะสมทันที (แก้บั๊ก Invalid Field Path เรียบร้อยแล้ว)
-        const updateData = { 
-            "stats.totalVotes": increment(1) 
-        };
-        updateData[`stats.votes.${voteValue}`] = increment(1);
-        updateData[`stats.byRoom.${safeRoomKey}`] = increment(1); // บันทึกสถิติห้องด้วย "ม_6_1"
+        // 2. บวกคะแนนสะสมทันที (วนลูปตามจำนวนที่เลือก)
+        const updateData = { "stats.totalVotes": increment(1) };
+        userSelectedOptions.forEach(opt => {
+            updateData[`stats.votes.${opt}`] = increment(1);
+        });
+        updateData[`stats.byRoom.${safeRoomKey}`] = increment(1); 
         
         batch.update(campaignRef, updateData);
-
-        // 3. ยืนยันคำสั่งทั้งหมดพร้อมกัน
         await batch.commit();
 
         Swal.close();
@@ -498,3 +527,21 @@ function showReceipt(campaignName, voterName) {
     document.getElementById("receiptCampaignName").innerText = campaignName;
     document.getElementById("receiptVoterName").innerText = voterName;
 }
+
+// ฟังก์ชันเซฟใบเสร็จเป็นรูปภาพ
+window.saveReceiptImage = function() {
+    const receiptCard = document.getElementById("receiptCard");
+    Swal.fire({ title: 'กำลังบันทึกใบเสร็จ...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+    
+    html2canvas(receiptCard, { scale: 2, useCORS: true, backgroundColor: "#ffffff" }).then(canvas => {
+        const link = document.createElement("a");
+        link.download = `EVoting_Receipt_${document.getElementById("receiptRef").innerText}.png`;
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+        Swal.close();
+        Swal.fire('สำเร็จ', 'บันทึกใบเสร็จเป็นรูปภาพเรียบร้อยแล้ว', 'success');
+    }).catch(err => {
+        console.error("Save Receipt Error:", err);
+        Swal.fire('ผิดพลาด', 'ไม่สามารถบันทึกภาพได้', 'error');
+    });
+};

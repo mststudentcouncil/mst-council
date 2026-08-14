@@ -236,7 +236,9 @@ window.showCreateForm = function() {
     document.getElementById("editingId").value = "";
     document.getElementById("customLevelContainer").classList.add("hidden"); 
     document.getElementById("customRoomContainer").classList.add("hidden");
-    document.getElementById("formTitle").innerHTML = `<div class="p-2 bg-purple-100 text-purple-600 rounded-xl"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg></div> สร้างรายการใหม่`; 
+    document.getElementById("maxVotes").value = "1";
+    document.getElementById("hideScoresUntilClosed").checked = false;
+    document.getElementById("formTitle").innerHTML = `<div class="p-2 bg-purple-100 text-purple-600 rounded-xl"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg></div> สร้างรายการใหม่`;
     document.getElementById("submitCampaignBtn").innerHTML = "บันทึกและเปิดระบบ";
     
     document.getElementById("optionsContainer").innerHTML = `
@@ -319,6 +321,8 @@ document.getElementById("createCampaignForm")?.addEventListener("submit", async 
         description: document.getElementById("desc").value, 
         startTime: document.getElementById("startTime").value || null,
         endTime: document.getElementById("endTime").value || null, 
+        maxVotes: parseInt(document.getElementById("maxVotes").value) || 1,
+        hideScoresUntilClosed: document.getElementById("hideScoresUntilClosed").checked,
         allowed_voters: { type: document.getElementById("voterTargetType").value, values: [] } 
     };
 
@@ -393,6 +397,8 @@ window.editCampaign = async function(campaignId) {
         document.getElementById("desc").value = data.description || "";
         document.getElementById("startTime").value = data.startTime || "";
         document.getElementById("endTime").value = data.endTime || "";
+        document.getElementById("maxVotes").value = data.maxVotes || 1;
+        document.getElementById("hideScoresUntilClosed").checked = data.hideScoresUntilClosed || false;
         
         if(data.allowed_voters) {
             document.getElementById("voterTargetType").value = data.allowed_voters.type;
