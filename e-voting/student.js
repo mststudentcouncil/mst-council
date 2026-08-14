@@ -1,6 +1,5 @@
 import { auth, db } from "./firebase-config.js";
 import { onAuthStateChanged, signOut, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-import { collection, doc, getDoc, getDocs, setDoc, query, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 import { collection, doc, getDoc, getDocs, setDoc, query, where, serverTimestamp, writeBatch, increment, FieldPath } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
 // ==========================================
@@ -423,9 +422,11 @@ window.confirmVote = function() {
 async function submitFinalVote() {
     const campaignId = currentBoothData.id;
     const voteValue = userSelectedOption;
-    // ป้องกัน Error จากชื่อห้องที่มีเครื่องหมายทับ (/) โดยเปลี่ยนเป็น (_) ชั่วคราวใน stats
+    
+    // 🌟 ป้องกัน Error จากชื่อห้องที่มี (/) และจุด (.) โดยเปลี่ยนเป็น (_) ทั้งหมด
+    // เช่น ม.6/1 จะถูกแปลงเป็น ม_6_1 เก็บในฐานข้อมูลอย่างปลอดภัย
     const voterRoom = studentData.room || "ไม่ระบุ";
-    const safeRoomKey = voterRoom.replace(/\//g, '_');
+    const safeRoomKey = voterRoom.replace(/[\/\.]/g, '_');
 
     Swal.fire({ 
         title: 'กำลังบันทึกข้อมูล...', 
@@ -451,20 +452,18 @@ async function submitFinalVote() {
             votedAt: serverTimestamp(), 
             studentId: studentData.id, 
             name: studentData.name,
-            room: voterRoom, 
+            room: voterRoom, // ในบัตรโหวตยังเก็บเป็น "ม.6/1" เหมือนเดิม
             level: studentData.level, 
             uidUsed: currentUser.uid, 
             voteTo: voteValue
         });
 
-        // 2. บวกคะแนนสะสมทันทีแบบลดการดึงข้อมูล (Atomic Increment)
+        // 2. บวกคะแนนสะสมทันที (แก้บั๊ก Invalid Field Path เรียบร้อยแล้ว)
         const updateData = { 
             "stats.totalVotes": increment(1) 
         };
         updateData[`stats.votes.${voteValue}`] = increment(1);
-        
-        // ใช้ FieldPath ป้องกัน Error ชื่อห้อง
-        updateData[new FieldPath('stats', 'byRoom', safeRoomKey)] = increment(1);
+        updateData[`stats.byRoom.${safeRoomKey}`] = increment(1); // บันทึกสถิติห้องด้วย "ม_6_1"
         
         batch.update(campaignRef, updateData);
 

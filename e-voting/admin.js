@@ -1286,7 +1286,6 @@ window.editSingleStudent = function(id) {
 // 7. จัดการข้อมูลสรุปผล (Results) & เซิร์ฟเวอร์
 // ==========================================
 
-// 🌟 [อัปเดตใหม่]: นับคะแนนรวมจากบัตรโหวตในคอลเล็กชัน votes แทนการพึ่งพา votes_count
 // ==========================================
 // แสดงผลคะแนนบนหน้าจอ Admin
 // ==========================================
@@ -1313,16 +1312,9 @@ window.viewResults = async function(campaignId) {
         const stats = data.stats || { totalVotes: 0, votes: {}, byRoom: {} };
         const actualVotes = stats.votes || {};
         const totalVotes = stats.totalVotes || 0;
-        const votedByRoomRaw = stats.byRoom || {};
+        const votedByRoomRaw = stats.byRoom || {}; // 🌟 เก็บสถิติรายห้องที่หน้าตาเป็น ม_6_1
 
-        // นำ _ กลับมาเป็น / สำหรับชื่อห้อง
-        const votedByRoom = {};
-        Object.keys(votedByRoomRaw).forEach(key => {
-            const cleanKey = key.replace(/_/g, '/');
-            votedByRoom[cleanKey] = votedByRoomRaw[key];
-        });
-
-        // คำนวณผู้มีสิทธิ์
+        // คำนวณผู้มีสิทธิ์จากข้อมูลนักเรียนทั้งหมดในหน้าแอดมิน
         let eligibleByRoom = {};
         let levelOfRoomMapping = {};
         const allUsers = [...(window.globalStudents || []), ...(window.globalStaff || [])];
@@ -1391,7 +1383,11 @@ window.viewResults = async function(campaignId) {
                 `;
                 statsByLevel[level].forEach(r => {
                     let eligible = eligibleByRoom[r]; 
-                    let voted = votedByRoom[r] || 0;
+                    
+                    // 🌟 แปลงชื่อห้อง ม.6/1 เป็น ม_6_1 แล้วค่อยไปดึงยอดคนมาโหวต
+                    const safeRoomKey = r.replace(/[\/\.]/g, '_');
+                    let voted = votedByRoomRaw[safeRoomKey] || 0;
+                    
                     let pct = eligible > 0 ? Math.round((voted/eligible)*100) : 0;
                     let pctColor = pct === 100 ? 'text-green-600' : (pct >= 50 ? 'text-blue-600' : 'text-red-500');
                     let cleanRoomForDisplay = (level === 'ครู/บุคลากร') ? r : (r.includes('/') ? "ห้อง " + r.split('/')[1] : r);
@@ -1399,7 +1395,14 @@ window.viewResults = async function(campaignId) {
                 });
 
                 let totalLevelEligible = statsByLevel[level].reduce((sum, r) => sum + eligibleByRoom[r], 0);
-                let totalLevelVoted = statsByLevel[level].reduce((sum, r) => sum + (votedByRoom[r] || 0), 0);
+                
+                // 🌟 ผลรวมของทั้งระดับชั้น (เช่น รวม ม.6)
+                let totalLevelVoted = 0;
+                statsByLevel[level].forEach(r => {
+                    const safeRoomKey = r.replace(/[\/\.]/g, '_');
+                    totalLevelVoted += (votedByRoomRaw[safeRoomKey] || 0);
+                });
+                
                 let totalLevelPct = totalLevelEligible > 0 ? Math.round((totalLevelVoted/totalLevelEligible)*100) : 0;
                 resultHtml += `
                                 <tr class="bg-indigo-50 font-bold"><td class="p-3 text-indigo-900">รวม ${level}</td><td class="p-3 text-center text-indigo-900">${totalLevelEligible}</td><td class="p-3 text-center text-indigo-900">${totalLevelVoted}</td><td class="p-3 text-center text-indigo-700">${totalLevelPct}%</td></tr>
@@ -1438,12 +1441,6 @@ window.exportExcel = async function(campaignId) {
             const actualVotes = stats.votes || {};
             const totalVotes = stats.totalVotes || 0;
             const votedByRoomRaw = stats.byRoom || {};
-
-            const votedByRoom = {};
-            Object.keys(votedByRoomRaw).forEach(key => {
-                const cleanKey = key.replace(/_/g, '/');
-                votedByRoom[cleanKey] = votedByRoomRaw[key];
-            });
 
             let eligibleByRoom = {}; 
             let levelOfRoomMapping = {};
@@ -1495,7 +1492,11 @@ window.exportExcel = async function(campaignId) {
                 
                 statsByLevel[level].forEach(r => {
                     let eligible = eligibleByRoom[r]; 
-                    let voted = votedByRoom[r] || 0; 
+                    
+                    // 🌟 ดึงยอดคนโหวตโดยแปลงชื่อห้องให้ตรงกับตอนเซฟ
+                    const safeRoomKey = r.replace(/[\/\.]/g, '_');
+                    let voted = votedByRoomRaw[safeRoomKey] || 0; 
+                    
                     let pct = eligible > 0 ? ((voted/eligible)*100).toFixed(2) : 0;
                     totalLevelEligible += eligible; 
                     totalLevelVoted += voted; 
