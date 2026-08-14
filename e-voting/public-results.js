@@ -64,12 +64,12 @@ function startLiveResults(campaignId) {
 
     const docRef = doc(db, "campaigns", campaignId);
     
+    // ดึงข้อมูลแค่ Document หลักตัวเดียวเท่านั้น (ประหยัด Read ขั้นสุด)
     unsubscribe = onSnapshot(docRef, (docSnap) => {
         if (!docSnap.exists()) return;
 
         const data = docSnap.data();
         
-        // ใช้ไอคอน SVG เรืองแสงที่ข้อความหัวข้อแทนการใช้ Emoji
         const isStatusOpen = data.status === "open";
         const statusIcon = isStatusOpen
             ? `<svg class="w-8 h-8 text-green-400 animate-pulse drop-shadow-[0_0_8px_rgba(74,222,128,0.8)]" fill="currentColor" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8"></circle></svg>`
@@ -78,31 +78,32 @@ function startLiveResults(campaignId) {
         document.getElementById("displayTitle").innerHTML = `${statusIcon} ${data.title}`;
 
         const options = data.options || [];
-        const votes = data.votes_count || {};
+        
+        // ดึงข้อมูลตัวเลขที่อัปเดตเรียบร้อยแล้วจากฝั่ง Server มาโชว์เลย
+        const stats = data.stats || { totalVotes: 0, votes: {} };
+        const votes = stats.votes || {};
+        let totalVotes = stats.totalVotes || 0;
         
         let results = [];
-        let totalVotes = 0;
 
-        // ดึงลำดับ index มาบวก 1 เพื่อเป็นเบอร์ผู้สมัคร สำหรับแสดงผลในกรณีไม่มีรูปภาพ
+        // วนลูปสร้างตัวเลือกผู้สมัคร
         options.forEach((opt, index) => {
             const count = votes[opt.name] || 0;
-            totalVotes += count;
             results.push({
-                candidateNumber: index + 1, // เก็บเบอร์อ้างอิงไว้
+                candidateNumber: index + 1,
                 name: opt.name,
                 image: opt.image,
                 count: count
             });
         });
 
+        // ดึงตัวเลือก "ไม่ประสงค์ลงคะแนน"
         if (votes["ไม่ประสงค์ลงคะแนน"] !== undefined) {
-            const noVoteCount = votes["ไม่ประสงค์ลงคะแนน"];
-            totalVotes += noVoteCount;
             results.push({
                 name: "ไม่ประสงค์ลงคะแนน",
                 image: null,
                 isNoVote: true,
-                count: noVoteCount
+                count: votes["ไม่ประสงค์ลงคะแนน"]
             });
         }
 

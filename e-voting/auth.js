@@ -3,6 +3,23 @@ import { onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signInAnonymou
 import { doc, getDoc, getDocs, collection, query, where, updateDoc, setDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
 // ==========================================
+// ฟังก์ชันแปล Error จาก Firebase เป็นภาษาไทย
+// ==========================================
+function translateFirebaseError(error) {
+    const errorCode = error.code || error.message || "";
+    if (errorCode.includes('network-request-failed')) return 'การเชื่อมต่ออินเทอร์เน็ตมีปัญหา กรุณาตรวจสอบสัญญาณเน็ตของคุณ';
+    if (errorCode.includes('popup-closed-by-user')) return 'คุณปิดหน้าต่างล็อกอินก่อนทำรายการสำเร็จ';
+    if (errorCode.includes('popup-blocked')) return 'เบราว์เซอร์บล็อกหน้าต่างป๊อปอัป กรุณาอนุญาตให้แสดงป๊อปอัปก่อน';
+    if (errorCode.includes('unauthorized-domain')) return 'เว็บไซต์นี้ยังไม่ได้รับอนุญาตให้ใช้ระบบล็อกอิน';
+    if (errorCode.includes('permission-denied')) return 'คุณไม่มีสิทธิ์เข้าถึงหรือแก้ไขข้อมูลนี้ (Permission Denied)';
+    if (errorCode.includes('unavailable')) return 'ไม่สามารถเชื่อมต่อฐานข้อมูลได้ในขณะนี้';
+    if (errorCode.includes('quota-exceeded')) return 'ระบบโควตาเต็ม กรุณาติดต่อผู้ดูแลระบบ';
+    if (errorCode.includes('not-found')) return 'ไม่พบข้อมูลที่ต้องการในระบบ';
+    if (errorCode.includes('wrong-password') || errorCode.includes('invalid-credential')) return 'ข้อมูลการเข้าสู่ระบบไม่ถูกต้อง';
+    return `เกิดข้อผิดพลาดทางระบบ (${errorCode})`;
+}
+
+// ==========================================
 // 1. ฟังก์ชันจัดการหน้าจอโหลดและหน้าจอ Error แบบเต็มจอ
 // ==========================================
 const overlay = document.getElementById('auth-overlay');
@@ -148,7 +165,7 @@ if (loginBtn) {
             console.error(error);
             if (error.code !== 'auth/popup-closed-by-user') {
                 await auth.signOut();
-                showFullScreenError("เกิดข้อผิดพลาด", error.message);
+                showFullScreenError("เกิดข้อผิดพลาด", translateFirebaseError(error));
             } else {
                 overlay.classList.add('hidden');
                 overlay.classList.remove('flex');
@@ -209,7 +226,7 @@ if (staffRegForm) {
             sessionStorage.setItem("mst_voter_profile", JSON.stringify(profile));
             window.location.href = "student.html";
         } catch (error) {
-            showFullScreenError("ลงทะเบียนล้มเหลว", error.message);
+            showFullScreenError("ลงทะเบียนล้มเหลว", translateFirebaseError(error));
         }
     });
 }
@@ -242,7 +259,7 @@ window.loginAsAdmin = () => {
         }
     }).catch((error) => {
         if (error.code !== 'auth/popup-closed-by-user') {
-            showFullScreenError("เกิดข้อผิดพลาด", error.message);
+            showFullScreenError("เกิดข้อผิดพลาด", translateFirebaseError(error));
         } else {
             overlay.classList.add('hidden');
             overlay.classList.remove('flex');

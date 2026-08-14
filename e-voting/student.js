@@ -1,6 +1,24 @@
 import { auth, db } from "./firebase-config.js";
 import { onAuthStateChanged, signOut, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
 import { collection, doc, getDoc, getDocs, setDoc, query, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+import { collection, doc, getDoc, getDocs, setDoc, query, where, serverTimestamp, writeBatch, increment, FieldPath } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+// ==========================================
+// ฟังก์ชันแปล Error จาก Firebase เป็นภาษาไทย
+// ==========================================
+function translateFirebaseError(error) {
+    const errorCode = error.code || error.message || "";
+    if (errorCode.includes('network-request-failed')) return 'การเชื่อมต่ออินเทอร์เน็ตมีปัญหา กรุณาตรวจสอบสัญญาณเน็ตของคุณ';
+    if (errorCode.includes('popup-closed-by-user')) return 'คุณปิดหน้าต่างล็อกอินก่อนทำรายการสำเร็จ';
+    if (errorCode.includes('popup-blocked')) return 'เบราว์เซอร์บล็อกหน้าต่างป๊อปอัป กรุณาอนุญาตให้แสดงป๊อปอัปก่อน';
+    if (errorCode.includes('unauthorized-domain')) return 'เว็บไซต์นี้ยังไม่ได้รับอนุญาตให้ใช้ระบบล็อกอิน';
+    if (errorCode.includes('permission-denied')) return 'คุณไม่มีสิทธิ์เข้าถึงหรือแก้ไขข้อมูลนี้ (Permission Denied)';
+    if (errorCode.includes('unavailable')) return 'ไม่สามารถเชื่อมต่อฐานข้อมูลได้ในขณะนี้';
+    if (errorCode.includes('quota-exceeded')) return 'ระบบโควตาเต็ม กรุณาติดต่อผู้ดูแลระบบ';
+    if (errorCode.includes('not-found')) return 'ไม่พบข้อมูลที่ต้องการในระบบ';
+    if (errorCode.includes('wrong-password') || errorCode.includes('invalid-credential')) return 'ข้อมูลการเข้าสู่ระบบไม่ถูกต้อง';
+    return `เกิดข้อผิดพลาดทางระบบ (${errorCode})`;
+}
 
 let currentUser = null;
 let studentData = null; 
@@ -405,6 +423,9 @@ window.confirmVote = function() {
 async function submitFinalVote() {
     const campaignId = currentBoothData.id;
     const voteValue = userSelectedOption;
+    // ป้องกัน Error จากชื่อห้องที่มีเครื่องหมายทับ (/) โดยเปลี่ยนเป็น (_) ชั่วคราวใน stats
+    const voterRoom = studentData.room || "ไม่ระบุ";
+    const safeRoomKey = voterRoom.replace(/\//g, '_');
 
     Swal.fire({ 
         title: 'กำลังบันทึกข้อมูล...', 
@@ -415,6 +436,7 @@ async function submitFinalVote() {
 
     try {
         const voterRef = doc(db, "campaigns", campaignId, "votes", studentData.id);
+        const campaignRef = doc(db, "campaigns", campaignId);
         
         if ((await getDoc(voterRef)).exists()) { 
             Swal.fire('ข้อผิดพลาด', 'ท่านได้ใช้สิทธิ์ไปแล้ว', 'error'); 
@@ -422,23 +444,39 @@ async function submitFinalVote() {
             return; 
         }
 
-        await setDoc(voterRef, { 
-            votedAt: serverTimestamp(),
+        const batch = writeBatch(db);
+
+        // 1. หย่อนบัตรโหวตลงหีบ (เอาไว้ตรวจสอบหลักฐาน)
+        batch.set(voterRef, { 
+            votedAt: serverTimestamp(), 
             studentId: studentData.id, 
             name: studentData.name,
-            room: studentData.room,
-            level: studentData.level,
-            uidUsed: currentUser.uid,
-            voteTo: voteValue // 🌟 เก็บข้อมูลตัวเลือกที่โหวตไว้ในบัตร
+            room: voterRoom, 
+            level: studentData.level, 
+            uidUsed: currentUser.uid, 
+            voteTo: voteValue
         });
 
-        Swal.close();
+        // 2. บวกคะแนนสะสมทันทีแบบลดการดึงข้อมูล (Atomic Increment)
+        const updateData = { 
+            "stats.totalVotes": increment(1) 
+        };
+        updateData[`stats.votes.${voteValue}`] = increment(1);
         
+        // ใช้ FieldPath ป้องกัน Error ชื่อห้อง
+        updateData[new FieldPath('stats', 'byRoom', safeRoomKey)] = increment(1);
+        
+        batch.update(campaignRef, updateData);
+
+        // 3. ยืนยันคำสั่งทั้งหมดพร้อมกัน
+        await batch.commit();
+
+        Swal.close();
         showReceipt(currentBoothData.title, studentData.name);
         
     } catch (error) { 
         console.error("Vote Submission Error:", error);
-        Swal.fire('ผิดพลาด', 'เกิดข้อผิดพลาดในการบันทึกคะแนน: ' + error.message, 'error'); 
+        Swal.fire('ผิดพลาด', translateFirebaseError(error), 'error'); 
     }
 }
 

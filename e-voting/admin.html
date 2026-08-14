@@ -396,7 +396,25 @@ img[src*="Logo_mstsc"] {
                                 </div>
                             </div>
                             
-                            <button type="submit" id="submitCampaignBtn" class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold py-4 rounded-xl shadow-lg transition-all hover-lift text-lg mt-6">บันทึกและเปิดระบบ</button>
+                            <!-- คำเตือนสำหรับแอดมิน -->
+                            <div class="mt-6 bg-red-50 border border-red-200 p-4 md:p-5 rounded-2xl flex items-start gap-3 md:gap-4 shadow-sm relative overflow-hidden">
+                                <div class="absolute right-0 top-0 w-16 h-16 bg-red-100 rounded-bl-full -z-10 opacity-50"></div>
+                                <div class="mt-0.5 w-8 h-8 bg-red-100 text-red-600 rounded-full flex items-center justify-center shrink-0 shadow-inner">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                                </div>
+                                <div class="flex-1">
+                                    <h4 class="text-sm md:text-base font-extrabold text-red-800 mb-1">ข้อควรระวังก่อนบันทึกการแก้ไข!</h4>
+                                    <p class="text-xs md:text-sm text-red-600 leading-relaxed font-medium">
+                                        หากรายการนี้ <b class="text-red-700 underline">เปิดให้ลงคะแนนไปแล้ว และมีผู้ใช้สิทธิ์แล้ว</b> ห้ามลบ หรือเปลี่ยนแปลงรายชื่อตัวเลือกผู้สมัครเด็ดขาด! เพราะจะทำให้ข้อมูลการโหวตที่ถูกสะสมไว้ผิดเพี้ยนทันที
+                                    </p>
+                                    <div class="mt-2 text-[11px] md:text-xs text-red-500 font-bold bg-white/60 p-2 rounded-lg inline-flex items-center border border-red-100">
+                                        <svg class="w-4 h-4 mr-1.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
+                                        หากตั้งค่าผิด แนะนำให้กด "ลบรายการนี้ทิ้ง" แล้วสร้างแคมเปญใหม่เท่านั้น
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <button type="submit" id="submitCampaignBtn" class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold py-4 rounded-xl shadow-lg transition-all hover-lift text-lg mt-4">บันทึกและเปิดระบบ</button>
                         </div>
                     </form>
                 </div>
@@ -503,7 +521,21 @@ img[src*="Logo_mstsc"] {
                                 </tr>
                             </thead>
                             <tbody id="studentTableBody" class="divide-y divide-gray-100">
-                                <tr><td colspan="5" class="p-8 text-center text-gray-500">กำลังโหลดข้อมูล...</td></tr>
+                                <!-- Skeleton Table Row -->
+                                <tr class="animate-pulse border-b border-gray-50">
+                                    <td class="p-4"><div class="h-4 bg-gray-200 rounded-full w-20"></div></td>
+                                    <td class="p-4"><div class="h-4 bg-gray-200 rounded-full w-40"></div></td>
+                                    <td class="p-4"><div class="h-4 bg-gray-200 rounded-full w-12 mx-auto"></div></td>
+                                    <td class="p-4"><div class="h-4 bg-gray-200 rounded-full w-16 mx-auto"></div></td>
+                                    <td class="p-4"><div class="h-8 bg-gray-200 rounded-lg w-16 mx-auto"></div></td>
+                                </tr>
+                                <tr class="animate-pulse border-b border-gray-50 opacity-70">
+                                    <td class="p-4"><div class="h-4 bg-gray-200 rounded-full w-20"></div></td>
+                                    <td class="p-4"><div class="h-4 bg-gray-200 rounded-full w-32"></div></td>
+                                    <td class="p-4"><div class="h-4 bg-gray-200 rounded-full w-12 mx-auto"></div></td>
+                                    <td class="p-4"><div class="h-4 bg-gray-200 rounded-full w-16 mx-auto"></div></td>
+                                    <td class="p-4"><div class="h-8 bg-gray-200 rounded-lg w-16 mx-auto"></div></td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -594,7 +626,21 @@ img[src*="Logo_mstsc"] {
                                 </tr>
                             </thead>
                             <tbody id="staffTableBody" class="divide-y divide-gray-100">
-                                <tr><td colspan="5" class="p-8 text-center text-gray-500">กำลังโหลดข้อมูล...</td></tr>
+                                <!-- Skeleton Table Row -->
+                                <tr class="animate-pulse border-b border-gray-50">
+                                    <td class="p-4"><div class="h-4 bg-gray-200 rounded-full w-20"></div></td>
+                                    <td class="p-4"><div class="h-4 bg-gray-200 rounded-full w-40"></div></td>
+                                    <td class="p-4"><div class="h-4 bg-gray-200 rounded-full w-12 mx-auto"></div></td>
+                                    <td class="p-4"><div class="h-4 bg-gray-200 rounded-full w-16 mx-auto"></div></td>
+                                    <td class="p-4"><div class="h-8 bg-gray-200 rounded-lg w-16 mx-auto"></div></td>
+                                </tr>
+                                <tr class="animate-pulse border-b border-gray-50 opacity-70">
+                                    <td class="p-4"><div class="h-4 bg-gray-200 rounded-full w-20"></div></td>
+                                    <td class="p-4"><div class="h-4 bg-gray-200 rounded-full w-32"></div></td>
+                                    <td class="p-4"><div class="h-4 bg-gray-200 rounded-full w-12 mx-auto"></div></td>
+                                    <td class="p-4"><div class="h-4 bg-gray-200 rounded-full w-16 mx-auto"></div></td>
+                                    <td class="p-4"><div class="h-8 bg-gray-200 rounded-lg w-16 mx-auto"></div></td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>

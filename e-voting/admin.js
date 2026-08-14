@@ -4,6 +4,23 @@ import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/
 import { collection, addDoc, getDocs, onSnapshot, serverTimestamp, query, orderBy, updateDoc, doc, getDoc, deleteDoc, setDoc, writeBatch, limit, getCountFromServer } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 import { ref as storageRef, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-storage.js";
 
+// ==========================================
+// ฟังก์ชันแปล Error จาก Firebase เป็นภาษาไทย
+// ==========================================
+function translateFirebaseError(error) {
+    const errorCode = error.code || error.message || "";
+    if (errorCode.includes('network-request-failed')) return 'การเชื่อมต่ออินเทอร์เน็ตมีปัญหา กรุณาตรวจสอบสัญญาณเน็ตของคุณ';
+    if (errorCode.includes('popup-closed-by-user')) return 'คุณปิดหน้าต่างล็อกอินก่อนทำรายการสำเร็จ';
+    if (errorCode.includes('popup-blocked')) return 'เบราว์เซอร์บล็อกหน้าต่างป๊อปอัป กรุณาอนุญาตให้แสดงป๊อปอัปก่อน';
+    if (errorCode.includes('unauthorized-domain')) return 'เว็บไซต์นี้ยังไม่ได้รับอนุญาตให้ใช้ระบบล็อกอิน';
+    if (errorCode.includes('permission-denied')) return 'คุณไม่มีสิทธิ์เข้าถึงหรือแก้ไขข้อมูลนี้ (Permission Denied)';
+    if (errorCode.includes('unavailable')) return 'ไม่สามารถเชื่อมต่อฐานข้อมูลได้ในขณะนี้';
+    if (errorCode.includes('quota-exceeded')) return 'ระบบโควตาเต็ม กรุณาติดต่อผู้ดูแลระบบ';
+    if (errorCode.includes('not-found')) return 'ไม่พบข้อมูลที่ต้องการในระบบ';
+    if (errorCode.includes('wrong-password') || errorCode.includes('invalid-credential')) return 'ข้อมูลการเข้าสู่ระบบไม่ถูกต้อง';
+    return `เกิดข้อผิดพลาดทางระบบ (${errorCode})`;
+}
+
 window.liveResultListeners = {};
 window.globalStudents = []; 
 
@@ -309,16 +326,16 @@ document.getElementById("createCampaignForm")?.addEventListener("submit", async 
         payload.allowed_voters.values = Array.from(document.querySelectorAll("input[name='targetLevel']:checked")).map(cb => cb.value);
         if(!payload.allowed_voters.values.length) return Swal.fire('แจ้งเตือน', 'เลือกระดับชั้นอย่างน้อย 1 ระดับ', 'warning');
     } else if (payload.allowed_voters.type === "custom_room") {
-        // 🌟 ดึงค่าจาก Checkbox ห้องที่ถูกติ๊ก
         payload.allowed_voters.values = Array.from(document.querySelectorAll("input[name='targetRoom']:checked")).map(cb => cb.value);
         if(!payload.allowed_voters.values.length) return Swal.fire('แจ้งเตือน', 'ระบุห้องเรียนอย่างน้อย 1 ห้อง', 'warning');
     } else if (payload.allowed_voters.type === "custom_dept") {
-        // 🌟 [เพิ่มใหม่] ดึงค่าจาก Checkbox กลุ่มสาระที่ถูกติ๊ก
         payload.allowed_voters.values = Array.from(document.querySelectorAll("input[name='targetDept']:checked")).map(cb => cb.value);
         if(!payload.allowed_voters.values.length) return Swal.fire('แจ้งเตือน', 'ระบุกลุ่มสาระ/หน่วยงานอย่างน้อย 1 กลุ่ม', 'warning');
     }
 
-    let optionsData = []; let initialVotes = {};
+    let optionsData = []; 
+    let initialVotes = {};
+    
     document.querySelectorAll(".option-group").forEach((group, index) => {
         let name = group.querySelector(".opt-name").value.trim();
         if (!name) {
@@ -327,6 +344,9 @@ document.getElementById("createCampaignForm")?.addEventListener("submit", async 
         optionsData.push({ name: name, image: group.querySelector(".opt-img").value.trim() }); 
         initialVotes[name] = 0; 
     });
+    
+    // ตั้งค่าคะแนนไม่ประสงค์ลงคะแนนเป็น 0 เริ่มต้น
+    initialVotes["ไม่ประสงค์ลงคะแนน"] = 0;
 
     if (optionsData.length < 2) return Swal.fire('ผิดพลาด', 'ต้องมีอย่างน้อย 2 ตัวเลือก', 'error');
     payload.options = optionsData;
@@ -336,20 +356,30 @@ document.getElementById("createCampaignForm")?.addEventListener("submit", async 
     try {
         if (editingId) {
             const campRef = doc(db, "campaigns", editingId);
-            // 🌟 แม้ว่าเราจะไม่ใช้ votes_count ในการนับแล้ว แต่ยังเก็บไว้เพื่อป้องกันระบบ Error ตอนอัปเดตแคมเปญเก่า
-            const oldVotes = (await getDoc(campRef)).data().votes_count || {};
-            optionsData.forEach(opt => { if (oldVotes[opt.name] !== undefined) initialVotes[opt.name] = oldVotes[opt.name]; });
-            payload.votes_count = initialVotes;
+            const oldData = (await getDoc(campRef)).data();
+            const oldStats = oldData.stats || { totalVotes: 0, votes: {}, byRoom: {} };
+            
+            // รักษาคะแนนเดิมไว้เมื่อกดแก้ไขแคมเปญเก่า
+            optionsData.forEach(opt => { 
+                if (oldStats.votes[opt.name] === undefined) oldStats.votes[opt.name] = 0; 
+            });
+            if (oldStats.votes["ไม่ประสงค์ลงคะแนน"] === undefined) oldStats.votes["ไม่ประสงค์ลงคะแนน"] = 0;
+            
+            payload.stats = oldStats;
             await updateDoc(campRef, payload);
         } else {
-            payload.votes_count = initialVotes; payload.status = "open"; payload.createdAt = serverTimestamp();
+            payload.status = "open"; 
+            payload.createdAt = serverTimestamp();
+            // สร้างโครงสร้าง stats สำหรับเก็บคะแนนรวมแบบใหม่ล่าสุด
+            payload.stats = { totalVotes: 0, votes: initialVotes, byRoom: {} };
             await addDoc(collection(db, "campaigns"), payload);
         }
         Swal.fire('สำเร็จ', 'บันทึกข้อมูลเรียบร้อยแล้ว', 'success');
-        hideCreateForm(); loadCampaigns();
+        hideCreateForm(); 
+        loadCampaigns();
     } catch (error) { 
         console.error("Firebase Error:", error);
-        Swal.fire('ผิดพลาดจาก Firebase', error.message, 'error'); 
+        Swal.fire('ผิดพลาดจาก Firebase', translateFirebaseError(error), 'error');
     }
 });
 
@@ -392,8 +422,15 @@ window.editCampaign = async function(campaignId) {
 window.loadCampaigns = async function() {
     const list = document.getElementById("campaignList");
     if(!list) return;
-    list.innerHTML = '<div class="flex justify-center p-20"><div class="animate-spin rounded-full h-8 w-8 border-4 border-gray-200 border-t-purple-600"></div></div>';
-    
+    list.innerHTML = `
+        ${Array(3).fill().map((_, i) => `
+        <div class="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm animate-pulse" style="opacity: ${1 - (i * 0.2)}">
+            <div class="flex items-center gap-2 mb-3"><div class="w-16 h-4 bg-gray-200 rounded"></div></div>
+            <div class="w-2/3 h-6 bg-gray-300 rounded mb-2"></div>
+            <div class="w-1/2 h-4 bg-gray-200 rounded mb-4"></div>
+            <div class="flex gap-2 mt-4"><div class="w-10 h-10 bg-gray-200 rounded-full"></div><div class="w-10 h-10 bg-gray-200 rounded-full"></div></div>
+        </div>`).join('')}
+    `;
     try {
         const q = query(collection(db, "campaigns"), orderBy("createdAt", "desc"));
         const snapshot = await getDocs(q);
@@ -516,9 +553,9 @@ async function updateDashboardLiveStats(campaigns) {
         }
 
         try {
-            // ดึงจำนวนคนโหวตจากกล่องบัตรคะแนน
-            const votesSnap = await getDocs(collection(db, "campaigns", camp.id, "votes"));
-            totalVoters = votesSnap.size;
+            // 🌟 ใช้วิธีนับจากฝั่ง Server (ประหยัด Quota: ใช้แค่ 1 Read ต่อ 1 แคมเปญ)
+            const votesSnap = await getCountFromServer(collection(db, "campaigns", camp.id, "votes"));
+            totalVoters = votesSnap.data().count;
         } catch (error) {
             console.error("Error fetching live stats:", error);
         }
@@ -606,7 +643,7 @@ window.deleteCampaign = async function(id) {
                 loadCampaigns(); 
             } catch (err) {
                 console.error("Delete Error:", err);
-                Swal.fire('เกิดข้อผิดพลาด', err.message, 'error');
+                Swal.fire('เกิดข้อผิดพลาด', translateFirebaseError(err), 'error');
             }
         }
     });
@@ -1108,7 +1145,7 @@ document.getElementById('deleteStudentsBtn')?.addEventListener('click', () => {
                 Swal.fire('สำเร็จ', `ล้างข้อมูลนักเรียนเรียบร้อยแล้ว (${count} รายการ)`, 'success');
                 checkStudentCount();
             } catch (err) {
-                Swal.fire('เกิดข้อผิดพลาด', err.message, 'error');
+                Swal.fire('เกิดข้อผิดพลาด', translateFirebaseError(err), 'error');
             }
         }
     });
@@ -1133,7 +1170,7 @@ document.getElementById('addSingleStudentForm')?.addEventListener('submit', asyn
         document.getElementById('addSingleStudentForm').reset();
         checkStudentCount();
     } catch (err) {
-        Swal.fire('เกิดข้อผิดพลาด', err.message, 'error');
+        Swal.fire('เกิดข้อผิดพลาด', translateFirebaseError(err), 'error');
     }
 });
 
@@ -1239,7 +1276,7 @@ window.editSingleStudent = function(id) {
                 Swal.fire('สำเร็จ', 'อัปเดตข้อมูลนักเรียนเรียบร้อยแล้ว', 'success');
                 checkStudentCount(); // โหลดข้อมูลใหม่ทั้งหมดเพื่ออัปเดตตารางและเวลาล่าสุด
             } catch (err) {
-                Swal.fire('เกิดข้อผิดพลาด', err.message, 'error');
+                Swal.fire('เกิดข้อผิดพลาด', translateFirebaseError(err), 'error');
             }
         }
     });
@@ -1250,143 +1287,143 @@ window.editSingleStudent = function(id) {
 // ==========================================
 
 // 🌟 [อัปเดตใหม่]: นับคะแนนรวมจากบัตรโหวตในคอลเล็กชัน votes แทนการพึ่งพา votes_count
+// ==========================================
+// แสดงผลคะแนนบนหน้าจอ Admin
+// ==========================================
 window.viewResults = async function(campaignId) {
     const resultDiv = document.getElementById(`results_${campaignId}`);
-    if (!resultDiv.classList.contains('hidden')) { resultDiv.classList.add('hidden'); return; }
+    if (!resultDiv.classList.contains('hidden')) { 
+        resultDiv.classList.add('hidden'); 
+        return; 
+    }
     resultDiv.classList.remove('hidden');
-    resultDiv.innerHTML = '<div class="text-center py-6 text-purple-700 font-bold animate-pulse">กำลังประมวลผลคะแนนและสถิติรายห้อง...</div>';
+    resultDiv.innerHTML = '<div class="text-center py-6 text-purple-700 font-bold animate-pulse">กำลังประมวลผลคะแนน...</div>';
 
-    const loadData = async () => {
-        try {
-            const docSnap = await getDoc(doc(db, "campaigns", campaignId));
-            if (!docSnap.exists()) { resultDiv.innerHTML = '<div class="text-center text-red-500">ไม่พบข้อมูล</div>'; return; }
+    try {
+        const docSnap = await getDoc(doc(db, "campaigns", campaignId));
+        if (!docSnap.exists()) { 
+            resultDiv.innerHTML = '<div class="text-center text-red-500">ไม่พบข้อมูล</div>'; 
+            return; 
+        }
 
-            const data = docSnap.data(); 
-            const title = data.title;
-            
-            // อ่านบัตรโหวตทั้งหมดในกล่อง
-            const votesSnap = await getDocs(collection(db, "campaigns", campaignId, "votes"));
+        const data = docSnap.data(); 
+        const title = data.title;
+        
+        // ดึงข้อมูลจาก stats แทน (ไม่เสียโควตาอ่าน Subcollection)
+        const stats = data.stats || { totalVotes: 0, votes: {}, byRoom: {} };
+        const actualVotes = stats.votes || {};
+        const totalVotes = stats.totalVotes || 0;
+        const votedByRoomRaw = stats.byRoom || {};
 
-            // เริ่มต้นเซ็ตคะแนนผู้สมัครทุกคนเป็น 0
-            let actualVotes = {};
-            data.options.forEach(opt => actualVotes[opt.name] = 0);
-            actualVotes["ไม่ประสงค์ลงคะแนน"] = 0;
+        // นำ _ กลับมาเป็น / สำหรับชื่อห้อง
+        const votedByRoom = {};
+        Object.keys(votedByRoomRaw).forEach(key => {
+            const cleanKey = key.replace(/_/g, '/');
+            votedByRoom[cleanKey] = votedByRoomRaw[key];
+        });
 
-            let eligibleByRoom = {};
-            let levelOfRoomMapping = {};
-            
-            // 🌟 เอาครูและนักเรียนมารวมกันตอนออกรายงาน
-            const allUsers = [...(window.globalStudents || []), ...(window.globalStaff || [])];
-            if(allUsers.length > 0) {
-                allUsers.forEach(s => {
-                    if(isStudentEligible(data.allowed_voters, s)) { 
-                        let r = s.room || "ไม่ระบุ"; 
-                        eligibleByRoom[r] = (eligibleByRoom[r] || 0) + 1; 
-                        levelOfRoomMapping[r] = s.level || "อื่นๆ";
-                    }
-                });
-            }
-
-            let votedByRoom = {};
-            
-            // นำบัตรโหวตแต่ละใบมาแยกนับคะแนนและนับจำนวนคนมาโหวต
-            votesSnap.forEach(v => { 
-                let vData = v.data();
-                let r = vData.room || "ไม่ระบุ"; 
-                votedByRoom[r] = (votedByRoom[r] || 0) + 1; 
-                if(vData.level) levelOfRoomMapping[r] = vData.level;
-                
-                let voteValue = vData.voteTo;
-                if(voteValue) {
-                    actualVotes[voteValue] = (actualVotes[voteValue] || 0) + 1;
+        // คำนวณผู้มีสิทธิ์
+        let eligibleByRoom = {};
+        let levelOfRoomMapping = {};
+        const allUsers = [...(window.globalStudents || []), ...(window.globalStaff || [])];
+        
+        if(allUsers.length > 0) {
+            allUsers.forEach(s => {
+                if(isStudentEligible(data.allowed_voters, s)) { 
+                    let r = s.room || "ไม่ระบุ"; 
+                    eligibleByRoom[r] = (eligibleByRoom[r] || 0) + 1; 
+                    levelOfRoomMapping[r] = s.level || "อื่นๆ";
                 }
             });
+        }
 
-            // ใช้ actualVotes เป็นคะแนนของระบบ
-            const votes = actualVotes;
+        let statsByLevel = {};
+        let sortedRooms = Object.keys(eligibleByRoom).sort((a,b) => a.localeCompare(b, 'th', {numeric:true}));
+        sortedRooms.forEach(r => {
+            let level = levelOfRoomMapping[r] || 'อื่นๆ';
+            if(!statsByLevel[level]) statsByLevel[level] = [];
+            statsByLevel[level].push(r);
+        });
 
-            let statsByLevel = {};
-            let sortedRooms = Object.keys(eligibleByRoom).sort((a,b) => a.localeCompare(b, 'th', {numeric:true}));
-            sortedRooms.forEach(r => {
-                let level = levelOfRoomMapping[r] || 'อื่นๆ';
-                if(!statsByLevel[level]) statsByLevel[level] = [];
-                statsByLevel[level].push(r);
-            });
-
-            let resultHtml = `
-                <div class="flex items-center justify-between mb-6 border-b border-gray-200 pb-4">
-                    <h4 class="font-extrabold text-gray-800 text-lg">สรุปผลคะแนน</h4>
-                    <div class="flex gap-2">
-                        <button onclick="exportExcel('${campaignId}')" class="text-xs font-bold bg-green-100 hover:bg-green-200 text-green-700 px-4 py-2 rounded-lg hidden sm:block">ออกไฟล์ Excel</button>
-                        <button onclick="exportPDF('${campaignId}')" class="text-xs font-bold bg-red-100 hover:bg-red-200 text-red-700 px-4 py-2 rounded-lg hidden sm:block">บันทึก PDF</button>
-                    </div>
+        let resultHtml = `
+            <div class="flex items-center justify-between mb-6 border-b border-gray-200 pb-4">
+                <h4 class="font-extrabold text-gray-800 text-lg">สรุปผลคะแนน</h4>
+                <div class="flex gap-2">
+                    <button onclick="exportExcel('${campaignId}')" class="text-xs font-bold bg-green-100 hover:bg-green-200 text-green-700 px-4 py-2 rounded-lg hidden sm:block">ออกไฟล์ Excel</button>
+                    <button onclick="exportPDF('${campaignId}')" class="text-xs font-bold bg-red-100 hover:bg-red-200 text-red-700 px-4 py-2 rounded-lg hidden sm:block">บันทึก PDF</button>
                 </div>
-                
-                <div id="pdf-content-${campaignId}" class="bg-white p-4 rounded-xl">
-                    <h2 class="text-center font-bold text-xl text-purple-900 mb-6 hidden print-title">${title}</h2>
-                    <ul class="space-y-5 mb-8">
-            `;
+            </div>
             
-            let totalVotes = 0; const validVotes = [];
-            Object.entries(votes).forEach(([option, count]) => {
-                if (option.trim().length > 0 && typeof count === 'number' && !isNaN(count)) { totalVotes += count; validVotes.push([option, count]); }
-            });
-
-            validVotes.sort((a, b) => b[1] - a[1]).forEach(([option, count], index) => {
-                const percent = totalVotes === 0 ? 0 : Math.round((count / totalVotes) * 100);
-                const barColor = index === 0 && count > 0 ? "bg-gradient-to-r from-purple-500 to-indigo-500" : "bg-gray-400"; 
-                resultHtml += `
-                    <li>
-                        <div class="flex justify-between text-sm mb-2"><span class="font-bold text-gray-800">${option}</span><span class="font-extrabold text-purple-700">${count} คะแนน <span class="text-gray-400 font-normal ml-1">(${percent}%)</span></span></div>
-                        <div class="w-full bg-gray-100 rounded-full h-3 overflow-hidden"><div class="${barColor} h-3 rounded-full transition-all duration-1000 ease-out" style="width: ${percent}%"></div></div>
-                    </li>
-                `;
-            });
-            resultHtml += `</ul><div class="bg-blue-50 p-4 rounded-xl text-center font-bold text-blue-900">จำนวนผู้ใช้สิทธิ์ทั้งหมด: ${totalVotes} คน</div>`;
-
-            let levels = Object.keys(statsByLevel).sort();
-            if (levels.length > 0) {
-                levels.forEach((level) => {
-                    resultHtml += `
-                        <div class="mt-8 pt-6 page-break-section">
-                            <h4 class="font-bold text-gray-800 mb-4 bg-gray-50 p-2 rounded-lg text-center">สถิติการใช้สิทธิ์ ${level}</h4>
-<div class="rounded-xl border border-gray-200 overflow-hidden">
-    <table class="w-full text-sm text-left border-collapse">
-        <thead class="bg-gray-100"><tr class="text-gray-600"><th class="p-3 border-b">สังกัด</th><th class="p-3 border-b text-center">มีสิทธิ์ (คน)</th><th class="p-3 border-b text-center">มาโหวต</th><th class="p-3 border-b text-center">%</th></tr></thead>
-        <tbody>
-                    `;
-                    statsByLevel[level].forEach(r => {
-                        let eligible = eligibleByRoom[r]; let voted = votedByRoom[r] || 0;
-                        let pct = eligible > 0 ? Math.round((voted/eligible)*100) : 0;
-                        let pctColor = pct === 100 ? 'text-green-600' : (pct >= 50 ? 'text-blue-600' : 'text-red-500');
-                        let cleanRoomForDisplay = (level === 'ครู/บุคลากร') ? r : (r.includes('/') ? "ห้อง " + r.split('/')[1] : r);
-                        resultHtml += `<tr class="hover:bg-gray-50"><td class="p-3 border-b font-bold text-gray-700">${cleanRoomForDisplay}</td><td class="p-3 border-b text-center">${eligible}</td><td class="p-3 border-b text-center font-black text-gray-900">${voted}</td><td class="p-3 border-b text-center font-bold ${pctColor}">${pct}%</td></tr>`;
-                    });
-
-                    let totalLevelEligible = statsByLevel[level].reduce((sum, r) => sum + eligibleByRoom[r], 0);
-                    let totalLevelVoted = statsByLevel[level].reduce((sum, r) => sum + (votedByRoom[r] || 0), 0);
-                    let totalLevelPct = totalLevelEligible > 0 ? Math.round((totalLevelVoted/totalLevelEligible)*100) : 0;
-                    resultHtml += `
-                                    <tr class="bg-indigo-50 font-bold"><td class="p-3 text-indigo-900">รวม ${level}</td><td class="p-3 text-center text-indigo-900">${totalLevelEligible}</td><td class="p-3 text-center text-indigo-900">${totalLevelVoted}</td><td class="p-3 text-center text-indigo-700">${totalLevelPct}%</td></tr>
-                                </tbody></table>
-                            </div>
-                        </div>`;
-                });
+            <div id="pdf-content-${campaignId}" class="bg-white p-4 rounded-xl">
+                <h2 class="text-center font-bold text-xl text-purple-900 mb-6 hidden print-title">${title}</h2>
+                <ul class="space-y-5 mb-8">
+        `;
+        
+        const validVotes = [];
+        Object.entries(actualVotes).forEach(([option, count]) => {
+            if (option.trim().length > 0 && typeof count === 'number' && !isNaN(count)) { 
+                validVotes.push([option, count]); 
             }
+        });
 
-            resultHtml += `</div>
-                <div class="mt-6 text-center">
-                    <button onclick="document.getElementById('results_${campaignId}').classList.add('hidden')" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-2.5 rounded-xl text-sm font-bold transition-colors inline-block">ปิดหน้าต่างผลคะแนน</button>
-                </div>
-            `; 
-            resultDiv.innerHTML = resultHtml;
+        validVotes.sort((a, b) => b[1] - a[1]).forEach(([option, count], index) => {
+            const percent = totalVotes === 0 ? 0 : Math.round((count / totalVotes) * 100);
+            const barColor = index === 0 && count > 0 ? "bg-gradient-to-r from-purple-500 to-indigo-500" : "bg-gray-400"; 
+            resultHtml += `
+                <li>
+                    <div class="flex justify-between text-sm mb-2"><span class="font-bold text-gray-800">${option}</span><span class="font-extrabold text-purple-700">${count} คะแนน <span class="text-gray-400 font-normal ml-1">(${percent}%)</span></span></div>
+                    <div class="w-full bg-gray-100 rounded-full h-3 overflow-hidden"><div class="${barColor} h-3 rounded-full transition-all duration-1000 ease-out" style="width: ${percent}%"></div></div>
+                </li>
+            `;
+        });
+        resultHtml += `</ul><div class="bg-blue-50 p-4 rounded-xl text-center font-bold text-blue-900">จำนวนผู้ใช้สิทธิ์ทั้งหมด: ${totalVotes} คน</div>`;
 
-        } catch (error) { resultDiv.innerHTML = '<div class="text-center py-4 text-red-500 font-bold">เกิดข้อผิดพลาดในการโหลดผลคะแนน</div>'; }
-    };
-    loadData(); 
-}
+        let levels = Object.keys(statsByLevel).sort();
+        if (levels.length > 0) {
+            levels.forEach((level) => {
+                resultHtml += `
+                    <div class="mt-8 pt-6 page-break-section">
+                        <h4 class="font-bold text-gray-800 mb-4 bg-gray-50 p-2 rounded-lg text-center">สถิติการใช้สิทธิ์ ${level}</h4>
+                        <div class="rounded-xl border border-gray-200 overflow-hidden">
+                            <table class="w-full text-sm text-left border-collapse">
+                                <thead class="bg-gray-100"><tr class="text-gray-600"><th class="p-3 border-b">สังกัด</th><th class="p-3 border-b text-center">มีสิทธิ์ (คน)</th><th class="p-3 border-b text-center">มาโหวต</th><th class="p-3 border-b text-center">%</th></tr></thead>
+                                <tbody>
+                `;
+                statsByLevel[level].forEach(r => {
+                    let eligible = eligibleByRoom[r]; 
+                    let voted = votedByRoom[r] || 0;
+                    let pct = eligible > 0 ? Math.round((voted/eligible)*100) : 0;
+                    let pctColor = pct === 100 ? 'text-green-600' : (pct >= 50 ? 'text-blue-600' : 'text-red-500');
+                    let cleanRoomForDisplay = (level === 'ครู/บุคลากร') ? r : (r.includes('/') ? "ห้อง " + r.split('/')[1] : r);
+                    resultHtml += `<tr class="hover:bg-gray-50"><td class="p-3 border-b font-bold text-gray-700">${cleanRoomForDisplay}</td><td class="p-3 border-b text-center">${eligible}</td><td class="p-3 border-b text-center font-black text-gray-900">${voted}</td><td class="p-3 border-b text-center font-bold ${pctColor}">${pct}%</td></tr>`;
+                });
 
-// 🌟 [อัปเดตใหม่]: ระบบดึงออก Excel โดยนับบัตรโหวตจริง
+                let totalLevelEligible = statsByLevel[level].reduce((sum, r) => sum + eligibleByRoom[r], 0);
+                let totalLevelVoted = statsByLevel[level].reduce((sum, r) => sum + (votedByRoom[r] || 0), 0);
+                let totalLevelPct = totalLevelEligible > 0 ? Math.round((totalLevelVoted/totalLevelEligible)*100) : 0;
+                resultHtml += `
+                                <tr class="bg-indigo-50 font-bold"><td class="p-3 text-indigo-900">รวม ${level}</td><td class="p-3 text-center text-indigo-900">${totalLevelEligible}</td><td class="p-3 text-center text-indigo-900">${totalLevelVoted}</td><td class="p-3 text-center text-indigo-700">${totalLevelPct}%</td></tr>
+                            </tbody></table>
+                        </div>
+                    </div>`;
+            });
+        }
+
+        resultHtml += `</div>
+            <div class="mt-6 text-center">
+                <button onclick="document.getElementById('results_${campaignId}').classList.add('hidden')" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-2.5 rounded-xl text-sm font-bold transition-colors inline-block">ปิดหน้าต่างผลคะแนน</button>
+            </div>
+        `; 
+        resultDiv.innerHTML = resultHtml;
+
+    } catch (error) { 
+        resultDiv.innerHTML = '<div class="text-center py-4 text-red-500 font-bold">เกิดข้อผิดพลาดในการโหลดผลคะแนน</div>'; 
+    }
+};
+
+// ==========================================
+// ส่งออกไฟล์ Excel
+// ==========================================
 window.exportExcel = async function(campaignId) {
     try {
         Swal.fire({ title: 'กำลังสร้างไฟล์...', allowOutsideClick: false, didOpen: () => { Swal.showLoading() } });
@@ -1396,54 +1433,57 @@ window.exportExcel = async function(campaignId) {
             const safeTitle = data.title.replace(/[/\\?%*:|"<>]/g, '-'); 
             const wb = XLSX.utils.book_new();
 
-            const votesSnap = await getDocs(collection(db, "campaigns", campaignId, "votes"));
+            // ดึงข้อมูลจาก stats โดยตรง
+            const stats = data.stats || { totalVotes: 0, votes: {}, byRoom: {} };
+            const actualVotes = stats.votes || {};
+            const totalVotes = stats.totalVotes || 0;
+            const votedByRoomRaw = stats.byRoom || {};
 
-            let actualVotes = {};
-            data.options.forEach(opt => actualVotes[opt.name] = 0);
-            actualVotes["ไม่ประสงค์ลงคะแนน"] = 0;
+            const votedByRoom = {};
+            Object.keys(votedByRoomRaw).forEach(key => {
+                const cleanKey = key.replace(/_/g, '/');
+                votedByRoom[cleanKey] = votedByRoomRaw[key];
+            });
 
-            let eligibleByRoom = {}; let levelOfRoomMapping = {};
-            // 🌟 เอาครูและนักเรียนมารวมกันตอนออกรายงาน
+            let eligibleByRoom = {}; 
+            let levelOfRoomMapping = {};
             const allUsers = [...(window.globalStudents || []), ...(window.globalStaff || [])];
+            
             if(allUsers.length > 0) {
                 allUsers.forEach(s => {
                     if(isStudentEligible(data.allowed_voters, s)) {
-                        let r = s.room || "ไม่ระบุ"; eligibleByRoom[r] = (eligibleByRoom[r] || 0) + 1; levelOfRoomMapping[r] = s.level || "อื่นๆ";
+                        let r = s.room || "ไม่ระบุ"; 
+                        eligibleByRoom[r] = (eligibleByRoom[r] || 0) + 1; 
+                        levelOfRoomMapping[r] = s.level || "อื่นๆ";
                     } 
                 }); 
             }
 
-            let votedByRoom = {}; 
-            votesSnap.forEach(v => { 
-                let vData = v.data();
-                let r = vData.room || "ไม่ระบุ"; 
-                votedByRoom[r] = (votedByRoom[r] || 0) + 1; 
-                if(vData.level) levelOfRoomMapping[r] = vData.level;
-                
-                let voteValue = vData.voteTo;
-                if(voteValue) {
-                    actualVotes[voteValue] = (actualVotes[voteValue] || 0) + 1;
+            const validVotes = [];
+            Object.entries(actualVotes).forEach(([option, count]) => {
+                if (option.trim().length > 0 && typeof count === 'number' && !isNaN(count)) { 
+                    validVotes.push([option, count]); 
                 }
-            });
-            
-            const votes = actualVotes;
-
-            let totalVotes = 0; const validVotes = [];
-            Object.entries(votes).forEach(([option, count]) => {
-                if (option.trim().length > 0 && typeof count === 'number' && !isNaN(count)) { totalVotes += count; validVotes.push([option, count]); }
             });
 
             let summaryData = [ ["หัวข้อการลงคะแนน:", data.title], [""], ["--- สรุปคะแนนผู้สมัคร ---", "", ""], ["ตัวเลือก / ผู้สมัคร", "คะแนนโหวต (คน)", "เปอร์เซ็นต์ (%)"] ];
+            
             validVotes.sort((a, b) => b[1] - a[1]).forEach(([option, count]) => {
                 const percent = totalVotes === 0 ? 0 : ((count / totalVotes) * 100).toFixed(2);
                 summaryData.push([option, count, percent + "%"]);
             });
-            summaryData.push(["", "", ""]); summaryData.push(["รวมผู้ใช้สิทธิ์ทั้งหมด", totalVotes, "100%"]);
+            
+            summaryData.push(["", "", ""]); 
+            summaryData.push(["รวมผู้ใช้สิทธิ์ทั้งหมด", totalVotes, "100%"]);
             XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(summaryData), "สรุปผลโหวต");
             
             let statsByLevel = {};
             let sortedRooms = Object.keys(eligibleByRoom).sort((a,b) => a.localeCompare(b, 'th', {numeric:true}));
-            sortedRooms.forEach(r => { let level = levelOfRoomMapping[r] || 'อื่นๆ'; if(!statsByLevel[level]) statsByLevel[level] = []; statsByLevel[level].push(r); });
+            sortedRooms.forEach(r => { 
+                let level = levelOfRoomMapping[r] || 'อื่นๆ'; 
+                if(!statsByLevel[level]) statsByLevel[level] = []; 
+                statsByLevel[level].push(r); 
+            });
 
             let levels = Object.keys(statsByLevel).sort();
             levels.forEach(level => {
@@ -1452,19 +1492,29 @@ window.exportExcel = async function(campaignId) {
                 let levelData = [ [titleText], [col1Text, "จำนวนผู้มีสิทธิ์ (คน)", "มาใช้สิทธิ์ (คน)", "คิดเป็นเปอร์เซ็นต์ (%)"] ];
                 
                 let totalLevelEligible = 0; let totalLevelVoted = 0;
+                
                 statsByLevel[level].forEach(r => {
-                    let eligible = eligibleByRoom[r]; let voted = votedByRoom[r] || 0; let pct = eligible > 0 ? ((voted/eligible)*100).toFixed(2) : 0;
-                    totalLevelEligible += eligible; totalLevelVoted += voted; 
+                    let eligible = eligibleByRoom[r]; 
+                    let voted = votedByRoom[r] || 0; 
+                    let pct = eligible > 0 ? ((voted/eligible)*100).toFixed(2) : 0;
+                    totalLevelEligible += eligible; 
+                    totalLevelVoted += voted; 
                     let cleanRoomForDisplay = (level === 'ครู/บุคลากร') ? r : (r.includes('/') ? "ห้อง " + r.split('/')[1] : r);
                     levelData.push([cleanRoomForDisplay, eligible, voted, pct + "%"]);
                 });
+                
                 let totalPct = totalLevelEligible > 0 ? ((totalLevelVoted/totalLevelEligible)*100).toFixed(2) : 0;
-                levelData.push(["", "", "", ""]); levelData.push([`รวม ${level}`, totalLevelEligible, totalLevelVoted, totalPct + "%"]);
+                levelData.push(["", "", "", ""]); 
+                levelData.push([`รวม ${level}`, totalLevelEligible, totalLevelVoted, totalPct + "%"]);
                 XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(levelData), `สถิติ_${level}`);
             });
-            XLSX.writeFile(wb, `ผลโหวต_${safeTitle}.xlsx`); Swal.close();
+            
+            XLSX.writeFile(wb, `ผลโหวต_${safeTitle}.xlsx`); 
+            Swal.close();
         }
-    } catch (error) { Swal.fire('ผิดพลาด', 'สร้างไฟล์ Excel ไม่สำเร็จ', 'error'); }
+    } catch (error) { 
+        Swal.fire('ผิดพลาด', 'สร้างไฟล์ Excel ไม่สำเร็จ', 'error'); 
+    }
 }
 
 window.exportPDF = async function(campaignId) {
@@ -1594,7 +1644,7 @@ window.toggleStaffStatus = async function(id, newStatus) {
     try {
         await updateDoc(doc(db, "students", id), { status: newStatus, updatedAt: serverTimestamp() });
         checkStudentCount(); 
-    } catch (err) { Swal.fire('เกิดข้อผิดพลาด', err.message, 'error'); }
+    } catch (err) { Swal.fire('เกิดข้อผิดพลาด', translateFirebaseError(err), 'error'); }
 }
 
 // 8.4 ตัวกรองตารางบุคลากร
@@ -1647,6 +1697,6 @@ document.getElementById('addSingleStaffForm')?.addEventListener('submit', async 
         document.getElementById('addSingleStaffForm').reset();
         checkStudentCount();
     } catch (err) {
-        Swal.fire('เกิดข้อผิดพลาด', err.message, 'error');
+        Swal.fire('เกิดข้อผิดพลาด', translateFirebaseError(err), 'error');
     }
 });
