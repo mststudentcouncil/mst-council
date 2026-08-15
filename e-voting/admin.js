@@ -458,7 +458,30 @@ window.loadCampaigns = async function() {
                 let badge = `<span class="bg-blue-100 text-blue-700 text-[10px] px-2 py-0.5 rounded font-bold">ทุกคน</span>`;
                 if(data.allowed_voters && data.allowed_voters.type !== 'all') badge = `<span class="bg-indigo-100 text-indigo-700 text-[10px] px-2 py-0.5 rounded font-bold">เฉพาะกลุ่ม</span>`;
                 
-                let statusDot = data.status === "open" ? '<span class="w-2 h-2 rounded-full bg-green-500 animate-pulse inline-block mr-1"></span>เปิดโหวต' : '<span class="w-2 h-2 rounded-full bg-gray-400 inline-block mr-1"></span>ปิดโหวต';
+                // 🌟 อัปเดตใหม่: คำนวณเวลาเพื่อแสดงสถานะให้แอดมินทราบอย่างชัดเจน
+                const now = new Date().getTime();
+                const endTimestamp = data.endTime ? new Date(data.endTime).getTime() : Infinity;
+                const startTimestamp = data.startTime ? new Date(data.startTime).getTime() : 0;
+                
+                const isExpired = now >= endTimestamp;
+                const isNotStarted = startTimestamp > 0 && now < startTimestamp;
+
+                let statusDot = '';
+                let toggleBtnHtml = '';
+
+                if (data.status === "closed") {
+                    statusDot = '<span class="w-2 h-2 rounded-full bg-gray-400 inline-block mr-1"></span>ปิดระบบแล้ว';
+                    toggleBtnHtml = `<button onclick="toggleStatus('${data.id}', '${data.status}')" class="w-full text-xs font-bold bg-gray-100 text-gray-700 py-2 rounded-lg hover:bg-gray-200 border">เปิดระบบใหม่</button>`;
+                } else if (isExpired) {
+                    statusDot = '<span class="w-2 h-2 rounded-full bg-orange-500 animate-pulse inline-block mr-1"></span>หมดเวลาโหวต (รอปิด)';
+                    toggleBtnHtml = `<button onclick="toggleStatus('${data.id}', '${data.status}')" class="w-full text-xs font-bold bg-orange-100 text-orange-700 py-2 rounded-lg hover:bg-orange-200 border border-orange-300">กดยืนยันปิดระบบ</button>`;
+                } else if (isNotStarted) {
+                    statusDot = '<span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse inline-block mr-1"></span>รอเวลาเปิด';
+                    toggleBtnHtml = `<button onclick="toggleStatus('${data.id}', '${data.status}')" class="w-full text-xs font-bold bg-gray-100 text-gray-700 py-2 rounded-lg hover:bg-gray-200 border">ปิดระบบ</button>`;
+                } else {
+                    statusDot = '<span class="w-2 h-2 rounded-full bg-green-500 animate-pulse inline-block mr-1"></span>กำลังเปิดโหวต';
+                    toggleBtnHtml = `<button onclick="toggleStatus('${data.id}', '${data.status}')" class="w-full text-xs font-bold bg-red-50 text-red-600 py-2 rounded-lg hover:bg-red-100 border border-red-200">ปิดระบบโหวต</button>`;
+                }
                 
                 const formatTime = (timeStr) => {
                     if(!timeStr) return "ไม่ระบุ";
@@ -502,7 +525,7 @@ window.loadCampaigns = async function() {
                         <div class="flex md:flex-col gap-2 shrink-0 md:w-32 justify-center mt-0 md:mt-0">
                             <button onclick="viewResults('${data.id}')" class="w-full text-xs font-bold bg-purple-100 text-purple-700 py-2 rounded-lg hover:bg-purple-200">ผลคะแนน</button>
                             <button onclick="editCampaign('${data.id}')" class="w-full text-xs font-bold bg-yellow-50 text-yellow-700 py-2 rounded-lg hover:bg-yellow-100 border border-yellow-200">แก้ไข</button>
-                            <button onclick="toggleStatus('${data.id}', '${data.status}')" class="w-full text-xs font-bold bg-gray-100 text-gray-700 py-2 rounded-lg hover:bg-gray-200 border">${data.status==="open"?"ปิดระบบ":"เปิดระบบ"}</button>
+                            ${toggleBtnHtml}
                             <button onclick="deleteCampaign('${data.id}')" class="w-full text-xs font-bold text-red-500 py-2 rounded-lg hover:bg-red-50">ลบ</button>
                         </div>
                     </div>

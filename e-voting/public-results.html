@@ -114,31 +114,44 @@
     </div>
 
     <!-- Header -->
-    <header class="p-4 md:p-6 flex flex-col md:flex-row justify-between items-center glass-header z-10 shrink-0 gap-4">
-        <div class="flex items-center gap-4">
-            <img src="./logo.webp" class="w-12 h-12 md:w-16 md:h-16 bg-white rounded-full p-1 shadow-md object-cover">
-            <div>
-                <h1 class="text-2xl md:text-3xl font-black tracking-wide text-mst-purple uppercase">
-                    Live Results
-                </h1>
-                <p class="text-purple-600 text-xs md:text-sm font-bold bg-purple-100 px-2 py-0.5 rounded-full inline-block mt-1">e-Voting</p>
-            </div>
-        </div>
-        
-        <div class="flex items-center gap-3 w-full md:w-auto">
-            <!-- ตัวเลือกแคมเปญ -->
-            <div class="relative flex-1 md:w-80">
-                <select id="campaignSelect" class="w-full bg-white/80 border border-purple-200 text-purple-900 text-sm md:text-lg rounded-2xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 font-bold appearance-none cursor-pointer shadow-sm">
-                    <option value="">กำลังโหลดรายการ...</option>
-                </select>
-                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-purple-700">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+    <header class="p-4 md:p-6 glass-header z-10 shrink-0">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            
+            <!-- แถวบนมือถือ: โลโก้ชิดซ้าย & ปุ่มโฮมชิดขวา -->
+            <div class="flex justify-between items-center w-full md:w-auto">
+                <div class="flex items-center gap-3 md:gap-4">
+                    <img src="./logo.webp" class="w-12 h-12 md:w-16 md:h-16 bg-white rounded-full p-1 shadow-md object-cover">
+                    <div>
+                        <h1 class="text-2xl md:text-3xl font-black tracking-wide text-mst-purple uppercase leading-none md:leading-tight">
+                            Live Results
+                        </h1>
+                        <p class="text-purple-600 text-[10px] md:text-sm font-bold bg-purple-100 px-2 py-0.5 rounded-full inline-block mt-1">e-Voting</p>
+                    </div>
                 </div>
+
+                <!-- ปุ่มโฮม (แสดงเฉพาะหน้าจอมือถือ) -->
+                <a href="index.html" class="md:hidden bg-white/80 hover:bg-purple-100 text-purple-700 p-3 rounded-2xl transition-colors border border-purple-200 shadow-sm shrink-0">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 001 1m-6 0h6"></path></svg>
+                </a>
             </div>
             
-            <a href="index.html" class="bg-white/80 hover:bg-purple-100 text-purple-700 p-3.5 rounded-2xl transition-colors border border-purple-200 shadow-sm shrink-0">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 001 1m-6 0h6"></path></svg>
-            </a>
+            <!-- แถวสองมือถือ: ตัวเลือกแคมเปญ -->
+            <div class="flex items-center gap-3 w-full md:w-auto">
+                <div class="relative flex-1 md:w-80">
+                    <select id="campaignSelect" class="w-full bg-white/80 border border-purple-200 text-purple-900 text-sm md:text-lg rounded-2xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 font-bold appearance-none cursor-pointer shadow-sm">
+                        <option value="">กำลังโหลดรายการ...</option>
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-purple-700">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </div>
+                </div>
+                
+                <!-- ปุ่มโฮม (แสดงเฉพาะหน้าจอคอมพิวเตอร์) -->
+                <a href="index.html" class="hidden md:flex bg-white/80 hover:bg-purple-100 text-purple-700 p-3.5 rounded-2xl transition-colors border border-purple-200 shadow-sm shrink-0">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 001 1m-6 0h6"></path></svg>
+                </a>
+            </div>
+
         </div>
     </header>
 
@@ -174,13 +187,7 @@
         import { collection, doc, getDocs, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
         let campaignUnsubscribe = null;
-        let votesUnsubscribe = null;
         let isInitialized = false; 
-
-        // ตัวแปรเก็บสถานะคะแนนแบบ Real-time
-        let currentCampaignData = null;
-        let realTimeVotes = {};
-        let totalRealTimeVotes = 0;
 
         function initialize() {
             onAuthStateChanged(auth, async (user) => {
@@ -202,13 +209,11 @@
 
         async function loadCampaigns() {
             const select = document.getElementById('campaignSelect');
-            
             try {
                 const q = query(collection(db, "campaigns"), orderBy("createdAt", "desc"));
                 const snapshot = await getDocs(q);
                 
                 select.innerHTML = '';
-                
                 if (snapshot.empty) {
                     select.innerHTML = '<option value="">ไม่มีรายการลงคะแนน</option>';
                     document.getElementById("displayTitle").innerHTML = "ยังไม่มีรายการลงคะแนน";
@@ -234,7 +239,6 @@
                         startLiveResults(e.target.value);
                     }
                 });
-
             } catch (error) {
                 console.error("Error loading campaigns:", error);
             }
@@ -243,94 +247,100 @@
         function startLiveResults(campaignId) {
             // ล้าง Listener ตัวเก่าทิ้งเมื่อเปลี่ยนแคมเปญ
             if (campaignUnsubscribe) campaignUnsubscribe();
-            if (votesUnsubscribe) votesUnsubscribe();
-
-            // รีเซ็ตคะแนนเริ่มต้น
-            currentCampaignData = null;
-            realTimeVotes = {};
-            totalRealTimeVotes = 0;
 
             const campRef = doc(db, "campaigns", campaignId);
             
-            // 🌟 1. ดึงข้อมูลหัวข้อและสถานะการเลือกตั้ง
+            // 🌟 อุดรอยรั่วค่าใช้จ่าย: ดึงข้อมูลแค่ Document หลักตัวเดียวเท่านั้น
             campaignUnsubscribe = onSnapshot(campRef, (docSnap) => {
                 if (!docSnap.exists()) return;
-                currentCampaignData = docSnap.data();
-                renderCombinedResults();
-            });
-
-            // 🌟 2. ดักฟังการหย่อนบัตรลงหีบ (Subcollection: votes)
-            const votesRef = collection(db, "campaigns", campaignId, "votes");
-            votesUnsubscribe = onSnapshot(votesRef, (snapshot) => {
-                snapshot.docChanges().forEach((change) => {
-                    // ถ้านักเรียนโหวตเข้ามาใหม่ (หรือโหลดครั้งแรก)
-                    if (change.type === "added") {
-                        const voteValue = change.doc.data().voteTo;
-                        if (voteValue) {
-                            realTimeVotes[voteValue] = (realTimeVotes[voteValue] || 0) + 1;
-                            totalRealTimeVotes++;
-                        }
-                    }
-                    // ถ้าแอดมินลบบัตรทิ้ง
-                    if (change.type === "removed") {
-                        const voteValue = change.doc.data().voteTo;
-                        if (voteValue && realTimeVotes[voteValue] > 0) {
-                            realTimeVotes[voteValue]--;
-                            totalRealTimeVotes--;
-                        }
-                    }
-                });
-                renderCombinedResults();
-            });
-        }
-
-        // ฟังก์ชันประมวลผลคะแนนก่อนส่งไปวาดกราฟ
-        function renderCombinedResults() {
-            if (!currentCampaignData) return;
-            const data = currentCampaignData;
-            
-            const isStatusOpen = data.status === "open";
-            const statusIcon = isStatusOpen
-                ? `<svg class="w-8 h-8 md:w-10 md:h-10 text-green-500 animate-pulse drop-shadow-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`
-                : `<svg class="w-8 h-8 md:w-10 md:h-10 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>`;
                 
-            document.getElementById("displayTitle").innerHTML = `${statusIcon} <span>${data.title}</span>`;
+                const data = docSnap.data();
+                
+                const isStatusOpen = data.status === "open";
+                const statusIcon = isStatusOpen
+                    ? `<svg class="w-8 h-8 md:w-10 md:h-10 text-green-500 animate-pulse drop-shadow-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`
+                    : `<svg class="w-8 h-8 md:w-10 md:h-10 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>`;
+                    
+                document.getElementById("displayTitle").innerHTML = `${statusIcon} <span>${data.title}</span>`;
 
-            const options = data.options || [];
-            let results = [];
+                const options = data.options || [];
+                
+                // ดึงข้อมูลตัวเลขจาก field stats ที่ถูกบวกมาจากฝั่ง Client 
+                const stats = data.stats || { totalVotes: 0, votes: {} };
+                const votes = stats.votes || {};
+                let totalVotes = stats.totalVotes || 0;
+                
+                let results = [];
 
-            options.forEach((opt, index) => {
-                const count = realTimeVotes[opt.name] || 0;
-                results.push({
-                    candidateNumber: index + 1, 
-                    name: opt.name,
-                    image: opt.image,
-                    count: count
+                options.forEach((opt, index) => {
+                    const count = votes[opt.name] || 0;
+                    results.push({
+                        candidateNumber: index + 1, 
+                        name: opt.name,
+                        image: opt.image,
+                        count: count
+                    });
                 });
+
+                if (votes["ไม่ประสงค์ลงคะแนน"] !== undefined || totalVotes > 0) {
+                    const noVoteCount = votes["ไม่ประสงค์ลงคะแนน"] || 0;
+                    results.push({
+                        name: "ไม่ประสงค์ลงคะแนน",
+                        image: null,
+                        isNoVote: true,
+                        count: noVoteCount
+                    });
+                }
+
+                document.getElementById("totalVotesDisplay").innerText = totalVotes.toLocaleString();
+
+                results.sort((a, b) => b.count - a.count);
+                
+                // เช็คการตั้งค่าซ่อนคะแนน
+                const isHidden = data.hideScoresUntilClosed === true && data.status === "open";
+                
+                renderResults(results, totalVotes, isHidden);
             });
-
-            if (realTimeVotes["ไม่ประสงค์ลงคะแนน"] !== undefined || totalRealTimeVotes > 0) {
-                const noVoteCount = realTimeVotes["ไม่ประสงค์ลงคะแนน"] || 0;
-                results.push({
-                    name: "ไม่ประสงค์ลงคะแนน",
-                    image: null,
-                    isNoVote: true,
-                    count: noVoteCount
-                });
-            }
-
-            document.getElementById("totalVotesDisplay").innerText = totalRealTimeVotes.toLocaleString();
-
-            results.sort((a, b) => b.count - a.count);
-            renderResults(results, totalRealTimeVotes);
         }
 
-        function renderResults(results, totalVotes) {
+        function renderResults(results, totalVotes, isHidden = false) {
             const container = document.getElementById("resultsContainer");
             container.innerHTML = '';
 
+            // 🌟 เพิ่มแบนเนอร์ประกาศ หากแอดมินตั้งค่าซ่อนคะแนนไว้
+            if (isHidden) {
+                const hiddenBanner = `
+                    <div class="mb-6 bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-200 p-4 md:p-5 rounded-2xl flex items-start gap-3 md:gap-4 shadow-sm fade-in">
+                        <div class="mt-0.5 w-8 h-8 bg-orange-100 text-orange-500 rounded-full flex items-center justify-center shrink-0 shadow-inner">
+                            <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path></svg>
+                        </div>
+                        <div>
+                            <h4 class="text-sm md:text-base font-extrabold text-orange-800 mb-1">ผลคะแนนถูกซ่อนชั่วคราว</h4>
+                            <p class="text-xs md:text-sm text-orange-700 leading-relaxed font-medium">
+                                เพื่อความเป็นธรรมและป้องกันการโหวตตามกระแส ระบบจะแสดงผลคะแนนอย่างเป็นทางการ <b class="underline text-orange-800">หลังจากปิดระบบลงคะแนนแล้วเท่านั้น</b>
+                            </p>
+                        </div>
+                    </div>
+                `;
+                container.insertAdjacentHTML('beforeend', hiddenBanner);
+            }
+
+            let currentRank = 1;
+            let prevCount = null;
+            
+            results.forEach(item => {
+                if (!item.isNoVote) {
+                    if (prevCount !== null && item.count < prevCount) currentRank++;
+                    item.rank = currentRank;
+                    prevCount = item.count;
+                }
+            });
+
             results.forEach((item, index) => {
-                const percent = totalVotes === 0 ? 0 : ((item.count / totalVotes) * 100).toFixed(1);
+                const percentVal = totalVotes === 0 ? 0 : ((item.count / totalVotes) * 100).toFixed(1);
+                const displayCount = isHidden ? "?" : item.count.toLocaleString();
+                const displayPercent = isHidden ? "?" : percentVal;
+                const barWidthPercent = isHidden ? 0 : percentVal;
                 
                 let rankBadge = '';
                 let cardStyle = 'glass-card';
@@ -339,27 +349,28 @@
                 let textScoreColor = 'text-purple-700';
 
                 if (!item.isNoVote) {
-                    if (index === 0 && item.count > 0) {
+                    if (item.rank === 1 && item.count > 0 && !isHidden) {
                         rankBadge = `<div class="absolute -left-3 -top-3 md:-left-4 md:-top-4 w-10 h-10 md:w-14 md:h-14 bg-gradient-to-br from-yellow-300 to-yellow-500 rounded-full flex items-center justify-center font-black text-xl md:text-3xl text-yellow-900 shadow-[0_4px_15px_rgba(250,204,21,0.5)] border-4 border-white z-20">1</div>`;
                         cardStyle = 'bg-white/90 backdrop-blur-xl border-2 border-yellow-400 shadow-[0_10px_30px_rgba(250,204,21,0.2)] transform scale-[1.02] md:scale-[1.03] z-10';
                         barColor = 'bg-gradient-to-r from-yellow-400 to-yellow-300 shadow-[0_0_10px_rgba(250,204,21,0.6)]';
                         textNameColor = 'text-gray-900 font-extrabold';
                         textScoreColor = 'text-transparent bg-clip-text bg-gradient-to-r from-yellow-600 to-yellow-500';
-                    } else if (index === 1 && item.count > 0) {
+                    } else if (item.rank === 2 && item.count > 0 && !isHidden) {
                         rankBadge = `<div class="absolute -left-2 -top-2 md:-left-3 md:-top-3 w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-gray-200 to-gray-400 rounded-full flex items-center justify-center font-black text-lg md:text-xl text-gray-800 shadow-md border-2 border-white z-20">2</div>`;
                         barColor = 'bg-gradient-to-r from-gray-400 to-gray-300';
                         textNameColor = 'text-gray-800 font-bold';
-                    } else if (index === 2 && item.count > 0) {
+                    } else if (item.rank === 3 && item.count > 0 && !isHidden) {
                         rankBadge = `<div class="absolute -left-2 -top-2 md:-left-3 md:-top-3 w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-orange-300 to-orange-500 rounded-full flex items-center justify-center font-black text-lg md:text-xl text-orange-950 shadow-md border-2 border-white z-20">3</div>`;
                         barColor = 'bg-gradient-to-r from-orange-400 to-orange-300';
                         textNameColor = 'text-gray-800 font-bold';
                     } else {
-                        barColor = 'bg-gradient-to-r from-purple-500 to-purple-400';
+                        barColor = isHidden ? 'bg-gray-400' : 'bg-gradient-to-r from-purple-500 to-purple-400';
+                        if(isHidden) textScoreColor = 'text-gray-500';
                     }
                 } else {
-                    barColor = 'bg-gradient-to-r from-red-500 to-red-400';
+                    barColor = isHidden ? 'bg-gray-400' : 'bg-gradient-to-r from-red-500 to-red-400';
                     textNameColor = 'text-red-500 font-bold';
-                    textScoreColor = 'text-red-600';
+                    textScoreColor = isHidden ? 'text-gray-500' : 'text-red-600';
                 }
 
                 let avatarHtml = '';
@@ -386,15 +397,15 @@
                             <div class="flex justify-between items-end mb-2 md:mb-3">
                                 <h3 class="text-lg md:text-2xl truncate pr-2 ${textNameColor}">${item.name}</h3>
                                 <div class="text-right shrink-0">
-                                    <div class="text-2xl md:text-4xl font-black tracking-tight ${textScoreColor}">${item.count.toLocaleString()}</div>
+                                    <div class="text-2xl md:text-4xl font-black tracking-tight ${textScoreColor}">${displayCount}</div>
                                 </div>
                             </div>
                             
                             <div class="flex items-center gap-3">
                                 <div class="w-full bg-gray-200/50 rounded-full h-3 md:h-4 overflow-hidden border border-white/60 shadow-inner">
-                                    <div class="${barColor} h-full rounded-full bar-animate" style="width: ${percent}%"></div>
+                                    <div class="${barColor} h-full rounded-full bar-animate" style="width: ${barWidthPercent}%"></div>
                                 </div>
-                                <div class="text-sm md:text-base font-extrabold ${textScoreColor} w-16 text-right shrink-0">${percent}%</div>
+                                <div class="text-sm md:text-base font-extrabold ${textScoreColor} w-16 text-right shrink-0">${displayPercent}%</div>
                             </div>
                         </div>
                     </div>

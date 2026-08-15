@@ -178,7 +178,8 @@ function isStudentEligible(campaignRules, studentInfo) {
 }
 
 async function fetchCampaigns() { 
-    const q = query(collection(db, "campaigns"), where("status", "==", "open"));
+    // 🌟 แก้ไข: ลบเงื่อนไข where("status", "==", "open") ออก เพื่อดึงรายการทั้งหมดมาแสดง
+    const q = query(collection(db, "campaigns")); 
     try {
         const querySnapshot = await getDocs(q); 
         let tempCampaigns = [];
@@ -186,6 +187,14 @@ async function fetchCampaigns() {
             const data = doc.data();
             if (isStudentEligible(data.allowed_voters, studentData)) tempCampaigns.push({ id: doc.id, ...data });
         });
+        
+        // เรียงลำดับให้รายการใหม่ล่าสุดขึ้นมาอยู่ด้านบนสุด
+        tempCampaigns.sort((a, b) => {
+            const timeA = a.createdAt ? a.createdAt.toMillis() : 0;
+            const timeB = b.createdAt ? b.createdAt.toMillis() : 0;
+            return timeB - timeA;
+        });
+
         allCampaigns = tempCampaigns;
         renderCampaigns(allCampaigns);
     } catch (error) { 
@@ -242,13 +251,40 @@ async function renderCampaigns(campaignsToRender) {
         }
 
         let buttonHtml = '';
-        if (hasVoted) {
-            const voteTime = voterSnap.data().votedAt ? voterSnap.data().votedAt.toDate().toLocaleString('th-TH') : "ไม่ระบุเวลา";
-            buttonHtml = `<div class="mt-1 bg-green-50 border border-green-200 p-4 rounded-xl flex items-center justify-between"><div class="flex items-center gap-3"><div class="w-10 h-10 bg-green-100 text-green-600 rounded-full flex items-center justify-center"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg></div><div><p class="text-sm font-bold text-green-800">ท่านใช้สิทธิ์เรียบร้อยแล้ว</p><p class="text-[10px] text-green-600">เมื่อ: ${voteTime}</p></div></div></div>`;
+        
+        // 🌟 1. ถ้าระบบ "ปิดโหวต" แล้ว หรือ "หมดเวลา" ให้แสดงปุ่มดูผลการเลือกตั้ง
+        if (data.status === "closed" || isExpired) {
+            buttonHtml = `
+                <div class="mt-4 space-y-3">
+                    <div class="bg-gray-100 text-gray-500 font-bold py-3 px-4 rounded-xl text-center text-sm border border-gray-200 shadow-inner">การลงคะแนนสิ้นสุดลงแล้ว</div>
+                    <a href="public-results.html" class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold py-3.5 px-4 rounded-xl shadow-md transition-all flex justify-center items-center gap-2 group">
+                        ดูผลการเลือกตั้งอย่างเป็นทางการ 
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                    </a>
+                </div>
+            `;
         }
-        else if (isExpired) buttonHtml = `<div class="mt-1 bg-gray-100 text-gray-500 font-bold py-3 px-4 rounded-xl text-center">หมดเวลาการลงคะแนน</div>`;
-        else if (isNotStarted) buttonHtml = `<div class="mt-3 bg-blue-50 text-blue-500 border border-blue-200 font-bold py-3 px-4 rounded-xl text-center">ยังไม่ถึงเวลาลงคะแนน</div>`;
-        else buttonHtml = `<button onclick="enterBooth('${campaignId}')" class="w-full mt-5 bg-purple-700 hover:bg-purple-800 text-white font-bold py-3.5 px-4 rounded-xl shadow-md transition-all flex justify-center items-center gap-2 group">ลงคะแนน <svg class="w-5 h-5 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg></button>`;
+        // 🌟 2. ถ้ายังเปิดอยู่ และโหวตไปแล้ว ให้ขึ้นว่าโหวตแล้ว
+        else if (hasVoted) {
+            const voteTime = voterSnap.data().votedAt ? voterSnap.data().votedAt.toDate().toLocaleString('th-TH') : "ไม่ระบุเวลา";
+            buttonHtml = `
+                <div class="mt-4 space-y-2">
+                    <div class="bg-green-50 border border-green-200 p-4 rounded-xl flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-green-100 text-green-600 rounded-full flex items-center justify-center"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg></div>
+                            <div><p class="text-sm font-bold text-green-800">ท่านใช้สิทธิ์เรียบร้อยแล้ว</p><p class="text-[10px] text-green-600">เมื่อ: ${voteTime}</p></div>
+                        </div>
+                    </div>
+                </div>`;
+        }
+        // 🌟 3. ถ้ายังเปิดอยู่ แต่ยังไม่ถึงเวลาเริ่มโหวต
+        else if (isNotStarted) {
+            buttonHtml = `<div class="mt-3 bg-blue-50 text-blue-500 border border-blue-200 font-bold py-3 px-4 rounded-xl text-center">ยังไม่ถึงเวลาลงคะแนน</div>`;
+        }
+        // 🌟 4. ถ้ายังเปิดอยู่ และยังไม่หมดเวลา และยังไม่โหวต ให้ขึ้นปุ่มลงคะแนน
+        else {
+            buttonHtml = `<button onclick="enterBooth('${campaignId}')" class="w-full mt-5 bg-purple-700 hover:bg-purple-800 text-white font-bold py-3.5 px-4 rounded-xl shadow-md transition-all flex justify-center items-center gap-2 group">ลงคะแนน <svg class="w-5 h-5 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg></button>`;
+        }
 
         let avatars = '<div class="flex -space-x-3 mt-0">';
         data.options.forEach((o, i) => { 
@@ -423,7 +459,7 @@ window.selectOption = function(element, optName) {
 window.showPolicy = function(name, imageUrl) {
     Swal.fire({
         title: name,
-        html: `<p class="text-sm text-gray-500 mb-4">คลิกพื้นที่ว่างเพื่อปิดหน้าต่าง</p>`,
+        html: `<p class="text-sm text-gray-500 mb-4">คลิก x เพื่อปิดหน้าต่าง</p>`,
         imageUrl: imageUrl || null,
         imageAlt: name,
         showCloseButton: true,
@@ -478,29 +514,31 @@ async function submitFinalVote() {
 
         const batch = writeBatch(db);
 
-        // 1. หย่อนบัตรโหวตลงหีบ (เปลี่ยน voteTo เป็นบันทึก Array)
+        // 1. หย่อนบัตรโหวต (PDPA: ลบชื่อออกเพื่อความลับ แต่เก็บชั้น/ห้องไว้ทำสถิติ)
         batch.set(voterRef, { 
             votedAt: serverTimestamp(), 
             studentId: studentData.id, 
-            name: studentData.name,
-            room: voterRoom, 
-            level: studentData.level, 
+            room: voterRoom,            // ✅ เก็บข้อมูลห้อง
+            level: studentData.level,   // ✅ เก็บข้อมูลระดับชั้น
             uidUsed: currentUser.uid, 
             voteTo: userSelectedOptions 
         });
 
-        // 2. บวกคะแนนสะสมทันที (วนลูปตามจำนวนที่เลือก)
+        // 2. บวกคะแนนสะสมและสถิติรายห้อง (ใช้ Rules ป้องกันการแฮ็กปั่นเลขทีละมากๆ)
         const updateData = { "stats.totalVotes": increment(1) };
         userSelectedOptions.forEach(opt => {
             updateData[`stats.votes.${opt}`] = increment(1);
         });
+        
+        // บวกสถิติของห้องนั้นๆ เข้าไปใน Document หลักด้วย
         updateData[`stats.byRoom.${safeRoomKey}`] = increment(1); 
         
         batch.update(campaignRef, updateData);
         await batch.commit();
 
         Swal.close();
-        showReceipt(currentBoothData.title, studentData.name);
+        // การแสดงใบเสร็จยังใช้ชื่อได้ปกติ เพราะโชว์แค่ในหน้าจอของนักเรียนคนนั้น
+        showReceipt(currentBoothData.title, studentData.name); 
         
     } catch (error) { 
         console.error("Vote Submission Error:", error);
