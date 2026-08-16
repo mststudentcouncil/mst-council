@@ -20,7 +20,6 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script> 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 
     <style>
         body { 
@@ -93,21 +92,38 @@
                         <i class="fa-solid fa-circle-info text-mst-purple mt-1"></i>
                         <div>
                             <p class="text-sm font-bold text-gray-800">เข้าสู่ระบบคลังเกียรติบัตร</p>
-                            <p class="text-xs text-gray-500 mt-1">เฉพาะคณะกรรมการที่รายงานตัวในระบบ REGIS แล้วเท่านั้น</p>
+                            <p class="text-xs text-gray-500 mt-1">เข้าสู่ระบบด้วยอีเมลโรงเรียน (@mst.ac.th)</p>
                         </div>
                     </div>
                 </div>
 
-                <div id="loginBtnContainer" class="flex justify-center mb-4 relative z-10">
-    <button onclick="loginWithPassport()" class="group w-full bg-white border-2 border-gray-100 hover:border-mst-purple text-purple-900 font-bold py-4 px-6 rounded-2xl flex items-center justify-center gap-4 transition-all duration-300 shadow-sm hover:shadow-xl active:scale-95">
-        <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center text-purple-700 shrink-0 shadow-inner group-hover:scale-110 transition-transform">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
-            </svg>
-        </div>
-        <span class="text-md">Login with MST Passport</span>
-    </button>
-</div>
+                <div id="loginBtnContainer" class="flex flex-col items-center justify-center mb-4 relative z-10 w-full">
+                    
+                    <!-- Google Sign-In Button -->
+                    <div id="g_id_onload"
+                         data-client_id="YOUR_GOOGLE_CLIENT_ID_HERE.apps.googleusercontent.com"
+                         data-context="signin"
+                         data-ux_mode="popup"
+                         data-callback="handleCredentialResponse"
+                         data-auto_prompt="false">
+                    </div>
+                    <div class="g_id_signin"
+                         data-type="standard"
+                         data-shape="rectangular"
+                         data-theme="outline"
+                         data-text="signin_with"
+                         data-size="large"
+                         data-logo_alignment="left">
+                    </div>
+                    
+                    <!-- PDPA Notice -->
+                    <div class="mt-5 text-center max-w-xs">
+                        <p class="text-[11px] text-gray-500 leading-relaxed">
+                            การเข้าสู่ระบบถือว่าท่านรับทราบและยินยอมตาม <a href="#" class="text-mst-purple font-bold hover:underline">นโยบายคุ้มครองข้อมูลส่วนบุคคล (PDPA)</a> ของโรงเรียนในการจัดเก็บและประมวลผลข้อมูล
+                        </p>
+                    </div>
+
+                </div>
                 
                 <div id="loginLoader" class="hidden flex-col items-center mt-4">
                     <div class="loader mb-2 w-8 h-8"></div>
@@ -120,6 +136,7 @@
                 <div id="statsRow" class="flex flex-wrap gap-3 mb-8"></div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                    <!-- ฟอร์มอัปโหลด -->
                     <div class="lg:col-span-4">
                         <div class="bg-gray-50 rounded-2xl p-5 border border-gray-200">
                             <h3 class="font-black text-mst-purple mb-5 flex items-center gap-2"><i class="fa-solid fa-file-circle-plus"></i> บันทึกผลงานใหม่</h3>
@@ -172,6 +189,7 @@
                         </div>
                     </div>
 
+                    <!-- แสดงผลงาน -->
                     <div class="lg:col-span-8 flex flex-col h-[700px]">
                         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-4 gap-3">
                             <div>
@@ -205,6 +223,7 @@
         </div>
     </div>
 
+    <!-- Modal พรีวิว -->
     <div id="previewModal" class="fixed inset-0 bg-gray-900/90 z-50 hidden flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-3xl w-full max-w-4xl overflow-hidden shadow-2xl flex flex-col max-h-[95vh]">
             <div class="p-4 flex justify-between items-center border-b">
@@ -215,12 +234,10 @@
             </div>
             
             <div class="p-4 md:p-6 overflow-y-auto bg-gray-50 flex-grow custom-scrollbar">
-                
                 <div class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm mb-4 border-l-4 border-l-mst-purple">
                     <p class="text-xs text-gray-500 font-bold mb-1">ชื่อกิจกรรม/เกียรติบัตร</p>
                     <p class="font-bold text-gray-800 text-xl" id="previewTitle">-</p>
                 </div>
-
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6" id="previewDetails">
                     <div class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
                         <p class="text-xs text-gray-500 font-bold mb-1">วันที่ทำกิจกรรม</p>
@@ -235,14 +252,11 @@
                         <div id="pd_award">-</div>
                     </div>
                 </div>
-
                 <div id="showFullDesc" class="mb-6 p-4 bg-white rounded-2xl text-sm text-gray-600 shadow-sm border border-gray-100 hidden"></div>
-
                 <div class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex flex-col items-center">
                      <p class="text-sm font-bold text-mst-purple mb-3 self-start w-full border-b pb-2"><i class="fa-solid fa-file-image mr-2"></i> ไฟล์แนบ</p>
                     <div id="previewBody" class="w-full"></div>
                 </div>
-
             </div>
             
             <div class="p-4 bg-white border-t text-center">
@@ -253,6 +267,7 @@
         </div>
     </div>
 
+    <!-- Modal แก้ไข -->
     <div id="editModal" class="fixed inset-0 bg-gray-900/90 z-50 hidden flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl flex flex-col max-h-[95vh]">
             <div class="p-4 flex justify-between items-center border-b bg-yellow-50">
@@ -305,6 +320,7 @@
         </div>
     </div>
 
+    <!-- Modal IG Story -->
     <div id="igStoryModal" class="fixed inset-0 bg-gray-900/90 z-50 hidden flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-3xl w-full max-w-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
             <div class="p-4 flex justify-between items-center border-b">
@@ -331,70 +347,76 @@
     </div>
 
     <script>
-        // ⚠️ อย่าลืมใส่ Web App URL ตัวใหม่ของคุณที่นี่ 
+        // ⚠️ Web App URL เดิม
         const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbx82RgLw1JIiiZRpHAZHBCQgQyNDm9uINgRyHeGk1BJGVphhMap4ATP4Q_FkIbf3lyZ/exec";
         
-        let userId = ""; // เปลี่ยนจาก userEmail เป็น userId
-let userName = "";
-let fileData = {};
-let allCerts = [];
+        let userId = ""; 
+        let userName = "";
+        let fileData = {};
+        let allCerts = [];
 
-// ------------------------------------------
-// จัดการ Session (กันหลุดตอนรีเฟรช)
-// ------------------------------------------
-$(document).ready(function() {
-    // เปลี่ยน Key การดึงข้อมูลจาก email เป็น userid
-    const savedId = localStorage.getItem('mstsc_userid');
-    const savedName = localStorage.getItem('mstsc_name');
-    
-    if(savedId && savedName) {
-        userId = savedId;
-        userName = savedName;
-        
-        $('#userNameShow').text(userName);
-        $('#userEmailShow').text(`รหัส: ${userId}`); // เปลี่ยนข้อความที่โชว์เป็น รหัสประจำตัว
-        
-        $('#loginSection').hide();
-        $('#userProfileHeader').removeClass('hidden');
-        $('#mainContent').removeClass('hidden').show();
-        
-        loadCerts();
-    }
-
-    // เรียกฟังก์ชันเพื่อตรวจสอบว่ามีข้อมูลส่งกลับมาจาก Passport หรือไม่
-    checkPassportAuth();
-});
-
-// ==========================================
-// ระบบ Login ด้วย MST Passport
-// ==========================================
-// ฟังก์ชันนี้จะถูกเรียกเมื่อผู้ใช้กดปุ่ม Login with MST Passport
-function loginWithPassport() {
-    const currentUrl = window.location.href.split('#')[0]; 
-    // เด้งไปหน้า Passport พร้อมส่ง URL หน้าเว็บปัจจุบันไปให้มันเด้งกลับมา
-    window.location.href = `https://mstsc.pages.dev/passport?redirect=${encodeURIComponent(currentUrl)}`;
-}
-
-// ฟังก์ชันนี้จะคอยดักจับและถอดรหัสข้อมูลที่ Passport ส่งกลับมาบน URL
-function checkPassportAuth() {
-    if (window.location.hash.includes('#auth=')) {
-        
-        // 🌟 ซ่อนปุ่มล็อกอินเดิม และโชว์ไอคอนกำลังโหลด
-        $('#loginBtnContainer').hide(); 
-        $('#loginLoader').removeClass('hidden').addClass('flex');
-        
-        try {
-            // ถอดรหัสลับด้วย CryptoJS
-            const payload = window.location.hash.replace('#auth=', '');
-            const decrypted = CryptoJS.AES.decrypt(decodeURIComponent(payload), "MST_SECRET_KEY_2026").toString(CryptoJS.enc.Utf8);
-            const userData = JSON.parse(decrypted);
+        // ------------------------------------------
+        // จัดการ Session (กันหลุดตอนรีเฟรช)
+        // ------------------------------------------
+        $(document).ready(function() {
+            const savedId = localStorage.getItem('mstsc_userid');
+            const savedName = localStorage.getItem('mstsc_name');
             
-            const stdId = userData.id; 
+            if(savedId && savedName) {
+                userId = savedId;
+                userName = savedName;
+                
+                $('#userNameShow').text(userName);
+                $('#userEmailShow').text(`รหัส: ${userId}`); 
+                
+                $('#loginSection').hide();
+                $('#userProfileHeader').removeClass('hidden');
+                $('#mainContent').removeClass('hidden').show();
+                
+                loadCerts();
+            }
+        });
+
+        // ==========================================
+        // ระบบ Login ด้วย Google Sign-In
+        // ==========================================
+        function decodeJwtResponse(token) {
+            let base64Url = token.split('.')[1];
+            let base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            let jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+            return JSON.parse(jsonPayload);
+        }
+
+        // ฟังก์ชันรับผลลัพธ์จากการล็อกอิน Google
+        window.handleCredentialResponse = function(response) {
+            const responsePayload = decodeJwtResponse(response.credential);
+            const email = responsePayload.email;
+            const name = responsePayload.name;
+
+            // ตรวจสอบโดเมนของโรงเรียน
+            if (!email.endsWith('@mst.ac.th')) {
+                Swal.fire('ปฏิเสธการเข้าถึง', 'กรุณาใช้อีเมลของโรงเรียน (@mst.ac.th) เท่านั้น', 'warning');
+                return;
+            }
+
+            const emailPrefix = email.split('@')[0];
             
-            // ล้าง URL ให้สะอาด
-            history.replaceState(null, null, ' '); 
+            // ตรวจสอบรูปแบบอีเมล (ปีจบ 2 หลัก + รหัส 5 หลัก รวม 7 หลัก)
+            if (emailPrefix.length !== 7 || isNaN(emailPrefix)) {
+                Swal.fire('รูปแบบอีเมลไม่ถูกต้อง', 'กรุณาใช้อีเมลนักเรียนรูปแบบมาตรฐาน (เช่น 6829903@mst.ac.th)', 'error');
+                return;
+            }
+
+            // ตัดเอาเฉพาะรหัสนักเรียน 5 หลัก (จาก Index ที่ 2 เป็นต้นไป)
+            const stdId = emailPrefix.substring(2); 
+
+            // ซ่อนปุ่ม Google แล้วโชว์ Loader
+            $('#loginBtnContainer').hide(); 
+            $('#loginLoader').removeClass('hidden').addClass('flex');
             
-            // ส่งรหัสนักเรียน (std_id) ไปให้ Google Apps Script เช็คสิทธิ์
+            // ส่งรหัสนักเรียน (stdId) ไปให้ Google Apps Script เช็คสิทธิ์ในฐานข้อมูลเดิม
             fetch(WEB_APP_URL, { 
                 method: 'POST', 
                 body: JSON.stringify({ action: 'verifyLogin', std_id: stdId }) 
@@ -403,7 +425,7 @@ function checkPassportAuth() {
             .then(data => {
                 if (data.status === 'success') {
                     userId = stdId;
-                    userName = data.name;
+                    userName = data.name || name; // ใช้ชื่อจากระบบถ้ามี ถ้าไม่มีใช้จาก Google
                     
                     // บันทึก Session ลงเครื่อง
                     localStorage.setItem('mstsc_userid', userId);
@@ -432,54 +454,42 @@ function checkPassportAuth() {
                             window.open('https://mstsc.pages.dev/regis', '_blank');
                         }
                     });
-                    // 🌟 ซ่อน Loader และ โชว์ปุ่ม Login กลับมา (เผื่อผู้ใช้กดยืนยันตัวใหม่)
                     $('#loginLoader').addClass('hidden').removeClass('flex');
                     $('#loginBtnContainer').fadeIn();
                 } else {
                     Swal.fire('ข้อผิดพลาด', data.message, 'error');
-                    // 🌟 ซ่อน Loader และ โชว์ปุ่ม Login กลับมา
                     $('#loginLoader').addClass('hidden').removeClass('flex');
                     $('#loginBtnContainer').fadeIn();
                 }
             })
             .catch(err => {
                 Swal.fire('ระบบขัดข้อง', 'ไม่สามารถเชื่อมต่อฐานข้อมูลได้', 'error');
-                // 🌟 ซ่อน Loader และ โชว์ปุ่ม Login กลับมา
                 $('#loginLoader').addClass('hidden').removeClass('flex');
                 $('#loginBtnContainer').fadeIn();
             });
-            
-        } catch (error) {
-            Swal.fire('ข้อผิดพลาด', 'เกิดปัญหาในการยืนยันตัวตนจาก Passport', 'error');
-            // 🌟 ซ่อน Loader และ โชว์ปุ่ม Login กลับมา
-            $('#loginLoader').addClass('hidden').removeClass('flex');
-            $('#loginBtnContainer').fadeIn();
-        }
-    }
-}
+        };
 
-// ==========================================
-// ออกจากระบบ
-// ==========================================
-function confirmLogout() {
-    Swal.fire({
-        title: 'ยืนยันออกจากระบบ?',
-        text: "คุณต้องการออกจากระบบคลังเกียรติบัตรใช่หรือไม่",
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonColor: '#6A1B9A',
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'ใช่, ออกจากระบบ',
-        cancelButtonText: 'ยกเลิก'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            // ลบ key ให้ตรงกับที่ตั้งไว้ตอน Login
-            localStorage.removeItem('mstsc_userid');
-            localStorage.removeItem('mstsc_name');
-            location.reload();
+        // ==========================================
+        // ออกจากระบบ
+        // ==========================================
+        function confirmLogout() {
+            Swal.fire({
+                title: 'ยืนยันออกจากระบบ?',
+                text: "คุณต้องการออกจากระบบคลังเกียรติบัตรใช่หรือไม่",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#6A1B9A',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'ใช่, ออกจากระบบ',
+                cancelButtonText: 'ยกเลิก'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    localStorage.removeItem('mstsc_userid');
+                    localStorage.removeItem('mstsc_name');
+                    location.reload();
+                }
+            })
         }
-    })
-}
 
         // ==========================================
         // ระบบจัดการไฟล์อัปโหลด
@@ -505,7 +515,7 @@ function confirmLogout() {
             
             const payload = { 
                 action: 'uploadCert', 
-                std_id: userId,  // <--- แก้บรรทัดนี้
+                std_id: userId,
                 certName: $('#certName').val(), 
                 location: $('#certLocation').val(),
                 certDate: $('#certDate').val(),
@@ -532,13 +542,12 @@ function confirmLogout() {
         });
 
         // ==========================================
-        // โหลดและแสดงคลังข้อมูล (ปุ่มลบ/แก้ไข)
+        // โหลดและแสดงคลังข้อมูล
         // ==========================================
         function loadCerts() {
             $('#certLoader').removeClass('hidden').addClass('flex');
             
-            // เปลี่ยน email เป็น std_id
-fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify({ action: 'getMyCerts', std_id: userId }) }) // <--- แก้บรรทัดนี้
+            fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify({ action: 'getMyCerts', std_id: userId }) })
                 .then(res => res.json())
                 .then(data => {
                     $('#certLoader').addClass('hidden').removeClass('flex');
@@ -614,11 +623,10 @@ fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify({ action: 'getMyCerts'
                 if (result.isConfirmed) {
                     Swal.fire({title: 'กำลังลบ...', allowOutsideClick: false, didOpen: () => {Swal.showLoading()}});
                     
-                    // เปลี่ยน email เป็น std_id
-fetch(WEB_APP_URL, {
-    method: 'POST',
-    body: JSON.stringify({ action: 'deleteCert', std_id: userId, fileId: fileId }) // <--- แก้บรรทัดนี้
-})
+                    fetch(WEB_APP_URL, {
+                        method: 'POST',
+                        body: JSON.stringify({ action: 'deleteCert', std_id: userId, fileId: fileId })
+                    })
                     .then(res => res.json())
                     .then(data => {
                         if(data.status === 'success') {
@@ -663,11 +671,10 @@ fetch(WEB_APP_URL, {
             e.preventDefault();
             $('#btnUpdate').prop('disabled', true).html('<i class="fa-solid fa-spinner fa-spin mr-2"></i> กำลังบันทึก...');
             
-            // เปลี่ยน email เป็น std_id
-const payload = { 
-    action: 'editCert', 
-    std_id: userId, // <--- แก้บรรทัดนี้
-    fileId: $('#editFileId').val(),
+            const payload = { 
+                action: 'editCert', 
+                std_id: userId, 
+                fileId: $('#editFileId').val(),
                 certName: $('#editCertName').val(), 
                 location: $('#editCertLocation').val(),
                 certDate: $('#editCertDate').val(),
