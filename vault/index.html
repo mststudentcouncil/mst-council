@@ -97,24 +97,26 @@
                     </div>
                 </div>
 
-                <div id="loginBtnContainer" class="flex flex-col items-center justify-center mb-4 relative z-10 w-full">
-                    
-                    <!-- Google Sign-In Button -->
-                    <div id="g_id_onload"
-                         data-client_id="YOUR_GOOGLE_CLIENT_ID_HERE.apps.googleusercontent.com"
-                         data-context="signin"
-                         data-ux_mode="popup"
-                         data-callback="handleCredentialResponse"
-                         data-auto_prompt="false">
-                    </div>
-                    <div class="g_id_signin"
-                         data-type="standard"
-                         data-shape="rectangular"
-                         data-theme="outline"
-                         data-text="signin_with"
-                         data-size="large"
-                         data-logo_alignment="left">
-                    </div>
+                <div id="loginBtnWrapper" class="flex flex-col items-center justify-center mb-6 relative z-10 w-full">
+        <!-- Google Sign-In -->
+        <div id="g_id_onload" 
+             data-client_id="1055496557-rm1petnl1gtd6c1ed01q9o6k880ik2ta.apps.googleusercontent.com" 
+             data-callback="handleStudentLogin" 
+             data-auto_prompt="false"
+             data-auto_select="false"
+             data-hd="mst.ac.th"> <!-- เพิ่มบรรทัดนี้เพื่อจำกัดโดเมนอีเมล -->
+        </div>
+        <div class="g_id_signin" 
+             data-type="standard" 
+             data-size="large" 
+             data-theme="outline" 
+             data-text="sign_in_with" 
+             data-shape="pill" 
+             data-logo_alignment="left">
+        </div>
+        <p class="mt-4 text-xs text-gray-500 font-bold">
+            * เข้าสู่ระบบด้วย @mst.ac.th เท่านั้น
+        </p>
                     
                     <!-- PDPA Notice -->
                     <div class="mt-5 text-center max-w-xs">
