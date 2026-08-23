@@ -1,8 +1,3 @@
-<script>
-    // เติม / ข้างหน้า เพื่อให้วิ่งไปที่หน้าหลักของโดเมนเสมอ
-    window.location.href = "/maintenance.html";
-</script>
-
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -127,19 +122,26 @@
 
     
     <div id="loginBtnWrapper" class="flex flex-col items-center justify-center mb-6 relative z-10 w-full">
-    <button id="loginBtn" onclick="loginWithPassport()" class="group w-full bg-white border-2 border-gray-100 hover:border-mst-purple text-purple-900 font-bold py-4 px-6 rounded-2xl flex items-center justify-center gap-4 transition-all duration-300 shadow-sm hover:shadow-xl active:scale-95">
-        <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center text-purple-700 shrink-0 shadow-inner group-hover:scale-110 transition-transform">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
-            </svg>
+        <!-- Google Sign-In -->
+        <div id="g_id_onload" 
+             data-client_id="1055496557-rm1petnl1gtd6c1ed01q9o6k880ik2ta.apps.googleusercontent.com" 
+             data-callback="handleStudentLogin" 
+             data-auto_prompt="false"
+             data-auto_select="false"
+             data-hd="mst.ac.th"> <!-- เพิ่มบรรทัดนี้เพื่อจำกัดโดเมนอีเมล -->
         </div>
-        <span class="text-md">Login with MST Passport</span>
-    </button>
-    
-    <p class="mt-4 text-xs text-gray-400">
-        * เข้าสู่ระบบผ่านระบบศูนย์กลาง
-    </p>
-</div>
+        <div class="g_id_signin" 
+             data-type="standard" 
+             data-size="large" 
+             data-theme="outline" 
+             data-text="sign_in_with" 
+             data-shape="pill" 
+             data-logo_alignment="left">
+        </div>
+        <p class="mt-4 text-xs text-gray-500 font-bold">
+            * เข้าสู่ระบบด้วย @mst.ac.th เท่านั้น
+        </p>
+    </div>
     
     <div id="loginLoader" class="hidden flex-col items-center mt-6 relative z-10">
         <div class="loader mb-3"></div>
@@ -319,7 +321,7 @@
                 </div>
                 <div class="space-y-2 text-sm bg-gray-50 p-3.5 rounded-xl border border-gray-100">
                     <div class="flex justify-between items-center"><span class="text-gray-500 font-medium">Email:</span><span class="font-bold text-mst-purple select-all">studentcouncil@mst.ac.th</span></div>
-                    <div class="flex justify-between items-center"><span class="text-gray-500 font-medium">Password:</span><span class="font-black text-gray-800 select-all tracking-wider bg-gray-200/50 px-2 py-0.5 rounded">077285686</span></div>
+                    <div class="flex justify-between items-center"><span class="text-gray-500 font-medium">Password:</span><span id="secure_email_pass" class="font-black text-gray-800 select-all tracking-wider bg-gray-200/50 px-2 py-0.5 rounded">กำลังโหลด...</span></div>
                 </div>
             </div>
 
@@ -331,7 +333,7 @@
                 <div class="space-y-2 text-sm bg-gray-50 p-3.5 rounded-xl border border-gray-100">
                     <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 border-b border-gray-200/60 pb-2"><span class="text-gray-500 font-medium">IG Username:</span><span class="font-bold text-gray-800 select-all">mst.studentcouncil</span></div>
                     <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 border-b border-gray-200/60 pb-2 pt-1"><span class="text-gray-500 font-medium">Email:</span><span class="font-bold text-mst-purple select-all">studentcouncil@mst.ac.th</span></div>
-                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 pt-1"><span class="text-gray-500 font-medium">Password:</span><span class="font-black text-gray-800 select-all tracking-wider">@Muangsurat</span></div>
+                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 pt-1"><span class="text-gray-500 font-medium">Password:</span><span id="secure_ig_pass" class="font-black text-gray-800 select-all tracking-wider">กำลังโหลด...</span></div>
                 </div>
             </div>
 
@@ -342,7 +344,7 @@
                 </div>
                 <div class="space-y-2 text-sm bg-gray-50 p-3.5 rounded-xl border border-gray-100 mb-3">
                     <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 border-b border-gray-200/60 pb-2"><span class="text-gray-500 font-medium">Email:</span><span class="font-bold text-mst-purple select-all">studentcouncil@mst.ac.th</span></div>
-                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 pt-1"><span class="text-gray-500 font-medium">Password:</span><span class="font-black text-gray-800 select-all tracking-wider">@Muangsurat</span></div>
+                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 pt-1"><span class="text-gray-500 font-medium">Password:</span><span id="secure_line_pass" class="font-black text-gray-800 select-all tracking-wider">กำลังโหลด...</span></div>
                 </div>
                 <div class="bg-red-50 text-red-700 text-xs p-3 rounded-xl border border-red-100 leading-relaxed">
                     <i class="fa-solid fa-shield-halved text-red-500 mr-1"></i> <b>หมายเหตุ:</b> มีการตั้งยืนยันสองชั้น (2FA) ระบบจะส่งรหัสยืนยันไปทางอีเมล studentcouncil@mst.ac.th
@@ -450,16 +452,6 @@
                         <p class="text-[10px] text-gray-400">mstsc.pages.dev/feedback</p>
                     </div>
                 </a>
-
-                <a href="https://mstsc.pages.dev/digitalid/admin" target="_blank" class="flex items-center p-3.5 bg-white border border-gray-100 hover:border-teal-500 hover:bg-teal-50/50 rounded-2xl transition-all shadow-sm group">
-                    <div class="w-10 h-10 bg-gray-50 text-gray-400 group-hover:bg-teal-100 group-hover:text-teal-600 rounded-xl flex items-center justify-center mr-4 transition-colors">
-                        <i class="fa-solid fa-qrcode"></i>
-                    </div>
-                    <div class="flex-grow">
-                        <p class="font-bold text-gray-800 text-sm group-hover:text-teal-600 transition-colors">จัดการการเข้าร่วมกิจกรรม (Check-in)</p>
-                        <p class="text-[10px] text-gray-400">mstsc.pages.dev/digitalid/admin</p>
-                    </div>
-                </a>
             </div>
         </div>
     </div>
@@ -473,6 +465,41 @@
 </div>
 
     <script>
+        // ==========================================
+// 🛡️ SECURITY CONSOLE WARNING
+// ==========================================
+(function() {
+    // กำหนดสไตล์ข้อความคำว่า "หยุด!"
+    const stopStyle = [
+        'color: #ff0000',
+        'font-size: 60px',
+        'font-weight: 900',
+        'text-shadow: 2px 2px 0px #222, 4px 4px 0px #fff',
+        'font-family: "Prompt", "Anuphan", sans-serif',
+        'display: block',
+        'margin-bottom: 10px'
+    ].join(';');
+
+    // กำหนดสไตล์ข้อความคำเตือน
+    const warningStyle = [
+        'color: #333333',
+        'font-size: 16px',
+        'font-weight: bold',
+        'font-family: "Prompt", "Anuphan", sans-serif',
+        'line-height: 1.6',
+        'display: block'
+    ].join(';');
+
+    // ข้อความคำเตือน
+    const warningText = "ข้อห้ามเกี่ยวกับการเข้าถึง API และระบบโดยตรง ผู้ใช้งานต้องใช้งานผ่านระบบและหน้าจอ (UI) ที่คณะกรรมการสภานักเรียนกำหนดเท่านั้น ห้ามเข้าถึง ดึงข้อมูล หรือใช้งาน API, API Key และ Token ของระบบโดยตรง นอกจากนี้ ห้ามทำวิศวกรรมย้อนกลับ (Reverse Engineer) ถอดรหัส ดักจับ เลียนแบบ หรือสร้างโปรแกรม/บอทใดๆ เพื่อเชื่อมต่อเข้ากับ API โดยไม่ได้รับอนุญาตเป็นลายลักษณ์อักษร หากพบการฝ่าฝืน คณะกรรมการสภานักเรียนขอสงวนสิทธิ์ในการระงับบัญชีผู้ใช้ทันที และจะดำเนินคดีทางกฎหมายตาม พ.ร.บ. ว่าด้วยการกระทำความผิดเกี่ยวกับคอมพิวเตอร์ อย่างถึงที่สุด";
+
+    // สั่งพิมพ์ลง Console
+    console.log('%cหยุด!', stopStyle);
+    console.log('%c' + warningText, warningStyle);
+    
+    // (ทางเลือก) เคลียร์ Console ก่อนหน้าทิ้งทั้งหมดเพื่อให้ข้อความนี้เด่นชัดที่สุด
+    // setTimeout(console.clear.bind(console), 100); 
+})();
         // ==========================================
         // ⚙️ 1. ตั้งค่าพื้นฐาน (CONFIG)
         // ==========================================
@@ -508,128 +535,159 @@
             return JSON.parse(decodeURIComponent(window.atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')));
         }
 
-        function loginWithPassport() {
-    const currentUrl = window.location.href.split('#')[0];
-    window.location.href = `../passport/index.html?redirect=${encodeURIComponent(currentUrl)}`;
-}
+        // ฟังก์ชันอ่านค่า JWT Token จาก Google
+        function parseJwt (token) {
+            var base64Url = token.split('.')[1];
+            var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            return JSON.parse(decodeURIComponent(window.atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')));
+        }
 
-window.addEventListener('DOMContentLoaded', async () => {
-    const hash = window.location.hash;
-    if (hash && hash.startsWith("#auth=")) {
-        $('#loginBtnWrapper').hide();
-        $('#loginLoader').removeClass('hidden').addClass('flex');
+        // ฟังก์ชันจัดการเมื่อล็อกอิน Google สำเร็จ
+        async function handleStudentLogin(response) {
+            $('#loginBtnWrapper').hide();
+            $('#loginLoader').removeClass('hidden').addClass('flex');
 
-        const payloadBase64 = hash.replace("#auth=", "");
-        try {
-            const encryptedPayload = decodeURIComponent(payloadBase64);
-            const bytes = CryptoJS.AES.decrypt(encryptedPayload, "MST_SECRET_KEY_2026");
-            const decodedStr = bytes.toString(CryptoJS.enc.Utf8);
-            const payload = JSON.parse(decodedStr);
+            try {
+                const payload = parseJwt(response.credential);
+                const email = payload.email;
 
-            history.replaceState(null, null, ' '); // ล้าง URL
-
-            if (Date.now() - payload.timestamp > 60000) throw new Error("Session Expired");
-            
-            // ❌ ลบส่วนที่ดักจับบล็อกศิษย์เก่าออกไปแล้ว เพื่อให้ไปเช็คสิทธิ์ที่ Google Sheet แทน 100%
-
-            const stdId = payload.id;
-            const email = payload.email || `${stdId}@mst.ac.th`;
-
-            // ดึงข้อมูลโดยส่ง std_id เข้าไปเช็คในระบบสภาโดยตรง (Backend)
-            const res = await fetch(API_URL, { 
-                method: 'POST', 
-                body: JSON.stringify({ action: 'verifyLogin', std_id: stdId, email: email }) 
-            });
-            const data = await res.json();
-
-            if (data.status === 'success') {
-                $('#loginSection').addClass('hidden');
-                $('#registrationForm').removeClass('step-hidden').addClass('fade-in');
-                
-                studentAuthData.std_id = data.std_id || stdId;
-                //$('#school_email').val(email);
-
-                // ดึงข้อมูลเดิมมาเติมในฟอร์ม
-                if(data.existing_data) {
-                    const d = data.existing_data;
-                    $('#std_id').val(d.std_id || stdId);
-                    $('#prefix').val(d.prefix || payload.prefix || 'นาย');
-                    $('#fname_th').val(d.fname_th || payload.fname || '');
-                    $('#lname_th').val(d.lname_th || payload.lname || '');
-                    $('#fname_en').val(d.fname_en || '');
-                    $('#lname_en').val(d.lname_en || '');
-                    $('#nickname').val(d.nickname || '');
-                    $('#blood_type').val(d.blood_type || '');
-                    $('#room').val(d.room || payload.room || '');
-                    $('#id_card').val(d.id_card || '');
-                    $('#personal_email').val(d.personal_email || '');
-                    $('#phone').val(d.phone ? '0'+d.phone : '');
-                    $('#line_id').val(d.line_id || '');
-                    $('#social').val(d.social || '');
-                    $('#parent_name').val(d.parent_name || '');
-                    $('#parent_phone').val(d.parent_phone ? '0'+d.parent_phone : '');
-                    $('#addr_no').val(d.addr_no || '');
-                    $('#district').val(d.district || '');
-                    $('#amphoe').val(d.amphoe || '');
-                    $('#province').val(d.province || '');
-                    $('#zipcode').val(d.zipcode || '');
-                    $('#med_condition').val(d.med_condition || '-');
-                    $('#food_limit').val(d.food_limit || '-');
-                    $('#shirt_size').val(d.shirt_size || 'M');
-                    $('#existing_document_url').val(d.document_url || '');
-                    $('#academic_year').val(d.academic_year || systemAcademicYear);
-
-                    // เติมวันเกิด
-                    if(d.birthdate) {
-                        let dateObj = new Date(d.birthdate);
-                        if(!isNaN(dateObj)) {
-                            $('#dob_year').val(dateObj.getFullYear() + 543);
-                            $('#dob_month').val((dateObj.getMonth() + 1).toString().padStart(2,'0'));
-                            $('#dob_day').val(dateObj.getDate().toString().padStart(2,'0'));
-                        }
-                    }
-
-                    if(d.id_card && String(d.id_card).trim() !== '') {
-                        $('#id_card').prop('readonly', true).addClass('pointer-events-none');
-                    }
-                    if(d.birthdate) {
-                        $('#dob_day, #dob_month, #dob_year').prop('disabled', true).addClass('pointer-events-none bg-gray-50 text-gray-500');
-                    }
-
-                    const isAlreadyRegistered = d.status === 'รายงานตัวสำเร็จ' || (d.addr_no && d.phone);
-                    
-                    if(isAlreadyRegistered) {
-                        $('#loginSection').addClass('hidden');
-                        $('#registrationForm').addClass('hidden step-hidden'); 
-                        $('#successSection').removeClass('hidden'); 
-                        return; 
-                    }
-
-                    const stuYear = parseInt(d.academic_year);
-                    $('#showStudentYear').text(stuYear ? stuYear : '-');
-                    
-                    let statusHtml = '';
-                    if (!stuYear) { statusHtml = `<span class="w-2 h-2 rounded-full bg-gray-500"></span> ไม่ระบุปีการศึกษา`; $('#showStatusText').removeClass().addClass('inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-bold bg-gray-200 text-gray-700'); }
-                    else if (stuYear === systemAcademicYear) { statusHtml = `<span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> กำลังดำรงตำแหน่ง`; $('#showStatusText').removeClass().addClass('inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-bold bg-green-100 text-green-700'); }
-                    else if (stuYear < systemAcademicYear) { statusHtml = `<span class="w-2 h-2 rounded-full bg-yellow-500"></span> ที่ปรึกษาสภานักเรียน`; $('#showStatusText').removeClass().addClass('inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-bold bg-yellow-100 text-yellow-700'); }
-                    else { statusHtml = `<span class="w-2 h-2 rounded-full bg-blue-500"></span> ว่าที่คณะกรรมการ`; $('#showStatusText').removeClass().addClass('inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-bold bg-blue-100 text-blue-700'); }
-                    $('#showStatusText').html(statusHtml);
+                // 1. ตรวจสอบว่าเป็นอีเมลโรงเรียน @mst.ac.th หรือไม่
+                if (!email.endsWith('@mst.ac.th')) {
+                    Swal.fire('ปฏิเสธการเข้าถึง', 'กรุณาใช้อีเมลของโรงเรียน (@mst.ac.th) เท่านั้น', 'error');
+                    resetLogin();
+                    $('#loginBtnWrapper').show();
+                    return;
                 }
-            } else {
-                Swal.fire('ไม่พบสิทธิ์', data.message || 'รหัสนักเรียนของคุณไม่มีสิทธิ์เข้าระบบรายงานตัวสภานักเรียน', 'warning');
+
+                // 2. แยกรหัสนักเรียนจากอีเมล (ตัด 2 หลักแรกที่เป็นปีจบการศึกษาออก)
+                // ตัวอย่าง: 6829903@mst.ac.th -> ตัดเหลือ 29903
+                const emailPrefix = email.split('@')[0];
+                let stdId = emailPrefix;
+                
+                if (/^\d{7}$/.test(emailPrefix)) {
+                    stdId = emailPrefix.substring(2); // ดึงเฉพาะ 5 หลักสุดท้าย
+                } else if (/^\d{5}$/.test(emailPrefix)) {
+                    stdId = emailPrefix; // กรณีเป็น 5 หลักอยู่แล้ว
+                } else {
+                    Swal.fire('รูปแบบอีเมลไม่ถูกต้อง', 'อีเมลไม่ตรงตามรูปแบบ (รหัสนักเรียน@mst.ac.th)', 'error');
+                    resetLogin();
+                    $('#loginBtnWrapper').show();
+                    return;
+                }
+
+                // 3. ส่งข้อมูลไปตรวจสอบกับ Google Apps Script
+                const res = await fetch(API_URL, { 
+                    method: 'POST', 
+                    body: JSON.stringify({ action: 'verifyLogin', std_id: stdId, email: email }) 
+                });
+                const data = await res.json();
+
+                if (data.status === 'success') {
+                    $('#loginSection').addClass('hidden');
+                    $('#registrationForm').removeClass('step-hidden').addClass('fade-in');
+                    
+                    studentAuthData.std_id = data.std_id || stdId;
+                    
+                    // บันทึกอีเมลที่ใช้ล็อกอินลงไปในช่อง อีเมลโรงเรียน และล็อกไม่ให้แก้
+                    $('#school_email').val(email).prop('readonly', true).addClass('pointer-events-none');
+
+                    // นำข้อมูลเดิมมาแสดงในฟอร์ม
+                    if(data.existing_data) {
+                        const d = data.existing_data;
+                        $('#std_id').val(d.std_id || stdId);
+                        $('#prefix').val(d.prefix || 'นาย');
+                        $('#fname_th').val(d.fname_th || '');
+                        $('#lname_th').val(d.lname_th || '');
+                        $('#fname_en').val(d.fname_en || '');
+                        $('#lname_en').val(d.lname_en || '');
+                        $('#nickname').val(d.nickname || '');
+                        $('#blood_type').val(d.blood_type || '');
+                        $('#room').val(d.room || '');
+                        $('#id_card').val(d.id_card || '');
+                        $('#personal_email').val(d.personal_email || '');
+                        $('#phone').val(d.phone ? '0'+d.phone : '');
+                        $('#line_id').val(d.line_id || '');
+                        $('#social').val(d.social || '');
+                        $('#parent_name').val(d.parent_name || '');
+                        $('#parent_phone').val(d.parent_phone ? '0'+d.parent_phone : '');
+                        $('#addr_no').val(d.addr_no || '');
+                        $('#district').val(d.district || '');
+                        $('#amphoe').val(d.amphoe || '');
+                        $('#province').val(d.province || '');
+                        $('#zipcode').val(d.zipcode || '');
+                        $('#med_condition').val(d.med_condition || '-');
+                        $('#food_limit').val(d.food_limit || '-');
+                        $('#shirt_size').val(d.shirt_size || 'M');
+                        $('#existing_document_url').val(d.document_url || '');
+                        $('#academic_year').val(d.academic_year || systemAcademicYear);
+
+                        if(d.birthdate) {
+                            let dateObj = new Date(d.birthdate);
+                            if(!isNaN(dateObj)) {
+                                $('#dob_year').val(dateObj.getFullYear() + 543);
+                                $('#dob_month').val((dateObj.getMonth() + 1).toString().padStart(2,'0'));
+                                $('#dob_day').val(dateObj.getDate().toString().padStart(2,'0'));
+                            }
+                        }
+
+                        if(d.id_card && String(d.id_card).trim() !== '') {
+                            $('#id_card').prop('readonly', true).addClass('pointer-events-none');
+                        }
+                        if(d.birthdate) {
+                            $('#dob_day, #dob_month, #dob_year').prop('disabled', true).addClass('pointer-events-none bg-gray-50 text-gray-500');
+                        }
+
+                        // ตรวจสอบว่ารายงานตัวไปหรือยัง
+                        const isAlreadyRegistered = d.status === 'รายงานตัวสำเร็จ' || (d.addr_no && d.phone);
+                        
+                        if(isAlreadyRegistered) {
+                            $('#loginSection').addClass('hidden');
+                            $('#registrationForm').addClass('hidden step-hidden'); 
+                            
+                            // นำรหัสความลับจาก Backend มาใส่ในช่อง HTML (ถ้ามี)
+                            if (data.secrets) {
+                                $('#secure_email_pass').text(data.secrets.email_pass);
+                                $('#secure_ig_pass').text(data.secrets.ig_pass);
+                                $('#secure_line_pass').text(data.secrets.line_pass);
+                            } else {
+                                $('#secure_email_pass').text("ไม่สามารถดึงรหัสผ่านได้");
+                                $('#secure_ig_pass').text("ไม่สามารถดึงรหัสผ่านได้");
+                                $('#secure_line_pass').text("ไม่สามารถดึงรหัสผ่านได้");
+                            }
+
+                            $('#successSection').removeClass('hidden'); 
+                            return; 
+                        }       
+
+                        const stuYear = parseInt(d.academic_year);
+                        $('#showStudentYear').text(stuYear ? stuYear : '-');
+                        
+                        let statusHtml = '';
+                        if (!stuYear) { statusHtml = `<span class="w-2 h-2 rounded-full bg-gray-500"></span> ไม่ระบุปีการศึกษา`; $('#showStatusText').removeClass().addClass('inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-bold bg-gray-200 text-gray-700'); }
+                        else if (stuYear === systemAcademicYear) { statusHtml = `<span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> กำลังดำรงตำแหน่ง`; $('#showStatusText').removeClass().addClass('inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-bold bg-green-100 text-green-700'); }
+                        else if (stuYear < systemAcademicYear) { statusHtml = `<span class="w-2 h-2 rounded-full bg-yellow-500"></span> ที่ปรึกษาสภานักเรียน`; $('#showStatusText').removeClass().addClass('inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-bold bg-yellow-100 text-yellow-700'); }
+                        else { statusHtml = `<span class="w-2 h-2 rounded-full bg-blue-500"></span> ว่าที่คณะกรรมการ`; $('#showStatusText').removeClass().addClass('inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-bold bg-blue-100 text-blue-700'); }
+                        $('#showStatusText').html(statusHtml);
+                    }
+                } else {
+                    Swal.fire('ไม่พบสิทธิ์', data.message || 'รหัสนักเรียนของคุณยังไม่มีสิทธิ์เข้าระบบรายงานตัว', 'warning');
+                    resetLogin();
+                    $('#loginBtnWrapper').show();
+                }
+
+            } catch (err) {
+                console.error("Google Login Error:", err);
+                Swal.fire('ระบบขัดข้อง', 'เกิดข้อผิดพลาดในการตรวจสอบข้อมูล Google', 'error');
                 resetLogin();
                 $('#loginBtnWrapper').show();
             }
-
-        } catch (err) {
-            console.error("SSO Error:", err);
-            history.replaceState(null, null, ' ');
-            Swal.fire('ระบบขัดข้อง', 'ข้อมูลการยืนยันตัวตนไม่ถูกต้อง หรือหมดเวลา', 'error');
-            resetLogin();
-            $('#loginBtnWrapper').show();
         }
-    }
-});
+
+        // รีเซ็ตปุ่ม Google Loader
+        function resetLogin() {
+            $('.g_id_signin').show();
+            $('#loginLoader').addClass('hidden').removeClass('flex');
+        }
 
         function resetLogin() {
             $('.g_id_signin').show();

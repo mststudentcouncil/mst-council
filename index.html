@@ -306,6 +306,40 @@
 
     <!-- UI Core Script -->
     <script>
+        // 🛡️ SECURITY CONSOLE WARNING
+// ==========================================
+(function() {
+    // กำหนดสไตล์ข้อความคำว่า "หยุด!"
+    const stopStyle = [
+        'color: #ff0000',
+        'font-size: 60px',
+        'font-weight: 900',
+        'text-shadow: 2px 2px 0px #222, 4px 4px 0px #fff',
+        'font-family: "Prompt", "Anuphan", sans-serif',
+        'display: block',
+        'margin-bottom: 10px'
+    ].join(';');
+
+    // กำหนดสไตล์ข้อความคำเตือน
+    const warningStyle = [
+        'color: #333333',
+        'font-size: 16px',
+        'font-weight: bold',
+        'font-family: "Prompt", "Anuphan", sans-serif',
+        'line-height: 1.6',
+        'display: block'
+    ].join(';');
+
+    // ข้อความคำเตือน
+    const warningText = "ข้อห้ามเกี่ยวกับการเข้าถึง API และระบบโดยตรง ผู้ใช้งานต้องใช้งานผ่านระบบและหน้าจอ (UI) ที่คณะกรรมการสภานักเรียนกำหนดเท่านั้น ห้ามเข้าถึง ดึงข้อมูล หรือใช้งาน API, API Key และ Token ของระบบโดยตรง นอกจากนี้ ห้ามทำวิศวกรรมย้อนกลับ (Reverse Engineer) ถอดรหัส ดักจับ เลียนแบบ หรือสร้างโปรแกรม/บอทใดๆ เพื่อเชื่อมต่อเข้ากับ API โดยไม่ได้รับอนุญาตเป็นลายลักษณ์อักษร หากพบการฝ่าฝืน คณะกรรมการสภานักเรียนขอสงวนสิทธิ์ในการระงับบัญชีผู้ใช้ทันที และจะดำเนินคดีทางกฎหมายตาม พ.ร.บ. ว่าด้วยการกระทำความผิดเกี่ยวกับคอมพิวเตอร์ อย่างถึงที่สุด";
+
+    // สั่งพิมพ์ลง Console
+    console.log('%cหยุด!', stopStyle);
+    console.log('%c' + warningText, warningStyle);
+    
+    // (ทางเลือก) เคลียร์ Console ก่อนหน้าทิ้งทั้งหมดเพื่อให้ข้อความนี้เด่นชัดที่สุด
+    // setTimeout(console.clear.bind(console), 100); 
+})();
         window.newsDataList = []; 
         window.allBoardMembers = [];
 
