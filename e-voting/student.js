@@ -272,7 +272,7 @@ async function renderCampaigns(campaignsToRender) {
                     <div class="bg-green-50 border border-green-200 p-4 rounded-xl flex items-center justify-between">
                         <div class="flex items-center gap-3">
                             <div class="w-10 h-10 bg-green-100 text-green-600 rounded-full flex items-center justify-center"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg></div>
-                            <div><p class="text-sm font-bold text-green-800">ท่านใช้สิทธิ์เรียบร้อยแล้ว</p><p class="text-[10px] text-green-600">เมื่อ: ${voteTime}</p></div>
+                            <div><p class="text-sm font-bold text-green-800">คุณใช้สิทธิ์เรียบร้อยแล้ว</p><p class="text-[10px] text-green-600">เมื่อ: ${voteTime}</p></div>
                         </div>
                     </div>
                 </div>`;
@@ -474,7 +474,7 @@ window.confirmVote = function() {
     const isNoVote = userSelectedOptions.includes("ไม่ประสงค์ลงคะแนน");
     const titleHtml = isNoVote 
         ? `<b class="text-red-500 text-2xl">ไม่ประสงค์ลงคะแนน</b>` 
-        : `รายการที่ท่านเลือกคือ <br><b class="text-purple-700 text-2xl mt-2 block">${userSelectedOptions.join("<br>")}</b>`;
+        : `รายการที่คุณเลือกคือ <br><b class="text-purple-700 text-2xl mt-2 block">${userSelectedOptions.join("<br>")}</b>`;
 
     Swal.fire({
         title: 'ยืนยันการลงคะแนน',
@@ -507,7 +507,7 @@ async function submitFinalVote() {
         const campaignRef = doc(db, "campaigns", campaignId);
         
         if ((await getDoc(voterRef)).exists()) { 
-            Swal.fire('ข้อผิดพลาด', 'ท่านได้ใช้สิทธิ์ไปแล้ว', 'error'); 
+            Swal.fire('ข้อผิดพลาด', 'คุณได้ใช้สิทธิ์ไปแล้ว', 'error'); 
             exitBooth(); 
             return; 
         }

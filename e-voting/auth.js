@@ -546,7 +546,7 @@ if (verifyOtpBtn) {
             
             if (now - otpData.createdAt > 300000) {
                 await deleteDoc(otpDocRef);
-                showFullScreenError("รหัส OTP หมดอายุ", "ท่านใช้เวลานานเกิน 5 นาที กรุณาทำรายการใหม่");
+                showFullScreenError("รหัส OTP หมดอายุ", "คุณใช้เวลานานเกิน 5 นาที กรุณาทำรายการใหม่");
                 return;
             }
 
