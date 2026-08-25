@@ -6,8 +6,8 @@
     <meta http-equiv="Expires" content="0">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - MSTSC Admin</title>
-    <link rel="icon" type="image/png" href="https://i.postimg.cc/yxjxZmRN/Logo_mstsc_(1)_(1).png">
+    <title>จัดการการรับสมัคร (MSTSC)</title>
+    <link rel="icon" type="image/webp" href="/logo.webp">
     <link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -38,7 +38,7 @@
 
     <div id="adminLoginView" class="min-h-screen flex items-center justify-center p-4">
         <div class="glass-card p-10 rounded-3xl shadow-xl w-full max-w-md text-center border-t-4 border-purple-600">
-            <img src="https://i.postimg.cc/yxjxZmRN/Logo_mstsc_(1)_(1).png" class="w-28 mx-auto mb-6">
+            <img src="/logo.webp" class="w-28 mx-auto mb-6">
             <h2 class="text-3xl font-bold text-purple-900 mb-2">ADMIN ADMISSION</h2>
             <p class="text-red-500 font-bold text-base mb-8 bg-red-50 py-3 rounded-xl border border-red-100">
                 เฉพาะผู้ดูแลระบบรับสมัครเท่านั้น
@@ -86,7 +86,7 @@
                     <div class="flex items-center gap-3 md:gap-4">
                         <div class="relative">
                             <div class="absolute inset-0 bg-purple-500 rounded-full blur-md opacity-30"></div>
-                            <img src="https://i.postimg.cc/yxjxZmRN/Logo_mstsc_(1)_(1).png" alt="Logo" class="relative h-11 w-11 md:h-12 md:w-12 drop-shadow-md transition-transform hover:scale-105">
+                            <img src="/logo.webp" alt="Logo" class="relative h-11 w-11 md:h-12 md:w-12 drop-shadow-md transition-transform hover:scale-105">
                         </div>
                         <div class="flex flex-col justify-center">
                             <h1 class="text-xl md:text-2xl font-black bg-clip-text text-transparent bg-gradient-to-r from-purple-900 via-purple-700 to-purple-900 tracking-tight leading-none mb-1.5 drop-shadow-sm">ADMIN ADMISSION</h1>
@@ -453,6 +453,41 @@
     </div>
 
     <script>
+        // 🛡️ SECURITY CONSOLE WARNING
+// ==========================================
+(function() {
+    // กำหนดสไตล์ข้อความคำว่า "หยุด!"
+    const stopStyle = [
+        'color: #ff0000',
+        'font-size: 60px',
+        'font-weight: 900',
+        'text-shadow: 2px 2px 0px #222, 4px 4px 0px #fff',
+        'font-family: "Prompt", "Anuphan", sans-serif',
+        'display: block',
+        'margin-bottom: 10px'
+    ].join(';');
+
+    // กำหนดสไตล์ข้อความคำเตือน
+    const warningStyle = [
+        'color: #333333',
+        'font-size: 16px',
+        'font-weight: bold',
+        'font-family: "Prompt", "Anuphan", sans-serif',
+        'line-height: 1.6',
+        'display: block'
+    ].join(';');
+
+    // ข้อความคำเตือน
+    const warningText = "ข้อห้ามเกี่ยวกับการเข้าถึง API และระบบโดยตรง ผู้ใช้งานต้องใช้งานผ่านระบบและหน้าจอ (UI) ที่คณะกรรมการสภานักเรียนกำหนดเท่านั้น ห้ามเข้าถึง ดึงข้อมูล หรือใช้งาน API, API Key และ Token ของระบบโดยตรง นอกจากนี้ ห้ามทำวิศวกรรมย้อนกลับ (Reverse Engineer) ถอดรหัส ดักจับ เลียนแบบ หรือสร้างโปรแกรม/บอทใดๆ เพื่อเชื่อมต่อเข้ากับ API โดยไม่ได้รับอนุญาตเป็นลายลักษณ์อักษร หากพบการฝ่าฝืน คณะกรรมการสภานักเรียนขอสงวนสิทธิ์ในการระงับบัญชีผู้ใช้ทันที และจะดำเนินคดีทางกฎหมายตาม พ.ร.บ. ว่าด้วยการกระทำความผิดเกี่ยวกับคอมพิวเตอร์ อย่างถึงที่สุด";
+
+    // สั่งพิมพ์ลง Console
+    console.log('%cหยุด!', stopStyle);
+    console.log('%c' + warningText, warningStyle);
+    
+    // (ทางเลือก) เคลียร์ Console ก่อนหน้าทิ้งทั้งหมดเพื่อให้ข้อความนี้เด่นชัดที่สุด
+    // setTimeout(console.clear.bind(console), 100); 
+})();
+
         // ========================================================
         const WEB_APP_URL = "https://admission-backend-592123078141.asia-southeast1.run.app/api/admission";
         // API สำหรับส่งเข้าระบบรายงานตัว (REGIS)

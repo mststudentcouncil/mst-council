@@ -6,9 +6,10 @@
     <meta http-equiv="Expires" content="0">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ระบบรับสมัครสภานักเรียน - ADMISSION MSTSC</title>
+    <title>ระบบรับสมัครสภานักเรียน (MSTSC)</title>
     
-    <link rel="icon" type="image/png" href="https://i.postimg.cc/yxjxZmRN/Logo_mstsc_(1)_(1).png">
+    <link rel="icon" type="image/webp" href="/logo.webp">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#6A1B9A">
     
@@ -82,10 +83,10 @@
 
     <div class="bg-white w-full max-w-4xl rounded-[2rem] shadow-[0_20px_50px_rgba(106,27,154,0.1)] overflow-hidden relative transition-all duration-300 z-10 flex flex-col min-h-[80vh] my-4">
         
-        <img src="https://i.postimg.cc/yxjxZmRN/Logo_mstsc_(1)_(1).png" class="absolute right-[-10%] bottom-[-5%] w-[400px] h-[400px] object-contain opacity-[0.03] z-0 pointer-events-none" alt="Watermark">
+        <img src="/logo.webp" class="absolute right-[-10%] bottom-[-5%] w-[400px] h-[400px] object-contain opacity-[0.03] z-0 pointer-events-none" alt="Watermark">
 
         <div class="bg-gradient-to-r from-mst-purple to-[#4a0072] p-6 md:p-8 text-white relative overflow-hidden flex justify-between items-center z-10">
-            <img src="https://i.postimg.cc/yxjxZmRN/Logo_mstsc_(1)_(1).png" class="absolute right-[-20px] top-1/2 transform -translate-y-1/2 w-48 h-48 opacity-[0.15] z-0 pointer-events-none" alt="Watermark Header">
+            <img src="/logo.webp" class="absolute right-[-20px] top-1/2 transform -translate-y-1/2 w-48 h-48 opacity-[0.15] z-0 pointer-events-none" alt="Watermark Header">
             
             <div class="relative z-10 text-left">
                 <h1 class="text-2xl md:text-4xl font-black tracking-wide">ADMISSION</h1>
@@ -110,7 +111,7 @@
 
             <!-- หน้าจอ Login ด้วย Google -->
             <div id="view-login" class="text-center py-4 w-full max-w-md mx-auto fade-in" style="display: none;">
-                <img src="https://i.postimg.cc/yxjxZmRN/Logo_mstsc_(1)_(1).png" alt="MSTSC Logo" class="w-28 h-28 mx-auto mb-6 drop-shadow-xl p-1 border-4 border-mst-yellow rounded-full bg-white relative z-10">
+                <img src="/logo.webp" alt="MSTSC Logo" class="w-28 h-28 mx-auto mb-6 drop-shadow-xl p-1 border-4 border-mst-yellow rounded-full bg-white relative z-10">
                 
                 <div class="bg-purple-50 border border-purple-100 rounded-2xl p-4 mb-8 text-left max-w-md mx-auto relative z-10 shadow-sm">
                     <div class="flex gap-3">
@@ -316,6 +317,41 @@
     </div>
 
     <script>
+        // 🛡️ SECURITY CONSOLE WARNING
+// ==========================================
+(function() {
+    // กำหนดสไตล์ข้อความคำว่า "หยุด!"
+    const stopStyle = [
+        'color: #ff0000',
+        'font-size: 60px',
+        'font-weight: 900',
+        'text-shadow: 2px 2px 0px #222, 4px 4px 0px #fff',
+        'font-family: "Prompt", "Anuphan", sans-serif',
+        'display: block',
+        'margin-bottom: 10px'
+    ].join(';');
+
+    // กำหนดสไตล์ข้อความคำเตือน
+    const warningStyle = [
+        'color: #333333',
+        'font-size: 16px',
+        'font-weight: bold',
+        'font-family: "Prompt", "Anuphan", sans-serif',
+        'line-height: 1.6',
+        'display: block'
+    ].join(';');
+
+    // ข้อความคำเตือน
+    const warningText = "ข้อห้ามเกี่ยวกับการเข้าถึง API และระบบโดยตรง ผู้ใช้งานต้องใช้งานผ่านระบบและหน้าจอ (UI) ที่คณะกรรมการสภานักเรียนกำหนดเท่านั้น ห้ามเข้าถึง ดึงข้อมูล หรือใช้งาน API, API Key และ Token ของระบบโดยตรง นอกจากนี้ ห้ามทำวิศวกรรมย้อนกลับ (Reverse Engineer) ถอดรหัส ดักจับ เลียนแบบ หรือสร้างโปรแกรม/บอทใดๆ เพื่อเชื่อมต่อเข้ากับ API โดยไม่ได้รับอนุญาตเป็นลายลักษณ์อักษร หากพบการฝ่าฝืน คณะกรรมการสภานักเรียนขอสงวนสิทธิ์ในการระงับบัญชีผู้ใช้ทันที และจะดำเนินคดีทางกฎหมายตาม พ.ร.บ. ว่าด้วยการกระทำความผิดเกี่ยวกับคอมพิวเตอร์ อย่างถึงที่สุด";
+
+    // สั่งพิมพ์ลง Console
+    console.log('%cหยุด!', stopStyle);
+    console.log('%c' + warningText, warningStyle);
+    
+    // (ทางเลือก) เคลียร์ Console ก่อนหน้าทิ้งทั้งหมดเพื่อให้ข้อความนี้เด่นชัดที่สุด
+    // setTimeout(console.clear.bind(console), 100); 
+})();
+
         // ========================================================
         const WEB_APP_URL = "https://admission-backend-592123078141.asia-southeast1.run.app/api/admission";
         // ========================================================
@@ -1187,7 +1223,7 @@
                     let receiptHtml = `
                     <div class="bg-white border-2 border-dashed border-gray-300 p-5 rounded-xl max-w-sm mx-auto text-left shadow-sm mt-2">
                         <div class="text-center border-b border-gray-200 pb-3 mb-3">
-                            <img src="https://i.postimg.cc/yxjxZmRN/Logo_mstsc_(1)_(1).png" class="w-12 h-12 mx-auto mb-2 opacity-80">
+                            <img src="/logo.webp" class="w-12 h-12 mx-auto mb-2 opacity-80">
                             <h3 class="text-lg font-black text-mst-purple">รายละเอียดการสมัคร</h3>
                             <p class="text-[10px] text-gray-500">MST STUDENT COUNCIL</p>
                         </div>
