@@ -17,8 +17,8 @@
 
     <title>สภานักเรียนโรงเรียนเมืองสุราษฎร์ธานี (MSTSC)</title>
     
-    <link rel="icon" type="image/webp" href="https://i.ibb.co/GQYCbXrc/logo.webp">
-    <link rel="apple-touch-icon" href="https://i.ibb.co/GQYCbXrc/logo.webp">
+    <link rel="icon" type="image/webp" href="/logo.webp">
+    <link rel="apple-touch-icon" href="/logo.webp">
     
     <!-- Fonts & Scripts -->
     <link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -87,7 +87,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-20 items-center">
                 <div class="flex items-center gap-4 cursor-pointer" onclick="window.scrollTo(0,0)">
-                    <img src="https://i.ibb.co/GQYCbXrc/logo.webp" alt="Logo" class="h-12 w-12 drop-shadow-md">
+                    <img src="/logo.webp" alt="Logo" class="h-12 w-12 drop-shadow-md">
                     <div>
                         <h1 class="font-black text-mstPurple text-xl leading-tight drop-shadow-sm">STUDENT COUNCIL</h1>
                         <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest hidden sm:block">Muangsuratthani School</p>
@@ -256,7 +256,7 @@
     <footer class="bg-mstDark text-gray-300 pt-16 pb-8 border-t-[10px] border-mstYellow">
         <div class="max-w-7xl mx-auto px-4 text-center">
             <div class="inline-block bg-white p-2 rounded-full mb-6 shadow-xl">
-                <img src="https://i.ibb.co/GQYCbXrc/logo.webp" alt="Logo" class="h-16 w-16">
+                <img src="/logo.webp" alt="Logo" class="h-16 w-16">
             </div>
             <h4 class="font-black text-2xl text-white mb-2 tracking-wide">คณะกรรมการสภานักเรียนโรงเรียนเมืองสุราษฎร์ธานี</h4>
             <p class="text-sm text-gray-400 mb-8 max-w-lg mx-auto leading-relaxed">
@@ -618,7 +618,7 @@ function closeNewsModal() {
                     // [เพิ่มคลาสกำหนดความกว้างของการ์ด w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.5rem)]]
                     html += `<article class="glass glass-hover rounded-[2rem] overflow-hidden flex flex-col group w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.5rem)] max-w-[400px]">
                                 <div class="relative h-56 overflow-hidden bg-gray-200">
-                                    <img src="${n.image}" class="w-full h-full object-cover group-hover:scale-110 transition duration-700" onerror="this.src='https://i.ibb.co/GQYCbXrc/logo.webp'">
+                                    <img src="${n.image}" class="w-full h-full object-cover group-hover:scale-110 transition duration-700" onerror="this.src='/logo.webp'">
                                     <div class="absolute top-4 left-4 ${bg} text-white text-[10px] font-bold px-4 py-1.5 rounded-full shadow-md">${n.category}</div>
                                 </div>
                                 <div class="p-8 flex flex-col flex-1">

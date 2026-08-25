@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PUBLIC HEARING</title>
+    <link rel="icon" type="image/webp" href="/logo.webp">
+
     
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -52,7 +54,7 @@
     <!-- HEADER (ผู้ใช้ทั่วไป) -->
     <header class="glass sticky top-0 z-40 px-4 py-3 flex justify-between items-center mb-6 hidden shadow-sm" id="mainHeader">
         <div class="flex items-center gap-3 cursor-pointer" onclick="nav('homePage')">
-            <img src="https://i.ibb.co/GQYCbXrc/logo.webp" class="w-10 h-10 object-contain drop-shadow-md" alt="MSTSC Logo">
+            <img src="/logo.webp" class="w-10 h-10 object-contain drop-shadow-md" alt="MSTSC Logo">
             <div>
                 <h1 class="text-sm font-black text-mstPurple leading-tight tracking-wide">STUDENT COUNCIL</h1>
                 <p class="text-[10px] font-bold text-gray-500 tracking-widest">MUANGSURATTHANI</p>
@@ -66,7 +68,7 @@
     <!-- HEADER (แอดมิน) -->
     <header class="glass sticky top-0 z-40 mt-2 mx-4 rounded-2xl px-5 py-3 flex justify-between items-center mb-6 shadow-sm border border-white hidden" id="adminHeader">
         <div class="flex items-center gap-3">
-            <img src="https://i.ibb.co/GQYCbXrc/logo.webp" class="w-11 h-11 object-contain drop-shadow-md" alt="MSTSC Logo">
+            <img src="/logo.webp" class="w-11 h-11 object-contain drop-shadow-md" alt="MSTSC Logo">
             <div>
                 <span class="font-black text-mstPurple text-lg tracking-tight leading-none block">PUBLIC HEARING</span>
                 <span class="text-[10px] font-bold text-gray-500 uppercase block mt-0.5">Admin Panel</span>
@@ -98,7 +100,7 @@
         <!-- LOGIN -->
         <section id="loginPage" class="hidden fade-in flex flex-col items-center justify-center min-h-[80vh]">
             <div class="glass rounded-3xl p-8 text-center max-w-sm w-full relative shadow-lg">
-                <img src="https://i.ibb.co/GQYCbXrc/logo.webp" class="w-24 h-24 mx-auto mb-4 drop-shadow-xl object-contain hover:scale-105 transition-transform" alt="MSTSC Logo">
+                <img src="/logo.webp" class="w-24 h-24 mx-auto mb-4 drop-shadow-xl object-contain hover:scale-105 transition-transform" alt="MSTSC Logo">
                 <h2 class="text-2xl font-black text-mstPurple mb-1">PUBLIC HEARING</h2>
                 <p class="text-sm font-bold text-gray-600">STUDENT COUNCIL</p>
                 <p class="text-[10px] font-medium text-gray-500 mb-6 tracking-[0.2em]">MUANGSURATTHANI</p>
@@ -303,7 +305,7 @@
             <div class="glass p-8 rounded-[2rem] w-full max-w-md relative overflow-hidden fade-in shadow-2xl">
                 <button onclick="$('#verifyScreen').addClass('hidden')" class="absolute top-4 right-4 text-gray-400 hover:text-red-500 w-8 h-8 flex items-center justify-center bg-white rounded-full shadow-sm"><i class="fas fa-times"></i></button>
                 <div class="text-center mb-6 mt-4">
-                    <img src="https://i.ibb.co/GQYCbXrc/logo.webp" class="w-20 h-20 mx-auto mb-3 drop-shadow-md object-contain" alt="MSTSC Logo">
+                    <img src="/logo.webp" class="w-20 h-20 mx-auto mb-3 drop-shadow-md object-contain" alt="MSTSC Logo">
                     <h2 class="text-2xl font-black text-mstPurple">ยืนยันตัวตนสภานักเรียน</h2>
                     <p class="text-xs text-gray-500 mt-2">กรุณาเข้าสู่ระบบเพื่อตรวจสอบกับระบบ REGIS</p>
                 </div>
@@ -724,7 +726,7 @@ async function handlePassportAuth() {
         } else {
             // โชว์หน้าต่างแจ้งเตือนและปุ่มแบบเดิม 100% กรณีสิทธิ์ไม่ผ่าน
             Swal.fire({
-                imageUrl: 'https://i.ibb.co/GQYCbXrc/logo.webp',
+                imageUrl: '/logo.webp',
                 imageWidth: 80,
                 title: 'ตรวจสอบสิทธิ์ไม่ผ่าน!',
                 html: `
