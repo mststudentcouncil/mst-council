@@ -677,7 +677,7 @@
                     $('#user-avatar').text(initials);
                     $('#userEmail').html(`
                         <div class="font-bold text-sm tracking-wide text-white drop-shadow-md truncate">${displayName}</div>
-                        <div class="text-[11px] text-purple-200 mt-0.5"> รหัสนักเรียน: ${displayId}</div>
+                        <div class="text-[11px] text-purple-200 mt-0.5"> รหัสนักเรียน: ${displayId} | ปีการศึกษา: ${data.existing_data?.academic_year || 'ไม่ระบุ'}</div>
                     `);
                     $('#userProfileHeader').removeClass('hidden');
                     $('#adminBtnHeader').addClass('hidden');

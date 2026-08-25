@@ -7,12 +7,19 @@
     
     <link rel="icon" type="image/webp" href="/logo.webp">
     
-    <link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@300;400;500;600;700;800&family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
-            theme: { extend: { fontFamily: { sans: ['Anuphan', 'sans-serif'] }, colors: { mst: { purple: '#6A1B9A', yellow: '#FFD600', light: '#f3f0f7', dark: '#2c2c2c', gray: '#f9fafb' } } } }
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Anuphan', 'sans-serif'] },
+                    colors: {
+                        mst: { purple: '#7e22ce', yellow: '#FFD600', light: '#f4f7fe', dark: '#2c2c2c', gray: '#f9fafb' }
+                    }
+                }
+            }
         }
     </script>
     
@@ -23,26 +30,78 @@
 
     <style>
         body { 
-            background-color: var(--mst-light); 
-            background-image: radial-gradient(circle at 10% 20%, rgba(106, 27, 154, 0.05) 0%, transparent 20%), radial-gradient(circle at 90% 80%, rgba(255, 214, 0, 0.1) 0%, transparent 20%);
+            background-color: #f4f7fe; 
+            font-family: 'Anuphan', sans-serif;
             padding-bottom: 40px;
         }
+
+        .glass-header { background: rgba(88, 28, 135, 0.95); backdrop-filter: blur(10px); }
+        .fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
         
-        .input-clean {
-            width: 100%; border-radius: 0.75rem; padding: 0.75rem 1rem; border: 1px solid #e5e7eb; font-size: 0.95rem; outline: none; transition: 0.3s; background: white; color: #374151; position: relative; z-index: 10;
+        /* Input & Placeholder styling inspired by REGIS */
+        input[type="text"], input[type="tel"], input[type="email"], input[type="number"], input[type="date"], select, textarea, .input-clean {
+            background-color: #ffffff !important; 
+            border: 1px solid #e5e7eb;
+            color: #374151 !important;
+            -webkit-text-fill-color: #374151 !important; 
+            position: relative;
+            z-index: 10;
+            width: 100%; border-radius: 1rem; padding: 0.875rem 1.25rem;
+            outline: none; transition: all 0.3s; font-size: 0.95rem; font-weight: 500;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
         }
-        .input-clean:focus { border-color: #6A1B9A; box-shadow: 0 0 0 4px rgba(106, 27, 154, 0.1); }
-        .cert-card:hover { transform: translateY(-3px); box-shadow: 0 10px 20px -5px rgba(106, 27, 154, 0.15); transition: 0.3s; border-color: #6A1B9A; }
+
+        .input-clean:focus, input:focus, select:focus, textarea:focus { border-color: #7e22ce; box-shadow: 0 0 0 4px rgba(126, 34, 206, 0.15); }
+        
+        .input-clean::-webkit-input-placeholder, input::-webkit-input-placeholder, textarea::-webkit-input-placeholder { color: #9ca3af !important; -webkit-text-fill-color: #9ca3af !important; font-weight: 400; opacity: 1 !important; }
+        .input-clean::-moz-placeholder, input::-moz-placeholder, textarea::-moz-placeholder { color: #9ca3af !important; font-weight: 400; opacity: 1 !important; }
+        .input-clean:-ms-input-placeholder, input:-ms-input-placeholder, textarea:-ms-input-placeholder { color: #9ca3af !important; font-weight: 400; opacity: 1 !important; }
+        .input-clean::placeholder, input::placeholder, textarea::placeholder { color: #9ca3af !important; -webkit-text-fill-color: #9ca3af !important; font-weight: 400; opacity: 1 !important; }
+
+        select.input-clean:invalid, select:invalid {
+            color: #9ca3af !important;
+            -webkit-text-fill-color: #9ca3af !important;
+            font-weight: 400;
+        }
+        select.input-clean option, select option {
+            color: #374151 !important;
+            -webkit-text-fill-color: #374151 !important;
+            font-weight: 500;
+        }
+
+        .cert-card:hover { transform: translateY(-3px); box-shadow: 0 10px 25px -5px rgba(126, 34, 206, 0.15); transition: 0.3s; border-color: #e5e7eb; }
         
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        .loader { border: 4px solid #f3f3f3; border-top: 4px solid #6A1B9A; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; }
+        
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid #7e22ce; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* IG Story Canvas Design */
+        @supports (padding-bottom: env(safe-area-inset-bottom)) {
+            .pb-safe { padding-bottom: calc(1rem + env(safe-area-inset-bottom)) !important; }
+        }
+        .pt-safe { padding-top: calc(1rem + env(safe-area-inset-top)); }
+
+        /* SweetAlert2 Full-Screen Overlay style */
+        body.swal2-shown .swal2-container { padding: 0 !important; }
+        .swal2-container.swal2-backdrop-show { background: rgba(244, 247, 254, 0.92) !important; backdrop-filter: blur(16px) !important; }
+        .swal2-popup:not(.swal2-toast) {
+            width: 100vw !important; height: 100dvh !important; max-width: 100vw !important;
+            border-radius: 0 !important; background: transparent !important; box-shadow: none !important;
+            border: none !important; display: flex !important; flex-direction: column !important;
+            justify-content: center !important; align-items: center !important; padding: 2rem !important;
+        }
+        .swal2-title { color: #581c87 !important; font-size: 2.2rem !important; font-weight: 800 !important; margin-bottom: 0.5rem !important; }
+        .swal2-html-container { width: 100% !important; max-width: 500px !important; margin: 1rem auto !important; overflow-x: hidden !important; }
+        .swal2-actions { width: 100% !important; max-width: 500px !important; display: flex !important; flex-direction: column !important; gap: 1rem !important; margin: 2rem auto 0 !important; }
+        .swal2-confirm, .swal2-cancel { width: 100% !important; margin: 0 !important; border-radius: 1rem !important; padding: 1rem !important; font-size: 1.1rem !important; font-weight: 700 !important; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important; }
+        .swal2-cancel { background-color: #f3f4f6 !important; color: #4b5563 !important; }
+        
+        /* IG Story Canvas Design (Kept original functionality but modernized) */
         #igStoryCard {
             width: 1080px; height: 1920px;
-            background: linear-gradient(135deg, #6A1B9A, #4a0072);
+            background: linear-gradient(135deg, #7e22ce, #4a0072);
             color: white; font-family: 'Anuphan', sans-serif;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
             text-align: center; padding: 80px; position: absolute; transform-origin: center center;
@@ -55,162 +114,173 @@
         #igStoryCard .story-logo img { width: 80%; height: 80%; object-fit: contain; }
     </style>
 </head>
-<body class="text-mst-dark flex items-center justify-center min-h-screen p-4 md:p-8">
+<body class="text-gray-800 pb-24">
 
-    <div class="bg-white w-full max-w-6xl rounded-[2rem] shadow-[0_20px_50px_rgba(106,27,154,0.1)] overflow-hidden relative transition-all duration-500 z-10 flex flex-col">
-        
-        <img src="/logo.webp" class="absolute right-[-10%] bottom-[-5%] w-[400px] h-[400px] object-contain opacity-[0.03] z-0 pointer-events-none">
-
-        <div class="bg-gradient-to-r from-mst-purple to-[#4a0072] p-6 md:p-8 text-white relative overflow-hidden flex justify-between items-center shadow-md shrink-0">
-            <img src="/logo.webp" class="absolute right-[-20px] top-1/2 transform -translate-y-1/2 w-48 h-48 opacity-[0.15] z-0 pointer-events-none">
-            
-            <div class="relative z-10 text-left">
-                <h1 class="text-2xl md:text-3xl font-black tracking-wide flex items-center gap-3">
-                    VAULT - MSTSC 
-                </h1>
-                <p class="text-mst-yellow font-medium mt-1 text-sm md:text-base">ระบบคลังจัดเก็บเกียรติบัตรสภานักเรียน</p>
+    <!-- Header สไตล์ REGIS (แสดงค้างไว้ตลอด) -->
+    <header class="glass-header sticky top-0 z-50 shadow-lg text-white rounded-b-3xl pb-4 pt-safe px-5 mb-8">
+        <div class="max-w-6xl mx-auto">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <img src="/logo.webp" class="w-10 h-10 bg-white rounded-full p-0.5 shadow-sm object-cover">
+                    <div>
+                        <h1 class="font-extrabold text-lg leading-tight tracking-wide">VAULT MSTSC</h1>
+                        <p class="text-[10px] text-purple-200 uppercase tracking-widest font-medium">ระบบคลังจัดเก็บเกียรติบัตร</p>
+                    </div>
+                </div>
             </div>
 
-            <div id="userProfileHeader" class="hidden relative z-10 flex items-center gap-3">
-                <div class="text-right hidden md:block">
-                    <p class="text-sm font-bold" id="userNameShow">...</p>
-                    <p class="text-[10px] text-purple-200 uppercase" id="userEmailShow">...</p>
+            <!-- Profile Field (จะแสดงหลังล็อคอิน) -->
+            <div id="userProfileHeader" class="hidden mt-4 bg-white/10 py-2.5 px-4 rounded-2xl border border-white/15 backdrop-blur-md flex items-center justify-between shadow-sm fade-in">
+                <div class="flex items-center gap-3 overflow-hidden">
+                    <div id="user-avatar" class="w-10 h-10 bg-gradient-to-tr from-purple-400 to-pink-400 rounded-full flex items-center justify-center font-bold text-lg shadow-inner text-white border border-white/30 shrink-0">
+                        -
+                    </div>
+                    <div class="flex-1 overflow-hidden" id="userEmail">
+                        <div class="font-bold text-sm tracking-wide text-white drop-shadow-md truncate" id="userNameShow">กำลังโหลด...</div>
+                        <div class="text-[11px] text-purple-200 mt-0.5" id="userEmailShow">ID: -</div>
+                    </div>
                 </div>
-                <button onclick="confirmLogout()" class="bg-white/10 hover:bg-red-500/80 text-white w-10 h-10 rounded-xl flex items-center justify-center backdrop-blur-md transition-all border border-white/20 shadow-sm" title="ออกจากระบบ">
-                    <i class="fa-solid fa-power-off"></i>
+                <button onclick="confirmLogout()" class="bg-white/10 hover:bg-white/20 w-10 h-10 rounded-full transition-colors backdrop-blur-sm shrink-0 flex items-center justify-center" title="ออกจากระบบ">
+                    <i class="fa-solid fa-right-from-bracket text-white text-sm"></i>
                 </button>
             </div>
         </div>
+    </header>
 
-        <div class="relative z-10 flex-grow flex flex-col p-4 md:p-8">
+    <main class="max-w-6xl mx-auto px-4 fade-in flex flex-col min-h-[calc(100vh-160px)]">
+        
+        <!-- ส่วน Login -->
+        <div id="loginSection" class="bg-white p-8 md:p-12 rounded-[2.5rem] shadow-sm border border-gray-100 text-center w-full max-w-2xl mx-auto relative overflow-hidden my-auto">
+            <div class="absolute top-0 right-0 w-32 h-32 bg-purple-50 rounded-bl-full -z-10"></div>
             
-            <div id="loginSection" class="text-center py-10 md:py-16">
-                <img src="/logo.webp" class="w-28 h-28 mx-auto mb-6 drop-shadow-xl p-1 border-4 border-mst-yellow rounded-full bg-white relative z-10">
-                
-                <div class="bg-purple-50 border border-purple-100 rounded-2xl p-4 mb-8 text-left max-w-md mx-auto relative z-10">
-                    <div class="flex gap-3">
-                        <i class="fa-solid fa-circle-info text-mst-purple mt-1"></i>
-                        <div>
-                            <p class="text-sm font-bold text-gray-800">เข้าสู่ระบบคลังเกียรติบัตร</p>
-                            <p class="text-xs text-gray-500 mt-1">เข้าสู่ระบบด้วยอีเมลโรงเรียน (@mst.ac.th)</p>
-                        </div>
-                    </div>
-                </div>
+            <img src="/logo.webp" class="w-28 h-28 mx-auto mb-6 drop-shadow-xl p-1.5 border-4 border-gray-50 rounded-full bg-white relative z-10">
+            
+            <h2 class="text-2xl font-extrabold text-gray-900 mb-1">เข้าสู่ระบบ</h2>
+            <h1 class="text-xl font-extrabold text-gray-900 mb-8">คลังจัดเก็บเกียรติบัตร</h1>
 
-                <div id="loginBtnWrapper" class="flex flex-col items-center justify-center mb-6 relative z-10 w-full">
-        <!-- Google Sign-In -->
-        <div id="g_id_onload" 
-             data-client_id="1055496557-rm1petnl1gtd6c1ed01q9o6k880ik2ta.apps.googleusercontent.com" 
-             data-callback="handleStudentLogin" 
-             data-auto_prompt="false"
-             data-auto_select="false"
-             data-hd="mst.ac.th"> <!-- เพิ่มบรรทัดนี้เพื่อจำกัดโดเมนอีเมล -->
-        </div>
-        <div class="g_id_signin" 
-             data-type="standard" 
-             data-size="large" 
-             data-theme="outline" 
-             data-text="sign_in_with" 
-             data-shape="pill" 
-             data-logo_alignment="left">
-        </div>
-        <p class="mt-4 text-xs text-gray-500 font-bold">
-            * เข้าสู่ระบบด้วย @mst.ac.th เท่านั้น
-        </p>
-                    
-                    <!-- PDPA Notice -->
-                    <div class="mt-5 text-center max-w-xs">
-                        <p class="text-[11px] text-gray-500 leading-relaxed">
-                            การเข้าสู่ระบบถือว่าท่านรับทราบและยินยอมตาม <a href="#" class="text-mst-purple font-bold hover:underline">นโยบายคุ้มครองข้อมูลส่วนบุคคล (PDPA)</a> ของโรงเรียนในการจัดเก็บและประมวลผลข้อมูล
-                        </p>
-                    </div>
-
-                </div>
-                
-                <div id="loginLoader" class="hidden flex-col items-center mt-4">
-                    <div class="loader mb-2 w-8 h-8"></div>
-                    <p class="text-sm font-bold text-mst-purple">กำลังตรวจสอบสิทธิ์...</p>
+            <div class="bg-purple-50 p-5 rounded-2xl border border-purple-100 max-w-md mx-auto mb-6 flex gap-3 text-left">
+                <i class="fa-solid fa-circle-info text-purple-600 mt-1"></i>
+                <div>
+                    <p class="text-sm font-bold text-gray-800">สำหรับคณะกรรมการสภานักเรียน</p>
+                    <p class="text-xs text-gray-500 mt-1">โปรดเข้าสู่ระบบด้วยอีเมลโรงเรียน (@mst.ac.th)</p>
                 </div>
             </div>
 
-            <div id="mainContent" class="hidden flex-grow flex flex-col">
+            <div id="loginBtnContainer" class="flex flex-col items-center justify-center mb-6 relative z-10 w-full">
+                <!-- Google Sign-In -->
+                <div id="g_id_onload" 
+                     data-client_id="1055496557-rm1petnl1gtd6c1ed01q9o6k880ik2ta.apps.googleusercontent.com" 
+                     data-callback="handleCredentialResponse" 
+                     data-auto_prompt="false"
+                     data-auto_select="false"
+                     data-hd="mst.ac.th">
+                </div>
+                <div class="g_id_signin" 
+                     data-type="standard" 
+                     data-size="large" 
+                     data-theme="outline" 
+                     data-text="sign_in_with" 
+                     data-shape="pill" 
+                     data-logo_alignment="left">
+                </div>
+
+            </div>
+
+            <div id="loginLoader" class="hidden flex-col items-center mt-4">
+                <div class="loader mb-2 w-8 h-8"></div>
+                <p class="text-sm font-bold text-purple-700">กำลังตรวจสอบสิทธิ์...</p>
+            </div>
+            
+            <div class="mt-5 text-center max-w-xs mx-auto">
+                <p class="text-[11px] text-gray-500 leading-relaxed">
+                    การเข้าสู่ระบบถือว่าท่านรับทราบและยินยอมตาม <a href="#" class="text-purple-600 font-bold hover:underline">นโยบายคุ้มครองข้อมูลส่วนบุคคล (PDPA)</a> ของโรงเรียน
+                </p>
+            </div>
+        </div>
+
+        <!-- Main Dashboard Section -->
+        <div id="mainContent" class="hidden flex-grow flex flex-col w-full">
+            
+            <div id="statsRow" class="flex flex-wrap gap-3 mb-8"></div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 mb-10">
                 
-                <div id="statsRow" class="flex flex-wrap gap-3 mb-8"></div>
-
-                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                    <!-- ฟอร์มอัปโหลด -->
-                    <div class="lg:col-span-4">
-                        <div class="bg-gray-50 rounded-2xl p-5 border border-gray-200">
-                            <h3 class="font-black text-mst-purple mb-5 flex items-center gap-2"><i class="fa-solid fa-file-circle-plus"></i> บันทึกผลงานใหม่</h3>
-                            
-                            <form id="uploadForm" class="space-y-4">
-                                <div>
-                                    <label class="text-xs font-bold text-gray-700 mb-1 block">ชื่อกิจกรรม/เกียรติบัตร <span class="text-red-500">*</span></label>
-                                    <input type="text" id="certName" class="input-clean" required placeholder="เช่น อบรมผู้นำ ฯ">
-                                </div>
-                                <div class="grid grid-cols-2 gap-3">
-                                    <div>
-                                        <label class="text-xs font-bold text-gray-700 mb-1 block">สถานที่จัด</label>
-                                        <input type="text" id="certLocation" class="input-clean" placeholder="ระบุ (ถ้ามี)">
-                                    </div>
-                                    <div>
-                                        <label class="text-xs font-bold text-gray-700 mb-1 block">วันที่จัดกิจกรรม</label>
-                                        <input type="date" id="certDate" class="input-clean">
-                                    </div>
-                                </div>
-                                <div>
-                                    <label class="text-xs font-bold text-gray-700 mb-1 block">ระดับรางวัล</label>
-                                    <select id="certAward" class="input-clean">
-                                        <option value="">-- ไม่ระบุ --</option>
-                                        <option value="เข้าร่วม">เข้าร่วมกิจกรรม</option>
-                                        <option value="ผ่านการอบรม">ผ่านการอบรม</option>
-                                        <option value="ชนะเลิศ">รางวัลชนะเลิศ</option>
-                                        <option value="รองชนะเลิศอันดับ 1">รองชนะเลิศอันดับ 1</option>
-                                        <option value="เหรียญทอง">รางวัลระดับเหรียญทอง</option>
-                                        <option value="เหรียญเงิน">รางวัลระดับเหรียญเงิน</option>
-                                        <option value="เหรียญทองแดง">รางวัลระดับเหรียญทองแดง</option>
-                                        <option value="อื่นๆ">อื่นๆ</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="text-xs font-bold text-gray-700 mb-1 block">รายละเอียดเพิ่มเติม</label>
-                                    <textarea id="certDesc" class="input-clean" rows="2" placeholder="อธิบายหน้าที่ หรือความรู้สึก..."></textarea>
-                                </div>
-                                <div>
-                                    <label class="text-xs font-bold text-gray-700 mb-1 block">ไฟล์แนบเกียรติบัตร <span class="text-red-500">*</span></label>
-                                    <div class="border-2 border-dashed border-gray-300 rounded-xl p-5 text-center hover:bg-purple-50 transition-colors relative cursor-pointer bg-white">
-                                        <input type="file" id="certFile" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full" accept=".pdf,image/*" required>
-                                        <i class="fa-solid fa-cloud-arrow-up text-3xl text-gray-300 mb-2"></i>
-                                        <p class="text-xs font-bold text-gray-500" id="fileStatus">คลิกเลือกไฟล์</p>
-                                    </div>
-                                </div>
-                                <button type="submit" id="btnUpload" class="w-full bg-gradient-to-r from-mst-purple to-[#4a0072] text-white py-3 rounded-xl font-bold shadow-md hover:scale-[1.02] transition-all flex items-center justify-center">
-                                    <i class="fa-solid fa-save mr-2"></i> บันทึกเข้าระบบ
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-
-                    <!-- แสดงผลงาน -->
-                    <div class="lg:col-span-8 flex flex-col h-[700px]">
-                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-4 gap-3">
+                <!-- ฟอร์มอัปโหลด -->
+                <div class="lg:col-span-4">
+                    <div class="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-gray-100">
+                        <div class="inline-block bg-purple-100 text-purple-700 text-[10px] px-3 py-1 rounded-full font-bold tracking-widest uppercase mb-4">ฟอร์ม</div>
+                        <h3 class="text-xl font-extrabold mb-6 text-gray-900 flex items-center gap-2"><i class="fa-solid fa-file-circle-plus text-purple-600"></i> บันทึกผลงานใหม่</h3>
+                        
+                        <form id="uploadForm" class="space-y-4">
                             <div>
-                                <h3 class="font-black text-gray-800 text-xl flex items-center gap-2"><i class="fa-solid fa-award text-mst-yellow"></i> คลังผลงาน</h3>
-                                <p class="text-xs font-bold text-gray-500 mt-1" id="certCount">0 รายการ (พื้นที่ไม่จำกัด)</p>
+                                <label class="block text-sm font-bold text-gray-700 mb-1.5">ชื่อกิจกรรม/เกียรติบัตร <span class="text-red-500">*</span></label>
+                                <input type="text" id="certName" class="input-clean" required placeholder="เช่น อบรมผู้นำ ฯ">
+                            </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-sm font-bold text-gray-700 mb-1.5">สถานที่จัด</label>
+                                    <input type="text" id="certLocation" class="input-clean" placeholder="ระบุ (ถ้ามี)">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-bold text-gray-700 mb-1.5">วันที่จัดกิจกรรม</label>
+                                    <input type="date" id="certDate" class="input-clean">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-1.5">ระดับรางวัล</label>
+                                <select id="certAward" class="input-clean" required>
+                                    <option value="" disabled selected hidden>-- เลือกระดับ --</option>
+                                    <option value="เข้าร่วม">เข้าร่วมกิจกรรม</option>
+                                    <option value="ผ่านการอบรม">ผ่านการอบรม</option>
+                                    <option value="ชนะเลิศ">รางวัลชนะเลิศ</option>
+                                    <option value="รองชนะเลิศอันดับ 1">รองชนะเลิศอันดับ 1</option>
+                                    <option value="เหรียญทอง">รางวัลระดับเหรียญทอง</option>
+                                    <option value="เหรียญเงิน">รางวัลระดับเหรียญเงิน</option>
+                                    <option value="เหรียญทองแดง">รางวัลระดับเหรียญทองแดง</option>
+                                    <option value="อื่นๆ">อื่นๆ</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-1.5">รายละเอียดเพิ่มเติม</label>
+                                <textarea id="certDesc" class="input-clean" rows="2" placeholder="อธิบายหน้าที่ หรือความรู้สึก..."></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-1.5">ไฟล์แนบเกียรติบัตร <span class="text-red-500">*</span></label>
+                                <div class="border-2 border-dashed border-gray-200 rounded-2xl p-6 text-center hover:bg-purple-50 hover:border-purple-300 transition-colors relative cursor-pointer bg-gray-50/50">
+                                    <input type="file" id="certFile" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full" accept=".pdf,image/*" required>
+                                    <i class="fa-solid fa-cloud-arrow-up text-3xl text-gray-400 mb-2 group-hover:text-purple-600 transition-colors"></i>
+                                    <p class="text-sm font-bold text-gray-500" id="fileStatus">คลิกเลือกไฟล์ / แตะเพื่อเลือก</p>
+                                </div>
+                            </div>
+                            <button type="submit" id="btnUpload" class="w-full mt-4 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white py-3.5 rounded-2xl font-bold shadow-lg transition-all flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-save"></i> บันทึกเข้าระบบ
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- แสดงผลงาน -->
+                <div class="lg:col-span-8 flex flex-col lg:h-[700px]">
+                    <div class="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-gray-100 flex-grow flex flex-col relative">
+                        
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-6 gap-4">
+                            <div>
+                                <div class="inline-block bg-indigo-100 text-indigo-700 text-[10px] px-3 py-1 rounded-full font-bold tracking-widest uppercase mb-4">พื้นที่จัดเก็บ</div>
+                                <h3 class="text-xl font-extrabold text-gray-900 flex items-center gap-2"><i class="fa-solid fa-award text-yellow-500"></i> คลังผลงานส่วนตัว</h3>
+                                <p class="text-sm font-medium text-gray-500 mt-1" id="certCount">0 รายการ (พื้นที่ไม่จำกัด)</p>
                             </div>
                             
-                            <button onclick="generateIGStory()" class="bg-gradient-to-tr from-[#E1306C] to-[#833AB4] text-white px-5 py-2.5 rounded-xl font-bold shadow-md hover:shadow-lg transition-all flex items-center gap-2 text-sm w-full sm:w-auto justify-center">
+                            <button onclick="generateIGStory()" class="bg-gradient-to-tr from-[#E1306C] to-[#833AB4] text-white px-5 py-3 rounded-2xl font-bold shadow-md hover:shadow-lg transition-all flex items-center gap-2 text-sm w-full sm:w-auto justify-center">
                                 <i class="fa-brands fa-instagram"></i> สร้าง IG Story
                             </button>
                         </div>
 
-                        <div class="flex-grow overflow-y-auto custom-scrollbar pr-2 relative bg-gray-50/50 rounded-2xl p-2 border border-gray-100">
-                            <div id="certLoader" class="absolute inset-0 bg-white/80 z-20 flex flex-col items-center justify-center hidden rounded-2xl backdrop-blur-sm">
-                                <div class="loader mb-2"></div><p class="text-sm font-bold text-mst-purple">กำลังดึงข้อมูล...</p>
+                        <div class="flex-grow overflow-y-auto custom-scrollbar pr-2 relative bg-gray-50/50 rounded-2xl p-3 border border-gray-100 min-h-[400px]">
+                            <div id="certLoader" class="absolute inset-0 bg-white/90 z-20 flex flex-col items-center justify-center hidden rounded-2xl backdrop-blur-sm">
+                                <div class="loader mb-3"></div><p class="text-sm font-bold text-purple-700">กำลังดึงข้อมูล...</p>
                             </div>
 
-                            <div id="certGrid" class="flex flex-col gap-3 pb-2">
-                                </div>
+                            <div id="certGrid" class="flex flex-col gap-3 pb-2"></div>
                             
                             <div id="emptyState" class="hidden text-center py-20 h-full flex flex-col items-center justify-center">
                                 <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-sm mb-4 border border-gray-100">
@@ -221,49 +291,50 @@
                         </div>
                     </div>
                 </div>
+
             </div>
         </div>
-    </div>
+    </main>
 
     <!-- Modal พรีวิว -->
     <div id="previewModal" class="fixed inset-0 bg-gray-900/90 z-50 hidden flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-3xl w-full max-w-4xl overflow-hidden shadow-2xl flex flex-col max-h-[95vh]">
-            <div class="p-4 flex justify-between items-center border-b">
-                <h5 class="font-bold text-lg text-gray-800 truncate pr-4">
-                    <i class="fa-solid fa-circle-info text-mst-purple mr-2"></i> รายละเอียด
+        <div class="bg-white rounded-3xl w-full max-w-4xl overflow-hidden shadow-2xl flex flex-col max-h-[95vh] border border-gray-100">
+            <div class="p-5 flex justify-between items-center border-b">
+                <h5 class="font-extrabold text-lg text-gray-900 truncate pr-4">
+                    <i class="fa-solid fa-circle-info text-purple-600 mr-2"></i> รายละเอียด
                 </h5>
-                <button onclick="$('#previewModal').addClass('hidden')" class="text-gray-400 hover:text-gray-800 w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-xmark"></i></button>
+                <button onclick="$('#previewModal').addClass('hidden')" class="text-gray-400 hover:text-gray-800 w-10 h-10 rounded-full bg-gray-50 hover:bg-gray-100 flex items-center justify-center flex-shrink-0 transition-colors"><i class="fa-solid fa-xmark"></i></button>
             </div>
             
-            <div class="p-4 md:p-6 overflow-y-auto bg-gray-50 flex-grow custom-scrollbar">
-                <div class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm mb-4 border-l-4 border-l-mst-purple">
-                    <p class="text-xs text-gray-500 font-bold mb-1">ชื่อกิจกรรม/เกียรติบัตร</p>
-                    <p class="font-bold text-gray-800 text-xl" id="previewTitle">-</p>
+            <div class="p-4 md:p-8 overflow-y-auto bg-[#f4f7fe] flex-grow custom-scrollbar">
+                <div class="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm mb-5 border-l-4 border-l-purple-600">
+                    <p class="text-xs text-gray-500 font-bold mb-1 uppercase tracking-wider">ชื่อกิจกรรม/เกียรติบัตร</p>
+                    <p class="font-bold text-gray-900 text-xl" id="previewTitle">-</p>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6" id="previewDetails">
-                    <div class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
-                        <p class="text-xs text-gray-500 font-bold mb-1">วันที่ทำกิจกรรม</p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5" id="previewDetails">
+                    <div class="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm">
+                        <p class="text-xs text-gray-500 font-bold mb-1 uppercase tracking-wider">วันที่ทำกิจกรรม</p>
                         <p class="font-medium text-gray-800" id="pd_date">-</p>
                     </div>
-                    <div class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
-                        <p class="text-xs text-gray-500 font-bold mb-1">สถานที่จัด</p>
+                    <div class="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm">
+                        <p class="text-xs text-gray-500 font-bold mb-1 uppercase tracking-wider">สถานที่จัด</p>
                         <p class="font-medium text-gray-800" id="pd_location">-</p>
                     </div>
-                    <div class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
-                        <p class="text-xs text-gray-500 font-bold mb-1">ระดับรางวัล</p>
+                    <div class="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm">
+                        <p class="text-xs text-gray-500 font-bold mb-1 uppercase tracking-wider">ระดับรางวัล</p>
                         <div id="pd_award">-</div>
                     </div>
                 </div>
-                <div id="showFullDesc" class="mb-6 p-4 bg-white rounded-2xl text-sm text-gray-600 shadow-sm border border-gray-100 hidden"></div>
-                <div class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex flex-col items-center">
-                     <p class="text-sm font-bold text-mst-purple mb-3 self-start w-full border-b pb-2"><i class="fa-solid fa-file-image mr-2"></i> ไฟล์แนบ</p>
+                <div id="showFullDesc" class="mb-5 p-5 bg-white rounded-3xl text-sm text-gray-600 shadow-sm border border-gray-100 hidden"></div>
+                <div class="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm flex flex-col items-center">
+                     <p class="text-sm font-bold text-purple-700 mb-3 self-start w-full border-b border-gray-100 pb-2"><i class="fa-solid fa-file-image mr-2"></i> ไฟล์แนบ</p>
                     <div id="previewBody" class="w-full"></div>
                 </div>
             </div>
             
-            <div class="p-4 bg-white border-t text-center">
-                <a href="#" id="downloadBtn" target="_blank" download class="inline-block bg-gradient-to-r from-mst-purple to-[#4a0072] text-white px-8 py-3 rounded-xl font-bold shadow-md hover:shadow-lg transition-all">
-                    <i class="fa-solid fa-download mr-2"></i> เปิดไฟล์เต็ม / ดาวน์โหลด
+            <div class="p-5 bg-white border-t border-gray-100 text-center">
+                <a href="#" id="downloadBtn" target="_blank" download class="inline-flex bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-8 py-3.5 rounded-2xl font-bold shadow-md hover:shadow-lg transition-all items-center gap-2">
+                    <i class="fa-solid fa-download"></i> เปิดไฟล์เต็ม / ดาวน์โหลด
                 </a>
             </div>
         </div>
@@ -271,31 +342,31 @@
 
     <!-- Modal แก้ไข -->
     <div id="editModal" class="fixed inset-0 bg-gray-900/90 z-50 hidden flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl flex flex-col max-h-[95vh]">
-            <div class="p-4 flex justify-between items-center border-b bg-yellow-50">
-                <h5 class="font-bold text-lg text-yellow-700"><i class="fa-solid fa-pen-to-square mr-2"></i> แก้ไขข้อมูลผลงาน</h5>
-                <button onclick="$('#editModal').addClass('hidden')" class="text-gray-400 hover:text-gray-800 w-8 h-8 rounded-full bg-white flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-xmark"></i></button>
+        <div class="bg-white rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl flex flex-col max-h-[95vh] border border-gray-100">
+            <div class="p-5 flex justify-between items-center border-b bg-yellow-50">
+                <h5 class="font-extrabold text-lg text-yellow-700"><i class="fa-solid fa-pen-to-square mr-2"></i> แก้ไขข้อมูลผลงาน</h5>
+                <button onclick="$('#editModal').addClass('hidden')" class="text-gray-400 hover:text-gray-800 w-10 h-10 rounded-full bg-white flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-xmark"></i></button>
             </div>
             
-            <div class="p-4 md:p-6 overflow-y-auto bg-white flex-grow custom-scrollbar">
-                <form id="editForm" class="space-y-4">
+            <div class="p-6 overflow-y-auto bg-[#f4f7fe] flex-grow custom-scrollbar">
+                <form id="editForm" class="space-y-4 bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
                     <input type="hidden" id="editFileId">
                     <div>
-                        <label class="text-xs font-bold text-gray-700 mb-1 block">ชื่อกิจกรรม/เกียรติบัตร <span class="text-red-500">*</span></label>
+                        <label class="block text-sm font-bold text-gray-700 mb-1.5">ชื่อกิจกรรม/เกียรติบัตร <span class="text-red-500">*</span></label>
                         <input type="text" id="editCertName" class="input-clean" required>
                     </div>
                     <div class="grid grid-cols-2 gap-3">
                         <div>
-                            <label class="text-xs font-bold text-gray-700 mb-1 block">สถานที่จัด</label>
+                            <label class="block text-sm font-bold text-gray-700 mb-1.5">สถานที่จัด</label>
                             <input type="text" id="editCertLocation" class="input-clean">
                         </div>
                         <div>
-                            <label class="text-xs font-bold text-gray-700 mb-1 block">วันที่จัดกิจกรรม</label>
+                            <label class="block text-sm font-bold text-gray-700 mb-1.5">วันที่จัดกิจกรรม</label>
                             <input type="date" id="editCertDate" class="input-clean">
                         </div>
                     </div>
                     <div>
-                        <label class="text-xs font-bold text-gray-700 mb-1 block">ระดับรางวัล</label>
+                        <label class="block text-sm font-bold text-gray-700 mb-1.5">ระดับรางวัล</label>
                         <select id="editCertAward" class="input-clean">
                             <option value="">-- ไม่ระบุ --</option>
                             <option value="เข้าร่วม">เข้าร่วมกิจกรรม</option>
@@ -309,12 +380,12 @@
                         </select>
                     </div>
                     <div>
-                        <label class="text-xs font-bold text-gray-700 mb-1 block">รายละเอียดเพิ่มเติม</label>
+                        <label class="block text-sm font-bold text-gray-700 mb-1.5">รายละเอียดเพิ่มเติม</label>
                         <textarea id="editCertDesc" class="input-clean" rows="2"></textarea>
                     </div>
-                    <div class="pt-2">
-                        <button type="submit" id="btnUpdate" class="w-full bg-gradient-to-r from-yellow-500 to-orange-500 text-white py-3 rounded-xl font-bold shadow-md hover:scale-[1.02] transition-all flex items-center justify-center">
-                            <i class="fa-solid fa-save mr-2"></i> บันทึกการเปลี่ยนแปลง
+                    <div class="pt-4 border-t border-gray-100">
+                        <button type="submit" id="btnUpdate" class="w-full bg-gradient-to-r from-yellow-500 to-orange-500 text-white py-3.5 rounded-2xl font-bold shadow-lg hover:scale-[1.02] transition-all flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-save"></i> บันทึกการเปลี่ยนแปลง
                         </button>
                     </div>
                 </form>
@@ -325,12 +396,12 @@
     <!-- Modal IG Story -->
     <div id="igStoryModal" class="fixed inset-0 bg-gray-900/90 z-50 hidden flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-3xl w-full max-w-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
-            <div class="p-4 flex justify-between items-center border-b">
-                <h5 class="font-bold text-lg"><i class="fa-brands fa-instagram text-pink-500 mr-2"></i> สรุปผลงานสำหรับ IG Stories</h5>
-                <button onclick="$('#igStoryModal').addClass('hidden')" class="text-gray-400 hover:text-gray-800 w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+            <div class="p-5 flex justify-between items-center border-b">
+                <h5 class="font-extrabold text-lg text-gray-900"><i class="fa-brands fa-instagram text-pink-500 mr-2"></i> สรุปผลงานสำหรับ IG Stories</h5>
+                <button onclick="$('#igStoryModal').addClass('hidden')" class="text-gray-400 hover:text-gray-800 w-10 h-10 bg-gray-50 hover:bg-gray-100 rounded-full flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <div class="p-4 overflow-y-auto bg-gray-100 flex-grow flex justify-center items-center">
-                <div id="igStoryCardContainer" class="relative w-[300px] h-[533px] bg-gray-300 rounded-2xl overflow-hidden shadow-inner flex justify-center items-center">
+            <div class="p-6 overflow-y-auto bg-gray-100 flex-grow flex justify-center items-center">
+                <div id="igStoryCardContainer" class="relative w-[300px] h-[533px] bg-gray-300 rounded-3xl overflow-hidden shadow-inner flex justify-center items-center">
                     <div id="igStoryCard">
                         <div class="story-logo"><img src="/logo.webp"></div>
                         <div style="font-size: 4rem; font-weight: 800; margin-bottom: 20px;">ผลงานของฉัน</div>
@@ -340,9 +411,9 @@
                     </div>
                 </div>
             </div>
-            <div class="p-4 bg-white border-t text-center">
-                <button id="downloadStoryBtn" class="bg-gradient-to-r from-pink-500 to-purple-600 text-white px-8 py-3 rounded-xl font-bold shadow-md">
-                    <i class="fa-solid fa-download mr-2"></i> บันทึกรูปภาพ
+            <div class="p-5 bg-white border-t border-gray-100 text-center">
+                <button id="downloadStoryBtn" class="bg-gradient-to-r from-pink-500 to-purple-600 text-white px-8 py-3.5 rounded-2xl font-bold shadow-lg flex justify-center items-center gap-2 mx-auto">
+                    <i class="fa-solid fa-download"></i> บันทึกรูปภาพ
                 </button>
             </div>
         </div>
@@ -350,40 +421,33 @@
 
     <script>
         // 🛡️ SECURITY CONSOLE WARNING
-// ==========================================
-(function() {
-    // กำหนดสไตล์ข้อความคำว่า "หยุด!"
-    const stopStyle = [
-        'color: #ff0000',
-        'font-size: 60px',
-        'font-weight: 900',
-        'text-shadow: 2px 2px 0px #222, 4px 4px 0px #fff',
-        'font-family: "Prompt", "Anuphan", sans-serif',
-        'display: block',
-        'margin-bottom: 10px'
-    ].join(';');
+        (function() {
+            const stopStyle = [
+                'color: #ff0000',
+                'font-size: 60px',
+                'font-weight: 900',
+                'text-shadow: 2px 2px 0px #222, 4px 4px 0px #fff',
+                'font-family: "Prompt", "Anuphan", sans-serif',
+                'display: block',
+                'margin-bottom: 10px'
+            ].join(';');
 
-    // กำหนดสไตล์ข้อความคำเตือน
-    const warningStyle = [
-        'color: #333333',
-        'font-size: 16px',
-        'font-weight: bold',
-        'font-family: "Prompt", "Anuphan", sans-serif',
-        'line-height: 1.6',
-        'display: block'
-    ].join(';');
+            const warningStyle = [
+                'color: #333333',
+                'font-size: 16px',
+                'font-weight: bold',
+                'font-family: "Prompt", "Anuphan", sans-serif',
+                'line-height: 1.6',
+                'display: block'
+            ].join(';');
 
-    // ข้อความคำเตือน
-    const warningText = "ข้อห้ามเกี่ยวกับการเข้าถึง API และระบบโดยตรง ผู้ใช้งานต้องใช้งานผ่านระบบและหน้าจอ (UI) ที่คณะกรรมการสภานักเรียนกำหนดเท่านั้น ห้ามเข้าถึง ดึงข้อมูล หรือใช้งาน API, API Key และ Token ของระบบโดยตรง นอกจากนี้ ห้ามทำวิศวกรรมย้อนกลับ (Reverse Engineer) ถอดรหัส ดักจับ เลียนแบบ หรือสร้างโปรแกรม/บอทใดๆ เพื่อเชื่อมต่อเข้ากับ API โดยไม่ได้รับอนุญาตเป็นลายลักษณ์อักษร หากพบการฝ่าฝืน คณะกรรมการสภานักเรียนขอสงวนสิทธิ์ในการระงับบัญชีผู้ใช้ทันที และจะดำเนินคดีทางกฎหมายตาม พ.ร.บ. ว่าด้วยการกระทำความผิดเกี่ยวกับคอมพิวเตอร์ อย่างถึงที่สุด";
+            const warningText = "ข้อห้ามเกี่ยวกับการเข้าถึง API และระบบโดยตรง ผู้ใช้งานต้องใช้งานผ่านระบบและหน้าจอ (UI) ที่คณะกรรมการสภานักเรียนกำหนดเท่านั้น ห้ามเข้าถึง ดึงข้อมูล หรือใช้งาน API, API Key และ Token ของระบบโดยตรง นอกจากนี้ ห้ามทำวิศวกรรมย้อนกลับ (Reverse Engineer) ถอดรหัส ดักจับ เลียนแบบ หรือสร้างโปรแกรม/บอทใดๆ เพื่อเชื่อมต่อเข้ากับ API โดยไม่ได้รับอนุญาตเป็นลายลักษณ์อักษร หากพบการฝ่าฝืน คณะกรรมการสภานักเรียนขอสงวนสิทธิ์ในการระงับบัญชีผู้ใช้ทันที และจะดำเนินคดีทางกฎหมายตาม พ.ร.บ. ว่าด้วยการกระทำความผิดเกี่ยวกับคอมพิวเตอร์ อย่างถึงที่สุด";
 
-    // สั่งพิมพ์ลง Console
-    console.log('%cหยุด!', stopStyle);
-    console.log('%c' + warningText, warningStyle);
-    
-    // (ทางเลือก) เคลียร์ Console ก่อนหน้าทิ้งทั้งหมดเพื่อให้ข้อความนี้เด่นชัดที่สุด
-    // setTimeout(console.clear.bind(console), 100); 
-})();
-        // ⚠️ Web App URL เดิม
+            console.log('%cหยุด!', stopStyle);
+            console.log('%c' + warningText, warningStyle);
+        })();
+
+        // ⚠️ Web App URL เดิมคงไว้ 100%
         const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbx82RgLw1JIiiZRpHAZHBCQgQyNDm9uINgRyHeGk1BJGVphhMap4ATP4Q_FkIbf3lyZ/exec";
         
         let userId = ""; 
@@ -403,7 +467,8 @@
                 userName = savedName;
                 
                 $('#userNameShow').text(userName);
-                $('#userEmailShow').text(`รหัส: ${userId}`); 
+                $('#userEmailShow').text(`ID: ${userId}`); 
+                $('#user-avatar').text(userName.charAt(0).toUpperCase());
                 
                 $('#loginSection').hide();
                 $('#userProfileHeader').removeClass('hidden');
@@ -425,34 +490,38 @@
             return JSON.parse(jsonPayload);
         }
 
-        // ฟังก์ชันรับผลลัพธ์จากการล็อกอิน Google
         window.handleCredentialResponse = function(response) {
             const responsePayload = decodeJwtResponse(response.credential);
             const email = responsePayload.email;
             const name = responsePayload.name;
 
-            // ตรวจสอบโดเมนของโรงเรียน
             if (!email.endsWith('@mst.ac.th')) {
-                Swal.fire('ปฏิเสธการเข้าถึง', 'กรุณาใช้อีเมลของโรงเรียน (@mst.ac.th) เท่านั้น', 'warning');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'ปฏิเสธการเข้าถึง',
+                    text: 'กรุณาใช้อีเมลของโรงเรียน (@mst.ac.th) เท่านั้น',
+                    customClass: { popup: 'rounded-[2rem]' }
+                });
                 return;
             }
 
             const emailPrefix = email.split('@')[0];
             
-            // ตรวจสอบรูปแบบอีเมล (ปีจบ 2 หลัก + รหัส 5 หลัก รวม 7 หลัก)
             if (emailPrefix.length !== 7 || isNaN(emailPrefix)) {
-                Swal.fire('รูปแบบอีเมลไม่ถูกต้อง', 'กรุณาใช้อีเมลนักเรียนรูปแบบมาตรฐาน (เช่น 6829903@mst.ac.th)', 'error');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'รูปแบบอีเมลไม่ถูกต้อง',
+                    text: 'กรุณาใช้อีเมลนักเรียนรูปแบบมาตรฐาน (เช่น 6829903@mst.ac.th)',
+                    customClass: { popup: 'rounded-[2rem]' }
+                });
                 return;
             }
 
-            // ตัดเอาเฉพาะรหัสนักเรียน 5 หลัก (จาก Index ที่ 2 เป็นต้นไป)
             const stdId = emailPrefix.substring(2); 
 
-            // ซ่อนปุ่ม Google แล้วโชว์ Loader
             $('#loginBtnContainer').hide(); 
             $('#loginLoader').removeClass('hidden').addClass('flex');
             
-            // ส่งรหัสนักเรียน (stdId) ไปให้ Google Apps Script เช็คสิทธิ์ในฐานข้อมูลเดิม
             fetch(WEB_APP_URL, { 
                 method: 'POST', 
                 body: JSON.stringify({ action: 'verifyLogin', std_id: stdId }) 
@@ -461,14 +530,14 @@
             .then(data => {
                 if (data.status === 'success') {
                     userId = stdId;
-                    userName = data.name || name; // ใช้ชื่อจากระบบถ้ามี ถ้าไม่มีใช้จาก Google
+                    userName = data.name || name; 
                     
-                    // บันทึก Session ลงเครื่อง
                     localStorage.setItem('mstsc_userid', userId);
                     localStorage.setItem('mstsc_name', userName);
 
                     $('#userNameShow').text(userName);
-                    $('#userEmailShow').text(`รหัส: ${userId}`);
+                    $('#userEmailShow').text(`ID: ${userId}`);
+                    $('#user-avatar').text(userName.charAt(0).toUpperCase());
                     
                     $('#loginSection').fadeOut(300, function() {
                         $('#userProfileHeader').removeClass('hidden');
@@ -481,10 +550,11 @@
                         text: data.message || 'ระบบนี้สำหรับคณะกรรมการสภานักเรียนเท่านั้น หากคุณเป็นคณะกรรมการฯ กรุณารายงานตัวในระบบก่อนเข้าใช้งาน',
                         icon: 'warning',
                         showCancelButton: true,
-                        confirmButtonColor: '#6A1B9A',
+                        confirmButtonColor: '#7e22ce',
                         cancelButtonColor: '#cbd5e1',
                         confirmButtonText: '<i class="fa-solid fa-up-right-from-square mr-2"></i> ไปหน้ารายงานตัว',
-                        cancelButtonText: 'ปิดหน้าต่าง'
+                        cancelButtonText: 'ปิดหน้าต่าง',
+                        customClass: { popup: 'rounded-[2rem]' }
                     }).then((result) => {
                         if (result.isConfirmed) {
                             window.open('https://mstsc.pages.dev/regis', '_blank');
@@ -493,13 +563,23 @@
                     $('#loginLoader').addClass('hidden').removeClass('flex');
                     $('#loginBtnContainer').fadeIn();
                 } else {
-                    Swal.fire('ข้อผิดพลาด', data.message, 'error');
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'ข้อผิดพลาด',
+                        text: data.message,
+                        customClass: { popup: 'rounded-[2rem]' }
+                    });
                     $('#loginLoader').addClass('hidden').removeClass('flex');
                     $('#loginBtnContainer').fadeIn();
                 }
             })
             .catch(err => {
-                Swal.fire('ระบบขัดข้อง', 'ไม่สามารถเชื่อมต่อฐานข้อมูลได้', 'error');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'ระบบขัดข้อง',
+                    text: 'ไม่สามารถเชื่อมต่อฐานข้อมูลได้',
+                    customClass: { popup: 'rounded-[2rem]' }
+                });
                 $('#loginLoader').addClass('hidden').removeClass('flex');
                 $('#loginBtnContainer').fadeIn();
             });
@@ -514,10 +594,11 @@
                 text: "คุณต้องการออกจากระบบคลังเกียรติบัตรใช่หรือไม่",
                 icon: 'question',
                 showCancelButton: true,
-                confirmButtonColor: '#6A1B9A',
-                cancelButtonColor: '#d33',
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#9ca3af',
                 confirmButtonText: 'ใช่, ออกจากระบบ',
-                cancelButtonText: 'ยกเลิก'
+                cancelButtonText: 'ยกเลิก',
+                customClass: { popup: 'rounded-[2rem]' }
             }).then((result) => {
                 if (result.isConfirmed) {
                     localStorage.removeItem('mstsc_userid');
@@ -533,11 +614,11 @@
         $('#certFile').on('change', function(e) {
             const file = e.target.files[0];
             if (!file) {
-                $('#fileStatus').text('คลิกเลือกไฟล์').removeClass('text-mst-purple');
+                $('#fileStatus').text('คลิกเลือกไฟล์ / แตะเพื่อเลือก').removeClass('text-purple-600');
                 return;
             }
             
-            $('#fileStatus').text(file.name).addClass('text-mst-purple');
+            $('#fileStatus').text(file.name).addClass('text-purple-600');
             const reader = new FileReader();
             reader.onload = function(evt) {
                 fileData = { base64: evt.target.result.split(',')[1], mimeType: file.type, fileName: file.name };
@@ -564,16 +645,16 @@
                 .then(res => res.json())
                 .then(data => {
                     if(data.status === 'success') {
-                        Swal.fire({icon: 'success', title: 'บันทึกเกียรติบัตรแล้ว', timer: 1500, showConfirmButton: false});
+                        Swal.fire({icon: 'success', title: 'บันทึกเกียรติบัตรแล้ว', timer: 1500, showConfirmButton: false, customClass: { popup: 'rounded-[2rem]' }});
                         $('#uploadForm')[0].reset();
-                        $('#fileStatus').text('คลิกเลือกไฟล์').removeClass('text-mst-purple');
+                        $('#fileStatus').text('คลิกเลือกไฟล์ / แตะเพื่อเลือก').removeClass('text-purple-600');
                         fileData = {};
                         loadCerts();
                     } else {
-                        Swal.fire('ข้อผิดพลาด', data.message, 'error');
+                        Swal.fire({icon: 'error', title: 'ข้อผิดพลาด', text: data.message, customClass: { popup: 'rounded-[2rem]' }});
                     }
                 })
-                .catch(err => Swal.fire('ข้อผิดพลาด', 'ไม่สามารถอัปโหลดข้อมูลได้', 'error'))
+                .catch(err => Swal.fire({icon: 'error', title: 'ข้อผิดพลาด', text: 'ไม่สามารถอัปโหลดข้อมูลได้', customClass: { popup: 'rounded-[2rem]' }}))
                 .finally(() => $('#btnUpload').prop('disabled', false).html('<i class="fa-solid fa-save mr-2"></i> บันทึกเข้าระบบ'));
         });
 
@@ -602,31 +683,31 @@
                             allCerts.forEach(c => {
                                 const thumb = `https://drive.google.com/thumbnail?id=${c.fileId}&sz=w400`;
                                 const dateStr = c.certDate ? new Date(c.certDate).toLocaleDateString('th-TH') : '';
-                                const awardBadge = c.award ? `<span class="bg-purple-100 text-mst-purple px-2 py-0.5 rounded text-xs font-bold">${c.award}</span>` : '';
+                                const awardBadge = c.award ? `<span class="bg-purple-100 text-purple-700 px-3 py-1 rounded-lg text-xs font-bold border border-purple-200">${c.award}</span>` : '';
                                 
                                 grid.append(`
-                                    <div class="bg-white rounded-2xl overflow-hidden border border-gray-100 cert-card shadow-sm p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                                        <div class="flex items-start gap-4">
-                                            <div class="w-12 h-12 rounded-xl bg-purple-50 text-mst-purple flex items-center justify-center flex-shrink-0 text-xl shadow-inner">
+                                    <div class="bg-white rounded-3xl overflow-hidden border border-gray-100 cert-card shadow-sm p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                                        <div class="flex items-start gap-4 w-full md:w-auto">
+                                            <div class="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center flex-shrink-0 text-xl border border-purple-100">
                                                 <i class="fa-solid fa-certificate"></i>
                                             </div>
-                                            <div>
-                                                <h4 class="font-bold text-gray-800 text-sm md:text-base leading-tight">${c.certName}</h4>
-                                                <div class="text-xs text-gray-500 mt-1 flex flex-wrap gap-2 items-center">
+                                            <div class="flex-grow">
+                                                <h4 class="font-bold text-gray-900 text-sm md:text-base leading-tight">${c.certName}</h4>
+                                                <div class="text-xs text-gray-500 mt-1.5 flex flex-wrap gap-2 items-center font-medium">
                                                     ${dateStr ? `<span><i class="fa-regular fa-calendar mr-1"></i>${dateStr}</span>` : ''}
                                                     ${c.location ? `<span><i class="fa-solid fa-location-dot mr-1"></i>${c.location}</span>` : ''}
                                                 </div>
-                                                <div class="mt-2 flex gap-2">${awardBadge}</div>
+                                                <div class="mt-2.5 flex gap-2">${awardBadge}</div>
                                             </div>
                                         </div>
-                                        <div class="flex gap-2 flex-shrink-0 ml-auto md:ml-0 mt-2 md:mt-0">
-                                            <button onclick="previewFile('${c.url}', '${c.certName}', '${c.description || ''}', '${c.certDate || ''}', '${c.location || ''}', '${c.award || ''}', '${c.fileId}')" class="bg-purple-50 hover:bg-mst-purple hover:text-white text-mst-purple w-9 h-9 rounded-xl flex items-center justify-center transition-colors border border-purple-100" title="เปิดดูรายละเอียด">
+                                        <div class="flex gap-2 flex-shrink-0 ml-auto w-full md:w-auto justify-end mt-2 md:mt-0 pt-2 md:pt-0 border-t md:border-t-0 border-gray-50">
+                                            <button onclick="previewFile('${c.url}', '${c.certName}', '${c.description || ''}', '${c.certDate || ''}', '${c.location || ''}', '${c.award || ''}', '${c.fileId}')" class="bg-indigo-50 hover:bg-indigo-600 hover:text-white text-indigo-600 w-10 h-10 rounded-xl flex items-center justify-center transition-colors border border-indigo-100 shadow-sm" title="เปิดดูรายละเอียด">
                                                 <i class="fa-solid fa-eye"></i>
                                             </button>
-                                            <button onclick="openEditModal('${c.fileId}')" class="bg-yellow-50 hover:bg-yellow-500 hover:text-white text-yellow-600 w-9 h-9 rounded-xl flex items-center justify-center transition-colors border border-yellow-100" title="แก้ไขข้อมูล">
+                                            <button onclick="openEditModal('${c.fileId}')" class="bg-yellow-50 hover:bg-yellow-500 hover:text-white text-yellow-600 w-10 h-10 rounded-xl flex items-center justify-center transition-colors border border-yellow-100 shadow-sm" title="แก้ไขข้อมูล">
                                                 <i class="fa-solid fa-pen"></i>
                                             </button>
-                                            <button onclick="deleteCert('${c.fileId}')" class="bg-red-50 hover:bg-red-500 hover:text-white text-red-500 w-9 h-9 rounded-xl flex items-center justify-center transition-colors border border-red-100" title="ลบเกียรติบัตร">
+                                            <button onclick="deleteCert('${c.fileId}')" class="bg-red-50 hover:bg-red-500 hover:text-white text-red-500 w-10 h-10 rounded-xl flex items-center justify-center transition-colors border border-red-100 shadow-sm" title="ลบเกียรติบัตร">
                                                 <i class="fa-solid fa-trash"></i>
                                             </button>
                                         </div>
@@ -638,7 +719,7 @@
                 })
                 .catch(err => {
                     $('#certLoader').addClass('hidden').removeClass('flex');
-                    Swal.fire('ระบบขัดข้อง', 'ไม่สามารถดึงข้อมูลคลังได้', 'error');
+                    Swal.fire({icon: 'error', title: 'ระบบขัดข้อง', text: 'ไม่สามารถดึงข้อมูลคลังได้', customClass: { popup: 'rounded-[2rem]' }});
                 });
         }
 
@@ -654,7 +735,8 @@
                 confirmButtonColor: '#d33',
                 cancelButtonColor: '#9ca3af',
                 confirmButtonText: 'ใช่, ลบทิ้งเลย',
-                cancelButtonText: 'ยกเลิก'
+                cancelButtonText: 'ยกเลิก',
+                customClass: { popup: 'rounded-[2rem]' }
             }).then((result) => {
                 if (result.isConfirmed) {
                     Swal.fire({title: 'กำลังลบ...', allowOutsideClick: false, didOpen: () => {Swal.showLoading()}});
@@ -666,12 +748,12 @@
                     .then(res => res.json())
                     .then(data => {
                         if(data.status === 'success') {
-                            Swal.fire({icon: 'success', title: 'ลบผลงานเรียบร้อยแล้ว', timer: 1500, showConfirmButton: false});
+                            Swal.fire({icon: 'success', title: 'ลบผลงานเรียบร้อยแล้ว', timer: 1500, showConfirmButton: false, customClass: { popup: 'rounded-[2rem]' }});
                             loadCerts();
                         } else {
-                            Swal.fire('ข้อผิดพลาด', data.message, 'error');
+                            Swal.fire({icon: 'error', title: 'ข้อผิดพลาด', text: data.message, customClass: { popup: 'rounded-[2rem]' }});
                         }
-                    }).catch(err => Swal.fire('ระบบขัดข้อง', 'ไม่สามารถลบข้อมูลได้', 'error'));
+                    }).catch(err => Swal.fire({icon: 'error', title: 'ระบบขัดข้อง', text: 'ไม่สามารถลบข้อมูลได้', customClass: { popup: 'rounded-[2rem]' }}));
                 }
             });
         };
@@ -722,14 +804,14 @@
                 .then(res => res.json())
                 .then(data => {
                     if(data.status === 'success') {
-                        Swal.fire({icon: 'success', title: 'อัปเดตข้อมูลแล้ว', timer: 1500, showConfirmButton: false});
+                        Swal.fire({icon: 'success', title: 'อัปเดตข้อมูลแล้ว', timer: 1500, showConfirmButton: false, customClass: { popup: 'rounded-[2rem]' }});
                         $('#editModal').addClass('hidden');
                         loadCerts();
                     } else {
-                        Swal.fire('ข้อผิดพลาด', data.message, 'error');
+                        Swal.fire({icon: 'error', title: 'ข้อผิดพลาด', text: data.message, customClass: { popup: 'rounded-[2rem]' }});
                     }
                 })
-                .catch(err => Swal.fire('ข้อผิดพลาด', 'ไม่สามารถอัปเดตข้อมูลได้', 'error'))
+                .catch(err => Swal.fire({icon: 'error', title: 'ข้อผิดพลาด', text: 'ไม่สามารถอัปเดตข้อมูลได้', customClass: { popup: 'rounded-[2rem]' }}))
                 .finally(() => $('#btnUpdate').prop('disabled', false).html('<i class="fa-solid fa-save mr-2"></i> บันทึกการเปลี่ยนแปลง'));
         });
 
@@ -746,7 +828,7 @@
                 'เหรียญทอง': 'from-yellow-300 to-yellow-500 text-yellow-900',
                 'เหรียญเงิน': 'from-gray-300 to-gray-400 text-gray-800',
                 'เหรียญทองแดง': 'from-orange-300 to-orange-500 text-orange-900',
-                'เข้าร่วม': 'from-mst-purple to-[#4a0072] text-white',
+                'เข้าร่วม': 'from-purple-600 to-indigo-700 text-white',
                 'ผ่านการอบรม': 'from-blue-400 to-blue-600 text-white'
             };
 
@@ -754,10 +836,10 @@
                 if(count > 0) {
                     const theme = colorMap[label] || 'from-slate-400 to-slate-600 text-white';
                     statsArea.append(`
-                        <div class="bg-gradient-to-br ${theme} rounded-2xl p-4 shadow-md min-w-[140px] flex-grow md:flex-grow-0 relative overflow-hidden">
+                        <div class="bg-gradient-to-br ${theme} rounded-3xl p-5 shadow-sm min-w-[140px] flex-grow md:flex-grow-0 relative overflow-hidden">
                             <div class="relative z-10">
-                                <p class="text-xs font-bold opacity-90 uppercase tracking-wide">${label}</p>
-                                <p class="text-3xl font-black">${count}</p>
+                                <p class="text-[11px] font-bold opacity-90 uppercase tracking-widest">${label}</p>
+                                <p class="text-4xl font-black mt-1">${count}</p>
                             </div>
                             <i class="fa-solid fa-medal absolute -bottom-2 -right-2 text-5xl opacity-20 transform -rotate-12"></i>
                         </div>
@@ -775,13 +857,13 @@
             $('#pd_location').html(location && location !== 'undefined' && location !== '' ? `<i class="fa-solid fa-location-dot text-gray-400 mr-1"></i> ${location}` : '-');
             
             if (award && award !== 'undefined' && award !== '') {
-                 $('#pd_award').html(`<span class="bg-purple-100 text-mst-purple px-3 py-1 rounded-lg text-xs font-bold border border-purple-200">${award}</span>`);
+                 $('#pd_award').html(`<span class="bg-purple-100 text-purple-700 px-3 py-1.5 rounded-lg text-xs font-bold border border-purple-200">${award}</span>`);
             } else {
                  $('#pd_award').text('-');
             }
 
             if(desc && desc !== 'undefined' && desc.trim() !== '') {
-                $('#showFullDesc').html(`<i class="fa-solid fa-quote-left mr-2 text-mst-purple opacity-50 text-xl float-left"></i> <span class="leading-relaxed block">${desc}</span>`).removeClass('hidden');
+                $('#showFullDesc').html(`<i class="fa-solid fa-quote-left mr-2 text-purple-600 opacity-50 text-xl float-left"></i> <span class="leading-relaxed block">${desc}</span>`).removeClass('hidden');
             } else {
                 $('#showFullDesc').addClass('hidden');
             }
@@ -789,10 +871,10 @@
             const isPDF = url.toLowerCase().endsWith('.pdf') || url.toLowerCase().includes('pdf');
             if (isPDF) {
                  const embedUrl = url.replace(/\/view.*$/, '/preview');
-                 $('#previewBody').html(`<iframe src="${embedUrl}" class="w-full h-[60vh] rounded-xl border border-gray-200"></iframe>`);
+                 $('#previewBody').html(`<iframe src="${embedUrl}" class="w-full h-[60vh] rounded-2xl border border-gray-200 shadow-inner"></iframe>`);
             } else {
                  const imgUrl = `https://drive.google.com/thumbnail?id=${fileId}&sz=w1200`;
-                 $('#previewBody').html(`<img src="${imgUrl}" class="max-w-full max-h-[60vh] rounded-xl mx-auto object-contain shadow-sm border border-gray-100" onerror="this.src='https://placehold.co/600x400/f3f0f7/6A1B9A?text=Image+Not+Found'">`);
+                 $('#previewBody').html(`<img src="${imgUrl}" class="max-w-full max-h-[60vh] rounded-2xl mx-auto object-contain shadow-sm border border-gray-100" onerror="this.src='https://placehold.co/600x400/f4f7fe/7e22ce?text=Image+Not+Found'">`);
             }
             
             $('#previewModal').removeClass('hidden').addClass('flex');
