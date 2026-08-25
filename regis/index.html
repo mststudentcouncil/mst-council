@@ -168,45 +168,54 @@
             <h1 class="text-xl font-extrabold text-gray-900 mb-1">คณะกรรมการสภานักเรียน</h1>
             <p class="text-sm text-gray-500 font-medium mb-8">เฉพาะผู้ที่ผ่านการคัดเลือกแล้วเท่านั้น</p>
 
-            <!-- 🌟 เพิ่มส่วนยืนยัน PDPA ก่อนเข้าสู่ระบบ -->
-            <div class="mb-5 text-left bg-purple-50 p-5 rounded-2xl border border-purple-100 max-w-lg mx-auto">
-                <label class="flex items-start cursor-pointer gap-4 group">
-                    <div class="relative flex items-center justify-center shrink-0 mt-0.5">
-                        <input type="checkbox" id="login_pdpa_consent" onchange="toggleLoginButton()" class="peer appearance-none w-5 h-5 border-2 border-gray-300 rounded-md checked:bg-purple-600 checked:border-purple-600 transition-colors cursor-pointer bg-white">
-                        <svg class="absolute w-3.5 h-3.5 text-white opacity-0 peer-checked:opacity-100 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
-                    </div>
-                    <div class="text-[13px] text-gray-700 leading-relaxed font-medium">
-                        ข้าพเจ้ายินยอมให้นำข้อมูลส่วนบุคคล (ชื่อ-สกุล, อีเมล) ไปใช้ในการตรวจสอบสิทธิ์และสร้างบัญชีผู้ใช้ ตามนโยบาย PDPA
-                    </div>
-                </label>
+            <!-- 🌟 1. แสดงตัวโหลด (Loading) เช็คสถานะระบบเป็นค่าเริ่มต้น -->
+            <div id="systemCheckLoader" class="py-8 flex flex-col items-center justify-center">
+                <div class="loader mb-4" style="border-top-color: #6A1B9A;"></div>
+                <p class="text-sm font-bold text-purple-700 animate-pulse">กำลังตรวจสอบสถานะระบบ...</p>
             </div>
 
-            <!-- 🌟 เพิ่มคลาส hidden เข้าไปใน div ของ loginBtnWrapper เพื่อซ่อนไว้ก่อน -->
-            <div id="loginBtnWrapper" class="hidden flex-col items-center justify-center mb-4 relative z-10 w-full transition-all duration-300">
-                <div id="g_id_onload" 
-                     data-client_id="1055496557-rm1petnl1gtd6c1ed01q9o6k880ik2ta.apps.googleusercontent.com" 
-                     data-callback="handleStudentLogin" 
-                     data-auto_prompt="false"
-                     data-auto_select="false"
-                     data-hd="mst.ac.th">
+            <!-- 🌟 2. ห่อกล่อง PDPA และ Login ด้วย div class="hidden" เพื่อซ่อนตั้งแต่แรก -->
+            <div id="loginContentWrapper" class="hidden">
+                <!-- ส่วนยืนยัน PDPA -->
+                <div class="mb-5 text-left bg-purple-50 p-5 rounded-2xl border border-purple-100 max-w-lg mx-auto">
+                    <label class="flex items-start cursor-pointer gap-4 group">
+                        <div class="relative flex items-center justify-center shrink-0 mt-0.5">
+                            <input type="checkbox" id="login_pdpa_consent" onchange="toggleLoginButton()" class="peer appearance-none w-5 h-5 border-2 border-gray-300 rounded-md checked:bg-purple-600 checked:border-purple-600 transition-colors cursor-pointer bg-white">
+                            <svg class="absolute w-3.5 h-3.5 text-white opacity-0 peer-checked:opacity-100 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                        </div>
+                        <div class="text-[13px] text-gray-700 leading-relaxed font-medium">
+                            ข้าพเจ้ายินยอมให้นำข้อมูลส่วนบุคคล (ชื่อ-สกุล, อีเมล) ไปใช้ในการตรวจสอบสิทธิ์และสร้างบัญชีผู้ใช้ ตามนโยบาย PDPA
+                        </div>
+                    </label>
                 </div>
-                <div class="g_id_signin" 
-                     data-type="standard" 
-                     data-size="large" 
-                     data-theme="outline" 
-                     data-text="sign_in_with" 
-                     data-shape="pill" 
-                     data-logo_alignment="left">
+
+                <!-- ส่วนปุ่ม Login ด้วย Google -->
+                <div id="loginBtnWrapper" class="hidden flex-col items-center justify-center mb-4 relative z-10 w-full transition-all duration-300">
+                    <div id="g_id_onload" 
+                         data-client_id="1055496557-rm1petnl1gtd6c1ed01q9o6k880ik2ta.apps.googleusercontent.com" 
+                         data-callback="handleStudentLogin" 
+                         data-auto_prompt="false"
+                         data-auto_select="false"
+                         data-hd="mst.ac.th">
+                    </div>
+                    <div class="g_id_signin" 
+                         data-type="standard" 
+                         data-size="large" 
+                         data-theme="outline" 
+                         data-text="sign_in_with" 
+                         data-shape="pill" 
+                         data-logo_alignment="left">
+                    </div>
+                    
+                    <div class="mt-5 flex items-center justify-center gap-1.5 text-[11px] text-purple-700 font-bold bg-purple-50 py-2 px-4 rounded-xl border border-purple-100 shadow-sm w-fit mx-auto">
+                        <i class="fa-solid fa-school text-purple-500"></i> เข้าสู่ระบบด้วย @mst.ac.th เท่านั้น
+                    </div>
                 </div>
                 
-                <div class="mt-5 flex items-center justify-center gap-1.5 text-[11px] text-purple-700 font-bold bg-purple-50 py-2 px-4 rounded-xl border border-purple-100 shadow-sm w-fit mx-auto">
-                    <i class="fa-solid fa-school text-purple-500"></i> เข้าสู่ระบบด้วย @mst.ac.th เท่านั้น
+                <div id="loginLoader" class="hidden flex-col items-center mt-6 relative z-10">
+                    <div class="loader mb-3"></div>
+                    <p class="text-sm font-bold text-purple-700">กำลังตรวจสอบสิทธิ์...</p>
                 </div>
-            </div>
-            
-            <div id="loginLoader" class="hidden flex-col items-center mt-6 relative z-10">
-                <div class="loader mb-3"></div>
-                <p class="text-sm font-bold text-purple-700">กำลังตรวจสอบสิทธิ์...</p>
             </div>
         </div>
 
@@ -501,11 +510,11 @@
                                     </div>
                                 </a>
 
-                                <a href="https://mstsc.pages.dev/evoting" target="_blank" class="flex items-center p-4 bg-white border border-gray-100 hover:border-yellow-400 hover:shadow-md rounded-2xl transition-all group">
+                                <a href="https://mstsc.pages.dev/e-voting" target="_blank" class="flex items-center p-4 bg-white border border-gray-100 hover:border-yellow-400 hover:shadow-md rounded-2xl transition-all group">
                                     <div class="w-12 h-12 bg-yellow-50 text-yellow-600 group-hover:bg-yellow-100 group-hover:text-yellow-700 rounded-xl flex items-center justify-center mr-4 transition-colors"><i class="fa-solid fa-check-to-slot text-lg"></i></div>
                                     <div class="flex-grow">
                                         <p class="font-bold text-gray-800 text-sm group-hover:text-yellow-600 transition-colors">เว็บเลือกตั้ง (e-Voting)</p>
-                                        <p class="text-xs text-gray-400 font-medium">mstsc.pages.dev/evoting</p>
+                                        <p class="text-xs text-gray-400 font-medium">mstsc.pages.dev/e-voting</p>
                                     </div>
                                 </a>
 
@@ -559,6 +568,63 @@
 
     <!-- SCRIPT -->
     <script>
+        async function checkSystemStatus() {
+    try {
+        const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getSettings' }) });
+        const result = await res.json();
+        
+        if (result.status === 'success') {
+            const now = new Date().getTime();
+            const openTime = result.data.open_time ? new Date(result.data.open_time).getTime() : null;
+            const closeTime = result.data.close_time ? new Date(result.data.close_time).getTime() : null;
+
+            let isClosed = false;
+            let msg = '';
+            let icon = '<i class="fa-solid fa-lock"></i>';
+            let title = 'ระบบปิดให้บริการชั่วคราว';
+
+            if (openTime && now < openTime) {
+                isClosed = true;
+                icon = '<i class="fa-solid fa-clock"></i>';
+                title = 'ยังไม่ถึงเวลารายงานตัว';
+                msg = `ระบบจะเปิดให้รายงานตัวในวันที่ <br><b class="text-xl text-purple-700 block mt-2">${new Date(openTime).toLocaleString('th-TH')}</b>`;
+            } else if (closeTime && now > closeTime) {
+                isClosed = true;
+                icon = '<i class="fa-solid fa-calendar-xmark"></i>';
+                title = 'สิ้นสุดการรายงานตัว';
+                msg = `ระบบปิดรับรายงานตัวแล้ว <br><span class="text-sm text-red-500 font-bold block mt-2">(ปิดรับเมื่อ ${new Date(closeTime).toLocaleString('th-TH')})</span>`;
+            }
+
+            if (isClosed) {
+                // 🌟 หากระบบปิด ให้แทนที่หน้า Login ทั้งหมดด้วยข้อความแจ้งเตือน
+                // ลบกล่อง PDPA และปุ่ม Login ออกไปเลย เพื่อป้องกันไม่ให้เข้าสู่ระบบได้
+                $('#loginSection').html(`
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-red-50 rounded-bl-full -z-10"></div>
+                    <img src="/logo.webp" alt="MSTSC Logo" class="w-28 h-28 mx-auto mb-6 drop-shadow-xl p-1.5 border-4 border-gray-50 rounded-full bg-white relative z-10">
+                    <h2 class="text-2xl font-extrabold text-gray-900 mb-1">ระบบรายงานตัว</h2>
+                    <h1 class="text-xl font-extrabold text-gray-900 mb-8">คณะกรรมการสภานักเรียน</h1>
+                    
+                    <div class="py-6 text-center fade-in">
+                        <div class="w-20 h-20 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-6 text-4xl shadow-inner border-4 border-white">
+                            ${icon}
+                        </div>
+                        <h2 class="text-xl font-black text-gray-900 mb-3 tracking-wide">${title}</h2>
+                        <p class="text-gray-600 font-medium leading-relaxed bg-gray-50 p-4 rounded-2xl border border-gray-100 inline-block">${msg}</p>
+                        <br>
+                        <a href="admin.html" class="mt-8 inline-flex items-center text-sm text-gray-400 font-bold hover:text-purple-600 transition-colors">
+                            <i class="fa-solid fa-user-shield mr-2"></i> เข้าสู่ระบบผู้ดูแลระบบ
+                        </a>
+                    </div>
+                `);
+                return false; // ส่งค่ากลับว่าระบบปิด
+            }
+        }
+        return true; // ส่งค่ากลับว่าระบบเปิด
+    } catch (err) {
+        console.error("ไม่สามารถตรวจสอบสถานะระบบได้ (ระบบอาจโหลดช้าหรือมีปัญหาเครือข่าย)", err);
+        return true; // ถ้าระบบพัง ปล่อยผ่านไปก่อน (ดีกว่าให้นักเรียนค้างหน้าขาว)
+    }
+}
         // ==========================================
         // 🛡️ SECURITY CONSOLE WARNING
         // ==========================================
@@ -601,7 +667,17 @@
         let systemAcademicYear = today.getFullYear() + 543;
         if (today.getMonth() < 4 || (today.getMonth() === 4 && today.getDate() < 15)) systemAcademicYear -= 1;
 
-        $(document).ready(function() {
+        // 🌟 เปลี่ยน function เป็น async เพื่อให้ใช้ await ได้
+        $(document).ready(async function() {
+            
+            // 🌟 1. ดักการเข้าถึงก่อนเลย ถ้าระบบปิดจะ return ออกทันที (โค้ดจะเขียนทับหน้าเป็นสีแดง)
+            const isSystemOpen = await checkSystemStatus();
+            if(!isSystemOpen) return;
+
+            // 🌟 2. ถ้าระบบเปิด ให้ซ่อน Loader แล้วแสดงเนื้อหา Login แบบค่อยๆ โผล่มา (Fade-in)
+            $('#systemCheckLoader').addClass('hidden');
+            $('#loginContentWrapper').removeClass('hidden').addClass('fade-in');
+
             let roomHtml = '<option value="" disabled selected hidden>เลือกห้อง</option>';
             for(let i=1; i<=10; i++) roomHtml += `<option value="${i}">ห้อง ${i}</option>`;
             $('#room').html(roomHtml);
@@ -879,6 +955,17 @@ function confirmLogout() {
             if (!$('#pdpa_consent').is(':checked')) {
                 return Swal.fire({ icon: 'warning', title: 'แจ้งเตือน', text: 'กรุณายอมรับข้อตกลงความปลอดภัยของข้อมูล (PDPA)', customClass: { popup: 'rounded-[2rem]' } });
             }
+
+            // 🌟 เพิ่มโค้ดเช็คเวลาที่จุดนี้ ก่อนที่จะส่ง Request ไปเซฟ
+    const isSystemOpen = await checkSystemStatus();
+    if(!isSystemOpen) {
+         return Swal.fire({ 
+             icon: 'error', 
+             title: 'หมดเวลา', 
+             text: 'ระบบปิดรับการรายงานตัวแล้ว ไม่สามารถบันทึกข้อมูลได้ในขณะนี้', 
+             customClass: { popup: 'rounded-[2rem]' } 
+         }).then(() => location.reload());
+    }
 
             $('#submitBtn').addClass('hidden');
             $('#submitLoader').removeClass('hidden');
