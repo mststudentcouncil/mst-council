@@ -171,13 +171,46 @@
                 </div>
             </div>
 
-            <!-- ส่วน View อื่นๆ คงเดิมตามโครงสร้างของคุณ -->
-            <div id="view-closed" class="text-center py-8 w-full max-w-md mx-auto fade-in" style="display: none;">
-                <div class="w-24 h-24 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <i class="fa-solid fa-lock text-5xl text-red-500"></i>
+            <!-- หน้าจอระบบปิด (view-closed) -->
+            <div id="view-closed" class="text-center w-full max-w-md mx-auto fade-in mt-4" style="display: none;">
+                <div class="bg-white p-8 md:p-10 rounded-[2.5rem] shadow-[0_15px_40px_rgba(239,68,68,0.08)] border border-red-50 relative overflow-hidden">
+                    
+                    <!-- กราฟิกตกแต่งมุมหลังการ์ด -->
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-red-50 to-transparent rounded-bl-full -z-10 opacity-80"></div>
+                    <div class="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-purple-50 to-transparent rounded-tr-full -z-10 opacity-50"></div>
+
+                    <!-- ชื่อระบบ -->
+                    <h2 class="text-xl md:text-2xl font-black text-gray-800 mb-6 tracking-wide drop-shadow-sm">
+                        ระบบรับสมัครสภานักเรียน
+                    </h2>
+                    
+                    <!-- ไอคอนแม่กุญแจ -->
+                    <div class="relative w-24 h-24 mx-auto mb-6">
+                        <div class="absolute inset-0 bg-red-100 rounded-full animate-ping opacity-30"></div>
+                        <div class="w-full h-full bg-red-50 text-red-500 rounded-full flex items-center justify-center text-5xl shadow-inner border-4 border-white ring-4 ring-red-50 relative z-10">
+                            <i class="fa-solid fa-lock"></i>
+                        </div>
+                    </div>
+                    
+                    <!-- ข้อความสถานะหลัก -->
+                    <h3 class="text-2xl font-black text-red-600 mb-3 tracking-tight drop-shadow-sm">
+                        ยังไม่เปิดให้ดำเนินการ
+                    </h3>
+                    
+                    <!-- ข้อความอธิบาย (id="closedMessageText" เดิมสำหรับให้ JS ส่งข้อความมาแสดงผล) -->
+                    <div class="bg-gray-50 p-4 rounded-2xl border border-gray-100 inline-block w-full shadow-sm">
+                        <p class="text-gray-600 text-sm font-medium leading-relaxed" id="closedMessageText">
+                            หมดเขตการรับสมัครสำหรับปีการศึกษานี้แล้ว
+                        </p>
+                    </div>
+
+                    <!-- ข้อความแนะนำเพิ่มเติม -->
+                    <div class="mt-8 pt-5 border-t border-gray-100">
+                        <p class="text-xs text-gray-400 font-bold tracking-wide">
+                            <i class="fa-solid fa-circle-info mr-1"></i> หากมีข้อสงสัย โปรดติดต่อห้องสภานักเรียน
+                        </p>
+                    </div>
                 </div>
-                <h4 class="text-2xl font-bold text-red-600 mb-2">ยังไม่เปิดให้ดำเนินการ</h4>
-                <p class="text-gray-500 text-sm mb-8" id="closedMessageText">ขออภัย ยังไม่ถึงเวลาเปิดรับสมัคร หรือหมดเขตรับสมัครแล้ว</p>
             </div>
 
             <div id="view-status" class="w-full max-w-xl mx-auto fade-in" style="display: none;">
@@ -421,6 +454,50 @@
             if (savedEmail) currentUserFullEmail = savedEmail; 
             
             const cachedData = localStorage.getItem('mstsc_cached_data');
+
+            // --- 🌟 1. เพิ่มฟังก์ชันเช็คเวลาเปิด-ปิดระบบ ---
+            const checkSystem = (settings) => {
+                let now = new Date();
+                let isOpen = true; let cMsg = "";
+                if(settings.SystemStatus === 'closed') { 
+                    isOpen = false; cMsg = "ระบบถูกปิดรับสมัครโดยคณะกรรมการ"; 
+                }
+                else if(settings.AppStartTime && now < new Date(settings.AppStartTime)) { 
+                    isOpen = false; cMsg = `ระบบจะเปิดรับสมัครในวันที่<br><b class="text-mst-purple">${formatDateTime(settings.AppStartTime)} น.</b>`; 
+                }
+                else if(settings.AppEndTime && now > new Date(settings.AppEndTime)) { 
+                    isOpen = false; cMsg = "หมดเขตการรับสมัครสำหรับปีการศึกษานี้แล้ว"; 
+                }
+                return { isOpen, cMsg };
+            };
+
+            // --- 🌟 2. เพิ่มฟังก์ชันจัดการหน้าจอ (ควบคุมการโชว์หน้า Login / หน้าปิดระบบ) ---
+            const handleViewRouting = (settings, dbApplied) => {
+                const sys = checkSystem(settings);
+                document.getElementById('view-initial-load').style.display = 'none';
+
+                if (savedStdId && dbApplied && dbApplied[savedStdId]) {
+                    // 2.1 หากเคยสมัครไว้แล้ว ให้โชว์หน้าสถานะเสมอ (แม้ระบบจะปิดรับสมัครไปแล้วก็ตาม)
+                    document.getElementById('navLogoutBtn').style.display = 'flex';
+                    checkAndShowStatus(savedStdId, dbApplied[savedStdId]);
+                } else if (!sys.isOpen) {
+                    // 2.2 ระบบปิด + ยังไม่เคยสมัคร -> โชว์หน้า view-closed ทันที ไม่ต้องโชว์ปุ่ม Login
+                    document.getElementById('closedMessageText').innerHTML = sys.cMsg;
+                    document.getElementById('view-closed').style.display = 'block';
+                    
+                    // ซ่อนหน้าจออื่นๆ ทั้งหมด
+                    document.getElementById('view-login').style.display = 'none';
+                    document.getElementById('view-application').style.display = 'none';
+                    document.getElementById('view-status').style.display = 'none';
+                    if (savedStdId) document.getElementById('navLogoutBtn').style.display = 'flex';
+                } else {
+                    // 2.3 ระบบเปิดตามปกติ -> โชว์หน้า Login หรือถ้ามีข้อมูลล็อกอินเก่าก็เข้าระบบเลย
+                    if (savedStdId) processStudentLogin({ id: savedStdId });
+                    else document.getElementById('view-login').style.display = 'block';
+                }
+            };
+
+            // โหลดข้อมูล Cache ก่อนเพื่อให้เว็บแสดงผลทันใจ
             if (cachedData) {
                 try {
                     const result = JSON.parse(cachedData);
@@ -430,19 +507,16 @@
                     availableParties = result.parties || [];
                     isDataLoaded = true;
                     
-                    document.getElementById('view-initial-load').style.display = 'none';
                     if (document.getElementById('displayYear')) {
                         document.getElementById('displayYear').innerText = systemSettings.CurrentAcademicYear || "2569";
                     }
 
-                    if (savedStdId) {
-                        processStudentLogin({ id: savedStdId });
-                    } else {
-                        document.getElementById('view-login').style.display = 'block';
-                    }
+                    // เรียกใช้ระบบจัดการหน้าจอ
+                    handleViewRouting(systemSettings, appliedDB);
                 } catch(e) { console.log("Cache error"); }
             }
 
+            // ดึงข้อมูลล่าสุดจาก Server
             try {
                 const result = await apiCall({ action: "getStudentInit" });
                 isDataLoaded = true;
@@ -459,14 +533,8 @@
                         document.getElementById('displayYear').innerText = systemSettings.CurrentAcademicYear || "2569";
                     }
 
-                    document.getElementById('view-initial-load').style.display = 'none';
-
-                    if (savedStdId && appliedDB[savedStdId]) {
-                        checkAndShowStatus(savedStdId, appliedDB[savedStdId]);
-                    } else if (!cachedData) {
-                        if (savedStdId) processStudentLogin({ id: savedStdId });
-                        else document.getElementById('view-login').style.display = 'block';
-                    }
+                    // เรียกใช้ระบบจัดการหน้าจอ
+                    handleViewRouting(systemSettings, appliedDB);
 
                     setTimeout(() => {
                         const pushContainer = document.getElementById('pushSetupContainer');
