@@ -7,12 +7,12 @@
   "theme_color": "#6A1B9A",
   "icons": [
     {
-      "src": "https://i.ibb.co/F4SNC0SH/ADMISSION.jpg",
+      "src": "./ADMISSION.jpg",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "https://i.ibb.co/F4SNC0SH/ADMISSION.jpg",
+      "src": "./ADMISSION.jpg",
       "sizes": "512x512",
       "type": "image/png"
     }
