@@ -16,7 +16,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-        // คอนฟิก Firebase ชุดเดียวกับที่คุณใช้ใน admin.html
+        // คอนฟิก Firebase 
         const firebaseConfig = {
             apiKey: "AIzaSyAaZXkpLEjASJY4Dc-il8FmjDiZgTDhwkc",
             authDomain: "mstsc-official-portal.firebaseapp.com",
@@ -27,30 +27,30 @@
         const db = getFirestore(app);
 
         async function processRedirect() {
-            // ดึงค่า id ออกมาจาก URL เช่น ?id=line
-            const params = new URLSearchParams(window.location.search);
-            const linkId = params.get('id');
+            // ดึงคำสุดท้ายของลิงก์ เช่น จาก /slinks/line จะได้คำว่า line
+            const pathname = window.location.pathname;
+            const pathParts = pathname.split('/').filter(Boolean);
+            const linkId = pathParts[pathParts.length - 1]; 
 
-            if (!linkId) {
+            // ป้องกันการเข้าหน้า slinks.html ตรงๆ
+            if (!linkId || linkId === 'slinks' || linkId.includes('.html')) {
                 window.location.replace('/404.html');
                 return;
             }
 
             try {
-                // ค้นหาใน Collection ใหม่ที่ชื่อว่า "official_links" โดยให้ Document ID เป็นชื่อย่อลิงก์
+                // ค้นหาลิงก์ใน Firestore
                 const docRef = doc(db, "official_links", linkId);
                 const docSnap = await getDoc(docRef);
 
                 if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    // ทำการย้ายหน้าไปยัง URL ปลายทาง
-                    window.location.replace(data.targetUrl);
+                    // หากพบข้อมูล ให้ย้ายไปลิงก์เป้าหมาย
+                    window.location.replace(docSnap.data().targetUrl);
                 } else {
-                    // หากไม่เจอชื่อลิงก์นี้ ให้เด้งไปหน้า 404
+                    // หากไม่พบชื่อลิงก์นี้
                     window.location.replace('/404.html');
                 }
             } catch (error) {
-                console.error("Error fetching link:", error);
                 window.location.replace('/404.html');
             }
         }

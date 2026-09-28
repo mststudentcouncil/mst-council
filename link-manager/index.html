@@ -2,8 +2,8 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบย่อลิงก์ (MSTSC Links)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>ระบบบริหารจัดการลิงก์ (MSTSC URL Shortener)</title>
     <link rel="icon" type="image/webp" href="/logo.webp">
 
     <!-- Fonts & Icons -->
@@ -13,6 +13,9 @@
     <!-- Tailwind CSS & SweetAlert2 -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <!-- EasyQRCodeJS สำหรับสร้าง QR Code มีโลโก้ -->
+    <script src="https://unpkg.com/easyqrcodejs@4.6.1/dist/easy.qrcode.min.js"></script>
 
     <script>
         tailwind.config = { 
@@ -26,98 +29,131 @@
     </script>
     
     <style>
+        ::-webkit-scrollbar { width: 6px; height: 6px; } 
+        ::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; } 
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        
         body { background-color: #f8fafc; }
-        .glass-panel { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.2); }
-        .hover-lift:hover { transform: translateY(-3px); box-shadow: 0 10px 25px -5px rgba(76, 29, 149, 0.1); }
+        .glass-panel { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.5); }
+        .hover-lift { transition: all 0.2s ease-in-out; }
+        .hover-lift:hover { transform: translateY(-3px); box-shadow: 0 10px 25px -5px rgba(76, 29, 149, 0.15); }
     </style>
 </head>
 <body class="text-gray-800 antialiased h-screen flex flex-col overflow-hidden">
 
-    <!-- หน้าจอล็อกอินและตรวจสอบสิทธิ์ -->
+    <!-- Login Overlay -->
     <div id="loginOverlay" class="fixed inset-0 bg-mstDark/95 z-[100] flex items-center justify-center px-4 backdrop-blur-xl transition-opacity duration-500">
-        <div class="bg-white p-8 md:p-12 rounded-[2.5rem] w-full max-w-md shadow-2xl relative overflow-hidden text-center">
-            <div class="w-20 h-20 bg-mstPurpleLight text-mstPurple rounded-[1.5rem] flex items-center justify-center text-4xl mx-auto mb-6">
-                <i class="fa-solid fa-link"></i>
+        <div class="bg-white p-8 md:p-12 rounded-[2.5rem] w-full max-w-md shadow-2xl relative overflow-hidden text-center transform transition-all">
+            <div class="absolute -top-20 -right-20 w-48 h-48 bg-purple-500 rounded-full blur-3xl opacity-20"></div>
+            <div class="relative z-10">
+                <div class="w-20 h-20 bg-mstPurpleLight text-mstPurple rounded-[1.5rem] flex items-center justify-center text-4xl mx-auto mb-6 shadow-inner">
+                    <i class="fa-solid fa-link"></i>
+                </div>
+                <h2 class="text-3xl font-black text-gray-900 mb-2">MSTSC URL</h2>
+                <p class="text-sm font-medium text-gray-500 mb-8 bg-gray-100 inline-block px-4 py-1.5 rounded-full">ระบบย่อลิงก์สภานักเรียน</p>
+                <button onclick="loginWithGoogle()" class="w-full bg-white border-2 border-gray-200 text-gray-700 font-bold py-4 rounded-2xl hover-lift flex items-center justify-center gap-3">
+                    <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-6 h-6" alt="Google"> 
+                    <span>เข้าสู่ระบบด้วย Google</span>
+                </button>
             </div>
-            <h2 class="text-3xl font-black text-gray-900 mb-2">MSTSC Links</h2>
-            <p class="text-sm font-medium text-gray-500 mb-8 bg-gray-100 inline-block px-4 py-1.5 rounded-full">ระบบจัดการลิงก์สภานักเรียน</p>
-            
-            <button onclick="loginWithGoogle()" class="w-full bg-white border-2 border-gray-200 text-gray-700 font-bold py-4 rounded-2xl hover-lift flex items-center justify-center gap-3">
-                <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-6 h-6" alt="Google"> 
-                <span>เข้าสู่ระบบด้วย Google</span>
-            </button>
-            <p class="text-xs text-center text-red-500 font-bold mt-4">
-                <i class="fa-solid fa-lock"></i> เฉพาะอีเมล @mst.ac.th ของกรรมการที่รายงานตัวแล้ว
-            </p>
         </div>
     </div>
 
-    <!-- ส่วนติดต่อผู้ใช้งานหลัก (Main Workspace) -->
+    <!-- Main Workspace -->
     <div id="appWorkspace" class="hidden flex-1 flex flex-col h-full overflow-hidden opacity-0 transition-opacity duration-500">
         
         <!-- Header -->
-        <header class="glass-panel h-20 border-b border-gray-200 flex items-center justify-between px-6 shrink-0 shadow-sm">
-            <div class="flex items-center gap-4">
-                <div class="w-10 h-10 bg-mstPurple rounded-xl flex items-center justify-center text-white"><i class="fa-solid fa-link"></i></div>
+        <header class="glass-panel h-20 flex items-center justify-between px-4 lg:px-10 shrink-0 shadow-sm z-20 sticky top-0">
+            <div class="flex items-center gap-3 lg:gap-4">
+                <div class="w-10 h-10 lg:w-12 lg:h-12 bg-gradient-to-br from-mstPurple to-purple-600 rounded-xl flex items-center justify-center text-white text-lg lg:text-xl shadow-md">
+                    <i class="fa-solid fa-link"></i>
+                </div>
                 <div>
-                    <h1 class="text-xl font-black text-gray-900">จัดการลิงก์ (URL Shortener)</h1>
-                    <p class="text-xs text-gray-500 font-bold">domain: mstsc.pages.dev/slinks/...</p>
+                    <h1 class="text-lg lg:text-xl font-black text-gray-900 leading-tight">ระบบจัดการลิงก์</h1>
+                    <p class="text-[10px] sm:text-xs text-gray-500 font-bold tracking-wide">Domain: mstsc.pages.dev/slinks/</p>
                 </div>
             </div>
             <div class="flex items-center gap-4">
                 <div class="hidden sm:block text-right">
                     <p id="adminUserName" class="text-sm font-bold text-gray-900">User</p>
-                    <p id="adminUserEmail" class="text-[10px] font-medium text-gray-500">email@mst.ac.th</p>
+                    <p id="adminUserRole" class="text-[10px] font-bold text-emerald-500 uppercase tracking-wider bg-emerald-50 px-2 py-0.5 rounded-full inline-block mt-0.5">Authorized</p>
                 </div>
-                <button onclick="logoutApp()" class="bg-red-50 text-red-600 hover:bg-red-500 hover:text-white w-10 h-10 rounded-xl flex items-center justify-center transition shadow-sm" title="ออกจากระบบ">
-                    <i class="fa-solid fa-power-off"></i>
+                <button onclick="logoutApp()" class="bg-gray-100 text-gray-600 hover:bg-red-500 hover:text-white w-10 h-10 lg:w-12 lg:h-12 rounded-xl flex items-center justify-center transition shadow-sm border border-gray-200" title="ออกจากระบบ">
+                    <i class="fa-solid fa-right-from-bracket"></i>
                 </button>
             </div>
         </header>
 
-        <!-- Content -->
-        <main class="flex-1 overflow-y-auto p-4 sm:p-8">
-            <div class="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Content Area -->
+        <main class="flex-1 overflow-y-auto p-4 lg:p-8 bg-[#f1f5f9] relative">
+            <div class="max-w-[1200px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6">
                 
-                <!-- ฟอร์มสร้างลิงก์ -->
-                <div class="md:col-span-1 bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100 h-fit sticky top-4">
-                    <h3 class="text-lg font-black text-gray-900 mb-4 border-b pb-2"><i class="fa-solid fa-plus text-mstPurple"></i> สร้างลิงก์ใหม่</h3>
-                    <form id="linkForm" class="space-y-4">
-                        <div>
-                            <label class="block text-xs font-bold text-gray-500 mb-1">ชื่อย่อลิงก์ (Slug) <span class="text-red-500">*</span></label>
-                            <div class="relative">
-                                <span class="absolute left-3 top-3.5 text-xs text-gray-400 font-bold">/slinks/</span>
-                                <input type="text" id="shortSlug" required placeholder="เช่น myform" class="w-full border border-gray-200 rounded-xl py-3 pl-16 pr-3 text-sm focus:border-mstPurple focus:ring-1 focus:ring-mstPurple outline-none bg-gray-50 font-bold text-mstPurple">
+                <!-- Left Column: Form -->
+                <div class="lg:col-span-4 space-y-6">
+                    <div class="bg-white p-6 md:p-8 rounded-[2rem] shadow-sm border border-gray-100 lg:sticky lg:top-4">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 id="formTitle" class="text-xl font-black text-gray-900"><i class="fa-solid fa-wand-magic-sparkles text-mstPurple mr-2"></i> สร้างลิงก์ใหม่</h3>
+                            <button type="button" id="cancelEditBtn" onclick="cancelEdit()" class="hidden text-[10px] font-bold bg-gray-100 text-gray-600 px-3 py-1.5 rounded-lg hover:bg-gray-200 transition">ยกเลิกแก้ไข</button>
+                        </div>
+                        
+                        <form id="linkForm" class="space-y-5">
+                            <div class="bg-purple-50/50 p-5 rounded-2xl border border-purple-100 relative overflow-hidden">
+                                <div class="flex items-center justify-between mb-2">
+                                    <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider">ชื่อย่อลิงก์ (Slug) <span class="text-red-500">*</span></label>
+                                    <button type="button" onclick="generateRandomSlug()" class="text-[10px] font-bold text-mstPurple hover:underline bg-white px-2 py-1 rounded shadow-sm border border-purple-100 relative z-10">
+                                        <i class="fa-solid fa-dice"></i> สุ่มชื่อ
+                                    </button>
+                                </div>
+                                <div class="relative flex items-center">
+                                    <span class="absolute left-4 text-sm text-gray-400 font-bold select-none">/slinks/</span>
+                                    <input type="text" id="shortSlug" required placeholder="my-event" class="w-full border border-gray-300 rounded-xl py-3.5 pl-[76px] pr-4 text-base focus:border-mstPurple focus:ring-2 focus:ring-mstPurple/20 outline-none bg-white font-black text-mstPurple transition placeholder-gray-300">
+                                </div>
+                                <p class="text-[10px] text-gray-500 mt-2"><i class="fa-solid fa-circle-info"></i> อนุญาตเฉพาะ <b>a-z, 0-9 และขีดกลาง (-)</b> ห้ามเว้นวรรค</p>
+                                
+                                <!-- คำเตือนเวลาแก้ไขชื่อ -->
+                                <p id="editSlugWarning" class="hidden text-[10px] text-red-500 font-bold mt-2 bg-red-50 p-2 rounded-lg border border-red-100">
+                                    <i class="fa-solid fa-triangle-exclamation"></i> การเปลี่ยนชื่อย่อลิงก์ จะทำให้ลิงก์เดิมที่เคยแชร์ไปใช้งานไม่ได้ทันที!
+                                </p>
                             </div>
-                            <p class="text-[10px] text-gray-400 mt-1">ใช้เฉพาะภาษาอังกฤษ ตัวเลข และขีดกลาง (-) เท่านั้น</p>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-gray-500 mb-1">ลิงก์ปลายทาง (Target URL) <span class="text-red-500">*</span></label>
-                            <input type="url" id="targetUrl" required placeholder="https://forms.gle/..." class="w-full border border-gray-200 rounded-xl p-3 text-sm focus:border-mstPurple focus:ring-1 focus:ring-mstPurple outline-none bg-gray-50">
-                        </div>
-                        <button type="submit" class="w-full bg-mstPurple text-white font-bold py-3.5 rounded-xl shadow-md hover-lift transition">
-                            บันทึกลิงก์
-                        </button>
-                    </form>
+
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 mb-2 uppercase tracking-wider">ลิงก์ปลายทาง (Target URL) <span class="text-red-500">*</span></label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400">
+                                        <i class="fa-solid fa-globe"></i>
+                                    </div>
+                                    <input type="url" id="targetUrl" required placeholder="https://forms.gle/..." class="w-full border border-gray-200 rounded-xl py-3.5 pl-11 pr-4 text-sm focus:border-mstPurple focus:ring-2 focus:ring-mstPurple/20 outline-none bg-gray-50 hover:bg-white transition">
+                                </div>
+                            </div>
+                            
+                            <button type="submit" id="submitBtn" class="w-full bg-gradient-to-r from-mstPurple to-purple-700 text-white font-bold py-4 rounded-xl shadow-lg hover-lift transition flex items-center justify-center gap-2 text-base mt-2">
+                                <i class="fa-solid fa-plus-circle"></i> บันทึกและสร้างลิงก์
+                            </button>
+                        </form>
+                    </div>
                 </div>
 
-                <!-- ตารางแสดงลิงก์ -->
-                <div class="md:col-span-2 bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100 min-h-[400px] flex flex-col">
-                    <h3 class="text-lg font-black text-gray-900 mb-4 border-b pb-2"><i class="fa-solid fa-list text-blue-500"></i> ลิงก์ที่สร้างไว้ทั้งหมด</h3>
-                    <div class="flex-1 overflow-x-auto">
-                        <table class="w-full text-left text-sm whitespace-nowrap">
-                            <thead class="bg-gray-50 text-gray-500 text-xs uppercase font-bold">
-                                <tr>
-                                    <th class="p-3 rounded-l-lg">ชื่อย่อ (Slug)</th>
-                                    <th class="p-3">ลิงก์ปลายทาง</th>
-                                    <th class="p-3">ผู้สร้าง</th>
-                                    <th class="p-3 text-center rounded-r-lg">จัดการ</th>
-                                </tr>
-                            </thead>
-                            <tbody id="linksTableBody" class="divide-y divide-gray-100 text-gray-700">
-                                <!-- Data will be loaded here -->
-                            </tbody>
-                        </table>
+                <!-- Right Column: Card List -->
+                <div class="lg:col-span-8 bg-white p-6 md:p-8 rounded-[2rem] shadow-sm border border-gray-100 min-h-[500px] flex flex-col relative">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
+                        <h3 class="text-xl font-black text-gray-900"><i class="fa-solid fa-list-ul text-blue-500 mr-2"></i> ลิงก์ที่ถูกสร้างไว้ทั้งหมด</h3>
+                        
+                        <!-- Search Box -->
+                        <div class="relative w-full sm:w-64 shrink-0">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                            </div>
+                            <input type="text" id="searchInput" placeholder="ค้นหาชื่อ หรือ ลิงก์..." class="w-full border border-gray-200 rounded-xl py-2.5 pl-10 pr-4 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none bg-gray-50 transition">
+                        </div>
+                    </div>
+
+                    <!-- พื้นที่แสดงข้อมูลรูปแบบ Card -->
+                    <div id="linksContainer" class="flex-1 overflow-auto space-y-4 pr-2 pb-4">
+                        <div class="text-center py-10 text-gray-400"><i class="fa-solid fa-spinner fa-spin text-3xl mb-2 text-mstPurple"></i><br>กำลังดึงข้อมูล...</div>
+                    </div>
+                    
+                    <div class="mt-4 pt-4 border-t border-gray-100 text-right text-xs text-gray-400 font-bold">
+                        รวมทั้งหมด <span id="totalLinks" class="text-mstPurple text-base">0</span> ลิงก์
                     </div>
                 </div>
 
@@ -125,78 +161,79 @@
         </main>
     </div>
 
+    <!-- Firebase & Logic Script -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getFirestore, collection, doc, setDoc, getDoc, getDocs, deleteDoc, query, orderBy, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+        import { getFirestore, collection, doc, setDoc, updateDoc, getDoc, getDocs, deleteDoc, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
         import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
 
+        // ==========================================
+        // ⚙️ CONFIGURATION SETTINGS
+        // ==========================================
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwPz6fBWeQ015Bf5jHkX5a3B-O8o2gU-9J4L1G0eZqNf3z_oP8Yy8uK0I1zXg/exec"; 
         const firebaseConfig = {
             apiKey: "AIzaSyAaZXkpLEjASJY4Dc-il8FmjDiZgTDhwkc",
             authDomain: "mstsc-official-portal.firebaseapp.com",
             projectId: "mstsc-official-portal"
         };
-        
+        const MASTER_EMAILS = ['studentcouncil@mst.ac.th', 'tassanee@mst.ac.th', '6829903@mst.ac.th'];
+        const SCHOOL_DOMAIN = '@mst.ac.th';
+
+        // ==========================================
+        // 🚀 INITIALIZATION
+        // ==========================================
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
         const provider = new GoogleAuthProvider();
 
-        // ตัวแปรการตั้งค่าสิทธิ์เข้าถึง
-        const MASTER_EMAIL = 'studentcouncil@mst.ac.th';
-        const SCHOOL_DOMAIN = '@mst.ac.th';
-        // ชื่อ Collection ที่เก็บข้อมูลผู้ที่รายงานตัวแล้ว (แก้ไขให้ตรงกับฐานข้อมูลจริงของคุณ)
-        const REGIS_COLLECTION = 'sc_regis'; 
+        let allLinksData = []; 
+        let editingOriginalId = null; // เก็บชื่อ Slug เดิมไว้เปรียบเทียบว่ามีการแก้ชื่อไหม
 
-        // จัดการสถานะการเข้าสู่ระบบ
+        // ==========================================
+        // 🔐 AUTHENTICATION
+        // ==========================================
         onAuthStateChanged(auth, async (user) => {
             if (user) {
-                Swal.fire({title:'กำลังตรวจสอบสิทธิ์...', allowOutsideClick:false, didOpen:()=>Swal.showLoading()});
+                Swal.fire({title:'ตรวจสอบสิทธิ์ความปลอดภัย', text: 'กำลังเชื่อมต่อฐานข้อมูลโรงเรียน...', allowOutsideClick:false, didOpen:()=>Swal.showLoading()});
                 
                 let isAllowed = false;
+                let userRole = 'Member';
 
-                // 1. ตรวจสอบว่าเป็นอีเมลหลักของสภาหรือไม่
-                if (user.email === MASTER_EMAIL) {
+                if (MASTER_EMAILS.includes(user.email.toLowerCase())) {
                     isAllowed = true;
+                    userRole = 'Super Admin';
                 } 
-                // 2. ถ้าไม่ใช่อีเมลหลัก ตรวจสอบว่าเป็นโดเมนโรงเรียนหรือไม่
-                else if (user.email.endsWith(SCHOOL_DOMAIN)) {
+                else if (user.email.toLowerCase().endsWith(SCHOOL_DOMAIN)) {
                     try {
-                        // ค้นหาอีเมลนี้ในฐานข้อมูลรายงานตัว
-                        // สมมติว่าเก็บฟิลด์ "email" ไว้ใน Collection
-                        const q = query(collection(db, REGIS_COLLECTION), where("email", "==", user.email));
-                        const snap = await getDocs(q);
-                        
-                        // ถ้าเจอข้อมูลแปลว่ารายงานตัวแล้ว
-                        if (!snap.empty) {
-                            isAllowed = true;
-                        }
-                    } catch (error) {
-                        console.error("Error checking permissions: ", error);
-                    }
+                        const response = await fetch(GOOGLE_SCRIPT_URL, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                            body: JSON.stringify({ action: 'checkEmailRegistered', email: user.email })
+                        });
+                        const data = await response.json();
+                        if (data.status === 'success' && data.registered === true) isAllowed = true;
+                    } catch (error) { console.error("Sheet Verification Error: ", error); }
                 }
 
                 Swal.close();
 
                 if (isAllowed) {
-                    // อนุญาตให้เข้าใช้งาน
                     document.getElementById('loginOverlay').classList.add('hidden');
                     const workspace = document.getElementById('appWorkspace');
                     workspace.classList.remove('hidden');
                     setTimeout(() => workspace.classList.remove('opacity-0'), 50);
                     
-                    document.getElementById('adminUserName').innerText = user.displayName || 'กรรมการสภานักเรียน';
-                    document.getElementById('adminUserEmail').innerText = user.email;
-                    
-                    loadLinks();
+                    document.getElementById('adminUserName').innerText = user.displayName || user.email.split('@')[0];
+                    document.getElementById('adminUserRole').innerText = userRole;
+                    if(userRole === 'Super Admin') {
+                        document.getElementById('adminUserRole').classList.replace('text-emerald-500', 'text-amber-500');
+                        document.getElementById('adminUserRole').classList.replace('bg-emerald-50', 'bg-amber-50');
+                    }
+                    loadLinks(); 
                 } else {
-                    // ปฏิเสธการเข้าใช้งาน
                     await signOut(auth);
-                    Swal.fire({
-                        title: 'ปฏิเสธการเข้าถึง',
-                        text: 'ระบบนี้สงวนสิทธิ์เฉพาะอีเมลสภานักเรียน และกรรมการที่รายงานตัวในระบบแล้วเท่านั้น',
-                        icon: 'error',
-                        confirmButtonColor: '#4C1D95'
-                    });
+                    Swal.fire({ title: 'ปฏิเสธการเข้าถึง', text: 'ไม่พบประวัติการรายงานตัวของคุณในฐานข้อมูล หรือบัญชีนี้ไม่มีสิทธิ์เข้าใช้งาน', icon: 'error', confirmButtonColor: '#4C1D95', customClass: { popup: 'rounded-[2rem]' } });
                 }
             } else {
                 document.getElementById('loginOverlay').classList.remove('hidden');
@@ -204,118 +241,324 @@
             }
         });
 
-        window.loginWithGoogle = () => { signInWithPopup(auth, provider); };
+        window.loginWithGoogle = () => { signInWithPopup(auth, provider).catch(err => { if(err.code !== 'auth/popup-closed-by-user') Swal.fire('Error', err.message, 'error'); }); };
         window.logoutApp = () => { 
-            Swal.fire({ title:'ออกจากระบบ?', icon:'question', showCancelButton:true, confirmButtonColor:'#ef4444' })
+            Swal.fire({ title:'ออกจากระบบ?', text:'ต้องการออกจากระบบจัดการลิงก์ใช่หรือไม่', icon:'question', showCancelButton:true, confirmButtonColor:'#ef4444', cancelButtonColor:'#cbd5e1', confirmButtonText:'ออกจากระบบ', cancelButtonText:'ยกเลิก', customClass: { popup: 'rounded-3xl' }})
             .then((r) => { if(r.isConfirmed) signOut(auth); }); 
         };
 
-        // ฟังก์ชันโหลดข้อมูลลิงก์ทั้งหมดมาแสดงในตาราง
+        // ==========================================
+        // 📊 FIRESTORE OPERATIONS & UI
+        // ==========================================
         async function loadLinks() {
-            const tbody = document.getElementById('linksTableBody');
-            tbody.innerHTML = '<tr><td colspan="4" class="text-center py-8 text-gray-400"><i class="fa-solid fa-spinner fa-spin text-2xl"></i></td></tr>';
+            const container = document.getElementById('linksContainer');
             try {
                 const q = query(collection(db, "official_links"), orderBy("timestamp", "desc"));
                 const snap = await getDocs(q);
                 
-                if (snap.empty) {
-                    tbody.innerHTML = '<tr><td colspan="4" class="text-center py-8 text-gray-400">ยังไม่มีลิงก์ในระบบ</td></tr>';
-                    return;
-                }
-
-                let html = '';
-                snap.forEach(doc => {
-                    const data = doc.data();
-                    const fullLink = `https://mstsc.pages.dev/slinks/${doc.id}`;
-                    html += `
-                        <tr class="hover:bg-gray-50 transition border-b border-gray-50 last:border-0 group">
-                            <td class="p-3 font-bold text-mstPurple">/${doc.id}</td>
-                            <td class="p-3">
-                                <a href="${data.targetUrl}" target="_blank" class="text-blue-500 hover:underline truncate inline-block max-w-[200px] md:max-w-[300px]">
-                                    ${data.targetUrl}
-                                </a>
-                            </td>
-                            <td class="p-3 text-xs text-gray-500">${data.creator || 'ไม่ระบุ'}</td>
-                            <td class="p-3 text-center">
-                                <button onclick="copyToClipboard('${fullLink}')" class="w-8 h-8 rounded-lg bg-gray-100 text-gray-600 hover:bg-mstPurple hover:text-white transition mr-1" title="คัดลอกลิงก์">
-                                    <i class="fa-regular fa-copy"></i>
-                                </button>
-                                <button onclick="deleteLink('${doc.id}')" class="w-8 h-8 rounded-lg bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition opacity-50 group-hover:opacity-100" title="ลบลิงก์">
-                                    <i class="fa-solid fa-trash-can"></i>
-                                </button>
-                            </td>
-                        </tr>
-                    `;
-                });
-                tbody.innerHTML = html;
+                allLinksData = [];
+                snap.forEach(doc => { allLinksData.push({ id: doc.id, ...doc.data() }); });
+                document.getElementById('totalLinks').innerText = allLinksData.length;
+                renderCards(allLinksData);
             } catch (error) {
-                tbody.innerHTML = `<tr><td colspan="4" class="text-center py-8 text-red-500">เกิดข้อผิดพลาด: ${error.message}</td></tr>`;
+                container.innerHTML = `<div class="p-6 bg-red-50 text-red-500 rounded-2xl text-center font-bold">เกิดข้อผิดพลาด: ${error.message}</div>`;
             }
         }
 
-        // ฟังก์ชันสร้างลิงก์ใหม่
+        // 📱 การแสดงผลแบบ Card
+        function renderCards(dataArray) {
+            const container = document.getElementById('linksContainer');
+            
+            if (dataArray.length === 0) {
+                container.innerHTML = '<div class="text-center py-12 text-gray-400 font-bold border-2 border-dashed border-gray-200 rounded-3xl">ไม่พบข้อมูลลิงก์</div>';
+                return;
+            }
+
+            let html = '';
+            dataArray.forEach(item => {
+                const fullLink = `https://mstsc.pages.dev/slinks/${item.id}`;
+                let dateStr = 'ไม่ระบุ';
+                if(item.timestamp) {
+                    const d = item.timestamp.toDate();
+                    dateStr = d.toLocaleDateString('th-TH', { day:'2-digit', month:'short', year:'2-digit'});
+                }
+                const creatorName = item.creator ? item.creator.split('@')[0] : 'Unknown';
+
+                html += `
+                    <div class="bg-gray-50 hover:bg-purple-50/30 transition border border-gray-200 rounded-2xl p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm group">
+                        <!-- ข้อมูลลิงก์ -->
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center gap-2 mb-1.5">
+                                <h4 class="font-black text-mstPurple text-lg truncate">/${item.id}</h4>
+                                <span class="text-[10px] text-gray-400 bg-white px-2 py-0.5 rounded-md border border-gray-100 shadow-sm"><i class="fa-regular fa-clock"></i> ${dateStr}</span>
+                            </div>
+                            <a href="${item.targetUrl}" target="_blank" class="text-sm text-blue-500 hover:text-blue-700 hover:underline truncate block w-full mb-2" title="${item.targetUrl}">
+                                ${item.targetUrl}
+                            </a>
+                            <div class="inline-flex items-center gap-1.5 text-xs text-gray-500">
+                                <div class="w-4 h-4 bg-gray-300 rounded-full flex items-center justify-center text-[8px] text-white"><i class="fa-solid fa-user"></i></div>
+                                <span class="font-bold truncate max-w-[150px]" title="${item.creator}">${creatorName}</span>
+                            </div>
+                        </div>
+
+                        <!-- ปุ่มจัดการ -->
+                        <div class="flex items-center gap-2 md:opacity-50 md:group-hover:opacity-100 transition duration-300 shrink-0 border-t md:border-t-0 pt-3 md:pt-0 mt-2 md:mt-0 border-gray-200">
+                            <button onclick="showQRCode('${item.id}')" class="flex-1 md:flex-none w-auto md:w-10 h-10 rounded-xl bg-gray-200/70 text-gray-700 hover:bg-gray-800 hover:text-white transition shadow-sm font-bold text-xs md:text-base flex items-center justify-center gap-1">
+                                <i class="fa-solid fa-qrcode"></i> <span class="md:hidden">QR</span>
+                            </button>
+                            <button onclick="copyToClipboard('${fullLink}')" class="flex-1 md:flex-none w-auto md:w-10 h-10 rounded-xl bg-gray-200/70 text-gray-700 hover:bg-blue-500 hover:text-white transition shadow-sm font-bold text-xs md:text-base flex items-center justify-center gap-1">
+                                <i class="fa-regular fa-copy"></i> <span class="md:hidden">คัดลอก</span>
+                            </button>
+                            <button onclick="editLink('${item.id}', '${item.targetUrl}')" class="flex-1 md:flex-none w-auto md:w-10 h-10 rounded-xl bg-amber-50 text-amber-600 hover:bg-amber-500 hover:text-white transition shadow-sm font-bold text-xs md:text-base flex items-center justify-center gap-1">
+                                <i class="fa-solid fa-pen"></i> <span class="md:hidden">แก้</span>
+                            </button>
+                            <button onclick="deleteLink('${item.id}')" class="flex-1 md:flex-none w-auto md:w-10 h-10 rounded-xl bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition shadow-sm font-bold text-xs md:text-base flex items-center justify-center gap-1">
+                                <i class="fa-solid fa-trash-can"></i> <span class="md:hidden">ลบ</span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            const keyword = e.target.value.toLowerCase().trim();
+            if(!keyword) return renderCards(allLinksData);
+            const filtered = allLinksData.filter(item => item.id.toLowerCase().includes(keyword) || item.targetUrl.toLowerCase().includes(keyword));
+            renderCards(filtered);
+        });
+
+        // ==========================================
+        // 📝 CREATE & UPDATE LOGIC (Allow ID Change)
+        // ==========================================
+        window.editLink = (id, url) => {
+            editingOriginalId = id; // บันทึกชื่อเก่าเอาไว้เผื่อเค้าแก้ชื่อ
+            document.getElementById('shortSlug').value = id;
+            document.getElementById('targetUrl').value = url;
+            
+            document.getElementById('formTitle').innerHTML = `<i class="fa-solid fa-pen text-amber-500 mr-2"></i> แก้ไขลิงก์: /${id}`;
+            document.getElementById('editSlugWarning').classList.remove('hidden'); // โชว์คำเตือน
+            
+            const btn = document.getElementById('submitBtn');
+            btn.className = "w-full bg-gradient-to-r from-amber-500 to-amber-600 text-white font-bold py-4 rounded-xl shadow-lg hover-lift transition flex items-center justify-center gap-2 text-base mt-2";
+            btn.innerHTML = '<i class="fa-solid fa-save"></i> อัปเดตข้อมูล';
+            document.getElementById('cancelEditBtn').classList.remove('hidden');
+            
+            document.querySelector('main').scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+        window.cancelEdit = () => {
+            editingOriginalId = null;
+            document.getElementById('linkForm').reset();
+            document.getElementById('formTitle').innerHTML = `<i class="fa-solid fa-wand-magic-sparkles text-mstPurple mr-2"></i> สร้างลิงก์ใหม่`;
+            document.getElementById('editSlugWarning').classList.add('hidden');
+            
+            const btn = document.getElementById('submitBtn');
+            btn.className = "w-full bg-gradient-to-r from-mstPurple to-purple-700 text-white font-bold py-4 rounded-xl shadow-lg hover-lift transition flex items-center justify-center gap-2 text-base mt-2";
+            btn.innerHTML = '<i class="fa-solid fa-plus-circle"></i> บันทึกและสร้างลิงก์';
+            document.getElementById('cancelEditBtn').classList.add('hidden');
+        };
+
         document.getElementById('linkForm').addEventListener('submit', async (e) => {
             e.preventDefault();
+            const btn = document.getElementById('submitBtn');
             const slugInput = document.getElementById('shortSlug').value;
             const targetUrl = document.getElementById('targetUrl').value;
-            
-            // คลีนชื่อ Slug ให้เหลือแค่ a-z, 0-9 และ -
             const cleanSlug = slugInput.trim().toLowerCase().replace(/[^a-z0-9-]/g, '');
 
-            if(!cleanSlug) return Swal.fire('แจ้งเตือน', 'ชื่อย่อลิงก์ไม่ถูกต้อง', 'warning');
+            if(!cleanSlug) return Swal.fire('ข้อมูลไม่ถูกต้อง', 'ชื่อย่อต้องเป็น a-z, 0-9 หรือ - เท่านั้น', 'warning');
 
-            Swal.fire({title:'กำลังตรวจสอบ...', didOpen:()=>Swal.showLoading()});
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังบันทึก...';
 
             try {
-                const docRef = doc(db, "official_links", cleanSlug);
-                const docSnap = await getDoc(docRef);
+                const newDocRef = doc(db, "official_links", cleanSlug);
 
-                // เช็คว่าชื่อซ้ำไหม
-                if (docSnap.exists()) {
-                    Swal.fire('ชื่อนี้มีคนใช้แล้ว!', `ชื่อย่อ /slinks/${cleanSlug} ถูกใช้งานไปแล้ว กรุณาตั้งชื่ออื่น`, 'error');
-                } else {
-                    // สร้างใหม่ พร้อมบันทึกว่าใครเป็นคนสร้าง
-                    await setDoc(docRef, {
-                        targetUrl: targetUrl,
-                        creator: auth.currentUser.email,
-                        timestamp: serverTimestamp()
-                    });
-                    
-                    document.getElementById('linkForm').reset();
-                    Swal.fire({icon:'success', title:'สร้างลิงก์สำเร็จ', timer: 1500, showConfirmButton: false});
+                if (editingOriginalId) {
+                    // 🔄 โหมดแก้ไข
+                    if (cleanSlug !== editingOriginalId) {
+                        // 1. ถ้ามีการเปลี่ยนชื่อ Slug (เปลี่ยน Document ID) ต้องเช็คก่อนว่าชื่อใหม่ซ้ำไหม
+                        const newDocSnap = await getDoc(newDocRef);
+                        if (newDocSnap.exists()) {
+                            Swal.fire({title:'ชื่อย่อนี้ถูกใช้ไปแล้ว!', text:`ไม่สามารถเปลี่ยนชื่อเป็น /slinks/${cleanSlug} ได้ เพราะมีคนใช้แล้ว`, icon:'error', customClass:{popup:'rounded-[2rem]'} });
+                            return;
+                        }
+                        
+                        // 2. ถ้าไม่ซ้ำ ให้สร้างเอกสารใหม่ด้วยชื่อใหม่
+                        await setDoc(newDocRef, { 
+                            targetUrl: targetUrl, 
+                            creator: auth.currentUser.email, // หรือเก็บชื่อผู้สร้างเดิมไว้ก็ได้
+                            timestamp: serverTimestamp()
+                        });
+
+                        // 3. ลบเอกสารเก่าทิ้ง
+                        await deleteDoc(doc(db, "official_links", editingOriginalId));
+                        
+                        Swal.fire({icon:'success', title:'เปลี่ยนชื่อลิงก์สำเร็จ!', timer:1500, showConfirmButton:false, customClass:{popup:'rounded-[2rem]'} });
+                    } else {
+                        // ถ้าไม่ได้เปลี่ยนชื่อ Slug อัปเดตเป้าหมาย URL ธรรมดา
+                        await updateDoc(newDocRef, { targetUrl: targetUrl });
+                        Swal.fire({icon:'success', title:'อัปเดตข้อมูลสำเร็จ!', timer:1500, showConfirmButton:false, customClass:{popup:'rounded-[2rem]'} });
+                    }
+                    cancelEdit();
                     loadLinks();
+                } else {
+                    // 🆕 โหมดสร้างใหม่
+                    const docSnap = await getDoc(newDocRef);
+                    if (docSnap.exists()) {
+                        Swal.fire({title:'ชื่อย่อนี้ถูกใช้ไปแล้ว!', text:`ลิงก์ /slinks/${cleanSlug} มีอยู่ในระบบแล้ว`, icon:'error', customClass:{popup:'rounded-[2rem]'} });
+                    } else {
+                        await setDoc(newDocRef, { targetUrl: targetUrl, creator: auth.currentUser.email, timestamp: serverTimestamp() });
+                        document.getElementById('linkForm').reset();
+                        Swal.fire({
+                            icon:'success', title:'สร้างสำเร็จ!', 
+                            html: `ลิงก์ของคุณพร้อมใช้งาน<br><br><b class="text-mstPurple bg-purple-50 px-4 py-2 rounded-lg inline-block">mstsc.pages.dev/slinks/${cleanSlug}</b>`,
+                            confirmButtonColor: '#4C1D95', customClass:{popup:'rounded-[2rem]'}
+                        });
+                        loadLinks();
+                    }
                 }
             } catch (error) {
                 Swal.fire('เกิดข้อผิดพลาด', error.message, 'error');
+            } finally {
+                btn.disabled = false;
+                if(!editingOriginalId) btn.innerHTML = '<i class="fa-solid fa-plus-circle"></i> บันทึกและสร้างลิงก์';
             }
         });
 
-        // ฟังก์ชันลบลิงก์ (ดึงออกเป็น window object เพื่อให้เรียกใช้ผ่าน HTML inline onclick ได้)
         window.deleteLink = (id) => {
             Swal.fire({
                 title: 'ยืนยันการลบ?',
-                text: `คุณต้องการลบลิงก์ย่อ /slinks/${id} ใช่หรือไม่? ลิงก์เก่าจะไม่สามารถเข้าได้อีก`,
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#ef4444',
-                confirmButtonText: 'ลบเลย',
-                cancelButtonText: 'ยกเลิก'
+                html: `คุณกำลังจะลบ <b>/slinks/${id}</b><br><span class="text-red-500 text-xs">หากลบแล้วผู้ที่เข้าลิงก์นี้จะพบหน้า 404 ทันที</span>`,
+                icon: 'warning', showCancelButton: true, confirmButtonColor: '#ef4444', cancelButtonColor: '#cbd5e1', confirmButtonText: 'ยืนยันลบ', cancelButtonText: 'ยกเลิก', customClass: { popup: 'rounded-[2rem]' }
             }).then(async (result) => {
                 if (result.isConfirmed) {
-                    Swal.fire({title:'กำลังลบ...', didOpen:()=>Swal.showLoading()});
-                    await deleteDoc(doc(db, "official_links", id));
-                    Swal.fire({icon:'success', title:'ลบสำเร็จ', timer:1500, showConfirmButton:false});
-                    loadLinks();
+                    Swal.fire({title:'กำลังลบ...', allowOutsideClick:false, didOpen:()=>Swal.showLoading()});
+                    try {
+                        await deleteDoc(doc(db, "official_links", id));
+                        Swal.fire({icon:'success', title:'ลบสำเร็จ', timer:1500, showConfirmButton:false});
+                        allLinksData = allLinksData.filter(item => item.id !== id);
+                        document.getElementById('totalLinks').innerText = allLinksData.length;
+                        renderCards(allLinksData);
+                    } catch(err) { Swal.fire('Error', err.message, 'error'); }
                 }
             });
         };
 
-        // ฟังก์ชันคัดลอกลิงก์
+        // ==========================================
+        // 📱 UTILITY & QR CODE
+        // ==========================================
         window.copyToClipboard = (text) => {
-            navigator.clipboard.writeText(text).then(() => {
-                Swal.fire({icon: 'success', title: 'คัดลอกลิงก์แล้ว!', text: text, timer: 1500, showConfirmButton: false});
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text).then(() => showToast('คัดลอกลิงก์สำเร็จ!'));
+            } else {
+                let ta = document.createElement("textarea"); ta.value = text; ta.style.position = "fixed"; ta.style.left = "-999999px";
+                document.body.appendChild(ta); ta.focus(); ta.select(); document.execCommand('copy'); ta.remove(); showToast('คัดลอกลิงก์สำเร็จ!');
+            }
+        };
+
+        function showToast(msg) {
+            Swal.mixin({toast:true, position:'top-end', showConfirmButton:false, timer:2000, customClass:{popup:'rounded-xl shadow-lg'}}).fire({ icon:'success', title: msg });
+        }
+
+        window.generateRandomSlug = () => {
+            const chars = 'abcdefghijklmnopqrstuvwxyz0123456789'; let res = '';
+            for(let i=0; i<6; i++) res += chars.charAt(Math.floor(Math.random() * chars.length));
+            document.getElementById('shortSlug').value = res;
+        };
+
+        // 🎨 สร้าง QR Code มีโลโก้ และปุ่มดาวน์โหลด
+        window.showQRCode = (id) => {
+            const fullLink = `mstsc.pages.dev/slinks/${id}`; // URL ที่จะใช้สแกนและโชว์
+            
+            Swal.fire({
+                title: 'QR Code',
+                html: `
+                    <div id="qrcode-box" class="flex justify-center mt-4 mb-4"></div>
+                    <div class="flex items-center justify-center gap-2 mb-4 bg-gray-50 py-2 rounded-lg border border-gray-200 w-3/4 mx-auto cursor-pointer" onclick="document.getElementById('showUrlCheckbox').click()">
+                        <input type="checkbox" id="showUrlCheckbox" class="w-4 h-4 text-mstPurple rounded cursor-pointer" checked>
+                        <label for="showUrlCheckbox" class="text-sm font-bold text-gray-700 cursor-pointer select-none">ใส่ชื่อลิงก์ไว้ด้านล่างรูป</label>
+                    </div>
+                    <button onclick="downloadQR('${id}')" class="w-full bg-gradient-to-r from-mstPurple to-purple-600 text-white py-3 rounded-xl font-bold shadow-md hover:shadow-lg transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-download"></i> ดาวน์โหลด QR Code
+                    </button>
+                `,
+                showConfirmButton: false,
+                showCloseButton: true,
+                customClass: { popup: 'rounded-[2.5rem] p-6' },
+                didOpen: () => {
+                    // สร้าง QR โค้ดลงใน Canvas
+                    new QRCode(document.getElementById("qrcode-box"), {
+                        text: `https://${fullLink}`, // ลิงก์ตอนสแกนต้องมี https
+                        width: 220,
+                        height: 220,
+                        colorDark: "#1E1B4B", 
+                        colorLight: "#ffffff",
+                        correctLevel: QRCode.CorrectLevel.H,
+                        drawer: 'canvas', // บังคับให้เป็น Canvas เพื่อที่เราจะดึงรูปไปเซฟได้
+                        logo: "/logo.webp", // โลโก้ตรงกลาง
+                        logoWidth: 60,
+                        logoHeight: 60,
+                        logoBackgroundColor: '#ffffff',
+                        logoBackgroundTransparent: false
+                    });
+                }
             });
         };
+
+        // ฟังก์ชันจัดการการดาวน์โหลด QR Code พร้อมวาด Text ด้านล่าง
+        window.downloadQR = (id) => {
+            const sourceCanvas = document.querySelector('#qrcode-box canvas');
+            if(!sourceCanvas) return;
+
+            const includeText = document.getElementById('showUrlCheckbox').checked;
+            const linkText = `mstsc.pages.dev/slinks/${id}`;
+            const fileName = `MSTSC_QR_${id}.png`;
+
+            if (includeText) {
+                // สร้าง Canvas ใหม่เพื่อเอามาต่อเติมข้อความด้านล่าง
+                const finalCanvas = document.createElement('canvas');
+                const ctx = finalCanvas.getContext('2d');
+                
+                // กำหนดขนาดพื้นที่สำหรับข้อความ
+                const paddingBottom = 40; 
+                
+                finalCanvas.width = sourceCanvas.width;
+                finalCanvas.height = sourceCanvas.height + paddingBottom;
+
+                // เทสีพื้นหลังสีขาวให้เต็มรูป
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
+
+                // วาง QR Code เดิมไว้ด้านบน
+                ctx.drawImage(sourceCanvas, 0, 0);
+
+                // วาดข้อความ URL ด้านล่าง
+                ctx.fillStyle = '#4C1D95'; // สีม่วง
+                ctx.font = 'bold 15px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(linkText, finalCanvas.width / 2, sourceCanvas.height + (paddingBottom / 2));
+
+                // แปลงเป็น Data URL และโหลด
+                triggerDownload(finalCanvas.toDataURL("image/png"), fileName);
+            } else {
+                // โหลด QR อย่างเดียวเพียวๆ
+                triggerDownload(sourceCanvas.toDataURL("image/png"), fileName);
+            }
+        };
+
+        // ฟังก์ชันสร้างปุ่มล่องหนและกดดาวน์โหลด
+        function triggerDownload(dataUrl, filename) {
+            const link = document.createElement('a');
+            link.href = dataUrl;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
     </script>
 </body>
 </html>
