@@ -27,16 +27,19 @@
         const db = getFirestore(app);
 
         async function processRedirect() {
-            // ดึงคำสุดท้ายของลิงก์ เช่น จาก /slinks/line จะได้คำว่า line
             const pathname = window.location.pathname;
             const pathParts = pathname.split('/').filter(Boolean);
-            const linkId = pathParts[pathParts.length - 1]; 
+            
+            // ดึงคำสุดท้ายออกมา
+            let linkId = pathParts[pathParts.length - 1]; 
 
-            // ป้องกันการเข้าหน้า slinks.html ตรงๆ
+            // ป้องกันการเข้าหน้าผิด และบังคับเป็นตัวพิมพ์เล็กให้ตรงกับฐานข้อมูล
             if (!linkId || linkId === 'slinks' || linkId.includes('.html')) {
                 window.location.replace('/404.html');
                 return;
             }
+            
+            linkId = linkId.toLowerCase(); // สำคัญ: แปลงเป็นตัวพิมพ์เล็ก
 
             try {
                 // ค้นหาลิงก์ใน Firestore
@@ -51,6 +54,7 @@
                     window.location.replace('/404.html');
                 }
             } catch (error) {
+                console.error("Redirect Error: ", error);
                 window.location.replace('/404.html');
             }
         }
