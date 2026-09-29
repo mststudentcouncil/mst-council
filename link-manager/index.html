@@ -105,7 +105,7 @@
                                     </button>
                                 </div>
                                 <div class="relative flex items-center">
-                                    <span class="absolute left-4 text-sm text-gray-400 font-bold select-none">/slinks/</span>
+                                    <span class="absolute left-4 text-sm text-gray-400 font-bold select-none">/</span>
                                     <input type="text" id="shortSlug" required placeholder="my-event" class="w-full border border-gray-300 rounded-xl py-3.5 pl-[76px] pr-4 text-base focus:border-mstPurple focus:ring-2 focus:ring-mstPurple/20 outline-none bg-white font-black text-mstPurple transition placeholder-gray-300">
                                 </div>
                                 <p class="text-[10px] text-gray-500 mt-2"><i class="fa-solid fa-circle-info"></i> อนุญาตเฉพาะ <b>a-z, 0-9 และขีดกลาง (-)</b> ห้ามเว้นวรรค</p>
@@ -381,7 +381,7 @@
                         // 1. ถ้ามีการเปลี่ยนชื่อ Slug (เปลี่ยน Document ID) ต้องเช็คก่อนว่าชื่อใหม่ซ้ำไหม
                         const newDocSnap = await getDoc(newDocRef);
                         if (newDocSnap.exists()) {
-                            Swal.fire({title:'ชื่อย่อนี้ถูกใช้ไปแล้ว!', text:`ไม่สามารถเปลี่ยนชื่อเป็น /slinks/${cleanSlug} ได้ เพราะมีคนใช้แล้ว`, icon:'error', customClass:{popup:'rounded-[2rem]'} });
+                            Swal.fire({title:'ชื่อย่อนี้ถูกใช้ไปแล้ว!', text:`ไม่สามารถเปลี่ยนชื่อเป็น /${cleanSlug} ได้ เพราะมีคนใช้แล้ว`, icon:'error', customClass:{popup:'rounded-[2rem]'} });
                             return;
                         }
                         
@@ -407,13 +407,13 @@
                     // 🆕 โหมดสร้างใหม่
                     const docSnap = await getDoc(newDocRef);
                     if (docSnap.exists()) {
-                        Swal.fire({title:'ชื่อย่อนี้ถูกใช้ไปแล้ว!', text:`ลิงก์ /slinks/${cleanSlug} มีอยู่ในระบบแล้ว`, icon:'error', customClass:{popup:'rounded-[2rem]'} });
+                        Swal.fire({title:'ชื่อย่อนี้ถูกใช้ไปแล้ว!', text:`ลิงก์ /${cleanSlug} มีอยู่ในระบบแล้ว`, icon:'error', customClass:{popup:'rounded-[2rem]'} });
                     } else {
                         await setDoc(newDocRef, { targetUrl: targetUrl, creator: auth.currentUser.email, timestamp: serverTimestamp() });
                         document.getElementById('linkForm').reset();
                         Swal.fire({
                             icon:'success', title:'สร้างสำเร็จ!', 
-                            html: `ลิงก์ของคุณพร้อมใช้งาน<br><br><b class="text-mstPurple bg-purple-50 px-4 py-2 rounded-lg inline-block">mstsc.pages.dev/slinks/${cleanSlug}</b>`,
+                            html: `ลิงก์ของคุณพร้อมใช้งาน<br><br><b class="text-mstPurple bg-purple-50 px-4 py-2 rounded-lg inline-block">mstsc-link.pages.dev/${cleanSlug}</b>`,
                             confirmButtonColor: '#4C1D95', customClass:{popup:'rounded-[2rem]'}
                         });
                         loadLinks();
@@ -430,7 +430,7 @@
         window.deleteLink = (id) => {
             Swal.fire({
                 title: 'ยืนยันการลบ?',
-                html: `คุณกำลังจะลบ <b>/slinks/${id}</b><br><span class="text-red-500 text-xs">หากลบแล้วผู้ที่เข้าลิงก์นี้จะพบหน้า 404 ทันที</span>`,
+                html: `คุณกำลังจะลบ <b>/${id}</b><br><span class="text-red-500 text-xs">หากลบแล้วผู้ที่เข้าลิงก์นี้จะพบหน้า 404 ทันที</span>`,
                 icon: 'warning', showCancelButton: true, confirmButtonColor: '#ef4444', cancelButtonColor: '#cbd5e1', confirmButtonText: 'ยืนยันลบ', cancelButtonText: 'ยกเลิก', customClass: { popup: 'rounded-[2rem]' }
             }).then(async (result) => {
                 if (result.isConfirmed) {
