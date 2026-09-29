@@ -56,7 +56,6 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // ฟังก์ชันสลับ UI ไปหน้า Error
         function showError(message) {
             document.getElementById('loadingState').classList.add('hidden');
             document.getElementById('errorState').classList.remove('hidden');
@@ -64,13 +63,23 @@
         }
 
         async function processRedirect() {
-            // อ่านค่า URL ปัจจุบัน
-            const pathParts = window.location.pathname.split('/').filter(Boolean);
-            let linkId = pathParts[pathParts.length - 1]; 
+            let linkId = "";
 
-            // ดักจับกรณีเข้า /slinks/ เฉยๆ หรือพิมพ์ผิด
+            // 1. ลองดึงรหัสลิงก์จาก Query String ก่อน (เช่น ?id=formlineoa)
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('id')) {
+                linkId = urlParams.get('id');
+            } 
+            // 2. ถ้าไม่มี ให้ดึงจาก Path URL แทน (เช่น /slinks/formlineoa)
+            else {
+                const pathname = window.location.pathname;
+                const pathParts = pathname.split('/').filter(Boolean);
+                linkId = pathParts[pathParts.length - 1]; 
+            }
+
+            // ดักจับกรณีไม่มีข้อมูล หรือเป็นชื่อไฟล์
             if (!linkId || linkId === 'slinks' || linkId.includes('.html')) {
-                showError('ไม่พบรหัสลิงก์ย่อ กรุณาตรวจสอบ URL อีกครั้ง');
+                showError('ไม่พบรหัสลิงก์ย่อ กรุณาตรวจสอบ URL ให้ถูกต้องอีกครั้ง');
                 return;
             }
             
@@ -81,10 +90,11 @@
                 const docSnap = await getDoc(docRef);
 
                 if (docSnap.exists()) {
+                    // หากพบลิงก์ ให้พาไป URL ปลายทาง
                     window.location.replace(docSnap.data().targetUrl);
                 } else {
-                    // ถ้าระบบหาไม่เจอ จะบอกชื่อลิงก์ที่หาไม่เจอด้วย
-                    showError(`ไม่มีข้อมูลของลิงก์ "/${linkId}" ในระบบ`);
+                    // หากฐานข้อมูลไม่มีลิงก์ชื่อนี้
+                    showError(`ไม่พบลิงก์ "/${linkId}" ในระบบสภานักเรียน`);
                 }
             } catch (error) {
                 showError('เกิดข้อผิดพลาดในการเชื่อมต่อฐานข้อมูล');
