@@ -7,7 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-50 flex h-screen items-center justify-center">
-    <div class="text-center">
+    <div class="text-center" id="statusBox">
         <div class="animate-spin rounded-full h-12 w-12 border-4 border-amber-400 border-t-purple-800 mx-auto mb-4"></div>
         <p class="text-gray-600 font-bold font-sans">กำลังนำคุณไปยังหน้าเว็บ...</p>
     </div>
@@ -16,7 +16,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-        // คอนฟิก Firebase 
         const firebaseConfig = {
             apiKey: "AIzaSyAaZXkpLEjASJY4Dc-il8FmjDiZgTDhwkc",
             authDomain: "mstsc-official-portal.firebaseapp.com",
@@ -27,38 +26,31 @@
         const db = getFirestore(app);
 
         async function processRedirect() {
+            // ดึงค่า URL (เช่น line) ออกมาจาก /slinks/line
             const pathname = window.location.pathname;
             const pathParts = pathname.split('/').filter(Boolean);
-            
-            // ดึงคำสุดท้ายออกมา
             let linkId = pathParts[pathParts.length - 1]; 
 
-            // ป้องกันการเข้าหน้าผิด และบังคับเป็นตัวพิมพ์เล็กให้ตรงกับฐานข้อมูล
             if (!linkId || linkId === 'slinks' || linkId.includes('.html')) {
-                window.location.replace('/404.html');
+                document.getElementById('statusBox').innerHTML = '<p class="text-red-500 font-bold">❌ ไม่พบรหัสลิงก์ย่อ</p>';
                 return;
             }
             
-            linkId = linkId.toLowerCase(); // สำคัญ: แปลงเป็นตัวพิมพ์เล็ก
+            linkId = linkId.toLowerCase(); 
 
             try {
-                // ค้นหาลิงก์ใน Firestore
                 const docRef = doc(db, "official_links", linkId);
                 const docSnap = await getDoc(docRef);
 
                 if (docSnap.exists()) {
-                    // หากพบข้อมูล ให้ย้ายไปลิงก์เป้าหมาย
                     window.location.replace(docSnap.data().targetUrl);
                 } else {
-                    // หากไม่พบชื่อลิงก์นี้
                     window.location.replace('/404.html');
                 }
             } catch (error) {
-                console.error("Redirect Error: ", error);
-                window.location.replace('/404.html');
+                document.getElementById('statusBox').innerHTML = `<p class="text-red-500 font-bold">⚠️ ข้อผิดพลาด: ${error.message}</p>`;
             }
         }
-
         processRedirect();
     </script>
 </body>
