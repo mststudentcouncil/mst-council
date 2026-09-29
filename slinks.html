@@ -3,13 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>กำลังเปลี่ยนเส้นทาง...</title>
+    <title>กำลังเปลี่ยนเส้นทาง... (MSTSC)</title>
+    <link rel="icon" type="image/webp" href="/logo.webp">
+    <link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;500;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { theme: { extend: { fontFamily: { sans: ['Anuphan', 'sans-serif'] }, colors: { mstPurple: '#4C1D95', mstYellow: '#FBBF24' } } } }
+    </script>
+    <style>
+        body { background-color: #f8fafc; }
+        .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); box-shadow: 0 20px 40px rgba(76, 29, 149, 0.05); }
+    </style>
 </head>
-<body class="bg-gray-50 flex h-screen items-center justify-center">
-    <div class="text-center" id="statusBox">
-        <div class="animate-spin rounded-full h-12 w-12 border-4 border-amber-400 border-t-purple-800 mx-auto mb-4"></div>
-        <p class="text-gray-600 font-bold font-sans">กำลังนำคุณไปยังหน้าเว็บ...</p>
+<body class="flex h-screen items-center justify-center p-4">
+    
+    <div class="glass-card rounded-[2rem] p-10 max-w-sm w-full text-center relative overflow-hidden">
+        <!-- สถานะกำลังโหลด -->
+        <div id="loadingState" class="transition-opacity duration-300">
+            <div class="relative w-20 h-20 mx-auto mb-6">
+                <div class="absolute inset-0 border-4 border-gray-100 rounded-full"></div>
+                <div class="absolute inset-0 border-4 border-mstPurple rounded-full border-t-transparent animate-spin"></div>
+                <!-- ใส่โลโก้โรงเรียนหมุนๆ ตรงกลาง -->
+                <img src="/logo.webp" class="absolute inset-0 w-10 h-10 m-auto opacity-70 animate-pulse" alt="logo" onerror="this.style.display='none'">
+            </div>
+            <h2 class="text-xl font-black text-gray-800 mb-2">กำลังเชื่อมต่อข้อมูล...</h2>
+            <p class="text-sm text-gray-500 font-medium">ระบบกำลังพาดำเนินการ กรุณารอสักครู่</p>
+        </div>
+
+        <!-- สถานะ Error (ซ่อนไว้เป็นค่าเริ่มต้น) -->
+        <div id="errorState" class="hidden transition-opacity duration-300">
+            <div class="w-20 h-20 bg-red-50 text-red-500 rounded-full flex items-center justify-center text-4xl mx-auto mb-6 shadow-inner">
+                ❌
+            </div>
+            <h2 class="text-xl font-black text-gray-900 mb-2">ไม่พบลิงก์นี้ในระบบ</h2>
+            <p class="text-sm text-gray-500 mb-8 font-medium" id="errorMessage">ลิงก์อาจถูกลบ หรือคุณพิมพ์ URL ไม่ถูกต้อง</p>
+            <a href="/" class="block w-full bg-mstPurple text-white font-bold py-3.5 rounded-xl hover:bg-purple-900 transition shadow-md">
+                กลับสู่หน้าหลัก
+            </a>
+        </div>
     </div>
 
     <script type="module">
@@ -25,14 +56,21 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
+        // ฟังก์ชันสลับ UI ไปหน้า Error
+        function showError(message) {
+            document.getElementById('loadingState').classList.add('hidden');
+            document.getElementById('errorState').classList.remove('hidden');
+            if(message) document.getElementById('errorMessage').innerText = message;
+        }
+
         async function processRedirect() {
-            // ดึงค่า URL (เช่น line) ออกมาจาก /slinks/line
-            const pathname = window.location.pathname;
-            const pathParts = pathname.split('/').filter(Boolean);
+            // อ่านค่า URL ปัจจุบัน
+            const pathParts = window.location.pathname.split('/').filter(Boolean);
             let linkId = pathParts[pathParts.length - 1]; 
 
+            // ดักจับกรณีเข้า /slinks/ เฉยๆ หรือพิมพ์ผิด
             if (!linkId || linkId === 'slinks' || linkId.includes('.html')) {
-                document.getElementById('statusBox').innerHTML = '<p class="text-red-500 font-bold">❌ ไม่พบรหัสลิงก์ย่อ</p>';
+                showError('ไม่พบรหัสลิงก์ย่อ กรุณาตรวจสอบ URL อีกครั้ง');
                 return;
             }
             
@@ -45,13 +83,17 @@
                 if (docSnap.exists()) {
                     window.location.replace(docSnap.data().targetUrl);
                 } else {
-                    window.location.replace('/404.html');
+                    // ถ้าระบบหาไม่เจอ จะบอกชื่อลิงก์ที่หาไม่เจอด้วย
+                    showError(`ไม่มีข้อมูลของลิงก์ "/${linkId}" ในระบบ`);
                 }
             } catch (error) {
-                document.getElementById('statusBox').innerHTML = `<p class="text-red-500 font-bold">⚠️ ข้อผิดพลาด: ${error.message}</p>`;
+                showError('เกิดข้อผิดพลาดในการเชื่อมต่อฐานข้อมูล');
+                console.error(error);
             }
         }
-        processRedirect();
+
+        // หน่วงเวลา 0.5 วิ ให้ผู้ใช้เห็น UI สวยๆ ก่อนย้ายหน้า
+        setTimeout(processRedirect, 500);
     </script>
 </body>
 </html>
