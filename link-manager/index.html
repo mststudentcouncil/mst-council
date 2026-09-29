@@ -70,7 +70,7 @@
                 </div>
                 <div>
                     <h1 class="text-lg lg:text-xl font-black text-gray-900 leading-tight">ระบบจัดการลิงก์</h1>
-                    <p class="text-[10px] sm:text-xs text-gray-500 font-bold tracking-wide">Domain: mstsc.pages.dev/slinks/</p>
+                    <p class="text-[10px] sm:text-xs text-gray-500 font-bold tracking-wide">Domain: mstsc-link.pages.dev/</p>
                 </div>
             </div>
             <div class="flex items-center gap-4">
@@ -276,7 +276,7 @@
 
             let html = '';
             dataArray.forEach(item => {
-                const fullLink = `https://mstsc.pages.dev/slinks/${item.id}`;
+                const fullLink = `https://mstsc-link.pages.dev/${item.id}`;
                 let dateStr = 'ไม่ระบุ';
                 if(item.timestamp) {
                     const d = item.timestamp.toDate();
@@ -470,7 +470,7 @@
 
         // 🎨 สร้าง QR Code มีโลโก้ และปุ่มดาวน์โหลด
         window.showQRCode = (id) => {
-            const fullLink = `mstsc.pages.dev/slinks/${id}`; // URL ที่จะใช้สแกนและโชว์
+            const fullLink = `mstsc-link.pages.dev/${id}`;
             
             Swal.fire({
                 title: 'QR Code',
@@ -513,7 +513,7 @@
             if(!sourceCanvas) return;
 
             const includeText = document.getElementById('showUrlCheckbox').checked;
-            const linkText = `mstsc.pages.dev/slinks/${id}`;
+            const linkText = `mstsc-link.pages.dev/${id}`;
             const fileName = `MSTSC_QR_${id}.png`;
 
             if (includeText) {
