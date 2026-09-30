@@ -14,8 +14,10 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
-    <!-- EasyQRCodeJS สำหรับสร้าง QR Code มีโลโก้ -->
-    <script src="https://unpkg.com/easyqrcodejs@4.6.1/dist/easy.qrcode.min.js"></script>
+    <!-- ลบ: <script src="https://unpkg.com/easyqrcodejs@4.6.1/dist/easy.qrcode.min.js"></script> -->
+    
+    <!-- ใส่ไลบรารีตัวใหม่ สำหรับดีไซน์ขอบมน -->
+    <script src="https://cdn.jsdelivr.net/npm/qr-code-styling@1.5.0/lib/qr-code-styling.js"></script>
 
     <script>
         tailwind.config = { 
@@ -476,9 +478,11 @@
                 title: 'QR Code',
                 html: `
                     <div id="qrcode-box" class="flex justify-center mt-4 mb-4"></div>
-                    <div class="flex items-center justify-center gap-2 mb-4 bg-gray-50 py-2 rounded-lg border border-gray-200 w-3/4 mx-auto cursor-pointer" onclick="document.getElementById('showUrlCheckbox').click()">
-                        <input type="checkbox" id="showUrlCheckbox" class="w-4 h-4 text-mstPurple rounded cursor-pointer" checked>
-                        <label for="showUrlCheckbox" class="text-sm font-bold text-gray-700 cursor-pointer select-none">ใส่ชื่อลิงก์ไว้ด้านล่างรูป</label>
+                    <div class="flex items-center justify-center mb-4 bg-gray-50 rounded-lg border border-gray-200 w-3/4 mx-auto transition hover:bg-gray-100">
+                        <label for="showUrlCheckbox" class="flex items-center justify-center gap-2 w-full py-2.5 cursor-pointer">
+                            <input type="checkbox" id="showUrlCheckbox" class="w-4 h-4 text-mstPurple rounded cursor-pointer">
+                            <span class="text-sm font-bold text-gray-700 select-none">ใส่ชื่อลิงก์ไว้ด้านล่างรูป</span>
+                        </label>
                     </div>
                     <button onclick="downloadQR('${id}')" class="w-full bg-gradient-to-r from-mstPurple to-purple-600 text-white py-3 rounded-xl font-bold shadow-md hover:shadow-lg transition flex items-center justify-center gap-2">
                         <i class="fa-solid fa-download"></i> ดาวน์โหลด QR Code
@@ -488,21 +492,48 @@
                 showCloseButton: true,
                 customClass: { popup: 'rounded-[2.5rem] p-6' },
                 didOpen: () => {
-                    // สร้าง QR โค้ดลงใน Canvas
-                    new QRCode(document.getElementById("qrcode-box"), {
-                        text: `https://${fullLink}`, // ลิงก์ตอนสแกนต้องมี https
-                        width: 220,
-                        height: 220,
-                        colorDark: "#1E1B4B", 
-                        colorLight: "#ffffff",
-                        correctLevel: QRCode.CorrectLevel.H,
-                        drawer: 'canvas', // บังคับให้เป็น Canvas เพื่อที่เราจะดึงรูปไปเซฟได้
-                        logo: "/logo.webp", // โลโก้ตรงกลาง
-                        logoWidth: 60,
-                        logoHeight: 60,
-                        logoBackgroundColor: '#ffffff',
-                        logoBackgroundTransparent: false
+                    const qrcodeBox = document.getElementById("qrcode-box");
+                    qrcodeBox.innerHTML = ""; // ล้างค่าเก่าออกก่อน
+                    
+                    const qrCode = new QRCodeStyling({
+                        width: 240,
+                        height: 240,
+                        type: "canvas",
+                        data: `https://${fullLink}`,
+                        image: "https://mstsc.pages.dev/logo.webp", 
+                        
+                        // 🌟 1. เพิ่มระดับการแก้ข้อผิดพลาดให้สูงสุด (H) เพราะโลโก้เราจะทับจุด QR
+                        qrOptions: {
+                            errorCorrectionLevel: 'H' 
+                        },
+                        
+                        dotsOptions: {
+                            color: "#1E1B4B", 
+                            type: "rounded" 
+                        },
+                        cornersSquareOptions: {
+                            color: "#4C1D95", 
+                            type: "extra-rounded" 
+                        },
+                        cornersDotOptions: {
+                            color: "#FBBF24", 
+                            type: "dot" 
+                        },
+                        backgroundOptions: {
+                            color: "#ffffff",
+                        },
+                        
+                        // 🌟 2. ตั้งค่าภาพโลโก้ใหม่ให้เนียนเป็นวงกลม
+                        imageOptions: {
+                            crossOrigin: "anonymous",
+                            margin: 0, // ปิดกรอบขอบสี่เหลี่ยม
+                            imageSize: 0.25, // ปรับขนาดโลโก้ลงมานิดนึงให้ไม่ทับลาย QR มากเกินไป (สแกนง่ายขึ้น)
+                            hideBackgroundDots: false // 🌟 (พระเอกของงาน) ปิดการเจาะช่อง ให้จุด QR รันทะลุหลังรูปไปเลย แล้วโลโก้จะทับเนียนๆ เอง
+                        }
                     });
+
+                    // วาด QR Code ลงในกล่อง
+                    qrCode.append(qrcodeBox);
                 }
             });
         };
@@ -551,13 +582,31 @@
 
         // ฟังก์ชันสร้างปุ่มล่องหนและกดดาวน์โหลด
         function triggerDownload(dataUrl, filename) {
+    // แปลงข้อมูล Base64 เป็นไฟล์ Blob (แก้บัคมือถือโหลดไม่ได้ 100%)
+    fetch(dataUrl)
+        .then(res => res.blob())
+        .then(blob => {
+            const blobUrl = window.URL.createObjectURL(blob);
             const link = document.createElement('a');
-            link.href = dataUrl;
+            link.href = blobUrl;
             link.download = filename;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-        }
+            
+            // คืนค่าหน่วยความจำหลังดาวน์โหลดเสร็จ
+            setTimeout(() => window.URL.revokeObjectURL(blobUrl), 1000);
+        })
+        .catch(err => {
+            console.error("Download Error: ", err);
+            Swal.fire({
+                icon: 'error',
+                title: 'ไม่สามารถดาวน์โหลดได้',
+                text: 'เบราว์เซอร์นี้บล็อกการดาวน์โหลด แนะนำให้ "กดค้างที่รูป QR Code" แล้วเลือกบันทึกรูปภาพแทนครับ',
+                customClass: { popup: 'rounded-3xl' }
+            });
+        });
+}
 
     </script>
 </body>
