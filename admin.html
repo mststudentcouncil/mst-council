@@ -761,6 +761,9 @@
         // เพิ่มโค้ดบรรทัดนี้ลงไปเพื่อบังคับโดเมนของ Google Login
         provider.setCustomParameters({ hd: 'mst.ac.th' });
 
+        // ADD THIS LINE:
+        const ALLOWED_EMAIL = "studentcouncil@mst.ac.th"; // Change this to the actual admin email you want to allow
+
         const googleProvider = new GoogleAuthProvider();
         googleProvider.setCustomParameters({ login_hint: ALLOWED_EMAIL });
 
