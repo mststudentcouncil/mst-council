@@ -99,19 +99,19 @@
                     <a href="#board" class="hover:text-mstPurple transition">คณะกรรมการ</a>
                     <a href="#news" class="hover:text-mstPurple transition">ข่าวสาร</a>
                     <a href="./admin.html" class="bg-gradient-to-r from-mstPurple to-purple-800 text-white px-6 py-2.5 rounded-full hover:shadow-lg transition flex items-center gap-2 border border-purple-400">
-                        <i class="fa-solid fa-shield-halved"></i> เจ้าหน้าที่
+                        <i class="fa-solid fa-shield-halved"></i> ผู้ดูแลระบบ
                     </a>
                 </div>
                 <button id="mobileMenuBtn" onclick="toggleMobileMenu()" class="lg:hidden text-gray-600 text-2xl"><i class="fa-solid fa-bars-staggered"></i></button>
             </div>
         </div>
-        <div id="mobileMenu" class="hidden lg:hidden glass absolute w-full left-0 border-t border-white/50 pb-[env(safe-area-inset-bottom)]">
+        <div id="mobileMenu" class="hidden lg:hidden bg-white/95 backdrop-blur-md absolute w-full left-0 border-t border-gray-100 pb-[env(safe-area-inset-bottom)]">
             <div class="flex flex-col px-6 py-6 space-y-5 text-base font-bold text-gray-700 text-center">
                 <a href="#services" onclick="toggleMobileMenu()" class="hover:text-mstPurple">ศูนย์บริการ</a>
                 <a href="#projects" onclick="toggleMobileMenu()" class="hover:text-mstPurple">ติดตามโครงการ</a>
                 <a href="#board" onclick="toggleMobileMenu()" class="hover:text-mstPurple">คณะกรรมการ</a>
                 <a href="#news" onclick="toggleMobileMenu()" class="hover:text-mstPurple">ข่าวสาร</a>
-                <a href="./admin.html" class="bg-mstPurple text-white px-4 py-3 rounded-xl mt-2">เข้าสู่ระบบเจ้าหน้าที่</a>
+                <a href="./admin.html" class="bg-mstPurple text-white px-4 py-3 rounded-xl mt-2">เข้าสู่ระบบผู้ดูแล</a>
             </div>
         </div>
     </nav>
@@ -176,7 +176,6 @@
 
             <!-- SC Regis -->
             <a href="/regis" target="_blank" class="glass glass-hover p-8 rounded-[2rem] text-center block transition-all duration-300 group w-full sm:w-[calc(50%-0.75rem)] lg:w-[calc(25%-1.125rem)] max-w-[300px]">
-                <div class="absolute top-4 right-4 bg-gray-900 text-white text-[8px] font-black px-2 py-1 rounded-md tracking-wider">STAFF</div>
                 <div class="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-6 group-hover:scale-110 group-hover:-rotate-3 transition shadow-sm">
                     <i class="fa-solid fa-folder-open"></i>
                 </div>
@@ -356,8 +355,22 @@
         window.newsDataList = []; 
         window.allBoardMembers = [];
 
-        function toggleMobileMenu() { document.getElementById('mobileMenu').classList.toggle('hidden'); }
-        function showComingSoon() { Swal.fire({ title: 'กำลังพัฒนา!', text: 'ระบบนี้กำลังอยู่ระหว่างการพัฒนา จะเปิดให้บริการเร็วๆ นี้ครับ', icon: 'info', confirmButtonColor: '#4C1D95', customClass: { popup: 'rounded-3xl' } }); }
+        function toggleMobileMenu() {
+    const menu = document.getElementById('mobileMenu');
+    const nav = document.getElementById('navbar');
+    menu.classList.toggle('hidden');
+
+    // ตรวจสอบว่าถ้าเมนูถูกเปิดอยู่ ให้ตั้งค่า Navbar เป็นพื้นหลังทึบ
+    if (!menu.classList.contains('hidden')) {
+        nav.classList.add('bg-white/95');
+        nav.classList.remove('glass');
+    } else if (window.scrollY <= 20) {
+        // หากกดปิดเมนู และผู้ใช้ยังอยู่ตำแหน่งบนสุดของหน้าเว็บ ให้กลับไปใช้แบบโปร่งใสเหมือนเดิม
+        nav.classList.add('glass');
+        nav.classList.remove('bg-white/95');
+    }
+}
+        function showComingSoon() { Swal.fire({ title: 'กำลังพัฒนา!', text: 'ระบบนี้กำลังอยู่ระหว่างการพัฒนา จะเปิดให้บริการเร็วๆ นี้', icon: 'info', confirmButtonColor: '#4C1D95', customClass: { popup: 'rounded-3xl' } }); }
         
         function openNewsModal(index) {
     const data = window.newsDataList[index];
