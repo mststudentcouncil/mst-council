@@ -39,25 +39,41 @@
         .glass-panel { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.5); }
         .hover-lift { transition: all 0.2s ease-in-out; }
         .hover-lift:hover { transform: translateY(-3px); box-shadow: 0 10px 25px -5px rgba(76, 29, 149, 0.15); }
+
+        /* เพิ่มเติมคลาสสำหรับหน้าล็อกอินสไตล์ scoring */
+        .glass-card { 
+            background: rgba(255, 255, 255, 0.85); 
+            backdrop-filter: blur(16px); 
+            border: 1px solid rgba(255, 255, 255, 0.5); 
+            box-shadow: 0 10px 30px rgba(103, 58, 183, 0.08); 
+        }
+        .fade-in { animation: fadeIn 0.5s ease-out; }
+        @keyframes fadeIn { 
+            from { opacity: 0; transform: translateY(15px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
     </style>
 </head>
 <body class="text-gray-800 antialiased h-screen flex flex-col overflow-hidden">
 
     <!-- Login Overlay -->
-    <div id="loginOverlay" class="fixed inset-0 bg-mstDark/95 z-[100] flex items-center justify-center px-4 backdrop-blur-xl transition-opacity duration-500">
-        <div class="bg-white p-8 md:p-12 rounded-[2.5rem] w-full max-w-md shadow-2xl relative overflow-hidden text-center transform transition-all">
-            <div class="absolute -top-20 -right-20 w-48 h-48 bg-purple-500 rounded-full blur-3xl opacity-20"></div>
-            <div class="relative z-10">
-                <div class="w-20 h-20 bg-mstPurpleLight text-mstPurple rounded-[1.5rem] flex items-center justify-center text-4xl mx-auto mb-6 shadow-inner">
-                    <i class="fa-solid fa-link"></i>
-                </div>
-                <h2 class="text-3xl font-black text-gray-900 mb-2">MSTSC URL</h2>
-                <p class="text-sm font-medium text-gray-500 mb-8 bg-gray-100 inline-block px-4 py-1.5 rounded-full">ระบบย่อลิงก์สภานักเรียน</p>
-                <button onclick="loginWithGoogle()" class="w-full bg-white border-2 border-gray-200 text-gray-700 font-bold py-4 rounded-2xl hover-lift flex items-center justify-center gap-3">
-                    <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-6 h-6" alt="Google"> 
-                    <span>เข้าสู่ระบบด้วย Google</span>
-                </button>
-            </div>
+    <div id="loginOverlay" class="fixed inset-0 z-[100] flex items-center justify-center px-4 transition-opacity duration-500" style="background: linear-gradient(135deg, #f3e8ff 0%, #fffbeb 100%);">
+        <div class="glass-card p-8 md:p-10 rounded-3xl w-full max-w-md text-center fade-in">
+            <!-- โลโก้แบบเดียวกับ scoring -->
+            <img src="/logo.webp" class="w-24 mx-auto mb-6 opacity-90" alt="MSTSC Logo">
+            
+            <!-- ข้อความต้อนรับ -->
+            <h1 class="text-3xl font-black text-purple-900 mb-2">MSTSC URL</h1>
+            <h2 class="text-xl font-bold text-purple-800 mb-4">ระบบบริหารจัดการลิงก์</h2>
+            <p class="text-sm text-gray-500 mb-8 bg-white/60 py-2 px-4 rounded-xl border border-white shadow-sm inline-block">
+                เฉพาะอีเมลคณะกรรมการสภานักเรียน
+            </p>
+
+            <!-- ปุ่มล็อกอิน -->
+            <button onclick="loginWithGoogle()" class="w-full bg-white border border-gray-200 text-gray-700 font-bold py-4 rounded-2xl hover-lift flex items-center justify-center gap-3 shadow-sm transition-all">
+                <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-6 h-6" alt="Google"> 
+                <span>เข้าสู่ระบบด้วย Google</span>
+            </button>
         </div>
     </div>
 
@@ -172,7 +188,7 @@
         // ==========================================
         // ⚙️ CONFIGURATION SETTINGS
         // ==========================================
-        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwPz6fBWeQ015Bf5jHkX5a3B-O8o2gU-9J4L1G0eZqNf3z_oP8Yy8uK0I1zXg/exec"; 
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzsI3LcYGE7FdlREISUmFtHP9d1Q2hJOOSDA38UiR9mmq2jfbXLBW2QEt6RD2og8QONEg/exec";
         const firebaseConfig = {
             apiKey: "AIzaSyAaZXkpLEjASJY4Dc-il8FmjDiZgTDhwkc",
             authDomain: "mstsc-official-portal.firebaseapp.com",
