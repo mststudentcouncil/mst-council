@@ -487,13 +487,43 @@
         };
 
         // 🎨 สร้าง QR Code มีโลโก้ และปุ่มดาวน์โหลด
-        window.showQRCode = (id) => {
+        window.showQRCode = async (id) => {
             const fullLink = `mstsc-link.pages.dev/${id}`;
+            
+            // 🌟 1. ดึงภาพโลโก้มาใส่กรอบวงกลมสีขาวก่อน
+            const logoWithWhiteBorder = await new Promise((resolve) => {
+                const img = new Image();
+                img.crossOrigin = "anonymous";
+                img.onload = () => {
+                    const canvas = document.createElement("canvas");
+                    const size = Math.max(img.width, img.height);
+                    // ลดความหนาของขอบขาวลงเหลือ 4% (จากเดิม 15%)
+                    const padding = size * 0.04; 
+                    const canvasSize = size + (padding * 2);
+                    
+                    canvas.width = canvasSize;
+                    canvas.height = canvasSize;
+                    const ctx = canvas.getContext("2d");
+                    
+                    // วาดพื้นหลังวงกลมสีขาว
+                    ctx.beginPath();
+                    ctx.arc(canvasSize / 2, canvasSize / 2, canvasSize / 2, 0, Math.PI * 2);
+                    ctx.fillStyle = "#ffffff";
+                    ctx.fill();
+                    
+                    // วาดรูปโลโก้ทับตรงกลาง
+                    ctx.drawImage(img, padding, padding, size, size);
+                    
+                    resolve(canvas.toDataURL("image/png"));
+                };
+                img.onerror = () => resolve("https://mstsc.pages.dev/logo.webp"); 
+                img.src = "https://mstsc.pages.dev/logo.webp";
+            });
             
             Swal.fire({
                 title: 'QR Code',
                 html: `
-                    <div id="qrcode-box" class="flex justify-center mt-4 mb-4"></div>
+                    <div id="qrcode-box" class="flex justify-center mt-4 mb-4 [&>canvas]:w-[240px] [&>canvas]:h-[240px]"></div>
                     <div class="flex items-center justify-center mb-4 bg-gray-50 rounded-lg border border-gray-200 w-3/4 mx-auto transition hover:bg-gray-100">
                         <label for="showUrlCheckbox" class="flex items-center justify-center gap-2 w-full py-2.5 cursor-pointer">
                             <input type="checkbox" id="showUrlCheckbox" class="w-4 h-4 text-mstPurple rounded cursor-pointer">
@@ -509,46 +539,44 @@
                 customClass: { popup: 'rounded-[2.5rem] p-6' },
                 didOpen: () => {
                     const qrcodeBox = document.getElementById("qrcode-box");
-                    qrcodeBox.innerHTML = ""; // ล้างค่าเก่าออกก่อน
+                    qrcodeBox.innerHTML = ""; 
                     
                     const qrCode = new QRCodeStyling({
-                        width: 240,
-                        height: 240,
+                        width: 1000,  
+                        height: 1000, 
                         type: "canvas",
                         data: `https://${fullLink}`,
-                        image: "https://mstsc.pages.dev/logo.webp", 
+                        image: logoWithWhiteBorder, 
                         
-                        // 🌟 1. เพิ่มระดับการแก้ข้อผิดพลาดให้สูงสุด (H) เพราะโลโก้เราจะทับจุด QR
                         qrOptions: {
                             errorCorrectionLevel: 'H' 
                         },
                         
                         dotsOptions: {
-                            color: "#1E1B4B", 
+                            color: "#61177C", 
                             type: "rounded" 
                         },
                         cornersSquareOptions: {
-                            color: "#4C1D95", 
+                            color: "#2E073E", 
                             type: "extra-rounded" 
                         },
                         cornersDotOptions: {
-                            color: "#FBBF24", 
+                            color: "#2E073E", 
                             type: "dot" 
                         },
                         backgroundOptions: {
                             color: "#ffffff",
                         },
                         
-                        // 🌟 2. ตั้งค่าภาพโลโก้ใหม่ให้เนียนเป็นวงกลม
                         imageOptions: {
                             crossOrigin: "anonymous",
-                            margin: 0, // ปิดกรอบขอบสี่เหลี่ยม
-                            imageSize: 0.25, // ปรับขนาดโลโก้ลงมานิดนึงให้ไม่ทับลาย QR มากเกินไป (สแกนง่ายขึ้น)
-                            hideBackgroundDots: false // 🌟 (พระเอกของงาน) ปิดการเจาะช่อง ให้จุด QR รันทะลุหลังรูปไปเลย แล้วโลโก้จะทับเนียนๆ เอง
+                            margin: 0, 
+                            // ปรับขนาดโลโก้ลงมานิดหน่อยให้จุด QR โชว์ได้เยอะขึ้น
+                            imageSize: 0.28, 
+                            hideBackgroundDots: false 
                         }
                     });
 
-                    // วาด QR Code ลงในกล่อง
                     qrCode.append(qrcodeBox);
                 }
             });
@@ -569,7 +597,7 @@
                 const ctx = finalCanvas.getContext('2d');
                 
                 // กำหนดขนาดพื้นที่สำหรับข้อความ
-                const paddingBottom = 40; 
+                const paddingBottom = 160; 
                 
                 finalCanvas.width = sourceCanvas.width;
                 finalCanvas.height = sourceCanvas.height + paddingBottom;
@@ -583,7 +611,7 @@
 
                 // วาดข้อความ URL ด้านล่าง
                 ctx.fillStyle = '#4C1D95'; // สีม่วง
-                ctx.font = 'bold 15px sans-serif';
+                ctx.font = 'bold 60px sans-serif';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 ctx.fillText(linkText, finalCanvas.width / 2, sourceCanvas.height + (paddingBottom / 2));
