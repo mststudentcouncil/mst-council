@@ -573,7 +573,7 @@
 
         // ========================================================
         const WEB_APP_URL = "https://admission-backend-592123078141.asia-southeast1.run.app/api/admission";
-        const REGIS_API_URL = "https://script.google.com/macros/s/AKfycbx7ujsszpBJ1nCZ8idqCaUDd6qmvr9sOvouGzpTuLv6GXe8SxCx5VHoqCOMvpSZu4Kqig/exec";
+        const REGIS_API_URL = "https://admission-backend-592123078141.asia-southeast1.run.app/api/regis";
         // ========================================================
 
         let allApplications = []; 
@@ -656,6 +656,7 @@
                     try {
                         const res = await fetch(REGIS_API_URL, { 
                             method: 'POST', 
+                            headers: { "Content-Type": "application/json" },
                             body: JSON.stringify({ action: 'importData', data: parsedData }) 
                         });
                         const data = await res.json();
