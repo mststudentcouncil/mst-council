@@ -1,7 +1,3 @@
-<script>
-    // สั่งให้เด้งไปหน้า maintenance.html ทันที
-    window.location.href = "/maintenance.html";
-</script>
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -17,10 +13,10 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#6A1B9A">
     
-    <link rel="apple-touch-icon" href="https://i.ibb.co/F4SNC0SH/ADMISSION.jpg">
-    <link rel="apple-touch-icon" sizes="152x152" href="https://i.ibb.co/F4SNC0SH/ADMISSION.jpg">
-    <link rel="apple-touch-icon" sizes="180x180" href="https://i.ibb.co/F4SNC0SH/ADMISSION.jpg">
-    <link rel="apple-touch-icon" sizes="167x167" href="https://i.ibb.co/F4SNC0SH/ADMISSION.jpg">
+    <link rel="apple-touch-icon" href="./ADMISSION.jpg">
+    <link rel="apple-touch-icon" sizes="152x152" href="./ADMISSION.jpg">
+    <link rel="apple-touch-icon" sizes="180x180" href="./ADMISSION.jpg">
+    <link rel="apple-touch-icon" sizes="167x167" href="./ADMISSION.jpg">
     
     <link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
@@ -235,7 +231,7 @@
                                     ไม่สามารถเข้าสู่ระบบด้วย Google ผ่านแอป <b>LINE, IG หรือ FB</b> ได้โดยตรง
                                 </p>
                                 <div class="bg-white p-2 rounded-lg border border-red-100 text-[11px] text-gray-700 shadow-sm text-center font-bold">
-                                    กรุณากดปุ่มมุมขวาบน แล้วเลือก <b class="text-blue-600">"เปิดในเบราว์เซอร์เริ่มต้น"</b>
+                                    กรุณากดปุ่มมุมขวาบนหรือล่าง แล้วเลือก <b class="text-blue-600">"เปิดในเบราว์เซอร์เริ่มต้น"</b>
                                 </div>
                             </div>
                         </div>
@@ -253,7 +249,7 @@
 
                     <!-- ข้อความ PDPA -->
                     <div class="mt-4 text-[11px] text-gray-500 text-left bg-gray-50 p-3 rounded-xl border border-gray-200 w-full shadow-sm">
-                        <b class="text-mst-purple"><i class="fa-solid fa-user-shield"></i> นโยบายคุ้มครองข้อมูลส่วนบุคคล (PDPA):</b> ข้อมูลของท่านจะถูกใช้เพื่อการรับสมัครและคัดเลือกคณะกรรมการสภานักเรียนโรงเรียนเมืองสุราษฎร์ธานีเท่านั้น
+                        <b class="text-mst-purple"><i class="fa-solid fa-user-shield"></i> นโยบายคุ้มครองข้อมูลส่วนบุคคล (PDPA):</b> ข้อมูลของคุณจะถูกใช้เพื่อการรับสมัครและคัดเลือกคณะกรรมการสภานักเรียนโรงเรียนเมืองสุราษฎร์ธานีเท่านั้น
                     </div>
                 </div>
 
@@ -274,9 +270,6 @@
                 <div class="bg-white p-8 md:p-10 rounded-[2.5rem] shadow-[0_15px_40px_rgba(239,68,68,0.08)] border border-red-50 relative overflow-hidden">
                     <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-red-50 to-transparent rounded-bl-full -z-10 opacity-80"></div>
                     <div class="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-purple-50 to-transparent rounded-tr-full -z-10 opacity-50"></div>
-                    <h2 class="text-xl md:text-2xl font-black text-gray-800 mb-6 tracking-wide drop-shadow-sm">
-                        ระบบรับสมัครสภานักเรียน
-                    </h2>
                     <div class="relative w-24 h-24 mx-auto mb-6">
                         <div class="absolute inset-0 bg-red-100 rounded-full animate-ping opacity-30"></div>
                         <div class="w-full h-full bg-red-50 text-red-500 rounded-full flex items-center justify-center text-5xl shadow-inner border-4 border-white ring-4 ring-red-50 relative z-10">
@@ -284,7 +277,7 @@
                         </div>
                     </div>
                     <h3 class="text-2xl font-black text-red-600 mb-3 tracking-tight drop-shadow-sm">
-                        ปิดระบบรับสมัครชั่วคราว
+                        ไม่อยู่ในช่วงเวลาการรับสมัคร
                     </h3>
                     <div class="bg-gray-50 p-4 rounded-2xl border border-gray-100 inline-block w-full shadow-sm">
                         <p class="text-gray-600 text-sm font-medium leading-relaxed" id="closedMessageText">
@@ -388,7 +381,7 @@
                         <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
                             <label class="block text-sm font-bold text-gray-800 mb-3">ชื่อพรรคที่สังกัด <span class="text-red-500">*</span></label>
                             
-                            <input type="text" id="partyNameText" class="input-clean mb-4" placeholder="ระบุชื่อพรรคของท่าน (ไม่ต้องใส่คำว่า พรรค)">
+                            <input type="text" id="partyNameText" class="input-clean mb-4" placeholder="ระบุชื่อพรรคของคุณ (ไม่ต้องใส่คำว่า พรรค)">
                             
                             <div class="flex flex-col md:flex-row items-center gap-3 mb-4" id="committeePartyContainer" style="display:none;">
                                 <select id="partyNameSelect" class="input-clean flex-grow">
@@ -474,7 +467,7 @@
                                 <i class="fa-solid fa-arrow-left mr-2"></i> ย้อนกลับ
                             </button>
                             <button type="submit" id="submitAppBtn" class="bg-gradient-to-r from-mst-purple to-[#4a0072] hover:from-[#5e1889] hover:to-[#380056] text-white px-8 py-3 rounded-xl font-bold shadow-lg transform hover:-translate-y-1 transition-all">
-                                <i class="fa-solid fa-paper-plane mr-2"></i> ยืนยันการส่งใบสมัคร
+                                <i class="fa-solid fa-paper-plane mr-2"></i> ส่งใบสมัคร
                             </button>
                         </div>
                     </div>
@@ -944,7 +937,7 @@
                 },
                 {
                     num: 2,
-                    title: 'รับใบสมัครที่ห้องสภาฯ และนำส่งเอกสารฉบับจริง',
+                    title: 'มารับใบสมัคร และนำส่งเอกสารฉบับจริง',
                     state: 'upcoming',
                     statusLabel: 'รอดำเนินการ',
                     desc: 'รอคณะกรรมการสภานักเรียนพิมพ์ใบสมัครให้ จากนั้นมารับที่ห้องสภานักเรียนเพื่อนำไปดำเนินการและส่งคืน',
@@ -982,17 +975,17 @@
             // --- ประมวลผลสถานะตามขั้นตอนจริง ---
             if (currentStatus === 'รอตรวจสอบ') {
                 steps[1].state = 'pending';
-                steps[1].statusLabel = 'รอสภาฯ พิมพ์ใบสมัคร';
-                steps[1].desc = 'คณะกรรมการสภานักเรียนกำลังตรวจสอบข้อมูลเบื้องต้นและจัดพิมพ์ใบสมัครให้ท่าน กรุณารออัปเดตสถานะเป็น <b>"พิมพ์ใบสมัครแล้ว"</b> ก่อนมารับเอกสารที่ห้องสภานักเรียน';
+                steps[1].statusLabel = 'รอสภานักเรียน พิมพ์ใบสมัคร';
+                steps[1].desc = 'คณะกรรมการสภานักเรียนกำลังตรวจสอบข้อมูลเบื้องต้นและจัดพิมพ์ใบสมัครให้คุณ กรุณารออัปเดตสถานะเป็น <b>"พิมพ์ใบสมัครแล้ว"</b> ก่อนมารับเอกสารที่ห้องสภานักเรียน';
                 currentStepNum = 2;
-                currentStepSummary = `ขั้นตอนที่ 2/5 : รอสภาฯ พิมพ์ใบสมัคร`;
+                currentStepSummary = `ขั้นตอนที่ 2/5 : รอสภานักเรียน พิมพ์ใบสมัคร`;
             } 
             else if (currentStatus === 'พิมพ์ใบสมัครแล้ว') {
                 steps[1].state = 'pending';
-                steps[1].statusLabel = 'พิมพ์ใบสมัครแล้ว (มารับได้ที่ห้องสภาฯ)';
+                steps[1].statusLabel = 'พิมพ์ใบสมัครแล้ว';
                 steps[1].desc = `<span class="text-blue-700 font-bold"><i class="fa-solid fa-print mr-1"></i> คณะกรรมการสภานักเรียนพิมพ์ใบสมัครให้เรียบร้อยแล้ว!</span><br>กรุณาติดต่อรับใบสมัครได้ที่ <b>ห้องสภานักเรียน</b> เพื่อนำไปขอความคิดเห็นชอบ (ผู้ปกครอง / ครูที่ปรึกษา / หัวหน้าระดับ) และแนบผลการเรียน แล้วนำกลับมาส่งที่ห้องสภานักเรียน`;
                 currentStepNum = 2;
-                currentStepSummary = `ขั้นตอนที่ 2/5 : มารับใบสมัครที่ห้องสภาฯ`;
+                currentStepSummary = `ขั้นตอนที่ 2/5 : มารับใบสมัครที่ห้องสภานักเรียน`;
             }
             else if (currentStatus.includes('เอกสารไม่เรียบร้อย')) {
                 steps[1].state = 'returned';
@@ -1004,7 +997,7 @@
             else if (currentStatus === 'สละสิทธิ์ (ไม่ส่งเอกสารตามกำหนด)') {
                 steps[1].state = 'rejected';
                 steps[1].statusLabel = 'ไม่ส่งเอกสารตามกำหนด';
-                steps[1].desc = 'ท่านไม่ได้นำส่งเอกสารใบสมัครฉบับจริงที่ห้องสภานักเรียนภายในระยะเวลาที่กำหนด ระบบจึงตัดสิทธิ์การสมัครอัตโนมัติ';
+                steps[1].desc = 'คุณไม่ได้นำส่งเอกสารใบสมัครฉบับจริงที่ห้องสภานักเรียนภายในระยะเวลาที่กำหนด ระบบจึงตัดสิทธิ์การสมัครอัตโนมัติ';
                 currentStepNum = 2;
                 currentStepSummary = `สิ้นสุดกระบวนการ : ไม่ส่งเอกสารตามกำหนด`;
             } 
@@ -1063,7 +1056,7 @@
                 steps[2].statusLabel = currentStatus;
                 steps[2].desc = currentStatus === 'ไม่ได้รับเลือกตั้ง' 
                     ? 'ไม่ผ่านการเลือกตั้งในรอบประธานนักเรียน และไม่ได้กดยืนยันสิทธิ์เข้าสัมภาษณ์ต่อ'
-                    : 'ท่านได้ทำการสละสิทธิ์ หรือไม่ได้กดยืนยันสิทธิ์ภายในระยะเวลาที่กำหนด';
+                    : 'คุณได้ทำการสละสิทธิ์ หรือไม่ได้กดยืนยันสิทธิ์ภายในระยะเวลาที่กำหนด';
                 currentStepNum = 3;
                 currentStepSummary = `สิ้นสุดกระบวนการ : ${currentStatus}`;
             }
@@ -1072,7 +1065,7 @@
                 steps[1].statusLabel = 'ส่งใบสมัครเรียบร้อย';
                 steps[2].state = 'approved';
                 steps[2].statusLabel = 'ยืนยันสมัครต่อสำเร็จ';
-                steps[2].desc = 'ท่านได้ยืนยันสิทธิ์เข้าร่วมการสัมภาษณ์เรียบร้อยแล้ว';
+                steps[2].desc = 'คุณได้ยืนยันสิทธิ์เข้าร่วมการสัมภาษณ์เรียบร้อยแล้ว';
 
                 steps[3].state = 'pending';
                 currentStepNum = 4;
@@ -1117,7 +1110,7 @@
                 steps[2].statusLabel = 'ยืนยันสมัครต่อสำเร็จ';
                 steps[3].state = 'rejected';
                 steps[3].statusLabel = 'ขาดสอบสัมภาษณ์';
-                steps[3].desc = 'ท่านไม่ได้เข้ารับการสัมภาษณ์ตามวันและเวลาที่กำหนด';
+                steps[3].desc = 'คุณไม่ได้เข้ารับการสัมภาษณ์ตามวันและเวลาที่กำหนด';
                 currentStepNum = 4;
                 currentStepSummary = `สิ้นสุดกระบวนการ : ขาดสอบสัมภาษณ์`;
             }
@@ -1144,8 +1137,8 @@
                     steps[4].state = 'approved';
                     steps[4].statusLabel = isPresident ? 'ได้รับตำแหน่งประธานนักเรียน' : 'ผ่านการคัดเลือก';
                     steps[4].desc = isPresident
-                        ? 'ขอแสดงความยินดี! ท่านชนะการเลือกตั้งและได้รับตำแหน่งประธานนักเรียน โรงเรียนเมืองสุราษฎร์ธานี'
-                        : 'ขอแสดงความยินดี! ท่านผ่านการคัดเลือกเป็นคณะกรรมการสภานักเรียน โรงเรียนเมืองสุราษฎร์ธานี';
+                        ? 'ขอแสดงความยินดี! คุณชนะการเลือกตั้งและได้รับตำแหน่งประธานนักเรียน โรงเรียนเมืองสุราษฎร์ธานี'
+                        : 'ขอแสดงความยินดี! คุณผ่านการคัดเลือกเป็นคณะกรรมการสภานักเรียน โรงเรียนเมืองสุราษฎร์ธานี';
                     currentStepSummary = `สำเร็จครบทุกขั้นตอน : ${steps[4].statusLabel}`;
 
                     steps[4].extraHtml = `
@@ -1278,7 +1271,7 @@
                             </div>
                             <div>
                                 <h4 class="font-extrabold text-sm sm:text-base leading-tight">สถานะการดำเนินการตามขั้นตอน</h4>
-                                <p class="text-[11px] text-purple-200">ติดตามความคืบหน้าการสมัครของท่านแบบเรียลไทม์</p>
+                                <p class="text-[11px] text-purple-200">ติดตามความคืบหน้าการสมัครของคุณ</p>
                             </div>
                         </div>
                         <span class="bg-mst-yellow text-mst-dark text-xs font-black px-3.5 py-1.5 rounded-xl shadow-sm self-start sm:self-auto">
@@ -1381,7 +1374,7 @@
 
         function confirmStudentAction(sheetName, rowIndex, actionStr, btn) {
             let msg = actionStr === 'ยืนยันสมัครต่อ' 
-                ? "เมื่อกดยืนยันแล้ว ท่านจะต้องเข้ารับการสัมภาษณ์ตามวันและเวลาที่กำหนด" 
+                ? "เมื่อกดยืนยันแล้ว คุณจะต้องเข้ารับการสัมภาษณ์ตามวันและเวลาที่กำหนด" 
                 : "หากกดสละสิทธิ์แล้ว จะไม่สามารถกลับมาแก้ไขหรือขอรับสิทธิ์คืนได้อีก";
             Swal.fire({ 
                 title: `ยืนยันการ "${actionStr}" ?`, 
@@ -1493,7 +1486,7 @@
                 } else {
                     const isIndep = document.getElementById('isIndependent').checked;
                     if(!isIndep && !document.getElementById('partyNameSelect').value) { 
-                        return Swal.fire('แจ้งเตือน', 'กรุณาเลือกพรรคที่สังกัด หรือติ๊กเลือกผู้สมัครอิสระ', 'warning');
+                        return Swal.fire('แจ้งเตือน', 'กรุณาเลือกพรรคที่สังกัด หรือเลือกผู้สมัครอิสระ', 'warning');
                     }
                 }
             }
@@ -1593,7 +1586,7 @@
                 Swal.fire('ข้อมูลไม่ถูกต้อง', 'กรุณาตรวจสอบรหัสนักเรียนของสมาชิกพรรคให้ถูกต้องครบทุกช่อง (หรือลบแถวที่ว่างออก)', 'error'); return;
             }
             const submitBtn = document.getElementById('submitAppBtn');
-            setBtnLoading(submitBtn, 'กำลังส่งใบสมัคร...');
+            setBtnLoading(submitBtn, 'กำลังส่ง...');
             
             let photoBase64Data = "";
             if (photoFile) photoBase64Data = await getBase64(photoFile); 
@@ -1645,7 +1638,7 @@
                         <div class="mb-2 text-sm flex justify-between"><span class="text-gray-500">ตำแหน่ง:</span> <span class="font-bold text-gray-800">${role}</span></div>
                         <div class="mb-2 text-sm flex justify-between"><span class="text-gray-500">พรรค/สังกัด:</span> <span class="font-bold text-gray-800 text-right w-40 truncate">${finalPartyName}</span></div>
                         <div class="mt-4 pt-4 border-t border-gray-200 text-center">
-                            <p class="text-xs text-gray-500 mb-1">เลขที่ใบสมัครของท่าน</p>
+                            <p class="text-xs text-gray-500 mb-1">เลขที่ใบสมัครของคุณ</p>
                             <div class="text-2xl font-black font-mono text-mst-purple tracking-widest bg-purple-50 py-2 rounded-lg border border-purple-100 shadow-inner">${resData.appNumber}</div>
                         </div>
                         <p class="text-xs text-red-500 font-bold text-center mt-4"><i class="fa-solid fa-camera mr-1"></i> กรุณาบันทึกหน้าจอนี้ไว้เป็นหลักฐาน และติดต่อรับใบสมัครฉบับจริงได้ที่ห้องสภานักเรียน</p>
@@ -1705,7 +1698,7 @@
                 html: `
                     <div class="text-left text-sm text-gray-700 space-y-3 mt-3">
                         <p><b>ขั้นตอนที่ 1 ยื่นใบสมัครออนไลน์:</b> เข้าสู่ระบบด้วยอีเมลโรงเรียน กรอกข้อมูลและอัปโหลดรูปถ่ายให้ครบถ้วน</p>
-                        <p><b>ขั้นตอนที่ 2 รับใบสมัครและส่งเอกสารฉบับจริง:</b> รอสภาฯ พิมพ์ใบสมัครให้ แล้วมารับที่<b>ห้องสภานักเรียน</b> นำไปขอความคิดเห็นชอบ (ผู้ปกครอง/ครูที่ปรึกษา/หัวหน้าระดับ) พร้อมแนบผลการเรียนนำส่งคืนที่ห้องสภาฯ</p>
+                        <p><b>ขั้นตอนที่ 2 รับใบสมัครและส่งเอกสารฉบับจริง:</b> รอสภานักเรียน พิมพ์ใบสมัครให้ แล้วมารับที่<b>ห้องสภานักเรียน</b> นำไปขอความคิดเห็นชอบ (ผู้ปกครอง/ครูที่ปรึกษา/หัวหน้าระดับ) พร้อมแนบผลการเรียนนำส่งคืนที่ห้องสภานักเรียน</p>
                         <p><b>ขั้นตอนที่ 3 ยืนยันสิทธิ์สมัครต่อ:</b> เมื่อเอกสารผ่านการตรวจสอบแล้ว ให้เข้ามากดปุ่ม <b>"ยืนยันสมัครต่อ"</b> หรือ <b>"สละสิทธิ์การสมัคร"</b> ตามเวลาที่กำหนด</p>
                         <p><b>ขั้นตอนที่ 4 เข้ารับการสัมภาษณ์:</b> ตรวจสอบหมายเลขคิวสัมภาษณ์ (Q-XXX) และเข้าสัมภาษณ์ตามวัน เวลา สถานที่ที่ระบุ</p>
                         <p class="text-mst-purple font-bold">ขั้นตอนที่ 5 ประกาศผลและรายงานตัว: ตรวจสอบผลการคัดเลือกและกดลิงก์รายงานตัวเข้าปฏิบัติหน้าที่</p>
