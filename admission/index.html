@@ -277,7 +277,7 @@
                         </div>
                     </div>
                     <h3 class="text-2xl font-black text-red-600 mb-3 tracking-tight drop-shadow-sm">
-                        ไม่อยู่ในช่วงเวลาการรับสมัคร
+                        ไม่อยู่ในช่วงการรับสมัคร
                     </h3>
                     <div class="bg-gray-50 p-4 rounded-2xl border border-gray-100 inline-block w-full shadow-sm">
                         <p class="text-gray-600 text-sm font-medium leading-relaxed" id="closedMessageText">
@@ -286,7 +286,7 @@
                     </div>
                     <div class="mt-8 pt-5 border-t border-gray-100">
                         <p class="text-xs text-gray-400 font-bold tracking-wide">
-                            <i class="fa-solid fa-circle-info mr-1"></i> หากมีข้อสงสัยกรุณาติดต่อคณะกรรมการสภานักเรียน
+                            <i class="fa-solid fa-circle-info mr-1"></i> หากมีข้อสงสัยกรุณาติดต่อสภานักเรียน
                         </p>
                     </div>
                 </div>
@@ -595,7 +595,7 @@
                     isOpen = false; cMsg = `ระบบจะเปิดรับสมัครในวันที่<br><b class="text-mst-purple">${formatDateTime(settings.AppStartTime)} น.</b>`; 
                 }
                 else if(settings.AppEndTime && now > new Date(settings.AppEndTime)) { 
-                    isOpen = false; cMsg = "หมดเขตรับสมัครคณะกรรมการสภานักเรียนแล้ว";
+                    isOpen = false; cMsg = "หมดเขตรับสมัคร<br>คณะกรรมการสภานักเรียนแล้ว";
                 }
                 return { isOpen, cMsg };
             };
@@ -1084,7 +1084,7 @@
                         steps[3].extraHtml = `
                             <div class="mt-3 bg-white p-4 sm:p-5 rounded-2xl shadow-md border-2 border-purple-100 relative overflow-hidden">
                                 <div class="border-b-2 border-dashed border-gray-200 pb-3 mb-3 text-center">
-                                    <span class="font-bold text-mst-purple text-[10px] uppercase tracking-widest bg-purple-50 px-3 py-1 rounded-full">บัตรคิวสัมภาษณ์ของท่าน</span>
+                                    <span class="font-bold text-mst-purple text-[10px] uppercase tracking-widest bg-purple-50 px-3 py-1 rounded-full">บัตรคิวสัมภาษณ์ของคุณ</span>
                                     <div class="text-3xl sm:text-4xl font-black font-mono text-gray-900 tracking-wider mt-2">Q-${("00" + calculatedQueue).slice(-3)}</div>
                                 </div>
                                 <div class="text-left mb-3">
