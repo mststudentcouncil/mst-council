@@ -107,6 +107,10 @@
                     <button onclick="showHelp()" class="group bg-white hover:bg-blue-50 text-gray-600 hover:text-blue-600 px-3.5 py-2 rounded-full text-xs font-bold border border-gray-200 hover:border-blue-300 transition-all duration-300 flex items-center gap-1.5 shadow-sm hover:shadow">
                         <i class="fa-solid fa-circle-question group-hover:scale-110 transition-transform text-blue-500"></i> <span class="hidden sm:inline">คู่มือแอดมิน</span>
                     </button>
+
+                    <button onclick="generateAllMissingPdfs(this)" class="group bg-amber-50 hover:bg-amber-500 text-amber-700 hover:text-white px-3.5 py-2 rounded-full text-xs font-bold border border-amber-200 hover:border-amber-500 transition-all duration-300 flex items-center gap-1.5 shadow-sm hover:shadow-md" title="สั่งสร้างไฟล์ใบสมัคร PDF ให้ผู้สมัครที่ยังไม่มี PDF ทั้งหมด">
+                        <i class="fa-solid fa-file-pdf group-hover:scale-110 transition-transform text-amber-600 group-hover:text-white"></i> <span>สร้าง PDF ที่ตกค้าง</span>
+                    </button>
                     
                     <button onclick="exportQueueToExcel()" class="group bg-white hover:bg-green-500 text-gray-600 hover:text-white px-3.5 py-2 rounded-full text-xs font-bold border border-gray-200 hover:border-green-500 transition-all duration-300 flex items-center gap-1.5 shadow-sm hover:shadow-md">
                         <i class="fa-solid fa-file-excel group-hover:scale-110 transition-transform text-green-600 group-hover:text-white"></i> <span class="hidden md:inline">ส่งออกคิวสัมภาษณ์</span>
@@ -1482,13 +1486,94 @@
                                 </a>` : ''}
                                 
                                 ${cleanPdfLink ? `
-                                <a href="${cleanPdfLink}" target="_blank" class="text-xs text-red-600 font-bold flex items-center justify-center gap-1.5 hover:underline bg-red-50 py-1.5 px-2.5 rounded-lg border border-red-100">
-                                    ${svgIcons.pdf} PDF
-                                </a>` : `<span class="text-xs text-gray-400 bg-gray-50 py-1.5 px-2.5 rounded-lg border border-gray-200 block">รอสร้าง PDF</span>`}
+                                <div class="flex items-center gap-1">
+                                    <a href="${cleanPdfLink}" target="_blank" class="flex-1 text-xs text-red-600 font-bold flex items-center justify-center gap-1 hover:underline bg-red-50 py-1.5 px-2 rounded-lg border border-red-100">
+                                        ${svgIcons.pdf} PDF
+                                    </a>
+                                    <button onclick="generateSinglePdf('${app.sheet}', ${app.rowIndex}, this)" class="text-xs text-gray-500 hover:text-purple-700 bg-gray-50 hover:bg-purple-50 py-1.5 px-2 rounded-lg border border-gray-200 transition-all" title="สร้างไฟล์ PDF ใหม่ (กรณีแก้ไขข้อมูล)">
+                                        <i class="fa-solid fa-rotate"></i>
+                                    </button>
+                                </div>` : `
+                                <button onclick="generateSinglePdf('${app.sheet}', ${app.rowIndex}, this)" class="w-full text-xs text-amber-700 hover:text-white font-bold flex items-center justify-center gap-1.5 bg-amber-50 hover:bg-amber-500 py-1.5 px-2.5 rounded-lg border border-amber-200 transition-all shadow-xs">
+                                    <i class="fa-solid fa-bolt"></i> กดสร้าง PDF
+                                </button>`}
                             </div>
                         </td>
                     </tr>`;
             });
+        }
+
+        // สั่งสร้างใบสมัคร PDF รายคนทันทีจากหน้าเว็บแอดมิน
+        async function generateSinglePdf(sheetName, rowIndex, btn) {
+            setBtnLoading(btn, 'กำลังสร้าง...');
+            showInlineLoader('กำลังสร้างไฟล์ใบสมัคร PDF ตามฟอร์มแม่แบบ...');
+            try {
+                const res = await apiCall({
+                    action: "generatePdf",
+                    sheet: sheetName,
+                    rowIndex: rowIndex
+                });
+                if (res.status === 'success' && res.pdfUrl) {
+                    const idx = allApplications.findIndex(a => a.sheet === sheetName && a.rowIndex === rowIndex);
+                    if (idx !== -1) allApplications[idx].pdfLink = res.pdfUrl;
+                    renderTable();
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'success',
+                        title: `สร้าง PDF ของ ${res.name || ''} สำเร็จ!`,
+                        showConfirmButton: false,
+                        timer: 2000
+                    });
+                } else {
+                    Swal.fire('เกิดข้อผิดพลาด', res.message || 'ไม่สามารถสร้าง PDF ได้', 'error');
+                    resetBtnLoading(btn);
+                }
+            } catch (err) {
+                Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อระบบสร้าง PDF ได้', 'error');
+                resetBtnLoading(btn);
+            } finally {
+                hideInlineLoader();
+            }
+        }
+
+        // สั่งสร้างใบสมัคร PDF ให้ผู้สมัครที่ยังไม่มีไฟล์ทั้งหมดในคลิกเดียว
+        async function generateAllMissingPdfs(btn) {
+            const missingList = allApplications.filter(a => !a.pdfLink || !String(a.pdfLink).trim().startsWith('http'));
+            if (missingList.length === 0) {
+                return Swal.fire('ครบถ้วนแล้ว!', 'ผู้สมัครทุกคนมีไฟล์ใบสมัคร PDF ครบหมดแล้ว', 'info');
+            }
+
+            const confirmRes = await Swal.fire({
+                title: 'สร้างใบสมัคร PDF ที่ตกค้าง?',
+                html: `พบผู้สมัครที่ยังไม่มีไฟล์ PDF จำนวน <b>${missingList.length}</b> คน<br>ต้องการสั่งสร้างไฟล์ PDF ทั้งหมดตอนนี้เลยหรือไม่?`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#d97706',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: '<i class="fa-solid fa-bolt mr-1"></i> สร้าง PDF ทั้งหมด',
+                cancelButtonText: 'ยกเลิก',
+                customClass: { confirmButton: 'rounded-xl font-bold', cancelButton: 'rounded-xl font-bold' }
+            });
+
+            if (!confirmRes.isConfirmed) return;
+
+            setBtnLoading(btn, `กำลังสร้าง (${missingList.length})...`);
+            showInlineLoader(`กำลังสร้างไฟล์ PDF จำนวน ${missingList.length} รายการ...`);
+            try {
+                const res = await apiCall({ action: "generateMissingPdfs" });
+                if (res.status === 'success') {
+                    Swal.fire('สำเร็จ!', `สร้างไฟล์ใบสมัคร PDF เรียบร้อยแล้ว ${res.generatedCount} รายการ`, 'success');
+                    await loadData(null);
+                } else {
+                    Swal.fire('เกิดข้อผิดพลาด', res.message || 'สร้าง PDF ไม่สำเร็จ', 'error');
+                }
+            } catch (err) {
+                Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้', 'error');
+            } finally {
+                resetBtnLoading(btn);
+                hideInlineLoader();
+            }
         }
 
         async function saveSettings(btn) {
