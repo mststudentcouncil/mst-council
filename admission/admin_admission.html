@@ -105,7 +105,7 @@
                 <div class="flex flex-wrap justify-center xl:justify-end items-center gap-2 w-full xl:w-auto">
                     
                     <button onclick="showHelp()" class="group bg-white hover:bg-blue-50 text-gray-600 hover:text-blue-600 px-3.5 py-2 rounded-full text-xs font-bold border border-gray-200 hover:border-blue-300 transition-all duration-300 flex items-center gap-1.5 shadow-sm hover:shadow">
-                        <i class="fa-solid fa-circle-question group-hover:scale-110 transition-transform text-blue-500"></i> <span class="hidden sm:inline">คู่มือแอดมิน</span>
+                        <i class="fa-solid fa-circle-question group-hover:scale-110 transition-transform text-blue-500"></i> <span class="hidden sm:inline">คู่มือ</span>
                     </button>
 
                     <button onclick="generateAllMissingPdfs(this)" class="group bg-amber-50 hover:bg-amber-500 text-amber-700 hover:text-white px-3.5 py-2 rounded-full text-xs font-bold border border-amber-200 hover:border-amber-500 transition-all duration-300 flex items-center gap-1.5 shadow-sm hover:shadow-md" title="สั่งสร้างไฟล์ใบสมัคร PDF ให้ผู้สมัครที่ยังไม่มี PDF ทั้งหมด">
@@ -126,7 +126,7 @@
 
                     <!-- เพิ่มโค้ดปุ่มระบบรายงานตัวด้านล่างนี้ -->
                     <a href="/regis/admin" target="_blank" class="group bg-white hover:bg-teal-600 text-gray-600 hover:text-white px-4 py-2 rounded-full text-xs font-bold border border-gray-200 hover:border-teal-600 transition-all duration-300 flex items-center gap-1.5 shadow-sm hover:shadow-md">
-                        <i class="fa-solid fa-clipboard-user group-hover:scale-110 transition-transform text-teal-600 group-hover:text-white"></i> <span class="hidden md:inline">ตั้งค่าระบบรายงานตัว</span>
+                        <i class="fa-solid fa-clipboard-user group-hover:scale-110 transition-transform text-teal-600 group-hover:text-white"></i> <span class="hidden md:inline">ระบบรายงานตัว</span>
                     </a>
 
                     <div class="hidden sm:block w-px h-6 bg-gray-200 mx-1"></div>
@@ -416,7 +416,7 @@
                         </div>
                         <div>
                             <h4 class="font-black text-purple-900 text-sm md:text-base">ลำดับขั้นตอนการทำงานของแอดมิน & ระบบพิมพ์ใบสมัคร</h4>
-                            <p class="text-xs text-gray-500">แอดมินสามารถกดปุ่ม <b class="text-purple-700">"พิมพ์ใบสมัคร"</b> ในตารางเพื่อออกเอกสาร หากไม่ขึ้นให้รอประมาณ 1 ชั่วโมง</p>
+                            <p class="text-xs text-gray-500">แอดมินสามารถกดปุ่ม <b class="text-purple-700">"กดสร้าง PDF"</b> ในตารางเพื่อออกเอกสาร ได้ทันที</p>
                         </div>
                     </div>
                 </div>
@@ -426,7 +426,7 @@
                         <span class="w-6 h-6 rounded-full bg-yellow-100 text-yellow-700 font-black flex items-center justify-center shrink-0">1</span>
                         <div>
                             <b class="text-gray-800 block mb-0.5">พิมพ์ใบสมัครให้นักเรียน</b>
-                            กดปุ่ม <b class="text-red-600">"PDF"</b> จาก Google ชีตเพื่อพิมพ์ใบสมัคร แล้วปรับสถานะเป็น <b class="text-blue-600">"พิมพ์ใบสมัครแล้ว"</b> เพื่อให้นักเรียนมารับที่ห้องสภาฯ
+                            กดปุ่ม <b class="text-red-600">"PDF"</b> เพื่อพิมพ์ใบสมัคร แล้วปรับสถานะเป็น <b class="text-blue-600">"พิมพ์ใบสมัครแล้ว"</b> เพื่อให้นักเรียนมารับที่ห้องสภานักเรียน
                         </div>
                     </div>
                     <div class="bg-white p-3.5 rounded-xl border border-gray-100 shadow-xs flex items-start gap-2.5">
@@ -813,7 +813,7 @@
                     loadData(null);
                 } else {
                     const errBox = document.getElementById('loginError');
-                    errBox.innerHTML = '<i class="fa-solid fa-triangle-exclamation mr-1"></i> บัญชีนี้ไม่มีสิทธิ์เข้าใช้งานระบบผู้ดูแล (ต้องใช้ studentcouncil@mst.ac.th)';
+                    errBox.innerHTML = '<i class="fa-solid fa-triangle-exclamation mr-1"></i> บัญชีนี้ไม่มีสิทธิ์เข้าใช้งานระบบผู้ดูแล (ต้องใช้บัญชีสภานักเรียน @mst.ac.th เท่านั้น)';
                     errBox.classList.remove('hidden');
                 }
             } catch(e) { 
@@ -1048,8 +1048,8 @@
                         <div class="bg-blue-50 p-4 rounded-xl border border-blue-200">
                             <h4 class="font-bold text-blue-800 mb-2 border-b border-blue-200 pb-2"><i class="fa-solid fa-2"></i> ขั้นตอนที่ 2: พิมพ์ใบสมัครและตรวจรับเอกสาร</h4>
                             <ul class="list-disc pl-5 space-y-1.5 text-[13px]">
-                                <li><b>พิมพ์ใบสมัครให้นักเรียน:</b> กดปุ่ม <b class="text-purple-700">"พิมพ์ใบสมัคร"</b> ในตาราง หากไม่ขึ้นให้รอประมาณ 1 ชั่วโมง</li>
-                                <li><b>แจ้งนักเรียนมารับ:</b> ปรับสถานะเป็น <b class="text-blue-600">"พิมพ์ใบสมัครแล้ว"</b> เพื่อให้นักเรียนมารับใบสมัครที่ห้องสภาฯ</li>
+                                <li><b>พิมพ์ใบสมัครให้นักเรียน:</b> กดปุ่ม <b class="text-purple-700">"PDF"</b> ในตาราง หากไม่ขึ้นให้กดปุ่ม <b class="text-purple-700">"สร้าง PDF"</b></li>
+                                <li><b>แจ้งนักเรียนมารับ:</b> ปรับสถานะเป็น <b class="text-blue-600">"พิมพ์ใบสมัครแล้ว"</b> เพื่อให้นักเรียนมารับใบสมัครที่ห้องสภานักเรียน</li>
                                 <li><b>ตรวจรับใบสมัครฉบับจริง:</b> เมื่อนักเรียนนำส่งคืนพร้อมลายเซ็นและ ปพ.6 ให้เปลี่ยนสถานะเป็น <b class="text-green-600">"ส่งใบสมัครเรียบร้อย"</b> หากไม่ครบให้เลือก <b class="text-red-600">"เอกสารไม่เรียบร้อย (...)"</b></li>
                             </ul>
                         </div>
@@ -1295,7 +1295,7 @@
         function getApplicantStepMeta(statusStr) {
             const s = String(statusStr || 'รอตรวจสอบ').trim();
             if (s === 'รอตรวจสอบ') {
-                return { stepCode: '2', badgeText: 'ขั้นตอนที่ 2/5 : รอสภาฯ พิมพ์ใบสมัคร', badgeClass: 'bg-yellow-100 text-yellow-800 border-yellow-300', dotClass: 'bg-yellow-500' };
+                return { stepCode: '2', badgeText: 'ขั้นตอนที่ 2/5 : รอสภานักเรียน พิมพ์ใบสมัคร', badgeClass: 'bg-yellow-100 text-yellow-800 border-yellow-300', dotClass: 'bg-yellow-500' };
             } else if (s === 'พิมพ์ใบสมัครแล้ว') {
                 return { stepCode: '2', badgeText: 'ขั้นตอนที่ 2/5 : พิมพ์แล้ว (รอนักเรียนมารับ/ส่งคืน)', badgeClass: 'bg-blue-50 text-blue-700 border-blue-200', dotClass: 'bg-blue-500' };
             } else if (s.includes('เอกสารไม่เรียบร้อย')) {
@@ -1444,7 +1444,7 @@
                 // ปุ่มลัดเปลี่ยนสถานะเป็น "พิมพ์ใบสมัครแล้ว" ทันทีหากยังเป็น "รอตรวจสอบ"
                 const quickMarkPrintedBtn = (currentStatus === 'รอตรวจสอบ')
                     ? `<button onclick="updateSingleStatus('${app.sheet}', ${app.rowIndex}, 'พิมพ์ใบสมัครแล้ว', null)" class="mt-1.5 w-full text-[11px] bg-blue-50 hover:bg-blue-600 text-blue-700 hover:text-white font-bold py-1 px-2 rounded-lg border border-blue-200 transition-all flex items-center justify-center gap-1 shadow-xs">
-                        <i class="fa-solid fa-check"></i> กดแจ้งว่าพิมพ์แล้ว
+                        <i class="fa-solid fa-check"></i> กดเมื่อพิมพ์ใบสมัครแล้ว
                        </button>`
                     : '';
 
