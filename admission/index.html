@@ -302,9 +302,10 @@
                 <!-- แถบแสดงขั้นตอนการกรอกใบสมัครแบบมีชื่อกำกับชัดเจน -->
                 <div id="stepperNav" class="mb-8 relative z-10 bg-purple-50/60 border border-purple-100 rounded-2xl p-4 sm:p-5" style="display: none;">
                     <div class="flex items-center justify-between relative">
-                        <div class="absolute top-5 left-10 right-10 h-1 bg-gray-200 -z-10 rounded-full"></div>
-                        <div id="progressBar" class="absolute top-5 left-10 w-0 h-1 bg-mst-purple transition-all duration-500 -z-10 rounded-full"></div>
-                        
+                        <!-- รางเส้นเชื่อมจากกึ่งกลางวงกลม 1 (16.67%) ไปถึงกึ่งกลางวงกลม 3 (83.33%) เป๊ะ -->
+                        <div class="absolute top-5 left-[16.67%] right-[16.67%] h-1 bg-gray-200 -z-10 rounded-full overflow-hidden">
+                            <div id="progressBar" class="h-full w-0 bg-mst-purple transition-all duration-500 rounded-full"></div>
+                        </div>
                         <div class="flex flex-col items-center text-center w-1/3">
                             <div id="stepCircle1" class="step-indicator w-10 h-10 rounded-full bg-mst-purple text-white flex items-center justify-center font-bold text-sm shadow-md ring-4 ring-white transition-all duration-300">1</div>
                             <span id="stepLabel1" class="text-[11px] sm:text-xs font-extrabold text-mst-purple mt-2">1. ข้อมูลผู้สมัคร</span>
@@ -355,11 +356,20 @@
                                 
                                 <div class="md:col-span-12 mt-4">
                                     <label class="block text-sm font-bold text-gray-800 mb-2">
-                                        <i class="fa-solid fa-image text-mst-purple"></i> อัปโหลดรูปถ่ายชุดนักเรียนหน้าตรง (JPG/PNG) <span class="text-red-500">*</span>
+                                        <i class="fa-solid fa-image text-mst-purple"></i> รูปถ่ายหน้าตรง (JPG/PNG) <span class="text-red-500">*</span>
                                     </label>
-                                    <div class="border-2 border-dashed border-gray-300 rounded-2xl p-6 text-center hover:bg-purple-50 hover:border-mst-purple transition-colors bg-white">
-                                        <input type="file" id="applicantPhoto" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-bold file:bg-mst-yellow file:text-mst-dark hover:file:bg-yellow-500 cursor-pointer mx-auto transition-colors" accept="image/jpeg, image/png">
-                                        <p class="text-xs text-gray-400 mt-2">รองรับไฟล์ภาพ JPG หรือ PNG ขนาดไม่เกิน 10 MB</p>
+                                    <div class="border-2 border-dashed border-gray-300 rounded-2xl p-6 text-center hover:bg-purple-50/50 hover:border-mst-purple transition-colors bg-gray-50/50">
+                                        <div id="photoPreviewWrapper" class="hidden mb-4">
+                                            <img id="photoPreviewImg" src="" alt="Preview" class="w-28 h-36 object-cover mx-auto rounded-xl border-2 border-mst-purple shadow-md">
+                                        </div>
+                                        <div id="uploadIconBox" class="w-14 h-14 bg-white rounded-full flex items-center justify-center mx-auto mb-3 shadow-sm text-mst-purple">
+                                            <i class="fa-solid fa-cloud-arrow-up text-2xl"></i>
+                                        </div>
+                                        <h4 class="text-sm sm:text-base font-extrabold text-gray-900 mb-1">อัปโหลดรูปถ่ายชุดนักเรียนหน้าตรง</h4>
+                                        <p class="text-xs text-gray-500 mb-4">รองรับไฟล์ PNG หรือ JPG (ขนาดไม่เกิน 10MB)</p>
+                                        
+                                        <input type="file" id="applicantPhoto" accept="image/jpeg, image/png" onchange="previewApplicantPhoto(this)" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-5 file:rounded-full file:border-0 file:text-sm file:font-bold file:bg-mst-yellow file:text-mst-dark hover:file:bg-yellow-500 cursor-pointer mx-auto max-w-sm transition-colors bg-white border border-gray-200 rounded-full shadow-xs">
+                                        <p id="fileNameDisplay" class="text-xs text-green-700 mt-3 font-bold hidden bg-green-50 py-1.5 px-4 rounded-xl border border-green-200 inline-block"></p>
                                     </div>
                                 </div>
                             </div>
@@ -584,6 +594,11 @@
             const savedStdId = localStorage.getItem('mstsc_std_login');
             const savedEmail = localStorage.getItem('mstsc_std_email'); 
             if (savedEmail) currentUserFullEmail = savedEmail;
+            if (savedStdId && typeof OneSignalDeferred !== 'undefined') {
+                OneSignalDeferred.push(async function(OneSignal) {
+                    try { await OneSignal.login(String(savedStdId).trim().slice(-5)); } catch (e) {}
+                });
+            }
 
             const checkSystem = (settings) => {
                 let now = new Date();
@@ -1313,7 +1328,7 @@
 
                 <!-- กล่องตั้งค่าการแจ้งเตือน Push Notification -->
                 <div id="pushSetupContainer" class="mt-6 fade-in">
-                    <button onclick="OneSignalDeferred.push(function(OS) { OS.Slidedown.promptPush(); });" class="w-full justify-center bg-purple-100 text-purple-700 hover:bg-purple-200 px-6 py-3.5 rounded-2xl font-bold transition-all shadow-sm flex items-center gap-2 border border-purple-200 text-sm">
+                    <button onclick="OneSignalDeferred.push(async function(OS) { try { await OS.login(String('${stdId}').trim().slice(-5)); await OS.Notifications.requestPermission(); } catch(e) { OS.Slidedown.promptPush(); } });" class="w-full justify-center bg-purple-100 text-purple-700 hover:bg-purple-200 px-6 py-3.5 rounded-2xl font-bold transition-all shadow-sm flex items-center gap-2 border border-purple-200 text-sm">
                         <i class="fa-solid fa-bell fa-lg"></i> เปิดรับการแจ้งเตือนเมื่อสถานะขั้นตอนเปลี่ยนแปลง
                     </button>
                     
@@ -1528,9 +1543,45 @@
                 }
             }
             const progressBar = document.getElementById('progressBar');
-            if(progressBar) {
-                progressBar.style.width = step === 1 ? '0%' : step === 2 ? '45%' : '88%';
+            if (progressBar) {
+                progressBar.style.width = step === 1 ? '0%' : step === 2 ? '50%' : '100%';
             }
+        }
+
+        function previewApplicantPhoto(input) {
+            const file = input.files && input.files[0];
+            const previewWrapper = document.getElementById('photoPreviewWrapper');
+            const previewImg = document.getElementById('photoPreviewImg');
+            const uploadIcon = document.getElementById('uploadIconBox');
+            const fileNameDisplay = document.getElementById('fileNameDisplay');
+
+            if (!file) {
+                if (previewWrapper) previewWrapper.classList.add('hidden');
+                if (uploadIcon) uploadIcon.classList.remove('hidden');
+                if (fileNameDisplay) fileNameDisplay.classList.add('hidden');
+                return;
+            }
+
+            if (file.size > 10 * 1024 * 1024) {
+                Swal.fire('ขนาดไฟล์เกินกำหนด', 'กรุณาอัปโหลดรูปภาพขนาดไม่เกิน 10 MB', 'warning');
+                input.value = '';
+                if (previewWrapper) previewWrapper.classList.add('hidden');
+                if (uploadIcon) uploadIcon.classList.remove('hidden');
+                if (fileNameDisplay) fileNameDisplay.classList.add('hidden');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                if (previewImg) previewImg.src = e.target.result;
+                if (previewWrapper) previewWrapper.classList.remove('hidden');
+                if (uploadIcon) uploadIcon.classList.add('hidden');
+                if (fileNameDisplay) {
+                    fileNameDisplay.innerHTML = `<i class="fa-solid fa-check-circle mr-1"></i> แนบไฟล์สำเร็จ: ${file.name}`;
+                    fileNameDisplay.classList.remove('hidden');
+                }
+            };
+            reader.readAsDataURL(file);
         }
 
         let memberCounter = 1;
