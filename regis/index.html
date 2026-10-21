@@ -162,7 +162,7 @@
                     </div>
                     <div class="mt-8 pt-5 border-t border-gray-100">
                         <p class="text-xs text-gray-400 font-bold tracking-wide">
-                            <i class="fa-solid fa-circle-info mr-1"></i> หากมีข้อสงสัยกรุณาติดต่อคณะกรรมการสภานักเรียน
+                            <i class="fa-solid fa-circle-info mr-1"></i> หากมีข้อสงสัยกรุณาติดต่อสภานักเรียน
                         </p>
                     </div>
                 </div>
@@ -176,7 +176,7 @@
                     <div class="flex gap-3">
                         <i class="fa-solid fa-id-card-clip text-mst-purple mt-1 text-lg"></i>
                         <div>
-                            <p class="text-sm font-bold text-gray-800">ระบบรับรายงานตัวคณะกรรมการสภานักเรียน<br>โรงเรียนเมืองสุราษฎร์ธานี</p>
+                            <p class="text-sm font-bold text-gray-800">ระบบรายงานตัวคณะกรรมการสภานักเรียน<br>โรงเรียนเมืองสุราษฎร์ธานี</p>
                             <p class="text-xs text-gray-500 mt-1">สำหรับผู้ที่ผ่านการคัดเลือกเป็นคณะกรรมการสภานักเรียน</p>
                         </div>
                     </div>
@@ -198,7 +198,7 @@
                         </div>
                         <div class="flex flex-col items-center">
                             <div class="w-8 h-8 rounded-full bg-purple-100 text-mst-purple font-bold text-xs flex items-center justify-center mb-1">3</div>
-                            <span class="text-[11px] font-bold text-gray-600 leading-tight">รับรหัสส่วนกลาง<br>และเข้ากลุ่มสภาฯ</span>
+                            <span class="text-[11px] font-bold text-gray-600 leading-tight">รับรหัสส่วนกลาง<br>และเข้ากลุ่มสภานักเรียน</span>
                         </div>
                     </div>
                 </div>
@@ -423,7 +423,7 @@
                             <i class="fa-solid fa-triangle-exclamation text-red-500 text-lg mt-0.5"></i>
                             <div class="text-xs sm:text-sm text-red-700 leading-relaxed">
                                 <b class="font-extrabold block mb-0.5">คำเตือน: โปรดตรวจสอบข้อมูลก่อนกดบันทึก</b>
-                                เมื่อบันทึกแล้วท่านจะไม่สามารถแก้ไขข้อมูลด้วยตนเองได้ หากต้องการแก้ไขในภายหลังต้องติดต่อห้องสภานักเรียนเท่านั้น
+                                เมื่อบันทึกแล้วคุณจะไม่สามารถแก้ไขข้อมูลด้วยตนเองได้ หากต้องการแก้ไขในภายหลังต้องติดต่อห้องสภานักเรียนเท่านั้น
                             </div>
                         </div>
                         
@@ -462,7 +462,7 @@
                         <div>
                             <span class="bg-white/20 text-white text-[11px] font-extrabold px-3 py-1 rounded-full uppercase tracking-wider">ขั้นตอนที่ 3/3 : เสร็จสมบูรณ์</span>
                             <h2 class="text-2xl font-black mt-1">รายงานตัวเรียบร้อยแล้ว</h2>
-                            <p class="text-green-50 text-xs sm:text-sm">ข้อมูลของท่านถูกบันทึกเข้าสู่ฐานข้อมูลคณะกรรมการสภานักเรียนอย่างสมบูรณ์</p>
+                            <p class="text-green-50 text-xs sm:text-sm">ข้อมูลของคุณถูกบันทึกเข้าสู่ฐานข้อมูลคณะกรรมการสภานักเรียนอย่างสมบูรณ์</p>
                         </div>
                     </div>
                     <div class="bg-white/15 backdrop-blur-sm px-4 py-2.5 rounded-2xl border border-white/20 text-center shrink-0">
@@ -1134,7 +1134,7 @@
                 return Swal.fire({ icon: 'warning', title: 'ข้อมูลไม่ครบ', text: 'กรุณาเลือกไซส์เสื้อก่อนบันทึกข้อมูล', confirmButtonColor: '#6A1B9A' });
             }
             if (!$('#pdpa_consent').is(':checked')) {
-                return Swal.fire({ icon: 'warning', title: 'แจ้งเตือน', text: 'กรุณาติ๊กยอมรับข้อตกลงความปลอดภัยของข้อมูล (PDPA)', confirmButtonColor: '#6A1B9A' });
+                return Swal.fire({ icon: 'warning', title: 'แจ้งเตือน', text: 'กรุณายอมรับข้อตกลงความปลอดภัยของข้อมูล (PDPA)', confirmButtonColor: '#6A1B9A' });
             }
 
             $('#submitBtn').addClass('hidden');
@@ -1201,7 +1201,7 @@
 
                     Swal.fire({
                         title: 'รายงานตัวสำเร็จ!', 
-                        text: 'ระบบได้จัดเก็บข้อมูลรายงานตัวของท่านเรียบร้อยแล้ว', 
+                        text: 'ระบบได้จัดเก็บข้อมูลรายงานตัวของคุณเรียบร้อยแล้ว', 
                         icon: 'success', 
                         confirmButtonColor: '#6A1B9A',
                         confirmButtonText: 'ดูข้อมูลบัญชีส่วนกลางสภาฯ',
