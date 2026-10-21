@@ -3,12 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <!-- วางโค้ดชุดนี้ไว้ด้านใน <head> ของไฟล์ index.html และ admin.html -->
     <meta name="referrer" content="no-referrer">
+    <title>ระบบบริหารจัดการสภานักเรียน (MSTSC CMS)</title>
+    <link rel="icon" type="image/webp" href="/logo.webp">
+
+    <!-- ระบบแปลงลิงก์รูปภาพ Google Drive อัตโนมัติให้แสดงผล 100% -->
     <script>
     (function() {
-        // ฟังก์ชันดึงรหัสไฟล์ (File ID) จากลิงก์ Google Drive ทุกรูปแบบ
-        window. extractDriveFileId = function(url) {
+        window.extractDriveFileId = function(url) {
             if (!url || typeof url !== 'string') return null;
             if (!url.includes('drive.google.com') && !url.includes('docs.google.com')) return null;
             const match = url.match(/(?:\/d\/|id=|open\?id=|uc\?.*id=)([a-zA-Z0-9_-]{25,})/);
@@ -16,17 +18,11 @@
             const fallback = url.match(/([a-zA-Z0-9_-]{28,35})/);
             return fallback ? fallback[1] : null;
         };
-
-        // ฟังก์ชันแปลงลิงก์ Google Drive เป็น Direct Image URL ที่ไม่ติดบล็อก
         window.resolveDriveImageUrl = function(url) {
             const fileId = window.extractDriveFileId(url);
-            if (fileId) {
-                return `https://lh3.googleusercontent.com/d/${fileId}=w1000`;
-            }
+            if (fileId) return `https://lh3.googleusercontent.com/d/${fileId}=w1000`;
             return url;
         };
-
-        // แปลง src ของ <img> ทั้งหมดบนหน้าเว็บอัตโนมัติเมื่อมีการสร้างหรือแก้ไข DOM
         function fixAllDriveImages(root) {
             const imgs = (root || document).querySelectorAll ? (root || document).querySelectorAll('img') : [];
             imgs.forEach(img => {
@@ -42,8 +38,6 @@
                 }
             });
         }
-
-        // หากลิงก์ lh3 โหลดไม่ขึ้น ให้สลับไปใช้ระบบ Thumbnail ของ Google Drive อัตโนมัติ
         window.addEventListener('error', function(e) {
             const el = e.target;
             if (el && el.tagName === 'IMG') {
@@ -54,7 +48,6 @@
                 }
             }
         }, true);
-
         document.addEventListener('DOMContentLoaded', function() {
             fixAllDriveImages(document);
             const observer = new MutationObserver(mutations => {
@@ -71,8 +64,6 @@
         });
     })();
     </script>
-    <title>ระบบบริหารจัดการสภานักเรียน (MSTSC CMS)</title>
-    <link rel="icon" type="image/webp" href="/logo.webp">
 
     <link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -239,7 +230,7 @@
                     </button>
                     <div>
                         <h1 class="text-xl sm:text-2xl font-black text-gray-900" id="headerTitle">ภาพรวมระบบ (Dashboard)</h1>
-                        <p class="text-xs text-gray-500 font-medium hidden sm:block">เชื่อมต่อฐานข้อมูล Google Sheets ผ่าน Cloud Run ความเร็วสูง</p>
+                        <p class="text-xs text-gray-500 font-medium hidden sm:block">เชื่อมต่อฐานข้อมูล Google Sheets & Drive แยกโฟลเดอร์อัตโนมัติ</p>
                     </div>
                 </div>
                 <div class="flex items-center gap-3">
@@ -279,14 +270,14 @@
                                 <div class="max-w-2xl">
                                     <h2 class="text-2xl md:text-3xl font-black mb-3 text-white">สวัสดีครับ แอดมินสภานักเรียน</h2>
                                     <p class="text-gray-300 text-sm md:text-base leading-relaxed">
-                                        ระบบจัดการเนื้อหาเว็บไซต์หลักเชื่อมต่อกับฐานข้อมูล Google Sheets ผ่าน Google Cloud Run เรียบร้อยแล้ว ข้อมูลทุกอย่างที่บันทึกจะมีผลบนหน้าเว็บไซต์หลักทันทีด้วยความเร็วสูงสุด
+                                        ระบบจัดเก็บรูปภาพแยกโฟลเดอร์ใน Google Drive อัตโนมัติเรียบร้อยแล้ว (รูปผู้สมัคร: <b>MSTSC_Admission_Photos</b>, รูปข่าวสาร: <b>MSTSC_News_Images</b>, รูปโลโก้โรงเรียน: <b>MSTSC_MOU_Logos</b>)
                                     </p>
                                     <div class="mt-6 flex flex-wrap gap-3">
                                         <button onclick="switchTab('newsTab', document.querySelectorAll('.nav-btn')[1], 'จัดการข่าวสารและประกาศ')" class="bg-white text-mstDark px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-gray-100 transition">
                                             <i class="fa-solid fa-plus mr-1"></i> เพิ่มข่าวใหม่
                                         </button>
-                                        <button onclick="switchTab('boardTab', document.querySelectorAll('.nav-btn')[2], 'ฐานข้อมูลทำเนียบสภานักเรียน')" class="bg-white/10 border border-white/20 text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-white/20 transition">
-                                            <i class="fa-solid fa-table mr-1"></i> จัดการทำเนียบรุ่น
+                                        <button onclick="switchTab('mouTab', document.querySelectorAll('.nav-btn')[4], 'เครือข่ายโรงเรียน (MOU)')" class="bg-white/10 border border-white/20 text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-white/20 transition">
+                                            <i class="fa-solid fa-handshake mr-1"></i> จัดการเครือข่าย MOU
                                         </button>
                                     </div>
                                 </div>
@@ -331,7 +322,7 @@
                                     </div>
                                     
                                     <div class="bg-gray-50 p-4 rounded-2xl border border-gray-100">
-                                        <label class="block text-xs font-bold text-gray-500 uppercase mb-3">รูปภาพหน้าปก (อัปโหลดเข้า Google Drive หรือวาง URL)</label>
+                                        <label class="block text-xs font-bold text-gray-500 uppercase mb-2">รูปภาพหน้าปก <span class="text-[10px] text-mstPurple">(เก็บในโฟลเดอร์ MSTSC_News_Images)</span></label>
                                         <div class="flex flex-col gap-3">
                                             <input type="file" id="nImgFile" accept="image/*" class="block w-full text-xs text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-mstPurple file:text-white cursor-pointer bg-white p-2 rounded-xl border border-gray-200">
                                             <div class="relative">
@@ -434,7 +425,7 @@
                         </div>
                     </div>
 
-                    <!-- Tab 4: เครือข่าย (MOU) -->
+                    <!-- Tab 4: เครือข่าย (MOU) - รองรับทั้งอัปโหลดไฟล์รูปโลโก้และวาง URL -->
                     <div id="mouTab" class="tab-content hidden grid grid-cols-1 xl:grid-cols-12 gap-6 animate-fade-in">
                         <div class="xl:col-span-4 bg-white p-6 md:p-8 rounded-[2rem] shadow-sm border border-gray-100 h-fit">
                             <h3 class="text-xl font-black text-gray-900 mb-6 flex items-center gap-3">
@@ -444,21 +435,47 @@
                             <form id="mouForm" class="space-y-5">
                                 <div>
                                     <label class="block text-xs font-bold text-gray-500 uppercase mb-2">ชื่อโรงเรียนเครือข่าย <span class="text-red-500">*</span></label>
-                                    <input type="text" id="mName" required placeholder="เช่น โรงเรียนเตรียมอุดมศึกษา" class="w-full border border-gray-200 rounded-xl p-3.5 text-sm bg-gray-50 font-bold outline-none">
+                                    <input type="text" id="mName" required placeholder="เช่น โรงเรียนเตรียมอุดมศึกษา" class="w-full border border-gray-200 rounded-xl p-3.5 text-sm bg-gray-50 font-bold outline-none focus:border-orange-500">
                                 </div>
-                                <div>
-                                    <label class="block text-xs font-bold text-gray-500 uppercase mb-2">URL ตราสัญลักษณ์ (โลโก้) <span class="text-red-500">*</span></label>
-                                    <input type="url" id="mLogo" required placeholder="https://..." class="w-full border border-gray-200 rounded-xl p-3.5 text-sm bg-gray-50 font-medium outline-none">
+
+                                <div class="bg-orange-50/50 p-4 rounded-2xl border border-orange-100 space-y-3">
+                                    <label class="block text-xs font-bold text-gray-700 uppercase">
+                                        ตราสัญลักษณ์ / โลโก้โรงเรียน <span class="text-red-500">*</span>
+                                        <span class="block text-[10px] text-orange-600 font-semibold mt-0.5">(เก็บแยกในโฟลเดอร์ MSTSC_MOU_Logos)</span>
+                                    </label>
+
+                                    <!-- พรีวิวโลโก้เมื่อเลือกไฟล์ -->
+                                    <div id="mLogoPreviewBox" class="hidden text-center py-2">
+                                        <img id="mLogoPreviewImg" src="" class="w-20 h-20 object-contain mx-auto bg-white p-2 rounded-xl border border-orange-200 shadow-sm">
+                                    </div>
+
+                                    <!-- อัปโหลดไฟล์รูปโลโก้จากเครื่อง -->
+                                    <input type="file" id="mLogoFile" accept="image/*" onchange="previewMouLogo(this)" class="block w-full text-xs text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-orange-500 file:text-white hover:file:bg-orange-600 cursor-pointer bg-white p-2 rounded-xl border border-gray-200">
+
+                                    <div class="flex items-center gap-2">
+                                        <div class="h-px bg-orange-200/60 flex-1"></div>
+                                        <span class="text-[10px] font-bold text-gray-400 uppercase">หรือวางลิงก์รูปภาพ</span>
+                                        <div class="h-px bg-orange-200/60 flex-1"></div>
+                                    </div>
+
+                                    <div class="relative">
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400"><i class="fa-solid fa-link"></i></div>
+                                        <input type="url" id="mLogo" placeholder="วาง URL โลโก้ (ถ้าไม่ได้อัปโหลดไฟล์)..." class="w-full border border-gray-200 rounded-xl py-2.5 pl-9 pr-3 text-sm bg-white font-medium outline-none focus:border-orange-500">
+                                    </div>
                                 </div>
-                                <button type="submit" class="w-full bg-orange-500 text-white font-bold py-4 rounded-xl shadow-lg hover-lift">บันทึกเครือข่าย</button>
+
+                                <button type="submit" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-4 rounded-xl shadow-lg hover-lift transition">
+                                    <i class="fa-solid fa-cloud-arrow-up mr-1"></i> บันทึกเครือข่าย
+                                </button>
                             </form>
                         </div>
+
                         <div class="xl:col-span-8 bg-white p-6 md:p-8 rounded-[2rem] shadow-sm border border-gray-100 min-h-[500px] flex flex-col">
                             <h3 class="text-xl font-black text-gray-900 mb-6">เครือข่ายสภานักเรียนทั้งหมด</h3>
                             <div class="flex-1 overflow-auto border border-gray-100 rounded-2xl bg-white">
                                 <table class="w-full text-left text-sm whitespace-nowrap">
                                     <thead class="bg-gray-50 text-gray-500 sticky top-0 text-xs uppercase font-bold">
-                                        <tr><th class="p-4 w-20 text-center">โลโก้</th><th class="p-4 w-full">ชื่อโรงเรียน</th><th class="p-4 text-center">จัดการ</th></tr>
+                                        <tr><th class="p-4 w-24 text-center">โลโก้</th><th class="p-4 w-full">ชื่อโรงเรียน</th><th class="p-4 text-center">จัดการ</th></tr>
                                     </thead>
                                     <tbody id="mouTableBody" class="divide-y divide-gray-100 text-gray-700"></tbody>
                                 </table>
@@ -531,6 +548,21 @@
                 reader.onerror = err => reject(err);
             });
         }
+
+        window.previewMouLogo = (input) => {
+            const box = document.getElementById('mLogoPreviewBox');
+            const img = document.getElementById('mLogoPreviewImg');
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = e => {
+                    img.src = e.target.result;
+                    box.classList.remove('hidden');
+                };
+                reader.readAsDataURL(input.files[0]);
+            } else {
+                box.classList.add('hidden');
+            }
+        };
 
         window.toggleSidebar = () => {
             document.getElementById('sidebar').classList.toggle('-translate-x-full');
@@ -681,8 +713,13 @@
             } else {
                 mouTb.innerHTML = mouList.map(d => {
                     window.dbCache.mou[d.id] = d;
+                    const logoSrc = window.resolveDriveImageUrl ? window.resolveDriveImageUrl(d.logo) : d.logo;
                     return `<tr class="hover:bg-gray-50 transition">
-                        <td class="p-4 text-center"><img src="${d.logo}" class="w-10 h-10 object-contain mx-auto" onerror="this.src='/logo.webp'"></td>
+                        <td class="p-4 text-center">
+                            <div class="w-12 h-12 bg-white border border-gray-200 rounded-xl mx-auto flex items-center justify-center overflow-hidden p-1 shadow-xs">
+                                <img src="${logoSrc}" referrerpolicy="no-referrer" class="w-full h-full object-contain" onerror="this.src='/logo.webp'">
+                            </div>
+                        </td>
                         <td class="p-4 font-bold text-gray-900">${d.name}</td>
                         <td class="p-4"><div class="flex gap-2 justify-center">
                             <button onclick="startEditMOU('${d.id}')" class="w-8 h-8 flex items-center justify-center rounded-lg bg-blue-50 text-blue-500 hover:bg-blue-500 hover:text-white transition"><i class="fa-solid fa-pen-to-square"></i></button>
@@ -821,39 +858,96 @@
             });
         };
 
+        // เพิ่มเครือข่ายโรงเรียน MOU (รองรับทั้งอัปโหลดไฟล์และวาง URL)
         document.getElementById('mouForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            Swal.fire({ title: 'กำลังบันทึกเครือข่าย...', didOpen: () => Swal.showLoading() });
-            const res = await portalApi({
-                action: 'saveMOU',
-                name: document.getElementById('mName').value,
-                logo: document.getElementById('mLogo').value
-            });
-            if (res.status === 'success') {
-                document.getElementById('mouForm').reset();
-                renderAdminBundle(res.data);
-                Swal.fire({ icon: 'success', title: 'เพิ่มเครือข่ายสำเร็จ', timer: 1200, showConfirmButton: false });
+            const file = document.getElementById('mLogoFile').files[0];
+            const logoUrlInput = document.getElementById('mLogo').value.trim();
+
+            if (!file && !logoUrlInput) {
+                return Swal.fire('แจ้งเตือน', 'กรุณาอัปโหลดไฟล์รูปโลโก้ หรือวาง URL โลโก้อย่างน้อย 1 อย่าง', 'warning');
+            }
+
+            Swal.fire({ title: 'กำลังบันทึกเครือข่ายโรงเรียน...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+            try {
+                let fileBase64 = null, mimeType = null;
+                if (file) {
+                    const dataUrl = await getBase64(file);
+                    fileBase64 = dataUrl.split(',')[1];
+                    mimeType = file.type;
+                }
+
+                const res = await portalApi({
+                    action: 'saveMOU',
+                    name: document.getElementById('mName').value.trim(),
+                    logo: logoUrlInput,
+                    fileBase64,
+                    mimeType
+                });
+
+                if (res.status === 'success') {
+                    document.getElementById('mouForm').reset();
+                    document.getElementById('mLogoPreviewBox').classList.add('hidden');
+                    renderAdminBundle(res.data);
+                    Swal.fire({ icon: 'success', title: 'เพิ่มเครือข่ายสำเร็จ', timer: 1300, showConfirmButton: false });
+                } else {
+                    Swal.fire('ผิดพลาด', res.message || 'ไม่สามารถบันทึกได้', 'error');
+                }
+            } catch (err) {
+                Swal.fire('Error', err.message, 'error');
             }
         });
 
+        // แก้ไขเครือข่ายโรงเรียน MOU (รองรับอัปโหลดไฟล์โลโก้ใหม่ด้วย)
         window.startEditMOU = (id) => {
             const d = window.dbCache.mou[id];
             Swal.fire({
-                title: 'แก้ไขข้อมูลเครือข่าย',
+                title: 'แก้ไขข้อมูลเครือข่าย MOU',
                 html: `
                     <div class="text-left space-y-3 mt-4">
-                        <label class="block text-xs font-bold text-gray-500">ชื่อโรงเรียน</label>
-                        <input id="sw-mName" class="w-full border rounded-xl p-3 text-sm font-bold" value="${d.name}">
-                        <label class="block text-xs font-bold text-gray-500">URL โลโก้</label>
-                        <input id="sw-mLogo" class="w-full border rounded-xl p-3 text-sm" value="${d.logo}">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 mb-1">ชื่อโรงเรียน</label>
+                            <input id="sw-mName" class="w-full border border-gray-300 rounded-xl p-3 text-sm font-bold" value="${d.name}">
+                        </div>
+                        <div class="bg-orange-50 p-3 rounded-xl border border-orange-100">
+                            <label class="block text-xs font-bold text-orange-800 mb-1.5">อัปโหลดไฟล์โลโก้ใหม่ (ถ้าต้องการเปลี่ยน)</label>
+                            <input id="sw-mLogoFile" type="file" accept="image/*" class="block w-full text-xs text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-orange-500 file:text-white bg-white p-1.5 rounded-lg border border-gray-200">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 mb-1">หรือแก้ไข URL โลโก้เดิม</label>
+                            <input id="sw-mLogo" class="w-full border border-gray-300 rounded-xl p-3 text-sm" value="${d.logo}">
+                        </div>
                     </div>
                 `,
-                showCancelButton: true, confirmButtonText: 'บันทึก', confirmButtonColor: '#f97316',
-                preConfirm: () => ({ id, name: document.getElementById('sw-mName').value, logo: document.getElementById('sw-mLogo').value })
+                showCancelButton: true,
+                confirmButtonText: 'บันทึกการแก้ไข',
+                cancelButtonText: 'ยกเลิก',
+                confirmButtonColor: '#f97316',
+                preConfirm: async () => {
+                    const fileInput = document.getElementById('sw-mLogoFile');
+                    let fileBase64 = null, mimeType = null;
+                    if (fileInput && fileInput.files && fileInput.files[0]) {
+                        const dataUrl = await getBase64(fileInput.files[0]);
+                        fileBase64 = dataUrl.split(',')[1];
+                        mimeType = fileInput.files[0].type;
+                    }
+                    return {
+                        id,
+                        name: document.getElementById('sw-mName').value.trim(),
+                        logo: document.getElementById('sw-mLogo').value.trim(),
+                        fileBase64,
+                        mimeType
+                    };
+                }
             }).then(async (r) => {
                 if (r.isConfirmed) {
+                    Swal.fire({ title: 'กำลังอัปเดตข้อมูล...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
                     const res = await portalApi({ action: 'saveMOU', ...r.value });
-                    if (res.status === 'success') renderAdminBundle(res.data);
+                    if (res.status === 'success') {
+                        renderAdminBundle(res.data);
+                        Swal.fire({ icon: 'success', title: 'อัปเดตสำเร็จ', timer: 1200, showConfirmButton: false });
+                    }
                 }
             });
         };
