@@ -351,8 +351,11 @@
                                 </div>
                             </div>
 
-                            <div class="mt-5 pt-4 border-t border-orange-100">
-                                <button onclick="saveSettings(this)" class="w-full bg-orange-500 hover:bg-orange-600 text-white py-3 rounded-xl text-sm font-bold shadow-md transition-all flex justify-center items-center gap-2">
+                            <div class="mt-5 pt-4 border-t border-orange-100 flex flex-col sm:flex-row gap-2.5">
+                                <button onclick="testSystemNotification(this)" type="button" class="w-full sm:w-1/2 bg-orange-50 hover:bg-orange-100 text-orange-700 border border-orange-200 py-3 rounded-xl text-sm font-bold transition-all flex justify-center items-center gap-2">
+                                    <i class="fa-solid fa-paper-plane"></i> ทดสอบส่งแจ้งเตือน
+                                </button>
+                                <button onclick="saveSettings(this)" type="button" class="w-full sm:w-1/2 bg-orange-500 hover:bg-orange-600 text-white py-3 rounded-xl text-sm font-bold shadow-md transition-all flex justify-center items-center gap-2">
                                     <i class="fa-solid fa-save"></i> บันทึกการตั้งค่าการแจ้งเตือน
                                 </button>
                             </div>
@@ -1196,11 +1199,12 @@
                     document.getElementById('interviewNoteInput').value = settings.InterviewNote || '';
                     document.getElementById('resultAnnounceTimeInput').value = safeTime(settings.ResultAnnounceTime);
 
-                    if(document.getElementById('emailOnApply')) {
-                        document.getElementById('emailOnApply').checked = (settings.emailOnApply === "true" || settings.emailOnApply === true || settings.emailOnApply === undefined);
+                    const isSwitchOn = (val) => val === undefined || val === true || String(val).trim().toLowerCase() !== "false";
+                    if (document.getElementById('emailOnApply')) {
+                        document.getElementById('emailOnApply').checked = isSwitchOn(settings.emailOnApply);
                     }
-                    if(document.getElementById('emailOnStatusChange')) {
-                        document.getElementById('emailOnStatusChange').checked = (settings.emailOnStatusChange === "true" || settings.emailOnStatusChange === true || settings.emailOnStatusChange === undefined);
+                    if (document.getElementById('emailOnStatusChange')) {
+                        document.getElementById('emailOnStatusChange').checked = isSwitchOn(settings.emailOnStatusChange);
                     }
 
                     document.getElementById('lastUpdatedText').innerHTML = `อัปเดตฐานข้อมูล ม.4 ล่าสุดเมื่อ: <br><span class="font-bold text-yellow-700">${settings.LastUpdatedM4 || '-'}</span>`;
@@ -1573,6 +1577,62 @@
             } finally {
                 resetBtnLoading(btn);
                 hideInlineLoader();
+            }
+        }
+
+        async function testSystemNotification(btn) {
+            const { value: formValues } = await Swal.fire({
+                title: '🔔 ทดสอบส่งแจ้งเตือน (อีเมล + แอป)',
+                html: `
+                    <div class="text-left space-y-3 mt-2">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-600 mb-1">รหัสนักเรียน 5 หลัก (สำหรับทดสอบ Web Push)</label>
+                            <input id="swal-test-id" class="w-full border border-gray-300 rounded-xl p-2.5 text-sm font-bold" value="29903" placeholder="เช่น 29903">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-600 mb-1">อีเมลผู้รับ (สำหรับทดสอบส่งอีเมล)</label>
+                            <input id="swal-test-email" type="email" class="w-full border border-gray-300 rounded-xl p-2.5 text-sm font-bold" value="6829903@mst.ac.th" placeholder="เช่น 6829903@mst.ac.th">
+                        </div>
+                    </div>
+                `,
+                focusConfirm: false,
+                showCancelButton: true,
+                confirmButtonText: 'ส่งแจ้งเตือนทดสอบ',
+                cancelButtonText: 'ยกเลิก',
+                confirmButtonColor: '#f97316',
+                preConfirm: () => ({
+                    studentId: document.getElementById('swal-test-id').value.trim(),
+                    email: document.getElementById('swal-test-email').value.trim()
+                })
+            });
+
+            if (!formValues) return;
+
+            setBtnLoading(btn, 'กำลังทดสอบ...');
+            try {
+                const res = await apiCall({
+                    action: "testNotification",
+                    studentId: formValues.studentId,
+                    email: formValues.email
+                });
+                const mailOk = res.emailResult && res.emailResult.status === 'success';
+                const pushOk = res.pushResult && res.pushResult.sent === true;
+
+                Swal.fire({
+                    icon: (mailOk && pushOk) ? 'success' : 'info',
+                    title: 'ผลการทดสอบส่งแจ้งเตือน',
+                    html: `
+                        <div class="text-left text-sm space-y-2 mt-2 bg-gray-50 p-4 rounded-xl border">
+                            <div><b>📧 อีเมล (${formValues.email}):</b> ${mailOk ? '<span class="text-green-600 font-bold">ส่งสำเร็จ!</span>' : `<span class="text-red-500 font-bold">ไม่สำเร็จ (${res.emailResult?.message || 'ตรวจสอบสิทธิ์ Apps Script'})</span>`}</div>
+                            <div><b>🔔 Web Push (รหัส ${formValues.studentId}):</b> ${pushOk ? '<span class="text-green-600 font-bold">ส่งเข้า OneSignal สำเร็จ!</span>' : `<span class="text-amber-600 font-bold">${res.pushResult?.reason || 'ยังไม่พบอุปกรณ์ที่กดรับแจ้งเตือน'}</span>`}</div>
+                        </div>
+                    `,
+                    confirmButtonColor: '#6A1B9A'
+                });
+            } catch (e) {
+                Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้', 'error');
+            } finally {
+                resetBtnLoading(btn);
             }
         }
 
