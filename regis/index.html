@@ -711,8 +711,8 @@
                 return {
                     isClosed: true,
                     icon: '<i class="fa-solid fa-calendar-xmark"></i>',
-                    title: 'สิ้นสุดการรายงานตัว',
-                    msg: `ระบบปิดรับรายงานตัวแล้ว<br><span class="text-xs text-red-500 font-bold block mt-1.5">(ปิดรับเมื่อ ${new Date(closeTime).toLocaleString('th-TH')} น.)</span>`
+                    title: 'ไม่อยู่ในช่วงเวลารายงานตัว',
+                    msg: `ระบบปิดรับรายงานตัวแล้ว<br><span class="text-xs text-red-500 font-bold block mt-1.5">(วันที่ ${new Date(closeTime).toLocaleString('th-TH')} น.)</span>`
                 };
             }
             return { isClosed: false };
