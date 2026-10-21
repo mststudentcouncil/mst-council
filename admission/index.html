@@ -862,23 +862,77 @@
             }
         }
 
+        function syncStudentDeviceAndEmail(stdId, appData) {
+            const cleanId5 = String(stdId || '').trim().slice(-5);
+            const savedEmail = currentUserFullEmail || localStorage.getItem('mstsc_std_email') || '';
+
+            if (typeof OneSignalDeferred !== 'undefined') {
+                OneSignalDeferred.push(async function(OneSignal) {
+                    try {
+                        await OneSignal.login(cleanId5);
+                        const subId = OneSignal.User.PushSubscription.id || '';
+                        if (savedEmail || subId) {
+                            apiCall({
+                                action: "syncStudentContact",
+                                studentId: cleanId5,
+                                email: savedEmail,
+                                subscriptionId: subId,
+                                sheet: appData ? appData.sheet : '',
+                                rowIndex: appData ? appData.rowIndex : ''
+                            }).catch(() => {});
+                        }
+                    } catch (e) {}
+                });
+            } else if (savedEmail && appData) {
+                apiCall({
+                    action: "syncStudentContact",
+                    studentId: cleanId5,
+                    email: savedEmail,
+                    sheet: appData.sheet,
+                    rowIndex: appData.rowIndex
+                }).catch(() => {});
+            }
+        }
+
         function checkAndShowStatus(stdId, appData) {
             let confirmEndStr = systemSettings.ConfirmEndTime;
             let appEndStr = systemSettings.AppEndTime;
             let now = new Date();
-
             if (confirmEndStr && appData.status === 'ส่งใบสมัครเรียบร้อย') {
                 if (now > new Date(confirmEndStr)) {
-                    appData.status = 'สละสิทธิ์ (ไม่ยืนยันตามกำหนด)';
-                    studentUpdateStatusAPI(appData.sheet, appData.rowIndex, 'สละสิทธิ์ (ไม่ยืนยันตามกำหนด)', null);
+                    appData.status = 'สละสิทธิ์ (ไม่กดยืนยันตามเวลา)';
+                    studentUpdateStatusAPI(appData.sheet, appData.rowIndex, 'สละสิทธิ์ (ไม่กดยืนยันตามเวลา)', null);
                 }
             }
             else if (appEndStr && (appData.status.includes('รอตรวจสอบ') || appData.status.includes('พิมพ์ใบสมัครแล้ว') || appData.status.includes('เอกสารไม่เรียบร้อย'))) {
                 if (now > new Date(appEndStr)) {
-                    appData.status = 'สละสิทธิ์ (ไม่ส่งเอกสารตามกำหนด)';
-                    studentUpdateStatusAPI(appData.sheet, appData.rowIndex, 'สละสิทธิ์ (ไม่ส่งเอกสารตามกำหนด)', null);
+                    appData.status = 'ถูกตัดสิทธิ์ (ไม่ส่งเอกสารตามเวลา)';
+                    studentUpdateStatusAPI(appData.sheet, appData.rowIndex, 'ถูกตัดสิทธิ์ (ไม่ส่งเอกสารตามเวลา)', null);
                 }
             }
+
+            // ซิงค์อีเมลและรหัสเครื่องรับแจ้งเตือนเข้าฐานข้อมูลอัตโนมัติ
+            syncStudentDeviceAndEmail(stdId, appData);
+
+            // แจ้งเตือนในแอปทันทีเมื่อสถานะใบสมัครมีการเปลี่ยนแปลงจากครั้งล่าสุดที่เปิดดู
+            const lastSeenKey = `mstsc_last_status_${String(stdId).trim().slice(-5)}`;
+            const prevStatus = localStorage.getItem(lastSeenKey);
+            const currStatus = String(appData.status || '').trim();
+            if (prevStatus && prevStatus !== currStatus) {
+                Swal.fire({
+                    icon: currStatus.includes('ไม่เรียบร้อย') ? 'warning' : 'info',
+                    title: 'สถานะใบสมัครอัปเดตแล้ว!',
+                    html: `สถานะปัจจุบันของคุณคือ:<br><b class="text-lg text-mst-purple mt-1 inline-block">${currStatus}</b>`,
+                    confirmButtonColor: '#6A1B9A',
+                    confirmButtonText: 'รับทราบ',
+                    customClass: { confirmButton: 'rounded-xl font-bold' }
+                });
+                if ("Notification" in window && Notification.permission === "granted") {
+                    try { new Notification("อัปเดตสถานะใบสมัคร MSTSC", { body: `สถานะล่าสุด: ${currStatus}`, icon: "/logo.webp" }); } catch (e) {}
+                }
+            }
+            localStorage.setItem(lastSeenKey, currStatus);
+
             renderStatusView(stdId, appData, systemSettings);
         }
 
