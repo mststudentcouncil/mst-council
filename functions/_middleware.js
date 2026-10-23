@@ -5,11 +5,20 @@ export async function onRequest(context) {
   const url = new URL(request.url);
 
   // ============================================================================
-  // 1. อนุญาตให้โหลดไฟล์รูปโลโก้และ Favicon เพื่อใช้แสดงผลบนหน้าตรวจสอบสิทธิ์
+  // 1. อนุญาตให้โหลดหน้าหลัก (หน้าแรก) และไฟล์ที่เกี่ยวข้องได้โดยไม่ต้องล็อกอิน
   // ============================================================================
-  const publicAssets = ["/logo.webp", "/favicon.ico", "/robots.txt"];
-  if (publicAssets.includes(url.pathname)) {
-    return next();
+  const publicPaths = [
+    "/", 
+    "/index", 
+    "/index.html", 
+    "/logo.webp", 
+    "/favicon.ico", 
+    "/robots.txt"
+  ];
+  
+  // ตรวจสอบว่า URL ที่เข้าตรงกับรายชื่อที่อนุญาต หรือเป็นไฟล์ในโฟลเดอร์สาธารณะหรือไม่
+  if (publicPaths.includes(url.pathname) || url.pathname.startsWith("/public/")) {
+    return next(); // ปล่อยให้เข้าดูหน้าหลักได้ทันที
   }
 
   // ============================================================================
@@ -33,7 +42,7 @@ export async function onRequest(context) {
   const clientIP = request.headers.get("CF-Connecting-IP") || "ไม่ทราบหมายเลข IP";
 
   // ============================================================================
-  // 3. หน้าสำหรับตรวจสอบเลข IP ปัจจุบัน (เข้าดูได้ที่ /auth/ip เวลาไปต่อ Wi-Fi รร.)
+  // 3. หน้าสำหรับตรวจสอบเลข IP ปัจจุบัน (เข้าดูได้ที่ /auth/ip)
   // ============================================================================
   if (url.pathname === "/auth/ip") {
     return new Response(
@@ -236,7 +245,7 @@ export async function onRequest(context) {
   }
 
   // ============================================================================
-  // 7. แสดงหน้าด่านตรวจสอบสิทธิ์กลาง (ไม่มีคำเกี่ยวกับโหวต และใช้ SVG ล้วน)
+  // 7. แสดงหน้าด่านตรวจสอบสิทธิ์กลาง
   // ============================================================================
   const requestedPath = `${url.pathname}${url.search}`;
   return renderGatewayPage(clientIP, CONFIG.ALLOWED_DOMAIN, requestedPath);
@@ -334,7 +343,7 @@ async function verifySignedToken(token, secret) {
 }
 
 // ==============================================================================
-// หน้าด่านตรวจสอบสิทธิ์ระบบสารสนเทศกลาง (UI โทนเดียวกับเว็บหลัก ไม่มีอีโมจิ)
+// หน้าด่านตรวจสอบสิทธิ์ระบบสารสนเทศกลาง
 // ==============================================================================
 
 function renderGatewayPage(clientIP, allowedDomain, returnTo = "/", errorMessage = "") {
