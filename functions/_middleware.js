@@ -452,7 +452,7 @@ function renderGatewayPage(clientIP, allowedDomain, returnTo = "/", errorMessage
             MSTSC
         </h1>
         <p class="text-base md:text-lg text-gray-500 font-medium mb-8 max-w-lg">
-            ระบบสารสนเทศ<br>คณะกรรมการสภานักเรียนโรงเรียนเมืองสุราษฎร์ธานี
+            ระบบสารสนเทศคณะกรรมการสภานักเรียน<br>โรงเรียนเมืองสุราษฎร์ธานี
         </p>
 
         <div class="glass-card w-full max-w-md p-8 rounded-[2.5rem] shadow-2xl mb-12 relative text-center">
@@ -504,7 +504,7 @@ function renderGatewayPage(clientIP, allowedDomain, returnTo = "/", errorMessage
                     </div>
                     <div>
                         <p class="text-xs font-bold text-gray-800">เชื่อมต่อผ่านเครือข่ายภายในโรงเรียน (Wi-Fi)</p>
-                        <p class="text-[11px] text-gray-500">เข้าใช้งานทุกระบบได้โดยอัตโนมัติเมื่ออยู่ในพื้นที่/p>
+                        <p class="text-[11px] text-gray-500">เข้าใช้งานทุกระบบได้โดยอัตโนมัติเมื่ออยู่ในพื้นที่</p>
                     </div>
                 </div>
 
