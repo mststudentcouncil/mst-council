@@ -26,7 +26,7 @@ export async function onRequest(context) {
     ALLOWED_DOMAIN: (env.ALLOWED_DOMAIN || "mst.ac.th").trim().toLowerCase(),
     GOOGLE_CLIENT_ID: (env.GOOGLE_CLIENT_ID || "").trim(),
     GOOGLE_CLIENT_SECRET: (env.GOOGLE_CLIENT_SECRET || "").trim(),
-    SESSION_SECRET: env.SESSION_SECRET || "mstsc-evoting-default-secret-key-2026",
+    SESSION_SECRET: env.SESSION_SECRET || "mstsc-central-portal-secret-key-2026",
     SESSION_DURATION: 60 * 60 * 12, // อายุการเข้าสู่ระบบ 12 ชั่วโมง
   };
 
@@ -37,11 +37,15 @@ export async function onRequest(context) {
   // ============================================================================
   if (url.pathname === "/auth/ip") {
     return new Response(
-      JSON.stringify({
-        ip: clientIP,
-        is_school_wifi: checkIsSchoolWiFi(clientIP, CONFIG.SCHOOL_IPS),
-        configured_school_ips: CONFIG.SCHOOL_IPS,
-      }, null, 2),
+      JSON.stringify(
+        {
+          ip: clientIP,
+          is_school_wifi: checkIsSchoolWiFi(clientIP, CONFIG.SCHOOL_IPS),
+          configured_school_ips: CONFIG.SCHOOL_IPS,
+        },
+        null,
+        2
+      ),
       {
         status: 200,
         headers: { "Content-Type": "application/json; charset=utf-8" },
@@ -50,7 +54,7 @@ export async function onRequest(context) {
   }
 
   // ============================================================================
-  // 4. ตรวจสอบว่าเป็น Wi-Fi โรงเรียนหรือไม่ (ถ้าใช่ ให้เข้าใช้งานได้เลยไม่ต้องล็อกอินซ้ำ)
+  // 4. ตรวจสอบว่าเป็น Wi-Fi โรงเรียนหรือไม่ (ถ้าใช่ ให้เข้าใช้งานทุกระบบได้ทันที)
   // ============================================================================
   const isSchoolWiFi = checkIsSchoolWiFi(clientIP, CONFIG.SCHOOL_IPS);
 
@@ -69,11 +73,14 @@ export async function onRequest(context) {
       return renderGatewayPage(
         clientIP,
         CONFIG.ALLOWED_DOMAIN,
+        "/",
         "ระบบยังไม่ได้ตั้งค่า GOOGLE_CLIENT_ID หรือ GOOGLE_CLIENT_SECRET ใน Cloudflare"
       );
     }
 
+    const returnTo = sanitizeReturnPath(url.searchParams.get("return_to") || "/");
     const state = crypto.randomUUID();
+
     const googleAuthUrl = new URL("https://accounts.google.com/o/oauth2/v2/auth");
     googleAuthUrl.searchParams.set("client_id", CONFIG.GOOGLE_CLIENT_ID);
     googleAuthUrl.searchParams.set("redirect_uri", redirectUri);
@@ -83,13 +90,18 @@ export async function onRequest(context) {
     googleAuthUrl.searchParams.set("state", state);
     googleAuthUrl.searchParams.set("prompt", "select_account");
 
-    return new Response(null, {
-      status: 302,
-      headers: {
-        "Location": googleAuthUrl.toString(),
-        "Set-Cookie": `mst_oauth_state=${state}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=600`,
-      },
-    });
+    const headers = new Headers();
+    headers.set("Location", googleAuthUrl.toString());
+    headers.append(
+      "Set-Cookie",
+      `mst_oauth_state=${state}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=600`
+    );
+    headers.append(
+      "Set-Cookie",
+      `mst_return_to=${encodeURIComponent(returnTo)}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=600`
+    );
+
+    return new Response(null, { status: 302, headers });
   }
 
   // 5.2 ออกจากระบบเครือข่าย
@@ -109,11 +121,15 @@ export async function onRequest(context) {
     const state = url.searchParams.get("state");
     const error = url.searchParams.get("error");
     const cookies = parseCookies(request.headers.get("Cookie") || "");
+    const returnTo = sanitizeReturnPath(
+      cookies.mst_return_to ? decodeURIComponent(cookies.mst_return_to) : "/"
+    );
 
     if (error) {
       return renderGatewayPage(
         clientIP,
         CONFIG.ALLOWED_DOMAIN,
+        returnTo,
         "ยกเลิกการเข้าสู่ระบบ หรือบัญชีของคุณไม่ได้รับอนุญาตจากองค์กร"
       );
     }
@@ -122,7 +138,8 @@ export async function onRequest(context) {
       return renderGatewayPage(
         clientIP,
         CONFIG.ALLOWED_DOMAIN,
-        "เซสชันการยืนยันตัวตนหมดอายุ กรุณากดเข้าสู่ระบบใหม่อีกครั้ง"
+        returnTo,
+        "เซสชันการยืนยันตัวตนหมดอายุ กรุณากดยืนยันตัวตนใหม่อีกครั้ง"
       );
     }
 
@@ -143,6 +160,7 @@ export async function onRequest(context) {
         return renderGatewayPage(
           clientIP,
           CONFIG.ALLOWED_DOMAIN,
+          returnTo,
           "ไม่สามารถตรวจสอบ Token กับระบบ Google ได้ กรุณาตรวจสอบ Redirect URI"
         );
       }
@@ -157,6 +175,7 @@ export async function onRequest(context) {
         return renderGatewayPage(
           clientIP,
           CONFIG.ALLOWED_DOMAIN,
+          returnTo,
           "ไม่สามารถดึงข้อมูลผู้ใช้งานจาก Google ได้"
         );
       }
@@ -168,6 +187,7 @@ export async function onRequest(context) {
         return renderGatewayPage(
           clientIP,
           CONFIG.ALLOWED_DOMAIN,
+          returnTo,
           `ปฏิเสธการเข้าถึง: บัญชี ${email} ไม่ใช่อีเมลของโรงเรียน (@${CONFIG.ALLOWED_DOMAIN})`
         );
       }
@@ -179,7 +199,7 @@ export async function onRequest(context) {
       );
 
       const headers = new Headers();
-      headers.set("Location", "/");
+      headers.set("Location", returnTo);
       headers.append(
         "Set-Cookie",
         `mst_network_session=${sessionToken}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=${CONFIG.SESSION_DURATION}`
@@ -188,12 +208,17 @@ export async function onRequest(context) {
         "Set-Cookie",
         "mst_oauth_state=; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=0"
       );
+      headers.append(
+        "Set-Cookie",
+        "mst_return_to=; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=0"
+      );
 
       return new Response(null, { status: 302, headers });
     } catch (err) {
       return renderGatewayPage(
         clientIP,
         CONFIG.ALLOWED_DOMAIN,
+        returnTo,
         "เกิดข้อผิดพลาดในการเชื่อมต่อระบบยืนยันตัวตน กรุณาลองใหม่อีกครั้ง"
       );
     }
@@ -211,14 +236,23 @@ export async function onRequest(context) {
   }
 
   // ============================================================================
-  // 7. แสดงหน้าตรวจสอบสิทธิ์เครือข่าย (ดีไซน์เดียวกับ index.html ไม่มีอีโมจิ)
+  // 7. แสดงหน้าด่านตรวจสอบสิทธิ์กลาง (ไม่มีคำเกี่ยวกับโหวต และใช้ SVG ล้วน)
   // ============================================================================
-  return renderGatewayPage(clientIP, CONFIG.ALLOWED_DOMAIN);
+  const requestedPath = `${url.pathname}${url.search}`;
+  return renderGatewayPage(clientIP, CONFIG.ALLOWED_DOMAIN, requestedPath);
 }
 
 // ==============================================================================
 // ฟังก์ชันช่วยเหลือด้านความปลอดภัยและการเข้ารหัส
 // ==============================================================================
+
+function sanitizeReturnPath(path) {
+  if (!path || typeof path !== "string") return "/";
+  if (!path.startsWith("/") || path.startsWith("//") || path.startsWith("/auth/")) {
+    return "/";
+  }
+  return path;
+}
 
 function checkIsSchoolWiFi(clientIP, allowedIps) {
   if (!clientIP || !allowedIps || allowedIps.length === 0) return false;
@@ -300,10 +334,12 @@ async function verifySignedToken(token, secret) {
 }
 
 // ==============================================================================
-// หน้าจอตรวจสอบสิทธิ์เครือข่าย (UI เหมือน index.html 100% และใช้ไอคอน SVG ล้วน)
+// หน้าด่านตรวจสอบสิทธิ์ระบบสารสนเทศกลาง (UI โทนเดียวกับเว็บหลัก ไม่มีอีโมจิ)
 // ==============================================================================
 
-function renderGatewayPage(clientIP, allowedDomain, errorMessage = "") {
+function renderGatewayPage(clientIP, allowedDomain, returnTo = "/", errorMessage = "") {
+  const loginUrl = `/auth/login?return_to=${encodeURIComponent(sanitizeReturnPath(returnTo))}`;
+
   const html = `<!DOCTYPE html>
 <html lang="th">
 <head>
@@ -363,7 +399,7 @@ function renderGatewayPage(clientIP, allowedDomain, errorMessage = "") {
     </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ตรวจสอบสิทธิ์เครือข่าย - ระบบลงคะแนนอิเล็กทรอนิกส์ (e-Voting)</title>
+    <title>ตรวจสอบสิทธิ์การเข้าถึงระบบสารสนเทศ - MSTSC</title>
     <link rel="icon" type="image/webp" href="/logo.webp">
     <link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -398,14 +434,14 @@ function renderGatewayPage(clientIP, allowedDomain, errorMessage = "") {
             <svg class="w-4 h-4 text-secondary shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
             </svg>
-            <span>มาตรการรักษาความปลอดภัยเครือข่าย</span>
+            <span>มาตรการรักษาความปลอดภัยระบบสารสนเทศ</span>
         </div>
 
         <h1 class="text-3xl md:text-5xl font-black text-primary tracking-tight mb-2">
-            e-Voting
+            MSTSC
         </h1>
         <p class="text-base md:text-lg text-gray-500 font-medium mb-8 max-w-lg">
-            ระบบลงคะแนนอิเล็กทรอนิกส์ โรงเรียนเมืองสุราษฎร์ธานี
+            ระบบสารสนเทศ คณะกรรมการสภานักเรียน โรงเรียนเมืองสุราษฎร์ธานี
         </p>
 
         <div class="glass-card w-full max-w-md p-8 rounded-[2.5rem] shadow-2xl mb-12 relative text-center">
@@ -429,7 +465,7 @@ function renderGatewayPage(clientIP, allowedDomain, errorMessage = "") {
             </div>
             ` : ""}
 
-            <a href="/auth/login" class="group w-full bg-purple-700 hover:bg-purple-800 text-white font-bold py-4 px-6 rounded-2xl flex items-center justify-center gap-4 transition-all duration-300 shadow-md hover:shadow-xl active:scale-95 z-10 relative border border-transparent">
+            <a href="${loginUrl}" class="group w-full bg-purple-700 hover:bg-purple-800 text-white font-bold py-4 px-6 rounded-2xl flex items-center justify-center gap-4 transition-all duration-300 shadow-md hover:shadow-xl active:scale-95 z-10 relative border border-transparent">
                 <div class="w-8 h-8 bg-white rounded-full flex items-center justify-center shrink-0 shadow-sm group-hover:scale-110 transition-transform">
                     <svg class="w-5 h-5" viewBox="0 0 24 24">
                         <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -456,8 +492,8 @@ function renderGatewayPage(clientIP, allowedDomain, errorMessage = "") {
                         </svg>
                     </div>
                     <div>
-                        <p class="text-xs font-bold text-gray-800">เชื่อมต่อผ่านเครือข่าย Wi-Fi โรงเรียน</p>
-                        <p class="text-[11px] text-gray-500">เข้าใช้งานระบบได้โดยอัตโนมัติเมื่ออยู่ในพื้นที่โรงเรียน</p>
+                        <p class="text-xs font-bold text-gray-800">เชื่อมต่อผ่านเครือข่ายภายในโรงเรียน (Wi-Fi)</p>
+                        <p class="text-[11px] text-gray-500">เข้าใช้งานทุกระบบได้โดยอัตโนมัติเมื่ออยู่ในพื้นที่โรงเรียน</p>
                     </div>
                 </div>
 
@@ -468,8 +504,8 @@ function renderGatewayPage(clientIP, allowedDomain, errorMessage = "") {
                         </svg>
                     </div>
                     <div>
-                        <p class="text-xs font-bold text-gray-800">เชื่อมต่อผ่านเครือข่ายภายนอก (VPN / SSO)</p>
-                        <p class="text-[11px] text-gray-500">ต้องยืนยันสิทธิ์ด้วยบัญชี Google (@${allowedDomain}) ก่อนเข้าสู่หน้าเว็บ</p>
+                        <p class="text-xs font-bold text-gray-800">เชื่อมต่อจากเครือข่ายภายนอก</p>
+                        <p class="text-[11px] text-gray-500">ต้องยืนยันสิทธิ์ด้วยบัญชี Google (@${allowedDomain}) ก่อนเข้าสู่ระบบสารสนเทศ</p>
                     </div>
                 </div>
             </div>
