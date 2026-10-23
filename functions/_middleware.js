@@ -17,7 +17,10 @@ export async function onRequest(context) {
     "/sitemap.xml",
     "/auth/ip",
     "/manifest.json",
-    "/feedback"
+    "/feedback.html",
+    "/richmenuline.html",
+    "/maintenance.html",
+    "/404.html"
   ];
   
   // อนุญาตโฟลเดอร์ที่เก็บรูปภาพ สคริปต์ หรือ CSS ของหน้าเว็บหลัก (โฟลเดอร์ใน GitHub)
@@ -25,7 +28,7 @@ export async function onRequest(context) {
     "/member/",   // ปลดล็อกโฟลเดอร์ member ทั้งหมด (67, 68, 69)
     "/public/",
     "/assets/",   // (ถ้ามี) โฟลเดอร์เก็บไฟล์ css/js ของหน้าหลัก
-    "/images/"    // (ถ้ามี) โฟลเดอร์เก็บรูปภาพอื่นๆ
+    "/files/"    // (ถ้ามี) โฟลเดอร์เก็บรูปภาพอื่นๆ
   ];
 
   const isPublicPath = publicPaths.includes(url.pathname);
