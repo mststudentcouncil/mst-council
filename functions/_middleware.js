@@ -13,7 +13,9 @@ export async function onRequest(context) {
     "/index.html", 
     "/logo.webp", 
     "/favicon.ico", 
-    "/robots.txt"
+    "/robots.txt",
+    "/manifest.json",
+    "/feedback"
   ];
   
   // ตรวจสอบว่า URL ที่เข้าตรงกับรายชื่อที่อนุญาต หรือเป็นไฟล์ในโฟลเดอร์สาธารณะหรือไม่
@@ -450,7 +452,7 @@ function renderGatewayPage(clientIP, allowedDomain, returnTo = "/", errorMessage
             MSTSC
         </h1>
         <p class="text-base md:text-lg text-gray-500 font-medium mb-8 max-w-lg">
-            ระบบสารสนเทศ คณะกรรมการสภานักเรียน โรงเรียนเมืองสุราษฎร์ธานี
+            ระบบสารสนเทศ<br>คณะกรรมการสภานักเรียนโรงเรียนเมืองสุราษฎร์ธานี
         </p>
 
         <div class="glass-card w-full max-w-md p-8 rounded-[2.5rem] shadow-2xl mb-12 relative text-center">
@@ -490,7 +492,7 @@ function renderGatewayPage(clientIP, allowedDomain, returnTo = "/", errorMessage
                 <svg class="w-4 h-4 text-purple-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                 </svg>
-                <span>สำหรับนักเรียนและบุคลากรเมื่อเชื่อมต่อจากภายนอกโรงเรียน</span>
+                <span>สำหรับนักเรียนและบุคลากรเมื่อเชื่อมต่อจากภายนอก</span>
             </div>
 
             <div class="text-left bg-gray-50/90 p-4 rounded-2xl border border-gray-200/80 space-y-3 shadow-sm">
@@ -502,7 +504,7 @@ function renderGatewayPage(clientIP, allowedDomain, returnTo = "/", errorMessage
                     </div>
                     <div>
                         <p class="text-xs font-bold text-gray-800">เชื่อมต่อผ่านเครือข่ายภายในโรงเรียน (Wi-Fi)</p>
-                        <p class="text-[11px] text-gray-500">เข้าใช้งานทุกระบบได้โดยอัตโนมัติเมื่ออยู่ในพื้นที่โรงเรียน</p>
+                        <p class="text-[11px] text-gray-500">เข้าใช้งานทุกระบบได้โดยอัตโนมัติเมื่ออยู่ในพื้นที่/p>
                     </div>
                 </div>
 
