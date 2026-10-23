@@ -14,13 +14,26 @@ export async function onRequest(context) {
     "/logo.webp", 
     "/favicon.ico", 
     "/robots.txt",
+    "/sitemap.xml",
+    "/auth/ip",
     "/manifest.json",
     "/feedback"
   ];
   
-  // ตรวจสอบว่า URL ที่เข้าตรงกับรายชื่อที่อนุญาต หรือเป็นไฟล์ในโฟลเดอร์สาธารณะหรือไม่
-  if (publicPaths.includes(url.pathname) || url.pathname.startsWith("/public/")) {
-    return next(); // ปล่อยให้เข้าดูหน้าหลักได้ทันที
+  // อนุญาตโฟลเดอร์ที่เก็บรูปภาพ สคริปต์ หรือ CSS ของหน้าเว็บหลัก (โฟลเดอร์ใน GitHub)
+  const publicPrefixes = [
+    "/member/",   // ปลดล็อกโฟลเดอร์ member ทั้งหมด (67, 68, 69)
+    "/public/",
+    "/assets/",   // (ถ้ามี) โฟลเดอร์เก็บไฟล์ css/js ของหน้าหลัก
+    "/images/"    // (ถ้ามี) โฟลเดอร์เก็บรูปภาพอื่นๆ
+  ];
+
+  const isPublicPath = publicPaths.includes(url.pathname);
+  const isPublicPrefix = publicPrefixes.some(prefix => url.pathname.startsWith(prefix));
+
+  // หากเป็นหน้าหลัก หรือไฟล์ในโฟลเดอร์สาธารณะ ให้ปล่อยผ่านทันที
+  if (isPublicPath || isPublicPrefix) {
+    return next(); 
   }
 
   // ============================================================================
