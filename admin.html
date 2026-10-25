@@ -525,11 +525,19 @@
         let editingNewsId = null;
         let boardSheet = null;
 
+        // ในไฟล์ admin.html แทนที่ฟังก์ชัน portalApi และ handlePortalAdminLogin เดิมด้วยโค้ดนี้:
+        const ADMIN_TOKEN_KEY = "mstsc_portal_admin_id_token";
+        const ADMIN_INFO_KEY = "mstsc_portal_admin_info";
+
         async function portalApi(payload) {
+            const idToken = sessionStorage.getItem(ADMIN_TOKEN_KEY) || "";
             const res = await fetch(`${PORTAL_API_URL}?t=${Date.now()}`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': idToken ? `Bearer ${idToken}` : ''
+                },
+                body: JSON.stringify({ ...payload, idToken })
             });
             return await res.json();
         }
@@ -584,7 +592,14 @@
 
         async function handlePortalAdminLogin(response) {
             try {
-                const payload = parseJwt(response.credential);
+                const idToken = response.credential; // JWT Token ที่มีลายเซ็นของ Google
+                const payload = parseJwt(idToken);
+                sessionStorage.setItem(ADMIN_TOKEN_KEY, idToken);
+                sessionStorage.setItem(ADMIN_INFO_KEY, JSON.stringify({
+                    email: payload.email,
+                    name: payload.name,
+                    picture: payload.picture
+                }));
                 await verifyAndLoadAdmin(payload.email, payload.name, payload.picture);
             } catch (e) {
                 Swal.fire('ข้อผิดพลาด', 'ไม่สามารถเข้าสู่ระบบได้', 'error');
@@ -606,8 +621,11 @@
                     if (document.getElementById('nDate')) document.getElementById('nDate').valueAsDate = new Date();
                     renderAdminBundle(res.data);
                 } else {
+                    // ล้างทั้ง localStorage และ sessionStorage เมื่อไม่มีสิทธิ์หรือ Token หมดอายุ
                     localStorage.removeItem(ADMIN_SESSION_KEY);
-                    Swal.fire('ปฏิเสธการเข้าถึง', res.message || 'ไม่มีสิทธิ์เข้าใช้งาน', 'error');
+                    sessionStorage.removeItem(ADMIN_TOKEN_KEY);
+                    sessionStorage.removeItem(ADMIN_INFO_KEY);
+                    Swal.fire('ปฏิเสธการเข้าถึง', res.message || 'เซสชันหมดอายุหรือไม่มีสิทธิ์เข้าใช้งาน กรุณาเข้าสู่ระบบใหม่', 'error');
                 }
             } catch (e) {
                 Swal.fire('ผิดพลาด', 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้', 'error');
@@ -628,7 +646,10 @@
             Swal.fire({ title: 'ออกจากระบบ?', icon: 'question', showCancelButton: true, confirmButtonColor: '#ef4444', confirmButtonText: 'ออกจากระบบ', cancelButtonText: 'ยกเลิก' })
             .then(r => {
                 if (r.isConfirmed) {
+                    // ล้าง Token ออกจาก sessionStorage เพื่อให้ล็อกเอาต์ออกจริงๆ
                     localStorage.removeItem(ADMIN_SESSION_KEY);
+                    sessionStorage.removeItem(ADMIN_TOKEN_KEY);
+                    sessionStorage.removeItem(ADMIN_INFO_KEY);
                     location.reload();
                 }
             });
@@ -981,8 +1002,11 @@
         });
 
         document.addEventListener('DOMContentLoaded', () => {
-            const savedEmail = localStorage.getItem(ADMIN_SESSION_KEY);
-            if (savedEmail) verifyAndLoadAdmin(savedEmail, null, null);
+            const savedToken = sessionStorage.getItem(ADMIN_TOKEN_KEY);
+            const savedInfo = JSON.parse(sessionStorage.getItem(ADMIN_INFO_KEY) || "null");
+            if (savedToken && savedInfo) {
+                verifyAndLoadAdmin(savedInfo.email, savedInfo.name, savedInfo.picture);
+            }
         });
     </script>
 </body>

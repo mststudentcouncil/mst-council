@@ -8,46 +8,9 @@ export async function onRequest(context) {
   if (url.pathname.split("/").some(part => part.startsWith("."))) {
     return new Response("403 Forbidden", { status: 403 });
   }
-  
-  // ============================================================================
-  // 1. อนุญาตให้โหลดหน้าหลัก (หน้าแรก) และไฟล์ที่เกี่ยวข้องได้โดยไม่ต้องล็อกอิน
-  // ============================================================================
-  const publicPaths = [
-    "/", 
-    "/index", 
-    "/index.html", 
-    "/logo.webp", 
-    "/favicon.ico", 
-    "/robots.txt",
-    "/sitemap.xml",
-    "/auth/ip",
-    "/manifest.json",
-    "/feedback/index.html",
-    "/richmenuline/index.html",
-    "/maintenance.html",
-    "/404.html"
-  ];
-  
-  // อนุญาตโฟลเดอร์ที่เก็บรูปภาพ สคริปต์ หรือ CSS ของหน้าเว็บหลัก (โฟลเดอร์ใน GitHub)
-  const publicPrefixes = [
-    "/member/",   // ปลดล็อกโฟลเดอร์ member ทั้งหมด (67, 68, 69)
-    "/public/",
-    "/assets/",   // (ถ้ามี) โฟลเดอร์เก็บไฟล์ css/js ของหน้าหลัก
-    "/files/",    // (ถ้ามี) โฟลเดอร์เก็บรูปภาพอื่นๆ
-    "/feedback/",
-    "/richmenuline/"
-  ];
-
-  const isPublicPath = publicPaths.includes(url.pathname);
-  const isPublicPrefix = publicPrefixes.some(prefix => url.pathname.startsWith(prefix));
-
-  // หากเป็นหน้าหลัก หรือไฟล์ในโฟลเดอร์สาธารณะ ให้ปล่อยผ่านทันที
-  if (isPublicPath || isPublicPrefix) {
-    return next(); 
-  }
 
   // ============================================================================
-  // 2. ดึงค่าตั้งต้นจาก Cloudflare Variables and secrets
+  // 1. ดึงค่าตั้งต้นจาก Cloudflare Variables and secrets
   // ============================================================================
   const rawSchoolIps = (env.SCHOOL_IPS || "").trim();
   const schoolIpList =
@@ -67,7 +30,7 @@ export async function onRequest(context) {
   const clientIP = request.headers.get("CF-Connecting-IP") || "ไม่ทราบหมายเลข IP";
 
   // ============================================================================
-  // 3. หน้าสำหรับตรวจสอบเลข IP ปัจจุบัน (เข้าดูได้ที่ /auth/ip)
+  // 2. หน้าสำหรับตรวจสอบเลข IP ปัจจุบัน (เข้าดูได้ที่ /auth/ip โดยไม่ต้องล็อกอิน)
   // ============================================================================
   if (url.pathname === "/auth/ip") {
     return new Response(
@@ -85,6 +48,51 @@ export async function onRequest(context) {
         headers: { "Content-Type": "application/json; charset=utf-8" },
       }
     );
+  }
+
+  // ============================================================================
+  // 3. อนุญาตให้โหลดหน้าหลัก, feedback, richmenuline และไฟล์สาธารณะได้โดยไม่ต้องล็อกอิน
+  // ============================================================================
+  const publicPaths = [
+    "/",
+    "/index",
+    "/index.html",
+    "/logo.webp",
+    "/favicon.ico",
+    "/robots.txt",
+    "/sitemap.xml",
+    "/manifest.json",
+    "/OneSignalSDKWorker.js",
+    "/maintenance",
+    "/maintenance.html",
+    "/404",
+    "/404.html",
+    "/feedback",
+    "/feedback/",
+    "/feedback/index.html",
+    "/richmenuline",
+    "/richmenuline/",
+    "/richmenuline/index.html"
+  ];
+
+  // อนุญาตโฟลเดอร์สาธารณะทั้งหมด (รองรับทั้งแบบมีและไม่มี / ปิดท้าย)
+  const publicFolders = [
+    "/member",
+    "/public",
+    "/assets",
+    "/files",
+    "/feedback",
+    "/richmenuline"
+  ];
+
+  const isPublicPath = publicPaths.includes(url.pathname);
+  const isPublicFolder = publicFolders.some(
+    (folder) => url.pathname === folder || url.pathname.startsWith(`${folder}/`)
+  );
+
+  // หากเป็นหน้าหรือโฟลเดอร์ที่อนุญาต ให้ปล่อยผ่านทันทีไม่ต้องยืนยันตัวตน
+  if (isPublicPath || isPublicFolder) {
+    return next();
   }
 
   // ============================================================================
@@ -549,14 +557,8 @@ function renderGatewayPage(clientIP, allowedDomain, returnTo = "/", errorMessage
                     <svg class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path>
                     </svg>
-                    <span>IP ของคุณ: <strong class="text-gray-600 font-mono">${clientIP}</strong></span>
+                    <span>IP : <strong class="text-gray-600 font-mono">${clientIP}</strong></span>
                 </div>
-                <button type="button" onclick="copyCurrentIp()" class="inline-flex items-center gap-1 text-purple-600 hover:text-purple-800 font-bold bg-purple-50 hover:bg-purple-100 px-2.5 py-1 rounded-lg transition-colors">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
-                    </svg>
-                    <span id="copyIpLabel">คัดลอก IP</span>
-                </button>
             </div>
         </div>
     </div>
