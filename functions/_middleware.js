@@ -4,6 +4,11 @@ export async function onRequest(context) {
   const { request, env, next } = context;
   const url = new URL(request.url);
 
+  // บล็อกการเข้าถึงไฟล์ระบบที่ซ่อนอยู่ เช่น .DS_Store, .git, .env ไม่ให้ใครดาวน์โหลดได้เด็ดขาด
+  if (url.pathname.split("/").some(part => part.startsWith("."))) {
+    return new Response("403 Forbidden", { status: 403 });
+  }
+  
   // ============================================================================
   // 1. อนุญาตให้โหลดหน้าหลัก (หน้าแรก) และไฟล์ที่เกี่ยวข้องได้โดยไม่ต้องล็อกอิน
   // ============================================================================
@@ -17,8 +22,8 @@ export async function onRequest(context) {
     "/sitemap.xml",
     "/auth/ip",
     "/manifest.json",
-    "/feedback.html",
-    "/richmenuline.html",
+    "/feedback/",
+    "/richmenuline/",
     "/maintenance.html",
     "/404.html"
   ];
@@ -28,7 +33,9 @@ export async function onRequest(context) {
     "/member/",   // ปลดล็อกโฟลเดอร์ member ทั้งหมด (67, 68, 69)
     "/public/",
     "/assets/",   // (ถ้ามี) โฟลเดอร์เก็บไฟล์ css/js ของหน้าหลัก
-    "/files/"    // (ถ้ามี) โฟลเดอร์เก็บรูปภาพอื่นๆ
+    "/files/",    // (ถ้ามี) โฟลเดอร์เก็บรูปภาพอื่นๆ
+    "/feedback/",
+    "/richmenuline/"
   ];
 
   const isPublicPath = publicPaths.includes(url.pathname);
