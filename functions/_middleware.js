@@ -22,8 +22,8 @@ export async function onRequest(context) {
     "/sitemap.xml",
     "/auth/ip",
     "/manifest.json",
-    "/feedback/",
-    "/richmenuline/",
+    "/feedback/index.html",
+    "/richmenuline/index.html",
     "/maintenance.html",
     "/404.html"
   ];

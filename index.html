@@ -396,7 +396,7 @@
 
         function renderBoard(targetYear) {
             const container = document.getElementById('boardContainer');
-            document.getElementById('boardTitle').innerText = `ทำเนียบคณะกรรมการ ปีการศึกษา ${targetYear}`;
+            document.getElementById('boardTitle').innerText = `ทำเนียบคณะกรรมการ`;
             let members = window.allBoardMembers.filter(m => String(m.year) === String(targetYear));
 
             if (members.length === 0) {
