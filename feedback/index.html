@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#4C1D95">
-    <title>PUBLIC HEARING</title>
+    <title>PUBLIC HEARING - สภานักเรียนโรงเรียนเมืองสุราษฎร์ธานี</title>
     <link rel="icon" type="image/webp" href="/logo.webp">
 
     <!-- Google Fonts -->
@@ -52,10 +52,10 @@
             padding-bottom: calc(env(safe-area-inset-bottom) + 4rem);
         }
         .glass {
-            background: rgba(255, 255, 255, 0.78);
+            background: rgba(255, 255, 255, 0.82);
             backdrop-filter: blur(14px);
             -webkit-backdrop-filter: blur(14px);
-            border: 1px solid rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.92);
             box-shadow: 0 10px 30px 0 rgba(76, 29, 149, 0.06);
         }
         .loader-overlay {
@@ -70,7 +70,7 @@
             justify-content: center;
             align-items: center;
         }
-        .fade-in { animation: fadeIn 0.3s ease-out forwards; }
+        .fade-in { animation: fadeIn 0.25s ease-out forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
@@ -97,8 +97,13 @@
                     <p class="text-[10px] font-bold text-gray-500 tracking-widest truncate">OF MUANGSURATTHANI SCHOOL</p>
                 </div>
             </div>
-            <div id="userProfile" class="flex items-center gap-2 cursor-pointer shrink-0" onclick="openProfile()" title="ข้อมูลส่วนตัว">
-                <img id="profileImage" src="/logo.webp" class="w-9 h-9 rounded-full border-2 border-mstYellow shadow-sm object-cover bg-white hover:scale-105 transition" alt="Profile" onerror="this.src='/logo.webp'">
+            <div class="flex items-center gap-2 shrink-0">
+                <span id="syncIndicator" class="hidden text-[10px] font-bold text-mstPurple bg-purple-50 px-2.5 py-1 rounded-full border border-purple-100 items-center gap-1">
+                    <i class="fas fa-circle-notch fa-spin text-[10px]"></i> ซิงค์ข้อมูล
+                </span>
+                <div id="userProfile" class="flex items-center gap-2 cursor-pointer" onclick="openProfile()" title="ข้อมูลส่วนตัว">
+                    <img id="profileImage" src="/logo.webp" class="w-9 h-9 rounded-full border-2 border-mstYellow shadow-sm object-cover bg-white hover:scale-105 transition" alt="Profile" onerror="this.src='/logo.webp'">
+                </div>
             </div>
         </header>
 
@@ -117,7 +122,7 @@
                     <span class="text-[9px] text-mstPurple font-bold uppercase tracking-widest bg-purple-100 px-2 py-0.5 rounded-full inline-block mt-0.5 self-end">VERIFIED</span>
                 </div>
                 <img id="adminProfileImage" src="/logo.webp" class="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 border-mstYellow shadow-sm object-cover bg-white" alt="Profile" onerror="this.src='/logo.webp'">
-                <button onclick="loadAdminData()" class="bg-white text-mstPurple border border-purple-100 w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center transition-all shadow-sm hover:bg-mstPurple hover:text-white" title="รีเฟรชข้อมูล">
+                <button onclick="loadAdminData(true)" class="bg-white text-mstPurple border border-purple-100 w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center transition-all shadow-sm hover:bg-mstPurple hover:text-white" title="รีเฟรชข้อมูล">
                     <i class="fa-solid fa-rotate-right text-xs sm:text-sm"></i>
                 </button>
                 <button onclick="exitAdminMode()" class="bg-red-50 text-red-600 border border-red-200 w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center transition-all shadow-sm hover:bg-red-500 hover:text-white" title="กลับสู่หน้าหลัก">
@@ -247,7 +252,7 @@
                 <div>
                     <span class="bg-purple-50 text-mstPurple text-[10px] font-black px-3 py-1 rounded-full border border-purple-100 uppercase tracking-wider">Public Hearing Service</span>
                     <h2 class="text-xl font-black text-mstDark mt-2">ศูนย์รับฟังความคิดเห็นสภานักเรียน</h2>
-                    <p class="text-xs text-gray-500 font-medium mt-0.5">แจ้งเรื่องร้องเรียน เสนอแนะ หรือติดตามความคืบหน้า</p>
+                    <p class="text-xs text-gray-500 font-medium mt-0.5">แจ้งเรื่องร้องเรียน เสนอแนะ หรือติดตามความคืบหน้าได้ตลอด 24 ชม.</p>
                 </div>
 
                 <div class="space-y-3.5">
@@ -339,7 +344,7 @@
 
                 <div class="bg-amber-50/80 p-4 rounded-2xl border border-amber-200/80">
                     <label class="block text-xs font-black text-mstDark mb-2.5">
-                        <i class="fas fa-user-Secret text-mstPurple mr-1"></i> การแสดงผลบนหน้ารายการสาธารณะ
+                        <i class="fas fa-user-secret text-mstPurple mr-1"></i> การแสดงผลบนหน้ารายการสาธารณะ
                     </label>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                         <label class="flex items-center gap-2.5 cursor-pointer bg-white p-3 rounded-xl border border-gray-200">
@@ -368,6 +373,9 @@
                     </button>
                     <h2 class="text-lg font-black text-mstPurple" id="trackTitle">ติดตามสถานะ</h2>
                 </div>
+                <button onclick="refreshComplaintsManual()" class="text-xs font-bold text-mstPurple bg-purple-50 hover:bg-purple-100 px-3 py-1.5 rounded-xl border border-purple-100 flex items-center gap-1.5 transition">
+                    <i class="fas fa-rotate-right" id="btnTrackRefreshIcon"></i> อัปเดต
+                </button>
             </div>
 
             <div class="bg-amber-50/90 border border-amber-200 rounded-2xl p-3.5 mb-4 text-xs text-gray-700 flex items-start gap-2.5">
@@ -386,9 +394,7 @@
             <div class="bg-white rounded-2xl p-5 shadow-xs border border-gray-100 space-y-4" id="detailContent"></div>
         </section>
 
-        <!-- ============================================== -->
-        <!-- 9. ADMIN VERIFY MODAL (ยืนยันตัวตนสภาผ่านฐานข้อมูล REGIS ปลอดภัย 2 ชั้น แทน MST Passport) -->
-        <!-- ============================================== -->
+        <!-- 9. ADMIN VERIFY MODAL -->
         <section id="verifyScreen" class="hidden fixed inset-0 flex items-center justify-center p-4 z-50 bg-slate-900/60 backdrop-blur-sm">
             <div class="glass bg-white/95 p-6 sm:p-8 rounded-[2.25rem] w-full max-w-md relative overflow-hidden fade-in shadow-2xl border border-white">
                 <button onclick="$('#verifyScreen').addClass('hidden')" class="absolute top-4 right-4 text-gray-400 hover:text-red-500 w-9 h-9 flex items-center justify-center bg-gray-100 rounded-full">
@@ -534,13 +540,22 @@
 
     <script>
         const LIFF_ID = "2008923798-7EBZdt6r";
-        const API_BASE_URL = "https://mstsc-backend.onrender.com/api";
+        // ใช้ Cloud Run ความเร็วสูงเป็นหลัก และมี Render เป็นตัวสำรองอัตโนมัติ
+        const CLOUD_RUN_FEEDBACK_API = "https://admission-backend-592123078141.asia-southeast1.run.app/api/feedback";
+        const LEGACY_RENDER_API = "https://mstsc-backend.onrender.com/api";
         const REGIS_CLOUD_RUN_URL = "https://admission-backend-592123078141.asia-southeast1.run.app/api/regis";
+
+        // คีย์สำหรับเก็บแคชความเร็วสูงในเครื่องผู้ใช้ (แสดงผลใน 0.01 วินาที)
+        const CACHE_USER_KEY = "mstsc_hearing_user_v2_";
+        const CACHE_COMPLAINTS_KEY = "mstsc_hearing_complaints_v2";
+        const CACHE_ADMIN_KEY = "mstsc_hearing_admin_v2_";
 
         let liffProfile = null;
         let userData = null;
         let adminName = "";
         let globalComplaints = [];
+        let complaintsLoadedOnce = false;
+        let currentTrackMode = 'my';
         let lastNavPage = 'homePage';
 
         const categoryHints = {
@@ -572,6 +587,11 @@
             $('#globalLoader').addClass('hidden').hide();
         }
 
+        function showSyncBadge(show) {
+            if (show) $('#syncIndicator').removeClass('hidden').addClass('inline-flex');
+            else $('#syncIndicator').addClass('hidden').removeClass('inline-flex');
+        }
+
         function nav(pageId) {
             $('#mainContainer > section').addClass('hidden');
             $('#' + pageId).removeClass('hidden').addClass('fade-in');
@@ -596,21 +616,82 @@
             }
         }
 
+        // ฟังก์ชันเรียก API อัจฉริยะ (ยิงไปที่ Cloud Run ก่อน หากยังไม่ได้ตั้งค่าจะสลับไป Render อัตโนมัติ)
+        async function smartApiRequest(actionName, payload = {}, legacyPath = "", legacyMethod = "GET") {
+            try {
+                const crRes = await fetch(`${CLOUD_RUN_FEEDBACK_API}?t=${Date.now()}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: actionName, ...payload })
+                });
+                if (crRes.ok) {
+                    const crJson = await crRes.json();
+                    if (crJson && crJson.status !== 'unknown_endpoint') {
+                        return crJson;
+                    }
+                }
+            } catch (e) {}
+
+            // Fallback ไปยัง API เดิม
+            const url = `${LEGACY_RENDER_API}${legacyPath}`;
+            const options = { method: legacyMethod, headers: { 'Content-Type': 'application/json' } };
+            if (legacyMethod !== 'GET') {
+                options.body = JSON.stringify(payload);
+            }
+            const res = await fetch(url, options);
+            return await res.json();
+        }
+
+        function normalizePhone(userObj) {
+            if (!userObj) return userObj;
+            let phoneStr = String(userObj.phone || '');
+            if (phoneStr.length === 9 && !phoneStr.startsWith('0')) {
+                userObj.phone = '0' + phoneStr;
+            }
+            return userObj;
+        }
+
         async function main() {
             try {
+                // โหลดแคชรายการร้องเรียนจากเครื่องมารอไว้ก่อนทันที
+                const cachedComplaints = localStorage.getItem(CACHE_COMPLAINTS_KEY);
+                if (cachedComplaints) {
+                    try {
+                        globalComplaints = JSON.parse(cachedComplaints);
+                        complaintsLoadedOnce = true;
+                    } catch (e) {}
+                }
+
                 await liff.init({ liffId: LIFF_ID });
                 if (!liff.isLoggedIn()) {
                     hideLoader();
                     nav('loginPage');
-                } else {
-                    liffProfile = await liff.getProfile();
-                    if (liffProfile.pictureUrl) {
-                        $('#profileImage').attr('src', liffProfile.pictureUrl);
-                        $('#adminProfileImage').attr('src', liffProfile.pictureUrl);
-                    }
-                    $('#mainHeader').removeClass('hidden');
-                    await checkUserStatus();
+                    return;
                 }
+
+                liffProfile = await liff.getProfile();
+                if (liffProfile.pictureUrl) {
+                    $('#profileImage').attr('src', liffProfile.pictureUrl);
+                    $('#adminProfileImage').attr('src', liffProfile.pictureUrl);
+                }
+                $('#mainHeader').removeClass('hidden');
+
+                // 1. ตรวจสอบข้อมูลผู้ใช้จาก LocalStorage ก่อน ถ้ามีให้เปิดหน้าหลักทันทีใน 0.01 วินาที!
+                const cachedUserRaw = localStorage.getItem(CACHE_USER_KEY + liffProfile.userId);
+                if (cachedUserRaw) {
+                    try {
+                        userData = normalizePhone(JSON.parse(cachedUserRaw));
+                        hideLoader();
+                        nav('homePage');
+                        // ซิงค์ข้อมูลล่าสุดและดึงรายการร้องเรียนในพื้นหลังโดยไม่บล็อกหน้าจอ
+                        backgroundSyncAll();
+                        return;
+                    } catch (e) {}
+                }
+
+                // กรณีเข้าครั้งแรกสุดและยังไม่มีแคชในเครื่อง
+                await checkUserStatus(true);
+                backgroundSyncAll();
             } catch (err) {
                 console.error(err);
                 hideLoader();
@@ -619,17 +700,54 @@
         }
         main();
 
-        async function checkUserStatus() {
-            setLoader('กำลังดึงข้อมูลผู้ใช้งาน...');
+        // ซิงค์ข้อมูลผู้ใช้ + รายการร้องเรียน + สิทธิ์แอดมิน แบบขนานในพื้นหลัง (Pre-fetch)
+        async function backgroundSyncAll() {
+            if (!liffProfile) return;
+            showSyncBadge(true);
             try {
-                const res = await fetch(`${API_BASE_URL}/user?uid=${liffProfile.userId}`);
-                const data = await res.json();
-                if (data.status === 'found') {
-                    userData = data.user;
-                    let phoneStr = String(userData.phone || '');
-                    if (phoneStr.length === 9 && !phoneStr.startsWith('0')) {
-                        userData.phone = '0' + phoneStr;
+                const [userRes, compRes, admRes] = await Promise.allSettled([
+                    smartApiRequest('getUser', { uid: liffProfile.userId }, `/user?uid=${liffProfile.userId}`, 'GET'),
+                    smartApiRequest('getComplaints', {}, `/complaints`, 'GET'),
+                    smartApiRequest('checkAdmin', { uid: liffProfile.userId }, `/admin/check?uid=${liffProfile.userId}`, 'GET')
+                ]);
+
+                if (userRes.status === 'fulfilled' && userRes.value && userRes.value.status === 'found') {
+                    userData = normalizePhone(userRes.value.user);
+                    localStorage.setItem(CACHE_USER_KEY + liffProfile.userId, JSON.stringify(userData));
+                }
+
+                if (compRes.status === 'fulfilled' && compRes.value && Array.isArray(compRes.value.data)) {
+                    globalComplaints = compRes.value.data.slice().reverse();
+                    complaintsLoadedOnce = true;
+                    localStorage.setItem(CACHE_COMPLAINTS_KEY, JSON.stringify(globalComplaints));
+                    // หากผู้ใช้เปิดหน้าติดตามสถานะหรือหน้าแอดมินอยู่ อัปเดตการ์ดให้เป็นข้อมูลล่าสุดทันที
+                    if (!$('#trackPage').hasClass('hidden')) {
+                        renderTrackingCards(currentTrackMode);
                     }
+                    if (!$('#adminDashboard').hasClass('hidden')) {
+                        populateAdminCategoryDropdown();
+                        filterCards();
+                    }
+                }
+
+                if (admRes.status === 'fulfilled' && admRes.value && admRes.value.status === 'found') {
+                    adminName = admRes.value.name;
+                    localStorage.setItem(CACHE_ADMIN_KEY + liffProfile.userId, adminName);
+                }
+            } catch (e) {
+                console.warn("Background sync warning:", e);
+            } finally {
+                showSyncBadge(false);
+            }
+        }
+
+        async function checkUserStatus(showBlockingLoader = true) {
+            if (showBlockingLoader) setLoader('กำลังดึงข้อมูลผู้ใช้งาน...');
+            try {
+                const data = await smartApiRequest('getUser', { uid: liffProfile.userId }, `/user?uid=${liffProfile.userId}`, 'GET');
+                if (data.status === 'found') {
+                    userData = normalizePhone(data.user);
+                    localStorage.setItem(CACHE_USER_KEY + liffProfile.userId, JSON.stringify(userData));
                     nav('homePage');
                 } else {
                     nav('registerPage');
@@ -637,7 +755,7 @@
             } catch (error) {
                 Swal.fire('ข้อผิดพลาด', 'การเชื่อมต่อฐานข้อมูลล้มเหลว', 'error');
             }
-            hideLoader();
+            if (showBlockingLoader) hideLoader();
         }
 
         function openProfile() {
@@ -677,14 +795,10 @@
                 userStatus: $('#regStatus').val()
             };
             try {
-                const res = await fetch(`${API_BASE_URL}/user`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                const data = await res.json();
+                const data = await smartApiRequest('register', payload, `/user`, 'POST');
                 if (data.status === 'success') {
-                    userData = payload;
+                    userData = normalizePhone(payload);
+                    localStorage.setItem(CACHE_USER_KEY + liffProfile.userId, JSON.stringify(userData));
                     Swal.fire({ icon: 'success', title: 'สำเร็จ', text: 'ลงทะเบียนเรียบร้อยแล้ว', confirmButtonColor: '#4C1D95' }).then(() => nav('homePage'));
                 }
             } catch (error) {
@@ -706,14 +820,10 @@
                 userStatus: $('#editStatus').val()
             };
             try {
-                const res = await fetch(`${API_BASE_URL}/user`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                const data = await res.json();
+                const data = await smartApiRequest('updateUser', payload, `/user`, 'POST');
                 if (data.status === 'success') {
-                    userData = payload;
+                    userData = normalizePhone(payload);
+                    localStorage.setItem(CACHE_USER_KEY + liffProfile.userId, JSON.stringify(userData));
                     Swal.fire({ icon: 'success', title: 'สำเร็จ', text: 'อัปเดตข้อมูลเรียบร้อยแล้ว', confirmButtonColor: '#4C1D95' }).then(() => nav('homePage'));
                 }
             } catch (error) {
@@ -753,13 +863,27 @@
                     publicConsent: $('input[name="publicConsent"]:checked').val(),
                     images: imagesBase64
                 };
-                const res = await fetch(`${API_BASE_URL}/submit`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                const result = await res.json();
+                const result = await smartApiRequest('submit', payload, `/submit`, 'POST');
                 if (result.status === 'success') {
+                    // เพิ่มรายการใหม่เข้าแคชทันทีเพื่อให้กดดูสถานะได้ทันทีไม่ต้องรอโหลดใหม่
+                    const newItem = {
+                        ID: result.id,
+                        Timestamp: new Date().toISOString(),
+                        LineUID: liffProfile.userId,
+                        Name: userData.name,
+                        Category: payload.category,
+                        Details: payload.details,
+                        PublicConsent: payload.publicConsent,
+                        Images: result.imageUrls || '-',
+                        AdminStatus: 'รอดำเนินการ',
+                        Responsible: '-',
+                        Resolution: '-',
+                        Remarks: '-'
+                    };
+                    globalComplaints.unshift(newItem);
+                    complaintsLoadedOnce = true;
+                    localStorage.setItem(CACHE_COMPLAINTS_KEY, JSON.stringify(globalComplaints));
+
                     Swal.fire({
                         icon: 'success',
                         title: 'ส่งเรื่องเรียบร้อยแล้ว',
@@ -778,51 +902,85 @@
             hideLoader();
         });
 
+        function renderTrackingCards(mode) {
+            $('#trackTitle').text(mode === 'my' ? 'รายการของฉัน' : 'รายการทั้งหมด (สาธารณะ)');
+            let filtered = mode === 'my'
+                ? globalComplaints.filter(c => c.LineUID === liffProfile.userId)
+                : globalComplaints.filter(c => c.PublicConsent === 'ยินยอม');
+
+            const container = document.getElementById('trackList');
+            if (filtered.length === 0) {
+                container.innerHTML = '<div class="text-center text-gray-400 py-12 bg-white rounded-2xl border border-gray-100 flex flex-col items-center"><i class="fas fa-folder-open text-4xl mb-3 opacity-40"></i><p class="font-bold text-sm">ยังไม่มีรายการในหมวดนี้</p></div>';
+            } else {
+                container.innerHTML = filtered.map(item => {
+                    const st = String(item.AdminStatus || 'รอดำเนินการ');
+                    let statusColor = st === 'เสร็จสิ้น'
+                        ? 'bg-emerald-100 text-emerald-700 border-emerald-200'
+                        : (st.includes('กำลัง')
+                            ? 'bg-blue-100 text-blue-700 border-blue-200'
+                            : (st.includes('ปฏิเสธ')
+                                ? 'bg-rose-100 text-rose-700 border-rose-200'
+                                : 'bg-amber-100 text-amber-800 border-amber-200'));
+                    return `
+                    <div class="bg-white p-4 sm:p-5 rounded-2xl shadow-xs border border-gray-100 cursor-pointer hover:shadow-md hover:border-mstPurple/30 transition-all group" onclick="viewDetails('${item.ID}')">
+                        <div class="flex justify-between items-center mb-2.5 gap-2">
+                            <span class="text-[10px] font-bold text-gray-500 bg-gray-100 px-2.5 py-1 rounded-md font-mono border border-gray-200">${item.ID}</span>
+                            <span class="px-2.5 py-1 rounded-full text-[10px] font-bold border ${statusColor} shrink-0">${st}</span>
+                        </div>
+                        <h4 class="font-black text-mstPurple text-sm mb-1.5 flex items-start gap-1.5"><i class="fas fa-tag mt-0.5 text-mstYellow shrink-0"></i> <span>${item.Category}</span></h4>
+                        <p class="text-xs text-gray-600 line-clamp-2 leading-relaxed bg-gray-50 p-2.5 rounded-xl border border-gray-100 break-words">${item.Details}</p>
+                        <div class="mt-3 pt-2.5 border-t border-gray-100 flex justify-between items-center text-[11px] text-gray-400 font-bold">
+                            <span><i class="far fa-calendar-alt mr-1"></i> ${new Date(item.Timestamp).toLocaleDateString('th-TH')}</span>
+                            <span class="text-mstPurple bg-purple-50 px-3 py-1 rounded-full flex items-center gap-1 group-hover:bg-mstPurple group-hover:text-white transition-colors">ดูรายละเอียด <i class="fas fa-chevron-right text-[8px]"></i></span>
+                        </div>
+                    </div>`;
+                }).join('');
+            }
+        }
+
+        // เปิดดูรายการทันทีใน 0 วินาทีหากมีแคชอยู่แล้ว พร้อมซิงค์ข้อมูลใหม่ในพื้นหลัง
         async function loadTracking(mode) {
+            currentTrackMode = mode;
+            lastNavPage = 'trackPage';
+
+            if (complaintsLoadedOnce) {
+                renderTrackingCards(mode);
+                nav('trackPage');
+                // อัปเดตข้อมูลล่าสุดเงียบๆ ในพื้นหลัง
+                refreshComplaintsManual(true);
+                return;
+            }
+
             setLoader('กำลังโหลดรายการ...');
             try {
-                const res = await fetch(`${API_BASE_URL}/complaints`);
-                const result = await res.json();
-                globalComplaints = (result.data || []).reverse();
-                lastNavPage = 'trackPage';
+                const result = await smartApiRequest('getComplaints', {}, `/complaints`, 'GET');
+                globalComplaints = (result.data || []).slice().reverse();
+                complaintsLoadedOnce = true;
+                localStorage.setItem(CACHE_COMPLAINTS_KEY, JSON.stringify(globalComplaints));
+                renderTrackingCards(mode);
                 nav('trackPage');
-                $('#trackTitle').text(mode === 'my' ? 'รายการของฉัน' : 'รายการทั้งหมด (สาธารณะ)');
-
-                let filtered = mode === 'my'
-                    ? globalComplaints.filter(c => c.LineUID === liffProfile.userId)
-                    : globalComplaints.filter(c => c.PublicConsent === 'ยินยอม');
-
-                const container = document.getElementById('trackList');
-                if (filtered.length === 0) {
-                    container.innerHTML = '<div class="text-center text-gray-400 py-12 bg-white rounded-2xl border border-gray-100 flex flex-col items-center"><i class="fas fa-folder-open text-4xl mb-3 opacity-40"></i><p class="font-bold text-sm">ยังไม่มีรายการในหมวดนี้</p></div>';
-                } else {
-                    container.innerHTML = filtered.map(item => {
-                        let statusColor = item.AdminStatus === 'เสร็จสิ้น'
-                            ? 'bg-emerald-100 text-emerald-700 border-emerald-200'
-                            : (item.AdminStatus.includes('กำลัง')
-                                ? 'bg-blue-100 text-blue-700 border-blue-200'
-                                : (item.AdminStatus.includes('ปฏิเสธ')
-                                    ? 'bg-rose-100 text-rose-700 border-rose-200'
-                                    : 'bg-amber-100 text-amber-800 border-amber-200'));
-                        return `
-                        <div class="bg-white p-4 sm:p-5 rounded-2xl shadow-xs border border-gray-100 cursor-pointer hover:shadow-md hover:border-mstPurple/30 transition-all group" onclick="viewDetails('${item.ID}')">
-                            <div class="flex justify-between items-center mb-2.5 gap-2">
-                                <span class="text-[10px] font-bold text-gray-500 bg-gray-100 px-2.5 py-1 rounded-md font-mono border border-gray-200">${item.ID}</span>
-                                <span class="px-2.5 py-1 rounded-full text-[10px] font-bold border ${statusColor} shrink-0">${item.AdminStatus}</span>
-                            </div>
-                            <h4 class="font-black text-mstPurple text-sm mb-1.5 flex items-start gap-1.5"><i class="fas fa-tag mt-0.5 text-mstYellow shrink-0"></i> <span>${item.Category}</span></h4>
-                            <p class="text-xs text-gray-600 line-clamp-2 leading-relaxed bg-gray-50 p-2.5 rounded-xl border border-gray-100 break-words">${item.Details}</p>
-                            <div class="mt-3 pt-2.5 border-t border-gray-100 flex justify-between items-center text-[11px] text-gray-400 font-bold">
-                                <span><i class="far fa-calendar-alt mr-1"></i> ${new Date(item.Timestamp).toLocaleDateString('th-TH')}</span>
-                                <span class="text-mstPurple bg-purple-50 px-3 py-1 rounded-full flex items-center gap-1 group-hover:bg-mstPurple group-hover:text-white transition-colors">ดูรายละเอียด <i class="fas fa-chevron-right text-[8px]"></i></span>
-                            </div>
-                        </div>`;
-                    }).join('');
-                }
             } catch (error) {
                 Swal.fire('ข้อผิดพลาด', 'ไม่สามารถโหลดข้อมูลได้', 'error');
             }
             hideLoader();
+        }
+
+        async function refreshComplaintsManual(silent = false) {
+            const icon = document.getElementById('btnTrackRefreshIcon');
+            if (icon) icon.classList.add('fa-spin');
+            try {
+                const result = await smartApiRequest('getComplaints', {}, `/complaints`, 'GET');
+                if (result && Array.isArray(result.data)) {
+                    globalComplaints = result.data.slice().reverse();
+                    complaintsLoadedOnce = true;
+                    localStorage.setItem(CACHE_COMPLAINTS_KEY, JSON.stringify(globalComplaints));
+                    renderTrackingCards(currentTrackMode);
+                    if (!silent) {
+                        Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'อัปเดตข้อมูลล่าสุดแล้ว', showConfirmButton: false, timer: 1200 });
+                    }
+                }
+            } catch (e) {}
+            if (icon) icon.classList.remove('fa-spin');
         }
 
         function buildImageButtonsHtml(imagesStr) {
@@ -839,11 +997,12 @@
         function viewDetails(id) {
             const item = globalComplaints.find(c => c.ID === id);
             if (!item) return;
-            let statusColor = item.AdminStatus === 'เสร็จสิ้น'
+            const st = String(item.AdminStatus || 'รอดำเนินการ');
+            let statusColor = st === 'เสร็จสิ้น'
                 ? 'text-emerald-700 bg-emerald-50 border-emerald-200'
-                : (item.AdminStatus.includes('กำลัง')
+                : (st.includes('กำลัง')
                     ? 'text-blue-700 bg-blue-50 border-blue-200'
-                    : (item.AdminStatus.includes('ปฏิเสธ')
+                    : (st.includes('ปฏิเสธ')
                         ? 'text-rose-700 bg-rose-50 border-rose-200'
                         : 'text-amber-800 bg-amber-50 border-amber-200'));
 
@@ -856,7 +1015,7 @@
 
             let html = `
                 <div class="text-center border-b border-gray-100 pb-4 mb-4">
-                    <span class="inline-block px-4 py-1.5 rounded-full text-xs font-black border ${statusColor} mb-2 shadow-xs">${item.AdminStatus}</span>
+                    <span class="inline-block px-4 py-1.5 rounded-full text-xs font-black border ${statusColor} mb-2 shadow-xs">${st}</span>
                     <p class="text-xs text-gray-500 font-mono font-bold block">รหัสอ้างอิง: ${item.ID}</p>
                 </div>
                 <div class="space-y-4 text-sm">
@@ -905,22 +1064,44 @@
             nav('detailPage');
         }
 
-        // ============================================================
-        // ระบบตรวจสอบสิทธิ์สภานักเรียนแบบใหม่ (ตรวจสอบกับฐานข้อมูล REGIS โดยตรง แทน MST Passport)
-        // ============================================================
+        function populateAdminCategoryDropdown() {
+            const currentVal = $('#categoryFilter').val() || 'all';
+            const categories = [...new Set(globalComplaints.map(c => c.Category).filter(Boolean))];
+            let catHtml = '<option value="all">ทุกหมวดหมู่</option>';
+            categories.forEach(cat => catHtml += `<option value="${cat}">${cat}</option>`);
+            $('#categoryFilter').html(catHtml).val(currentVal);
+        }
+
+        // ตรวจสอบสิทธิ์แอดมินแบบ Instant (หากเคยยืนยันไว้แล้วจะเปิดหน้าแดชบอร์ดทันทีใน 0.01 วินาที)
         async function checkAdminAuth() {
+            const cachedAdmin = localStorage.getItem(CACHE_ADMIN_KEY + liffProfile.userId);
+            if (cachedAdmin) {
+                adminName = cachedAdmin;
+                $('#showAdminName').text(adminName);
+                $('#mainHeader').addClass('hidden');
+                $('#adminHeader').removeClass('hidden');
+                nav('adminDashboard');
+                if (complaintsLoadedOnce) {
+                    populateAdminCategoryDropdown();
+                    filterCards();
+                    loadAdminData(false); // ซิงค์เงียบๆ ในพื้นหลัง
+                } else {
+                    await loadAdminData(true);
+                }
+                return;
+            }
+
             setLoader('กำลังตรวจสอบสิทธิ์สภานักเรียน...');
             try {
-                const res = await fetch(`${API_BASE_URL}/admin/check?uid=${liffProfile.userId}`);
-                const data = await res.json();
-
+                const data = await smartApiRequest('checkAdmin', { uid: liffProfile.userId }, `/admin/check?uid=${liffProfile.userId}`, 'GET');
                 if (data.status === 'found') {
                     adminName = data.name;
+                    localStorage.setItem(CACHE_ADMIN_KEY + liffProfile.userId, adminName);
                     $('#showAdminName').text(adminName);
                     $('#mainHeader').addClass('hidden');
                     $('#adminHeader').removeClass('hidden');
                     nav('adminDashboard');
-                    await loadAdminData();
+                    await loadAdminData(false);
                 } else {
                     $('#verifyStdIdInput').val('');
                     $('#verifyIdCardInput').val('');
@@ -946,7 +1127,6 @@
 
             setLoader('กำลังตรวจสอบข้อมูลกับระบบทะเบียนสภานักเรียน (REGIS)...');
             try {
-                // ขั้นที่ 1: ตรวจสอบรหัสนักเรียนและเลขบัตรประชาชน 13 หลักกับฐานข้อมูล REGIS บน Cloud Run
                 let regisVerified = false;
                 try {
                     const regisRes = await fetch(`${REGIS_CLOUD_RUN_URL}?t=${Date.now()}`, {
@@ -961,42 +1141,29 @@
                             regisVerified = true;
                         }
                     }
-                } catch (regErr) {
-                    console.warn("Cloud Run REGIS check fallback:", regErr);
-                }
+                } catch (regErr) {}
 
-                // ขั้นที่ 2: ส่งยืนยันและผูก LINE UID กับระบบ Feedback Backend
-                let res = await fetch(`${API_BASE_URL}/admin/verify`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
+                let data = await smartApiRequest('verifyAndRegisterAdmin', {
+                    action: 'verifyAndRegisterAdmin',
+                    uid: liffProfile.userId,
+                    std_id: stdId,
+                    id_card: idCard
+                }, `/admin/verify`, 'POST');
+
+                if (data.status !== 'success' && regisVerified) {
+                    data = await smartApiRequest('verifyAndRegisterAdmin', {
                         action: 'verifyAndRegisterAdmin',
                         uid: liffProfile.userId,
                         std_id: stdId,
-                        id_card: idCard
-                    })
-                });
-                let data = await res.json();
-
-                // หากตรวจเลขบัตร 13 หลักกับ Cloud Run REGIS ผ่านแล้ว แต่ฝั่ง Render ตั้งรับค่า PASSPORT_SSO ไว้ ให้ส่งซ้ำเพื่อผูก UID อัตโนมัติ
-                if (data.status !== 'success' && regisVerified) {
-                    res = await fetch(`${API_BASE_URL}/admin/verify`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            action: 'verifyAndRegisterAdmin',
-                            uid: liffProfile.userId,
-                            std_id: stdId,
-                            id_card: "PASSPORT_SSO"
-                        })
-                    });
-                    data = await res.json();
+                        id_card: "PASSPORT_SSO"
+                    }, `/admin/verify`, 'POST');
                 }
 
                 hideLoader();
 
                 if (data.status === 'success') {
                     adminName = data.name;
+                    localStorage.setItem(CACHE_ADMIN_KEY + liffProfile.userId, adminName);
                     $('#verifyScreen').addClass('hidden');
                     Swal.fire({
                         icon: 'success',
@@ -1008,7 +1175,7 @@
                         $('#mainHeader').addClass('hidden');
                         $('#adminHeader').removeClass('hidden');
                         nav('adminDashboard');
-                        loadAdminData();
+                        loadAdminData(false);
                     });
                 } else {
                     Swal.fire({
@@ -1042,21 +1209,25 @@
             }
         }
 
-        async function loadAdminData() {
-            setLoader('กำลังโหลดรายการเคสทั้งหมด...');
-            try {
-                const res = await fetch(`${API_BASE_URL}/complaints`);
-                const result = await res.json();
-                globalComplaints = (result.data || []).reverse();
-
-                const categories = [...new Set(globalComplaints.map(c => c.Category).filter(Boolean))];
-                let catHtml = '<option value="all">ทุกหมวดหมู่</option>';
-                categories.forEach(cat => catHtml += `<option value="${cat}">${cat}</option>`);
-                $('#categoryFilter').html(catHtml);
-
+        async function loadAdminData(showSpinLoader = true) {
+            if (complaintsLoadedOnce) {
+                populateAdminCategoryDropdown();
                 filterCards();
+            }
+            if (showSpinLoader && !complaintsLoadedOnce) {
+                setLoader('กำลังโหลดรายการเคสทั้งหมด...');
+            }
+            try {
+                const result = await smartApiRequest('getComplaints', {}, `/complaints`, 'GET');
+                if (result && Array.isArray(result.data)) {
+                    globalComplaints = result.data.slice().reverse();
+                    complaintsLoadedOnce = true;
+                    localStorage.setItem(CACHE_COMPLAINTS_KEY, JSON.stringify(globalComplaints));
+                    populateAdminCategoryDropdown();
+                    filterCards();
+                }
             } catch (error) {
-                Swal.fire('ข้อผิดพลาด', 'โหลดข้อมูลไม่สำเร็จ', 'error');
+                if (!complaintsLoadedOnce) Swal.fire('ข้อผิดพลาด', 'โหลดข้อมูลไม่สำเร็จ', 'error');
             }
             hideLoader();
         }
@@ -1084,16 +1255,17 @@
 
             container.innerHTML = filtered.map(c => {
                 const dateStr = new Date(c.Timestamp).toLocaleDateString('th-TH');
+                const st = String(c.AdminStatus || 'รอดำเนินการ');
 
                 let statusIcon = '';
                 let badgeClass = '';
-                if (c.AdminStatus === 'เสร็จสิ้น') {
+                if (st === 'เสร็จสิ้น') {
                     statusIcon = '<i class="fas fa-check-circle mr-1"></i>';
                     badgeClass = 'bg-emerald-100 text-emerald-700 border-emerald-200';
-                } else if (c.AdminStatus.includes('กำลัง')) {
+                } else if (st.includes('กำลัง')) {
                     statusIcon = '<i class="fas fa-spinner fa-spin mr-1"></i>';
                     badgeClass = 'bg-blue-100 text-blue-700 border-blue-200';
-                } else if (c.AdminStatus.includes('ปฏิเสธ')) {
+                } else if (st.includes('ปฏิเสธ')) {
                     statusIcon = '<i class="fas fa-times-circle mr-1"></i>';
                     badgeClass = 'bg-rose-100 text-rose-700 border-rose-200';
                 } else {
@@ -1111,7 +1283,7 @@
                 <div class="bg-white/95 p-5 rounded-[1.75rem] shadow-xs border border-white hover:shadow-md transition-all flex flex-col h-full">
                     <div class="flex justify-between items-center mb-3 gap-2">
                         <span class="text-[10px] font-bold text-gray-500 bg-gray-100 px-2.5 py-1 rounded-md font-mono border border-gray-200"><i class="fas fa-hashtag text-gray-400 mr-0.5"></i>${c.ID}</span>
-                        <span class="px-3 py-1 rounded-full text-[10px] font-bold border ${badgeClass} shrink-0">${statusIcon}${c.AdminStatus}</span>
+                        <span class="px-3 py-1 rounded-full text-[10px] font-bold border ${badgeClass} shrink-0">${statusIcon}${st}</span>
                     </div>
                     <h4 class="font-black text-mstPurple text-sm mb-2 leading-snug flex items-start gap-1.5"><i class="fas fa-tag mt-0.5 text-mstYellow shrink-0"></i> <span>${c.Category}</span></h4>
                     <p class="text-xs text-gray-600 line-clamp-3 leading-relaxed mb-4 flex-grow bg-gray-50 p-3 rounded-xl border border-gray-100 break-words">${c.Details}</p>
@@ -1158,25 +1330,33 @@
         $('#adminEditForm').on('submit', async function(e) {
             e.preventDefault();
             $('#adminEditModal').addClass('hidden');
-            setLoader('กำลังบันทึกผลการดำเนินงาน...');
+            const targetId = $('#adminEditRowId').val();
             const payload = {
                 action: 'updateAdmin',
-                id: $('#adminEditRowId').val(),
+                id: targetId,
                 adminStatus: $('#updateStatus').val(),
                 responsible: $('#updateResponsible').val() || "-",
                 resolution: $('#updateResolution').val().trim() || "-",
                 remarks: $('#updateRemarks').val().trim() || "-"
             };
+
+            // อัปเดตการ์ดบนหน้าจอทันที (Optimistic UI) ไม่ต้องรอโหลดใหม่
+            const idx = globalComplaints.findIndex(c => c.ID === targetId);
+            if (idx !== -1) {
+                globalComplaints[idx].AdminStatus = payload.adminStatus;
+                globalComplaints[idx].Responsible = payload.responsible;
+                globalComplaints[idx].Resolution = payload.resolution;
+                globalComplaints[idx].Remarks = payload.remarks;
+                localStorage.setItem(CACHE_COMPLAINTS_KEY, JSON.stringify(globalComplaints));
+                filterCards();
+            }
+
+            setLoader('กำลังบันทึกผลการดำเนินงาน...');
             try {
-                const res = await fetch(`${API_BASE_URL}/admin/update`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                const result = await res.json();
+                const result = await smartApiRequest('updateAdmin', payload, `/admin/update`, 'POST');
                 if (result.status === 'success') {
-                    Swal.fire({ icon: 'success', title: 'อัปเดตเรียบร้อย', text: 'บันทึกข้อมูลเข้าสู่ระบบแล้ว', confirmButtonColor: '#4C1D95' });
-                    await loadAdminData();
+                    Swal.fire({ icon: 'success', title: 'อัปเดตเรียบร้อย', text: 'บันทึกข้อมูลเข้าสู่ระบบแล้ว', confirmButtonColor: '#4C1D95', timer: 1400, showConfirmButton: false });
+                    loadAdminData(false);
                 }
             } catch (error) {
                 Swal.fire('ข้อผิดพลาด', 'ไม่สามารถบันทึกได้', 'error');
@@ -1196,6 +1376,10 @@
                 cancelButtonText: 'ยกเลิก'
             }).then((result) => {
                 if (result.isConfirmed) {
+                    if (liffProfile) {
+                        localStorage.removeItem(CACHE_USER_KEY + liffProfile.userId);
+                        localStorage.removeItem(CACHE_ADMIN_KEY + liffProfile.userId);
+                    }
                     liff.logout();
                     window.location.reload();
                 }
