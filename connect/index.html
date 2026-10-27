@@ -111,7 +111,7 @@
 </head>
 <body class="antialiased">
 
-    <!-- Global Loader (มาตรฐานเดียวกับ Smart Radio & Feedback) -->
+    <!-- Global Loader -->
     <div id="globalLoader" class="loader-overlay">
         <i class="fas fa-circle-notch fa-spin text-5xl text-mstPurple mb-4 drop-shadow-md"></i>
         <p class="text-base font-bold text-mstPurple" id="loaderText">กำลังตรวจสอบข้อมูล...</p>
@@ -156,21 +156,34 @@
             </div>
         </div>
 
-        <!-- 2. Student Verification Screen (หน้าตาเดียวกับ Smart Radio 100%) -->
+        <!-- 2. Student Verification Screen (มีเส้นเชื่อม Logo สภา -> Logo LINE -> รูปผู้ใช้ + ชื่อ LINE ตามลำดับ) -->
         <div id="link-screen" class="hidden fade-in flex-col mt-2 space-y-3.5">
             <div class="glass rounded-[2rem] p-6 text-center space-y-4">
-                <div class="w-14 h-14 mx-auto bg-purple-50 rounded-2xl flex items-center justify-center text-mstPurple border border-purple-100 shadow-inner">
-                    <i class="fa-solid fa-id-card text-2xl"></i>
+                
+                <!-- ส่วนแสดงเส้นเชื่อม: โลโก้สภา -> โลโก้ LINE -> โปรไฟล์ผู้ใช้พร้อมชื่อ -->
+                <div class="flex items-center justify-center gap-2 py-2">
+                    <!-- โลโก้สภานักเรียน -->
+                    <div class="w-12 h-12 rounded-2xl bg-white p-1 shadow-md border border-purple-100 flex items-center justify-center shrink-0">
+                        <img src="/logo.webp" class="w-full h-full object-contain" alt="MSTSC" onerror="this.src='https://mstsc.pages.dev/logo.webp'">
+                    </div>
+                    <!-- เส้นเชื่อมที่ 1 -->
+                    <div class="w-6 sm:w-10 h-0.5 bg-gradient-to-r from-mstPurple to-lineGreen"></div>
+                    <!-- โลโก้ LINE -->
+                    <div class="w-12 h-12 rounded-2xl bg-lineGreen text-white shadow-md flex items-center justify-center text-xl shrink-0">
+                        <i class="fa-brands fa-line"></i>
+                    </div>
+                    <!-- เส้นเชื่อมที่ 2 -->
+                    <div class="w-6 sm:w-10 h-0.5 bg-gradient-to-r from-lineGreen to-purple-400"></div>
+                    <!-- รูปโปรไฟล์ LINE พร้อมชื่อ -->
+                    <div class="flex items-center gap-2 bg-white/90 border border-purple-100 py-1.5 px-3 rounded-2xl shadow-sm max-w-[140px] shrink-0">
+                        <img id="linkingLineAvatar" src="/logo.webp" class="w-8 h-8 rounded-full object-cover border border-purple-200 shrink-0 bg-white" onerror="this.src='https://mstsc.pages.dev/logo.webp'">
+                        <span id="linkingLineName" class="text-xs font-bold text-gray-800 truncate">LINE User</span>
+                    </div>
                 </div>
+
                 <div>
                     <h2 class="text-lg font-black text-mstDark">ยืนยันตัวตนนักเรียน</h2>
                     <p class="text-xs text-gray-500 font-medium mt-0.5">กรอกรหัสประจำตัวนักเรียน 5 หลัก เพื่อเชื่อมกับ LINE</p>
-                </div>
-
-                <!-- แสดงโปรไฟล์ LINE ปัจจุบัน -->
-                <div id="linkingProfileBox" class="hidden items-center justify-center gap-2.5 bg-purple-50/70 py-2 px-3.5 rounded-xl border border-purple-100">
-                    <img id="linkingLineAvatar" src="/logo.webp" class="w-7 h-7 rounded-full object-cover border border-white shadow-xs bg-white" onerror="this.src='https://mstsc.pages.dev/logo.webp'">
-                    <span id="linkingLineName" class="text-xs font-bold text-mstPurple truncate max-w-[200px]">LINE Account</span>
                 </div>
 
                 <input type="tel" id="input-sid" maxlength="5"
@@ -188,7 +201,7 @@
                 </button>
 
                 <button onclick="openAlumniBindModal()" class="w-full py-2.5 rounded-xl bg-amber-50/80 border border-amber-200 text-[11px] font-bold text-amber-800 hover:bg-amber-100 transition">
-                    <i class="fa-solid fa-user-graduate mr-1 text-amber-600"></i> สำหรับรุ่นพี่ศิษย์เก่า (ไม่มีชื่อในทะเบียนปัจจุบัน)
+                    <i class="fa-solid fa-user-graduate mr-1 text-amber-600"></i> สำหรับรุ่นพี่ศิษย์เก่า (เลือกแผนการเรียน / รุ่นปีการศึกษาได้)
                 </button>
             </div>
         </div>
@@ -210,7 +223,7 @@
                 </span>
             </div>
 
-            <!-- การ์ดบัตรประจำตัวนักเรียนดิจิทัล (Glass Dark เหมือนการ์ดหลักของ Smart Radio) -->
+            <!-- การ์ดบัตรประจำตัวนักเรียนดิจิทัล -->
             <div class="glass-dark rounded-[1.75rem] p-5 relative overflow-hidden space-y-4">
                 <div class="flex items-center justify-between gap-2">
                     <div>
@@ -230,7 +243,7 @@
                         <span id="pass-class" class="font-black text-white text-sm">-</span>
                     </div>
                     <div class="min-w-0">
-                        <span class="text-[10px] text-purple-200 font-semibold block">แผนการเรียน</span>
+                        <span class="text-[10px] text-purple-200 font-semibold block">แผนการเรียน / รุ่น</span>
                         <span id="pass-plan" class="font-bold text-white text-xs truncate block mt-0.5">-</span>
                     </div>
                 </div>
@@ -243,7 +256,7 @@
                 </div>
             </div>
 
-            <!-- รายการบริการดิจิทัลที่พร้อมเข้าใช้งานทันทีโดยไม่ต้องกรอกรหัสซ้ำ -->
+            <!-- รายการบริการดิจิทัลที่พร้อมเข้าใช้งานทันที -->
             <div class="glass rounded-[1.75rem] p-4 space-y-3 border-2 border-purple-100">
                 <div class="flex items-center justify-between">
                     <span class="text-[10px] font-black uppercase tracking-wider text-mstPurple bg-purple-50 px-3 py-1 rounded-full border border-purple-100">
@@ -253,7 +266,6 @@
                 </div>
 
                 <div class="space-y-2.5">
-                    <!-- 1. Smart Radio -->
                     <a href="https://liff.line.me/2008923798-TRND2m0M" class="bg-white hover:bg-purple-50/70 p-3.5 rounded-2xl border border-gray-200 flex items-center justify-between gap-3 transition active:scale-[0.99]">
                         <div class="flex items-center gap-3 min-w-0">
                             <div class="w-11 h-11 rounded-2xl bg-purple-100 text-mstPurple flex items-center justify-center text-lg shrink-0">
@@ -269,7 +281,6 @@
                         </span>
                     </a>
 
-                    <!-- 2. Senior Portfolio Hub -->
                     <a href="https://liff.line.me/2008923798-LmKWCP2j" class="bg-white hover:bg-amber-50/70 p-3.5 rounded-2xl border border-gray-200 flex items-center justify-between gap-3 transition active:scale-[0.99]">
                         <div class="flex items-center gap-3 min-w-0">
                             <div class="w-11 h-11 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center text-lg shrink-0">
@@ -285,7 +296,6 @@
                         </span>
                     </a>
 
-                    <!-- 3. Public Hearing -->
                     <a href="https://liff.line.me/2008923798-7EBZdt6r" class="bg-white hover:bg-blue-50/70 p-3.5 rounded-2xl border border-gray-200 flex items-center justify-between gap-3 transition active:scale-[0.99]">
                         <div class="flex items-center gap-3 min-w-0">
                             <div class="w-11 h-11 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center text-lg shrink-0">
@@ -301,7 +311,6 @@
                         </span>
                     </a>
 
-                    <!-- 4. LINE Hub ศูนย์รวมบริการนักเรียน -->
                     <a href="https://liff.line.me/2008923798-xBa4D5Dv" class="bg-white hover:bg-emerald-50/70 p-3.5 rounded-2xl border border-gray-200 flex items-center justify-between gap-3 transition active:scale-[0.99]">
                         <div class="flex items-center gap-3 min-w-0">
                             <div class="w-11 h-11 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-lg shrink-0">
@@ -359,7 +368,6 @@
             }
         }
 
-        // สั่งล็อกอินใหม่พร้อมล้าง Token ที่หมดอายุทิ้ง
         function triggerLineLogin() {
             try {
                 if (window.liff && liff.isLoggedIn()) {
@@ -369,7 +377,6 @@
             liff.login({ redirectUri: window.location.href });
         }
 
-        // ฟังก์ชันยิง API พร้อมตรวจจับกรณี LINE Token หมดอายุ (403) เพื่อรีเฟรชเซสชันอัตโนมัติ
         async function apiCall(payload) {
             if (window.liff && liff.isLoggedIn()) {
                 const latestToken = liff.getAccessToken();
@@ -384,7 +391,6 @@
 
             const data = await res.json();
 
-            // หากเซิร์ฟเวอร์ตอบกลับว่าเซสชัน LINE หมดอายุหรือไม่ถูกต้อง (HTTP 403)
             if (
                 res.status === 403 &&
                 data.message &&
@@ -396,7 +402,6 @@
             return data;
         }
 
-        // จัดการกรณี Token ของ LINE หมดอายุ
         async function handleExpiredLineSession() {
             hideLoader();
             try {
@@ -405,7 +410,6 @@
                 }
             } catch (e) {}
 
-            // ลอง Redirect เพื่อดึง Token ใหม่อัตโนมัติ 1 ครั้ง
             if (!sessionStorage.getItem(RELOGIN_FLAG_KEY)) {
                 sessionStorage.setItem(RELOGIN_FLAG_KEY, "1");
                 liff.login({ redirectUri: window.location.href });
@@ -442,18 +446,14 @@
 
                 lineAccessToken = liff.getAccessToken();
 
-                // ตรวจสอบความสดของ Token ด้วย liff.getProfile() ก่อน
                 try {
                     const profile = await liff.getProfile();
                     if (profile) {
-                        const box = document.getElementById('linkingProfileBox');
-                        box.classList.remove('hidden');
-                        box.classList.add('flex');
-                        document.getElementById('linkingLineAvatar').src = profile.pictureUrl || '/logo.webp';
-                        document.getElementById('linkingLineName').innerText = profile.displayName || 'LINE Account';
+                        document.getElementById('linkingLineAvatar').src = profile.pictureUrl || 'https://mstsc.pages.dev/logo.webp';
+                        document.getElementById('linkingLineName').innerText = profile.displayName || 'LINE User';
                     }
                 } catch (profileErr) {
-                    console.warn("LIFF getProfile failed (Token expired):", profileErr);
+                    console.warn("LIFF getProfile failed:", profileErr);
                     await handleExpiredLineSession();
                     return;
                 }
@@ -485,7 +485,6 @@
                 return;
             }
 
-            // เมื่อ Token ใช้งานได้ปกติ ล้างตัวนับการ Relogin
             sessionStorage.removeItem(RELOGIN_FLAG_KEY);
 
             currentUser = data.linkedUser;
@@ -495,7 +494,6 @@
                 return;
             }
 
-            // บันทึกข้อมูลลง LocalStorage เพื่อแชร์ให้ระบบพอร์ตโฟลิโอและหน้าเว็บอื่นด้วย
             try {
                 localStorage.setItem(LOCAL_VIEWER_KEY, JSON.stringify(currentUser));
             } catch (e) {}
@@ -506,7 +504,7 @@
 
             const roomDisplay = `${currentUser.level}${currentUser.room && currentUser.room !== '-' ? '/' + currentUser.room : ''}`;
 
-            document.getElementById('user-avatar').src = currentUser.linePic || '/logo.webp';
+            document.getElementById('user-avatar').src = currentUser.linePic || 'https://mstsc.pages.dev/logo.webp';
             document.getElementById('user-fullname').innerText = currentUser.fullName;
             document.getElementById('user-meta').innerText = `รหัส ${currentUser.std_id} • ชั้น ${roomDisplay}`;
 
@@ -519,7 +517,6 @@
             if (isInitial) showScreen('home-screen');
         }
 
-        // ฟังก์ชันตรวจสอบรหัสนักเรียน 5 หลักและผูกกับ LINE (เหมือน Smart Radio 100%)
         async function verifyAndBindStudent() {
             const std_id = document.getElementById('input-sid').value.trim();
             if (std_id.length !== 5) {
@@ -599,7 +596,6 @@
             }
         }
 
-        // ค้นหารหัสนักเรียนจากชื่อจริง (เหมือน Smart Radio + รองรับการคลิกเลือกกรณีมีหลายชื่อ)
         async function searchStudentByNameModal() {
             const { value: kw } = await Swal.fire({
                 title: 'ค้นหารหัสนักเรียนจากชื่อ',
@@ -639,7 +635,6 @@
                 return;
             }
 
-            // กรณีพบมากกว่า 1 รายชื่อ ให้กดเลือกได้ทันที
             const listHtml = res.matches.map(s => {
                 const roomStr = `${s.level}${s.room && s.room !== '-' ? '/' + s.room : ''}`;
                 return `
@@ -670,7 +665,7 @@
             });
         }
 
-        // โมดอลสำหรับรุ่นพี่ศิษย์เก่าที่ไม่มีชื่อในชีตนักเรียนปัจจุบัน
+        // โมดอลศิษย์เก่า (มีตัวเลือก แผนการเรียน / รุ่นปีการศึกษา)
         async function openAlumniBindModal() {
             const { value: formValues } = await Swal.fire({
                 title: 'ยืนยันตัวตนศิษย์เก่า ม.ส.ธ.',
@@ -689,7 +684,7 @@
                                 </select>
                             </div>
                             <div class="col-span-2">
-                                <label class="font-bold text-gray-600 block mb-1">ชื่อจริง (ไม่ต้องใส่คำนำหน้า) *</label>
+                                <label class="font-bold text-gray-600 block mb-1">ชื่อจริง *</label>
                                 <input id="sw-alumni-fname" type="text" class="glass-input text-sm py-2.5" placeholder="ชื่อจริง">
                             </div>
                         </div>
@@ -698,13 +693,23 @@
                             <input id="sw-alumni-lname" type="text" class="glass-input text-sm py-2.5" placeholder="นามสกุล">
                         </div>
                         <div>
-                            <label class="font-bold text-gray-600 block mb-1">แผนการเรียน / รุ่นปีการศึกษา</label>
-                            <input id="sw-alumni-plan" type="text" class="glass-input text-sm py-2.5" placeholder="เช่น วิทย์-คณิต (รุ่น 2568)">
+                            <label class="font-bold text-gray-600 block mb-1">แผนการเรียน / รุ่นปีการศึกษา *</label>
+                            <select id="sw-alumni-plan" class="glass-input text-sm py-2.5">
+                                <option value="วิทยาศาสตร์ - คณิตศาสตร์">แผนการเรียน: วิทยาศาสตร์ - คณิตศาสตร์</option>
+                                <option value="ศิลป์ - ภาษาอังกฤษ">แผนการเรียน: ศิลป์ - ภาษาอังกฤษ</option>
+                                <option value="ศิลป์ - ภาษาจีน">แผนการเรียน: ศิลป์ - ภาษาจีน</option>
+                                <option value="ภาษาไทย - สังคมศึกษา">แผนการเรียน: ภาษาไทย - สังคมศึกษา</option>
+                                <option value="ศิษย์เก่าสภานักเรียน (รุ่นทั่วไป)">ศิษย์เก่าสภานักเรียน (รุ่นทั่วไป)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="font-bold text-gray-600 block mb-1">ระบุรุ่นปีการศึกษา (พ.ศ.)</label>
+                            <input id="sw-alumni-year" type="text" class="glass-input text-sm py-2.5" placeholder="เช่น รุ่นปีการศึกษา 2567">
                         </div>
                     </div>
                 `,
                 showCancelButton: true,
-                confirmButtonText: 'ยืนยันผูกบัญชี',
+                confirmButtonText: 'ยืนยันผูกบัญชีศิษย์เก่า',
                 cancelButtonText: 'ยกเลิก',
                 confirmButtonColor: '#4C1D95',
                 customClass: { popup: 'swal-glass' },
@@ -713,7 +718,11 @@
                     const prefix = document.getElementById('sw-alumni-prefix').value;
                     const fname = document.getElementById('sw-alumni-fname').value.trim();
                     const lname = document.getElementById('sw-alumni-lname').value.trim();
-                    const plan = document.getElementById('sw-alumni-plan').value.trim() || 'ศิษย์เก่า ม.ส.ธ.';
+                    const selectedPlan = document.getElementById('sw-alumni-plan').value;
+                    const yearStr = document.getElementById('sw-alumni-year').value.trim();
+                    
+                    const plan = yearStr ? `${selectedPlan} (${yearStr})` : selectedPlan;
+
                     if (std_id.length !== 5 || !fname || !lname) {
                         Swal.showValidationMessage('กรุณากรอกรหัส 5 หลัก ชื่อ และนามสกุลให้ครบถ้วน');
                         return false;
@@ -752,7 +761,6 @@
             }
         }
 
-        // ยกเลิกการผูกบัญชี / สลับรหัสนักเรียน (เหมือน Smart Radio 100%)
         async function promptUnlink() {
             const confirm = await Swal.fire({
                 icon: 'warning',
