@@ -72,6 +72,11 @@
             outline: none;
             box-shadow: 0 0 0 3px rgba(76, 29, 149, 0.15);
         }
+        .glass-input:disabled {
+            background: #F1F5F9;
+            color: #94A3B8;
+            cursor: not-allowed;
+        }
         .btn-main {
             background: linear-gradient(135deg, #4C1D95 0%, #6D28D9 100%);
             color: white;
@@ -131,7 +136,7 @@
                     <a href="/richmenuline" class="w-9 h-9 rounded-xl bg-purple-50 hover:bg-purple-100 text-mstPurple border border-purple-100 flex items-center justify-center text-xs transition" title="เมนูบริการนักเรียน">
                         <i class="fa-solid fa-grip"></i>
                     </a>
-                    <button id="btnOpenUpload" onclick="showScreen('upload-screen')" class="hidden bg-mstYellow hover:bg-amber-400 text-mstDark font-black px-3 py-2 rounded-xl text-xs shadow-xs items-center gap-1.5 transition">
+                    <button id="btnOpenUpload" onclick="openUploadScreen()" class="hidden bg-mstYellow hover:bg-amber-400 text-mstDark font-black px-3 py-2 rounded-xl text-xs shadow-xs items-center gap-1.5 transition">
                         <i class="fa-solid fa-cloud-arrow-up"></i> ส่งพอร์ต
                     </button>
                     <button id="btnUnlinkPort" onclick="promptUnlinkPort()" class="hidden w-9 h-9 rounded-xl bg-white hover:bg-gray-50 text-gray-500 border border-gray-200 items-center justify-center text-xs transition" title="สลับรหัสนักเรียน">
@@ -236,9 +241,13 @@
                     </select>
                     <select id="fltTrack" onchange="renderPortfolios()" class="glass-input py-2 px-2 text-[11px]">
                         <option value="">ทุกสายการเรียน</option>
-                        <option value="วิทย์-คณิต">วิทย์-คณิต</option>
-                        <option value="ศิลป์-คำนวณ">ศิลป์-คำนวณ</option>
-                        <option value="ศิลป์-ภาษา">ศิลป์-ภาษา</option>
+                        <option value="ห้องเรียนพิเศษ วิทยาศาสตร์ - คณิตศาสตร์ (S.M.)">ห้องเรียนพิเศษ วิทยาศาสตร์ - คณิตศาสตร์ (S.M.)</option>
+                        <option value="ห้องเรียนพิเศษ วิทยาศาสตร์ - คณิตศาสตร์ - เทคโนโลยี (S.M.T.)">ห้องเรียนพิเศษ วิทยาศาสตร์ - คณิตศาสตร์ - เทคโนโลยี (S.M.T.)</option>
+                        <option value="ห้องเรียนพิเศษ วิทยาศาสตร์ - คณิตศาสตร์ - ภาษาอังกฤษ (S.M.E.)">ห้องเรียนพิเศษ วิทยาศาสตร์ - คณิตศาสตร์ - ภาษาอังกฤษ (S.M.E.)</option>
+                        <option value="วิทยาศาสตร์ - คณิตศาสตร์">วิทยาศาสตร์ - คณิตศาสตร์</option>
+                        <option value="คณิตศาสตร์ - ภาษาอังกฤษ">คณิตศาสตร์ - ภาษาอังกฤษ</option>
+                        <option value="ศิลป์ภาษาจีน">ศิลป์ภาษาจีน</option>
+                        <option value="ภาษาไทย - สังคมศึกษา">ภาษาไทย - สังคมศึกษา</option>
                     </select>
                     <select id="fltStyle" onchange="renderPortfolios()" class="glass-input py-2 px-2 text-[11px]">
                         <option value="">ทุกสไตล์</option>
@@ -252,7 +261,7 @@
             <div id="portfolioListContainer" class="space-y-3"></div>
         </div>
 
-        <!-- 5. หน้าอัปโหลด Portfolio -->
+        <!-- 5. หน้าอัปโหลด Portfolio (ดึงข้อมูลมหาวิทยาลัยจากระบบกลาง MyTCAS เหมือนระบบ uni) -->
         <div id="upload-screen" class="hidden fade-in flex-col space-y-4 pt-1">
             <div class="glass rounded-2xl p-3.5 flex items-center gap-3">
                 <button onclick="showScreen('home-screen')" class="w-10 h-10 bg-purple-50 hover:bg-purple-100 rounded-xl flex items-center justify-center text-mstPurple border border-purple-100 shrink-0 transition">
@@ -265,8 +274,55 @@
             </div>
 
             <div class="glass p-4 rounded-[1.75rem] space-y-3">
-                <input type="text" id="p_uni" class="glass-input text-xs" placeholder="มหาวิทยาลัย (เช่น จุฬาลงกรณ์มหาวิทยาลัย) *">
-                <input type="text" id="p_fac" class="glass-input text-xs" placeholder="คณะและสาขาวิชา (เช่น คณะวิทยาศาสตร์ วิทยาการคอมพิวเตอร์) *">
+                <!-- เลือกระบบเข้าศึกษา (เหมือนระบบ uni) -->
+                <div>
+                    <label class="block text-[11px] font-black text-mstPurple mb-1.5">
+                        <i class="fa-solid fa-building-columns mr-1"></i> ระบบสถาบันอุดมศึกษา *
+                    </label>
+                    <select id="systemType" onchange="toggleSystemType()" class="glass-input text-xs px-3">
+                        <option value="TCAS" selected>มหาวิทยาลัยในระบบ TCAS (ดึงข้อมูลจาก MyTCAS)</option>
+                        <option value="NON_TCAS">มหาวิทยาลัยไม่เข้าร่วม TCAS / นอกระบบ (พิมพ์เอง)</option>
+                    </select>
+                </div>
+
+                <!-- ส่วนดึงข้อมูลมหาวิทยาลัย/วิทยาเขต/คณะ/สาขา จาก MyTCAS -->
+                <div id="tcas-inputs" class="bg-purple-50/60 p-3.5 rounded-2xl border border-purple-100 space-y-2.5">
+                    <div id="tcas-loading-text" class="text-[11px] text-mstPurple font-bold animate-pulse flex items-center gap-1.5">
+                        <i class="fas fa-circle-notch fa-spin"></i> กำลังซิงค์ข้อมูลจากระบบกลาง MyTCAS...
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-700 mb-1">มหาวิทยาลัย *</label>
+                        <select id="tcas-uni" onchange="populateCampuses()" class="glass-input text-xs px-3" disabled>
+                            <option value="">-- เลือกมหาวิทยาลัย --</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-700 mb-1">วิทยาเขต *</label>
+                        <select id="tcas-campus" onchange="populateFaculties()" class="glass-input text-xs px-3" disabled>
+                            <option value="">-- เลือกวิทยาเขต --</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-700 mb-1">คณะ / หลักสูตร *</label>
+                        <select id="tcas-faculty" onchange="populateMajors()" class="glass-input text-xs px-3" disabled>
+                            <option value="">-- เลือกคณะ --</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-700 mb-1">สาขาวิชา *</label>
+                        <select id="tcas-major" class="glass-input text-xs px-3" disabled>
+                            <option value="">-- เลือกสาขาวิชา --</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- ส่วนกรอกเองกรณีเลือกนอกระบบ TCAS -->
+                <div id="manual-inputs" class="hidden bg-gray-50/80 p-3.5 rounded-2xl border border-gray-200 space-y-2.5">
+                    <input type="text" id="p_uni" class="glass-input text-xs" placeholder="ชื่อสถาบัน / มหาวิทยาลัย *">
+                    <input type="text" id="p_fac" class="glass-input text-xs" placeholder="คณะ / หลักสูตร *">
+                    <input type="text" id="p_major" class="glass-input text-xs" placeholder="สาขาวิชา (ถ้ามี)">
+                </div>
+
                 <div class="grid grid-cols-2 gap-2">
                     <select id="p_round" class="glass-input text-xs px-2">
                         <option value="รอบ 1 Portfolio">รอบ 1 Portfolio</option>
@@ -278,9 +334,13 @@
                 <input type="text" id="p_project" class="glass-input text-xs" placeholder="ชื่อโครงการที่ใช้ยื่น">
                 <div class="grid grid-cols-2 gap-2">
                     <select id="p_track" class="glass-input text-xs px-2">
-                        <option value="วิทย์-คณิต">วิทย์-คณิต</option>
-                        <option value="ศิลป์-คำนวณ">ศิลป์-คำนวณ</option>
-                        <option value="ศิลป์-ภาษา">ศิลป์-ภาษา</option>
+                        <option value="ห้องเรียนพิเศษ วิทยาศาสตร์ - คณิตศาสตร์ (S.M.)">ห้องเรียนพิเศษ วิทยาศาสตร์ - คณิตศาสตร์ (S.M.)</option>
+                        <option value="ห้องเรียนพิเศษ วิทยาศาสตร์ - คณิตศาสตร์ - เทคโนโลยี (S.M.T.)">ห้องเรียนพิเศษ วิทยาศาสตร์ - คณิตศาสตร์ - เทคโนโลยี (S.M.T.)</option>
+                        <option value="ห้องเรียนพิเศษ วิทยาศาสตร์ - คณิตศาสตร์ - ภาษาอังกฤษ (S.M.E.)">ห้องเรียนพิเศษ วิทยาศาสตร์ - คณิตศาสตร์ - ภาษาอังกฤษ (S.M.E.)</option>
+                        <option value="วิทยาศาสตร์ - คณิตศาสตร์">วิทยาศาสตร์ - คณิตศาสตร์</option>
+                        <option value="คณิตศาสตร์ - ภาษาอังกฤษ">คณิตศาสตร์ - ภาษาอังกฤษ</option>
+                        <option value="ศิลป์ภาษาจีน">ศิลป์ภาษาจีน</option>
+                        <option value="ภาษาไทย - สังคมศึกษา">ภาษาไทย - สังคมศึกษา</option>
                     </select>
                     <input type="text" id="p_gpax" class="glass-input text-xs" placeholder="ช่วงเกรด GPAX (เช่น 3.50 - 3.75)">
                 </div>
@@ -363,6 +423,7 @@
     <script>
         const API_PORTFOLIO_URL = "https://admission-backend-592123078141.asia-southeast1.run.app/api/portfolio";
         const API_RADIO_URL = "https://admission-backend-592123078141.asia-southeast1.run.app/api/radio";
+        const MYTCAS_COURSES_URL = "https://my-tcas.s3.ap-southeast-1.amazonaws.com/mytcas/courses.json";
         const LIFF_ID = "2008923798-LmKWCP2j";
         const PORT_USER_CACHE_KEY = "mstsc_portfolio_viewer_v2";
 
@@ -371,6 +432,10 @@
         let allPortfolios = [];
         let favOnly = false;
         let isAlumniMode = false;
+
+        // โครงสร้างข้อมูลมหาวิทยาลัยจาก MyTCAS (เหมือนระบบ uni)
+        let tcasTree = {};
+        let tcasDataLoaded = false;
 
         function setLoader(text) {
             document.getElementById('loaderText').innerText = text || 'กำลังตรวจสอบข้อมูล...';
@@ -389,6 +454,139 @@
             const target = document.getElementById(screenId);
             if (target) { target.classList.remove('hidden'); target.classList.add('flex'); }
             window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function openUploadScreen() {
+            showScreen('upload-screen');
+            if (!tcasDataLoaded) {
+                fetchTcasData();
+            }
+        }
+
+        // ==========================================
+        // ระบบดึงข้อมูลมหาวิทยาลัย วิทยาเขต คณะ และสาขาวิชาจาก MyTCAS (เหมือนระบบ uni 100%)
+        // ==========================================
+        function fetchTcasData() {
+            if (tcasDataLoaded) return;
+            const loadingText = document.getElementById('tcas-loading-text');
+            const uniSelect = document.getElementById('tcas-uni');
+
+            fetch(MYTCAS_COURSES_URL)
+                .then(res => res.json())
+                .then(data => {
+                    tcasTree = {};
+                    data.forEach(item => {
+                        const uni = item.university_name_th;
+                        const campus = item.campus_name_th || 'วิทยาเขตหลัก';
+                        const fac = item.faculty_name_th;
+                        const major = item.major_name_th ? item.major_name_th : item.program_name_th;
+                        if (!uni || !fac) return;
+                        if (!tcasTree[uni]) tcasTree[uni] = {};
+                        if (!tcasTree[uni][campus]) tcasTree[uni][campus] = {};
+                        if (!tcasTree[uni][campus][fac]) tcasTree[uni][campus][fac] = new Set();
+                        if (major) tcasTree[uni][campus][fac].add(major);
+                    });
+
+                    let optionsHtml = '<option value="">-- เลือกมหาวิทยาลัย --</option>';
+                    Object.keys(tcasTree).sort((a, b) => a.localeCompare(b, 'th')).forEach(uni => {
+                        optionsHtml += `<option value="${uni}">${uni}</option>`;
+                    });
+                    uniSelect.innerHTML = optionsHtml;
+                    uniSelect.disabled = false;
+                    loadingText.classList.add('hidden');
+                    tcasDataLoaded = true;
+                })
+                .catch(err => {
+                    console.error("MyTCAS sync error:", err);
+                    loadingText.innerHTML = '<i class="fa-solid fa-triangle-exclamation mr-1"></i> ดึงข้อมูล MyTCAS ไม่สำเร็จ กรุณาเลือก "นอกระบบ" เพื่อพิมพ์ชื่อมหาวิทยาลัยเอง';
+                    loadingText.classList.replace('text-mstPurple', 'text-red-500');
+                    loadingText.classList.remove('animate-pulse');
+                });
+        }
+
+        function populateCampuses() {
+            const uni = document.getElementById('tcas-uni').value;
+            const campusSelect = document.getElementById('tcas-campus');
+            const facSelect = document.getElementById('tcas-faculty');
+            const majorSelect = document.getElementById('tcas-major');
+
+            campusSelect.innerHTML = '<option value="">-- เลือกวิทยาเขต --</option>';
+            facSelect.innerHTML = '<option value="">-- เลือกคณะ --</option>';
+            majorSelect.innerHTML = '<option value="">-- เลือกสาขาวิชา --</option>';
+            campusSelect.disabled = true;
+            facSelect.disabled = true;
+            majorSelect.disabled = true;
+
+            if (uni && tcasTree[uni]) {
+                const campuses = Object.keys(tcasTree[uni]).sort((a, b) => a.localeCompare(b, 'th'));
+                campuses.forEach(campus => {
+                    campusSelect.innerHTML += `<option value="${campus}">${campus}</option>`;
+                });
+                campusSelect.disabled = false;
+                if (campuses.length === 1) {
+                    campusSelect.value = campuses[0];
+                    populateFaculties();
+                }
+            }
+        }
+
+        function populateFaculties() {
+            const uni = document.getElementById('tcas-uni').value;
+            const campus = document.getElementById('tcas-campus').value;
+            const facSelect = document.getElementById('tcas-faculty');
+            const majorSelect = document.getElementById('tcas-major');
+
+            facSelect.innerHTML = '<option value="">-- เลือกคณะ --</option>';
+            majorSelect.innerHTML = '<option value="">-- เลือกสาขาวิชา --</option>';
+            facSelect.disabled = true;
+            majorSelect.disabled = true;
+
+            if (uni && campus && tcasTree[uni] && tcasTree[uni][campus]) {
+                const faculties = Object.keys(tcasTree[uni][campus]).sort((a, b) => a.localeCompare(b, 'th'));
+                faculties.forEach(fac => {
+                    facSelect.innerHTML += `<option value="${fac}">${fac}</option>`;
+                });
+                facSelect.disabled = false;
+                if (faculties.length === 1) {
+                    facSelect.value = faculties[0];
+                    populateMajors();
+                }
+            }
+        }
+
+        function populateMajors() {
+            const uni = document.getElementById('tcas-uni').value;
+            const campus = document.getElementById('tcas-campus').value;
+            const fac = document.getElementById('tcas-faculty').value;
+            const majorSelect = document.getElementById('tcas-major');
+
+            majorSelect.innerHTML = '<option value="">-- เลือกสาขาวิชา --</option>';
+            majorSelect.disabled = true;
+
+            if (uni && campus && fac && tcasTree[uni] && tcasTree[uni][campus] && tcasTree[uni][campus][fac]) {
+                const majors = Array.from(tcasTree[uni][campus][fac]).sort((a, b) => a.localeCompare(b, 'th'));
+                majors.forEach(major => {
+                    majorSelect.innerHTML += `<option value="${major}">${major}</option>`;
+                });
+                majorSelect.disabled = false;
+                if (majors.length === 1) {
+                    majorSelect.value = majors[0];
+                }
+            }
+        }
+
+        function toggleSystemType() {
+            const type = document.getElementById('systemType').value;
+            const tcasDiv = document.getElementById('tcas-inputs');
+            const manualDiv = document.getElementById('manual-inputs');
+
+            if (type === 'TCAS') {
+                tcasDiv.classList.remove('hidden');
+                manualDiv.classList.add('hidden');
+            } else {
+                tcasDiv.classList.add('hidden');
+                manualDiv.classList.remove('hidden');
+            }
         }
 
         function setBindMode(alumni) {
@@ -439,6 +637,9 @@
         }
 
         async function initApp() {
+            // เริ่มซิงค์ข้อมูลมหาวิทยาลัยจาก MyTCAS ล่วงหน้าในพื้นหลังทันที
+            fetchTcasData();
+
             try {
                 await liff.init({ liffId: LIFF_ID });
                 if (liff.isLoggedIn()) {
@@ -660,7 +861,7 @@
                 if (track && p.track !== track) return false;
                 if (style && p.designTag !== style) return false;
                 if (kw) {
-                    const hay = `${p.university} ${p.faculty} ${p.projectName} ${p.seniorName} ${p.colorTag}`.toLowerCase();
+                    const hay = `${p.university} ${p.faculty} ${p.major || ''} ${p.projectName} ${p.seniorName} ${p.colorTag}`.toLowerCase();
                     if (!hay.includes(kw)) return false;
                 }
                 return true;
@@ -674,6 +875,9 @@
 
             container.innerHTML = filtered.map(p => {
                 const encodedPort = encodeURIComponent(JSON.stringify(p));
+                const facDisplay = (p.major && !String(p.faculty || '').includes(p.major))
+                    ? `${p.faculty} • ${p.major}`
+                    : p.faculty;
                 return `
                     <div class="glass p-4 rounded-2xl space-y-2.5">
                         <div class="flex items-center justify-between text-[10px]">
@@ -690,7 +894,7 @@
 
                         <div>
                             <h3 class="text-sm font-black text-gray-900 leading-snug break-words">${p.university}</h3>
-                            <p class="text-xs font-bold text-mstPurple mt-0.5 break-words">${p.faculty}</p>
+                            <p class="text-xs font-bold text-mstPurple mt-0.5 break-words">${facDisplay}</p>
                             <p class="text-[11px] text-gray-500 mt-0.5">โครงการ: ${p.projectName || '-'}</p>
                         </div>
 
@@ -727,7 +931,10 @@
 
         function openViewer(pOrEncoded) {
             const p = typeof pOrEncoded === 'string' ? JSON.parse(decodeURIComponent(pOrEncoded)) : pOrEncoded;
-            document.getElementById('v_uni_title').innerText = `${p.university} • ${p.faculty}`;
+            const facDisplay = (p.major && !String(p.faculty || '').includes(p.major))
+                ? `${p.faculty} • ${p.major}`
+                : p.faculty;
+            document.getElementById('v_uni_title').innerText = `${p.university} • ${facDisplay}`;
             document.getElementById('v_senior_sub').innerText = `โดย ${p.seniorName} (${p.tcasRound})`;
             document.getElementById('v_highlights').innerText = p.highlights || '-';
             document.getElementById('v_tips').innerText = p.interviewTips || '-';
@@ -765,14 +972,39 @@
                 return Swal.fire({ icon: 'warning', title: 'กรุณาติ๊กยืนยัน PDPA Checklist ทั้ง 2 ข้อ', customClass: { popup: 'swal-glass' } });
             }
 
-            const uni = document.getElementById('p_uni').value.trim();
-            const fac = document.getElementById('p_fac').value.trim();
+            const isTcas = document.getElementById('systemType').value === 'TCAS';
+            let finalUni = "";
+            let finalFac = "";
+            let finalMajor = "";
+
+            if (isTcas) {
+                const tUni = document.getElementById('tcas-uni').value.trim();
+                const tCampus = document.getElementById('tcas-campus').value.trim();
+                const tFac = document.getElementById('tcas-faculty').value.trim();
+                const tMajor = document.getElementById('tcas-major').value.trim();
+
+                if (!tUni || !tCampus || !tFac || !tMajor) {
+                    return Swal.fire({ icon: 'warning', title: 'กรุณาเลือกมหาวิทยาลัย วิทยาเขต คณะ และสาขาวิชาให้ครบถ้วน', customClass: { popup: 'swal-glass' } });
+                }
+                finalUni = `${tUni} (${tCampus})`;
+                finalFac = (tMajor && tMajor !== tFac) ? `${tFac} (${tMajor})` : tFac;
+                finalMajor = tMajor;
+            } else {
+                const mUni = document.getElementById('p_uni').value.trim();
+                const mFac = document.getElementById('p_fac').value.trim();
+                const mMajor = document.getElementById('p_major').value.trim();
+
+                if (!mUni || !mFac) {
+                    return Swal.fire({ icon: 'warning', title: 'กรุณาระบุชื่อมหาวิทยาลัยและคณะ', customClass: { popup: 'swal-glass' } });
+                }
+                finalUni = mUni;
+                finalFac = (mMajor && mMajor !== mFac) ? `${mFac} (${mMajor})` : mFac;
+                finalMajor = mMajor;
+            }
+
             const pdfFile = document.getElementById('p_pdf_file').files[0];
             const pdfUrlInput = document.getElementById('p_pdf_url').value.trim();
 
-            if (!uni || !fac) {
-                return Swal.fire({ icon: 'warning', title: 'กรุณาระบุมหาวิทยาลัยและคณะ', customClass: { popup: 'swal-glass' } });
-            }
             if (!pdfFile && !pdfUrlInput) {
                 return Swal.fire({ icon: 'warning', title: 'กรุณาเลือกไฟล์ PDF หรือวางลิงก์ไฟล์ PDF', customClass: { popup: 'swal-glass' } });
             }
@@ -791,8 +1023,9 @@
                 const res = await callApi(API_PORTFOLIO_URL, {
                     action: 'submitPortfolio',
                     pdpaConfirmed: true,
-                    university: uni,
-                    faculty: fac,
+                    university: finalUni,
+                    faculty: finalFac,
+                    major: finalMajor,
                     tcasRound: document.getElementById('p_round').value,
                     academicYear: document.getElementById('p_year').value.trim() || '2569',
                     projectName: document.getElementById('p_project').value.trim(),
