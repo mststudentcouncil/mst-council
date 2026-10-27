@@ -7,20 +7,28 @@
     <title>Senior Portfolio Hub</title>
     <link rel="icon" type="image/webp" href="/logo.webp">
 
-    <link href="[https://fonts.googleapis.com/css2?family=Anuphan:wght@300;400;500;600;700;800&display=swap](https://fonts.googleapis.com/css2?family=Anuphan:wght@300;400;500;600;700;800&display=swap)" rel="stylesheet">
-    <link rel="stylesheet" href="[https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css](https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css)">
-    <script src="[https://cdn.tailwindcss.com](https://cdn.tailwindcss.com)"></script>
-    <script src="[https://cdn.jsdelivr.net/npm/sweetalert2@11](https://cdn.jsdelivr.net/npm/sweetalert2@11)"></script>
-    <script charset="utf-8" src="[https://static.line-scdn.net/liff/edge/2/sdk.js](https://static.line-scdn.net/liff/edge/2/sdk.js)"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 
     <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: { sans: ['Anuphan', 'sans-serif'] },
-                    colors: { mstPurple: '#4C1D95', mstYellow: '#FBBF24', mstCream: '#FEFCF5', mstDark: '#1E1B4B' }
+        if (typeof tailwind !== 'undefined') {
+            tailwind.config = {
+                theme: {
+                    extend: {
+                        fontFamily: { sans: ['Anuphan', 'sans-serif'] },
+                        colors: {
+                            mstPurple: '#4C1D95',
+                            mstPurpleLight: '#EDE9FE',
+                            mstYellow: '#FBBF24',
+                            mstCream: '#FEFCF5',
+                            mstDark: '#1E1B4B'
+                        }
+                    }
                 }
-            }
+            };
         }
     </script>
 
@@ -31,14 +39,18 @@
             background: linear-gradient(135deg, #f3e5f5 0%, #fffde7 100%);
             color: #1E293B;
             min-height: 100vh;
+            margin: 0;
             overflow-x: hidden;
             -webkit-tap-highlight-color: transparent;
-            user-select: none;
             padding-top: env(safe-area-inset-top);
             padding-bottom: calc(env(safe-area-inset-bottom) + 3rem);
         }
+        .no-select {
+            user-select: none;
+            -webkit-user-select: none;
+        }
         .glass {
-            background: rgba(255, 255, 255, 0.82);
+            background: rgba(255, 255, 255, 0.85);
             backdrop-filter: blur(14px);
             -webkit-backdrop-filter: blur(14px);
             border: 1px solid rgba(255, 255, 255, 0.92);
@@ -92,9 +104,9 @@
         .swal-glass { background: #FFFFFF !important; border-radius: 1.75rem !important; font-family: 'Anuphan', sans-serif !important; }
     </style>
 </head>
-<body oncontextmenu="return false;" class="antialiased">
+<body class="antialiased">
 
-    <!-- Global Loader Overlay (เหมือนระบบ Feedback) -->
+    <!-- Global Loader Overlay -->
     <div id="globalLoader" class="loader-overlay hidden">
         <i class="fas fa-circle-notch fa-spin text-5xl text-mstPurple mb-4 drop-shadow-md"></i>
         <p class="text-base font-bold text-mstPurple" id="loaderText">กำลังตรวจสอบข้อมูล...</p>
@@ -105,8 +117,8 @@
         <!-- Sticky Top Header -->
         <header class="sticky top-0 z-30 pt-3 pb-2.5">
             <div class="glass rounded-2xl px-4 py-3 flex items-center justify-between gap-2">
-                <div class="flex items-center gap-3 min-w-0">
-                    <img src="/logo.webp" class="w-10 h-10 object-contain drop-shadow-sm shrink-0" alt="MSTSC Logo" onerror="this.style.opacity='0'">
+                <div class="flex items-center gap-3 min-w-0 cursor-pointer" onclick="if(currentViewer) showScreen('home-screen')">
+                    <img src="/logo.webp" style="width: 40px; height: 40px;" class="w-10 h-10 object-contain drop-shadow-sm shrink-0" alt="MSTSC Logo" onerror="this.style.opacity='0'">
                     <div class="min-w-0">
                         <div class="flex items-center gap-1.5">
                             <h1 class="text-sm font-black text-mstPurple truncate">STUDENT COUNCIL</h1>
@@ -138,14 +150,21 @@
 
         <!-- 2. Login Screen -->
         <div id="loginPage" class="hidden fade-in flex-col my-auto py-4">
-            <div class="glass rounded-[2.5rem] p-8 text-center w-full">
-                <img src="/logo.webp" class="w-24 h-24 mx-auto mb-4 drop-shadow-md object-contain" alt="MSTSC">
-                <span class="inline-block bg-purple-50 text-mstPurple text-[10px] font-extrabold px-3.5 py-1 rounded-full border border-purple-100 uppercase tracking-widest">MSTSC Academic Service</span>
-                <h2 class="text-2xl font-black text-mstDark mt-3 mb-1">Senior Portfolio Hub</h2>
-                <p class="text-xs font-medium text-gray-500 mb-7 leading-relaxed">คลังพอร์ตโฟลิโอและเทคนิคการสอบสัมภาษณ์จากรุ่นพี่โรงเรียนเมืองสุราษฎร์ธานี</p>
-                <button onclick="liff.login()" class="w-full bg-[#06C755] hover:bg-[#05b34c] active:scale-[0.98] text-white py-4 rounded-2xl font-bold shadow-md text-sm flex justify-center items-center gap-2 transition">
-                    <i class="fa-brands fa-line text-xl"></i> เข้าสู่ระบบด้วย LINE
-                </button>
+            <div class="glass rounded-[2.5rem] p-8 text-center w-full space-y-4">
+                <img src="/logo.webp" style="width: 96px; height: 96px;" class="w-24 h-24 mx-auto drop-shadow-md object-contain" alt="MSTSC">
+                <div>
+                    <span class="inline-block bg-purple-50 text-mstPurple text-[10px] font-extrabold px-3.5 py-1 rounded-full border border-purple-100 uppercase tracking-widest">MSTSC Academic Service</span>
+                    <h2 class="text-2xl font-black text-mstDark mt-3 mb-1">Senior Portfolio Hub</h2>
+                    <p class="text-xs font-medium text-gray-500 leading-relaxed">คลังพอร์ตโฟลิโอและเทคนิคการสอบสัมภาษณ์จากรุ่นพี่โรงเรียนเมืองสุราษฎร์ธานี</p>
+                </div>
+                <div class="space-y-2.5 pt-2">
+                    <button onclick="loginWithLine()" class="w-full bg-[#06C755] hover:bg-[#05b34c] active:scale-[0.98] text-white py-4 rounded-2xl font-bold shadow-md text-sm flex justify-center items-center gap-2 transition">
+                        <i class="fa-brands fa-line text-xl"></i> เข้าสู่ระบบด้วย LINE
+                    </button>
+                    <button onclick="showScreen('link-screen')" class="w-full bg-white hover:bg-purple-50 text-mstPurple border border-purple-200 py-3.5 rounded-2xl font-bold text-xs flex justify-center items-center gap-2 transition">
+                        <i class="fa-solid fa-id-card"></i> เข้าใช้งานด้วยรหัสนักเรียนโดยตรง
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -307,7 +326,7 @@
         </div>
 
         <!-- 6. หน้าเปิดอ่านไฟล์พร้อมลายน้ำไดนามิก -->
-        <div id="viewer-screen" class="hidden fade-in flex-col space-y-3 pt-1">
+        <div id="viewer-screen" class="hidden fade-in flex-col space-y-3 pt-1 no-select" oncontextmenu="return false;">
             <div class="glass rounded-2xl p-3.5 flex items-center justify-between gap-2">
                 <button onclick="closeViewer()" class="w-9 h-9 bg-purple-50 rounded-xl flex items-center justify-center text-mstPurple border border-purple-100 shrink-0">
                     <i class="fa-solid fa-arrow-left text-xs"></i>
@@ -342,9 +361,10 @@
     </div>
 
     <script>
-        const API_PORTFOLIO_URL = "[https://admission-backend-592123078141.asia-southeast1.run.app/api/portfolio](https://admission-backend-592123078141.asia-southeast1.run.app/api/portfolio)";
-        const API_RADIO_URL = "[https://admission-backend-592123078141.asia-southeast1.run.app/api/radio](https://admission-backend-592123078141.asia-southeast1.run.app/api/radio)";
+        const API_PORTFOLIO_URL = "https://admission-backend-592123078141.asia-southeast1.run.app/api/portfolio";
+        const API_RADIO_URL = "https://admission-backend-592123078141.asia-southeast1.run.app/api/radio";
         const LIFF_ID = "2008923798-LmKWCP2j";
+        const PORT_USER_CACHE_KEY = "mstsc_portfolio_viewer_v2";
 
         let lineAccessToken = "";
         let currentViewer = null;
@@ -378,11 +398,25 @@
             document.getElementById('alumniExtraFields').classList.toggle('hidden', !alumni);
         }
 
+        function getSavedViewer() {
+            try {
+                const raw = localStorage.getItem(PORT_USER_CACHE_KEY);
+                return raw ? JSON.parse(raw) : null;
+            } catch (e) {
+                return null;
+            }
+        }
+
         async function callApi(url, payload) {
+            const savedViewer = getSavedViewer();
             const res = await fetch(`${url}?t=${Date.now()}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ ...payload, lineAccessToken })
+                body: JSON.stringify({
+                    ...payload,
+                    lineAccessToken,
+                    savedViewer: savedViewer || undefined
+                })
             });
             return await res.json();
         }
@@ -396,32 +430,67 @@
             });
         }
 
+        function loginWithLine() {
+            try {
+                liff.login({ redirectUri: window.location.href });
+            } catch (e) {
+                showScreen('link-screen');
+            }
+        }
+
         async function initApp() {
             try {
                 await liff.init({ liffId: LIFF_ID });
-                if (!liff.isLoggedIn()) {
-                    if (liff.isInClient()) liff.login();
-                    else showScreen('loginPage');
-                    return;
+                if (liff.isLoggedIn()) {
+                    lineAccessToken = liff.getAccessToken() || "";
                 }
-                lineAccessToken = liff.getAccessToken();
+            } catch (liffErr) {
+                console.warn("LIFF init fallback:", liffErr.message);
+            }
+
+            try {
                 await loadPortfolioData();
-            } catch (e) {
-                Swal.fire({ icon: 'error', title: 'เชื่อมต่อ LINE ไม่สำเร็จ', text: e.message, customClass: { popup: 'swal-glass' } });
+            } catch (err) {
+                console.error("Load Portfolio Error:", err);
+                showScreen('link-screen');
             }
         }
 
         async function loadPortfolioData() {
-            const data = await callApi(API_PORTFOLIO_URL, { action: 'getPortfolios' });
-            if (data.status !== 'success') return;
+            try {
+                const data = await callApi(API_PORTFOLIO_URL, { action: 'getPortfolios' });
 
-            currentViewer = data.viewer;
-            if (!currentViewer) {
+                if (!data || data.status !== 'success') {
+                    const cachedViewer = getSavedViewer();
+                    if (cachedViewer && cachedViewer.std_id) {
+                        currentViewer = cachedViewer;
+                        updateHeaderViewerUI();
+                        renderPortfolios();
+                        showScreen('home-screen');
+                    } else {
+                        showScreen('link-screen');
+                    }
+                    return;
+                }
+
+                currentViewer = data.viewer || getSavedViewer();
+                if (!currentViewer || !currentViewer.std_id) {
+                    showScreen('link-screen');
+                    return;
+                }
+
+                localStorage.setItem(PORT_USER_CACHE_KEY, JSON.stringify(currentViewer));
+                allPortfolios = data.portfolios || [];
+                updateHeaderViewerUI();
+                renderPortfolios();
+                showScreen('home-screen');
+            } catch (e) {
                 showScreen('link-screen');
-                return;
             }
+        }
 
-            allPortfolios = data.portfolios || [];
+        function updateHeaderViewerUI() {
+            if (!currentViewer) return;
             const btnUp = document.getElementById('btnOpenUpload');
             btnUp.classList.remove('hidden');
             btnUp.classList.add('flex');
@@ -430,33 +499,33 @@
             btnUnlink.classList.remove('hidden');
             btnUnlink.classList.add('flex');
 
-            document.getElementById('viewerNameText').innerText = currentViewer.fullName;
-            document.getElementById('viewerRoleText').innerText = `รหัส ${currentViewer.std_id} (${currentViewer.level})`;
-            renderPortfolios();
-            showScreen('home-screen');
+            document.getElementById('viewerNameText').innerText = currentViewer.fullName || '-';
+            document.getElementById('viewerRoleText').innerText = `รหัส ${currentViewer.std_id} (${currentViewer.level || 'นักเรียน'})`;
         }
 
         async function handleBindSubmit() {
-            const std_id = document.getElementById('bindStdId').value.trim();
+            const std_id = document.getElementById('bindStdId').value.replace(/\D/g, '').trim();
             if (std_id.length !== 5) {
                 return Swal.fire({ icon: 'warning', title: 'กรุณาระบุรหัสนักเรียน 5 หลัก', customClass: { popup: 'swal-glass' } });
             }
+
+            let resolvedStudent = null;
 
             if (!isAlumniMode) {
                 setLoader('กำลังตรวจสอบรายชื่อ...');
                 const look = await callApi(API_RADIO_URL, { action: 'lookupStudentById', std_id });
                 hideLoader();
                 if (look.status !== 'success') {
-                    return Swal.fire({ icon: 'error', title: 'ไม่พบรหัสนักเรียน', text: look.message, customClass: { popup: 'swal-glass' } });
+                    return Swal.fire({ icon: 'error', title: 'ไม่พบรหัสนักเรียน', text: look.message || 'หากจบการศึกษาแล้ว กรุณาเลือกแท็บ "ศิษย์เก่าทั่วไป"', customClass: { popup: 'swal-glass' } });
                 }
-                const s = look.student;
+                resolvedStudent = look.student;
                 const cf = await Swal.fire({
                     title: 'ยืนยันข้อมูลผู้ใช้งาน',
                     html: `
                         <div class="text-left bg-purple-50 p-4 rounded-2xl border border-purple-100 text-xs space-y-1.5">
-                            <p><b>รหัสประจำตัว:</b> ${s.std_id}</p>
-                            <p><b>ชื่อ-นามสกุล:</b> ${s.prefix}${s.fname} ${s.lname}</p>
-                            <p><b>สถานะ/ระดับชั้น:</b> ${s.level}${s.room && s.room !== '-' ? '/' + s.room : ''}</p>
+                            <p><b>รหัสประจำตัว:</b> ${resolvedStudent.std_id}</p>
+                            <p><b>ชื่อ-นามสกุล:</b> ${resolvedStudent.prefix}${resolvedStudent.fname} ${resolvedStudent.lname}</p>
+                            <p><b>สถานะ/ระดับชั้น:</b> ${resolvedStudent.level}${resolvedStudent.room && resolvedStudent.room !== '-' ? '/' + resolvedStudent.room : ''}</p>
                         </div>
                     `,
                     showCancelButton: true,
@@ -466,23 +535,56 @@
                     customClass: { popup: 'swal-glass' }
                 });
                 if (!cf.isConfirmed) return;
+            } else {
+                const prefix = document.getElementById('alumniPrefix').value;
+                const fname = document.getElementById('alumniFname').value.trim();
+                const lname = document.getElementById('alumniLname').value.trim();
+                if (!fname || !lname) {
+                    return Swal.fire({ icon: 'warning', title: 'กรุณากรอกชื่อและนามสกุลให้ครบถ้วน', customClass: { popup: 'swal-glass' } });
+                }
+                resolvedStudent = {
+                    std_id,
+                    prefix,
+                    fname,
+                    lname,
+                    level: 'ศิษย์เก่า',
+                    room: '-',
+                    plan: '-'
+                };
             }
 
-            setLoader('กำลังผูกบัญชี LINE...');
-            const bindRes = await callApi(API_RADIO_URL, {
-                action: 'confirmBindLine',
-                std_id,
-                isAlumni: isAlumniMode,
-                prefix: document.getElementById('alumniPrefix').value,
-                fname: document.getElementById('alumniFname').value.trim(),
-                lname: document.getElementById('alumniLname').value.trim()
-            });
-            hideLoader();
+            setLoader('กำลังบันทึกการยืนยันตัวตน...');
+            try {
+                const bindRes = await callApi(API_RADIO_URL, {
+                    action: 'confirmBindLine',
+                    std_id,
+                    isAlumni: isAlumniMode,
+                    prefix: resolvedStudent.prefix,
+                    fname: resolvedStudent.fname,
+                    lname: resolvedStudent.lname
+                });
 
-            if (bindRes.status === 'success') {
+                if (bindRes && bindRes.status === 'success' && bindRes.linkedUser) {
+                    localStorage.setItem(PORT_USER_CACHE_KEY, JSON.stringify(bindRes.linkedUser));
+                } else {
+                    const fallbackViewer = {
+                        std_id: resolvedStudent.std_id,
+                        prefix: resolvedStudent.prefix,
+                        fname: resolvedStudent.fname,
+                        lname: resolvedStudent.lname,
+                        fullName: `${resolvedStudent.prefix}${resolvedStudent.fname} ${resolvedStudent.lname}`.trim(),
+                        level: resolvedStudent.level || 'นักเรียน',
+                        room: resolvedStudent.room || '-',
+                        plan: resolvedStudent.plan || '-',
+                        isAdminOrDj: resolvedStudent.std_id === '29903'
+                    };
+                    localStorage.setItem(PORT_USER_CACHE_KEY, JSON.stringify(fallbackViewer));
+                }
+                hideLoader();
                 await loadPortfolioData();
-            } else {
-                Swal.fire({ icon: 'error', title: 'ยืนยันตัวตนไม่สำเร็จ', text: bindRes.message, customClass: { popup: 'swal-glass' } });
+            } catch (err) {
+                hideLoader();
+                Swal.fire({ icon: 'error', title: 'ยืนยันตัวตนไม่สำเร็จ', text: err.message, customClass: { popup: 'swal-glass' } });
             }
         }
 
@@ -519,17 +621,22 @@
             const confirm = await Swal.fire({
                 icon: 'warning',
                 title: 'สลับบัญชีรหัสนักเรียน?',
-                text: 'ต้องการยกเลิกการผูกบัญชี LINE กับรหัสนักเรียนปัจจุบันหรือไม่',
+                text: 'ต้องการออกจากรหัสนักเรียนปัจจุบันเพื่อเปลี่ยนบัญชีหรือไม่',
                 showCancelButton: true,
-                confirmButtonText: 'ยืนยันยกเลิก',
+                confirmButtonText: 'ยืนยันสลับบัญชี',
                 cancelButtonText: 'ปิด',
                 confirmButtonColor: '#EF4444',
                 customClass: { popup: 'swal-glass' }
             });
             if (confirm.isConfirmed) {
-                setLoader('กำลังยกเลิกการผูกบัญชี...');
-                await callApi(API_RADIO_URL, { action: 'unlinkLineAccount' });
-                location.reload();
+                setLoader('กำลังสลับบัญชี...');
+                localStorage.removeItem(PORT_USER_CACHE_KEY);
+                if (lineAccessToken) {
+                    await callApi(API_RADIO_URL, { action: 'unlinkLineAccount' }).catch(() => {});
+                }
+                hideLoader();
+                currentViewer = null;
+                showScreen('link-screen');
             }
         }
 
@@ -635,7 +742,7 @@
             let embedUrl = p.pdfUrl || '';
             const match = embedUrl.match(/(?:\/d\/|id=)([a-zA-Z0-9_-]{20,})/);
             if (match && match[1]) {
-                embedUrl = `[https://drive.google.com/file/d/$](https://drive.google.com/file/d/$){match[1]}/preview`;
+                embedUrl = `https://drive.google.com/file/d/${match[1]}/preview`;
             }
             document.getElementById('v_pdf_frame').src = embedUrl;
             document.getElementById('v_external_btn').href = embedUrl;
@@ -690,9 +797,9 @@
                     academicYear: document.getElementById('p_year').value.trim() || '2569',
                     projectName: document.getElementById('p_project').value.trim(),
                     track: document.getElementById('p_track').value,
-                    gpaxRange: document.getElementById('p_gpax').value.trim(),
+                    gpaxRange: document.getElementById('p_gpax').value.trim() || '3.50 - 4.00',
                     designTag: document.getElementById('p_style').value,
-                    colorTag: document.getElementById('p_color').value.trim(),
+                    colorTag: document.getElementById('p_color').value.trim() || 'ม่วง-เหลือง',
                     highlights: document.getElementById('p_highlights').value.trim(),
                     interviewTips: document.getElementById('p_tips').value.trim(),
                     contactIg: document.getElementById('p_ig').value.trim(),
