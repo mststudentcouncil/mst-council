@@ -13,20 +13,22 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: { anuphan: ['Anuphan', 'sans-serif'] },
-                    colors: {
-                        mstPurple: '#4C1D95',
-                        mstPurpleLight: '#EDE9FE',
-                        mstYellow: '#FBBF24',
-                        mstCream: '#FEFCF5',
-                        mstDark: '#1E1B4B',
-                        lineGreen: '#06C755'
+        if (typeof tailwind !== 'undefined') {
+            tailwind.config = {
+                theme: {
+                    extend: {
+                        fontFamily: { anuphan: ['Anuphan', 'sans-serif'] },
+                        colors: {
+                            mstPurple: '#4C1D95',
+                            mstPurpleLight: '#EDE9FE',
+                            mstYellow: '#FBBF24',
+                            mstCream: '#FEFCF5',
+                            mstDark: '#1E1B4B',
+                            lineGreen: '#06C755'
+                        }
                     }
                 }
-            }
+            };
         }
     </script>
 
@@ -46,13 +48,14 @@
             font-family: 'Anuphan', sans-serif;
             background: linear-gradient(135deg, #f3e5f5 0%, #fffde7 100%);
             min-height: 100vh;
+            margin: 0;
             overflow-x: hidden;
             -webkit-tap-highlight-color: transparent;
             padding-top: env(safe-area-inset-top);
             padding-bottom: calc(env(safe-area-inset-bottom) + 4rem);
         }
         .glass {
-            background: rgba(255, 255, 255, 0.82);
+            background: rgba(255, 255, 255, 0.85);
             backdrop-filter: blur(14px);
             -webkit-backdrop-filter: blur(14px);
             border: 1px solid rgba(255, 255, 255, 0.92);
@@ -74,21 +77,23 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .stat-card-active { ring: 2px solid #4C1D95; border-color: #4C1D95 !important; background: #FAF5FF !important; }
     </style>
 </head>
 <body class="text-gray-800 antialiased">
 
-    <!-- Global Loader (ไอคอนโหลดมาตรฐานระบบ Feedback) -->
+    <!-- Global Loader -->
     <div id="globalLoader" class="loader-overlay">
         <i class="fas fa-circle-notch fa-spin text-5xl text-mstPurple mb-4 drop-shadow-md"></i>
         <p class="text-base font-bold text-mstPurple" id="loaderText">กำลังตรวจสอบข้อมูล...</p>
     </div>
 
-    <!-- HEADER (ผู้ใช้งานทั่วไป) -->
-    <div class="sticky top-0 z-40 px-4 pt-3 pb-2 bg-transparent max-w-4xl mx-auto">
+    <!-- HEADER WRAPPER -->
+    <div class="sticky top-0 z-40 px-4 pt-3 pb-2 bg-transparent max-w-5xl mx-auto">
+        <!-- HEADER (ผู้ใช้งานทั่วไป) -->
         <header class="glass rounded-2xl px-4 py-3 flex justify-between items-center hidden shadow-sm border border-white" id="mainHeader">
             <div class="flex items-center gap-3 cursor-pointer min-w-0" onclick="nav('homePage')">
-                <img src="/logo.webp" class="w-10 h-10 object-contain drop-shadow-sm shrink-0" alt="MSTSC Logo">
+                <img src="/logo.webp" style="width: 40px; height: 40px;" class="w-10 h-10 object-contain drop-shadow-sm shrink-0" alt="MSTSC Logo">
                 <div class="min-w-0">
                     <div class="flex items-center gap-1.5">
                         <h1 class="text-sm font-black text-mstPurple leading-tight truncate">STUDENT COUNCIL</h1>
@@ -101,8 +106,11 @@
                 <span id="syncIndicator" class="hidden text-[10px] font-bold text-mstPurple bg-purple-50 px-2.5 py-1 rounded-full border border-purple-100 items-center gap-1">
                     <i class="fas fa-circle-notch fa-spin text-[10px]"></i> ซิงค์ข้อมูล
                 </span>
+                <a href="/richmenuline" class="w-9 h-9 rounded-xl bg-purple-50 hover:bg-purple-100 text-mstPurple border border-purple-100 flex items-center justify-center text-xs transition" title="เมนูบริการนักเรียน">
+                    <i class="fa-solid fa-grip"></i>
+                </a>
                 <div id="userProfile" class="flex items-center gap-2 cursor-pointer" onclick="openProfile()" title="ข้อมูลส่วนตัว">
-                    <img id="profileImage" src="/logo.webp" class="w-9 h-9 rounded-full border-2 border-mstYellow shadow-sm object-cover bg-white hover:scale-105 transition" alt="Profile" onerror="this.src='/logo.webp'">
+                    <img id="profileImage" src="/logo.webp" style="width: 36px; height: 36px;" class="w-9 h-9 rounded-full border-2 border-mstYellow shadow-sm object-cover bg-white hover:scale-105 transition" alt="Profile" onerror="this.src='/logo.webp'">
                 </div>
             </div>
         </header>
@@ -110,34 +118,40 @@
         <!-- HEADER (ผู้ดูแลระบบสภานักเรียน) -->
         <header class="glass rounded-2xl px-4 sm:px-5 py-3 flex justify-between items-center shadow-sm border border-white hidden" id="adminHeader">
             <div class="flex items-center gap-3 min-w-0">
-                <img src="/logo.webp" class="w-10 h-10 sm:w-11 sm:h-11 object-contain drop-shadow-sm shrink-0" alt="MSTSC Logo">
+                <img src="/logo.webp" style="width: 42px; height: 42px;" class="w-10 h-10 sm:w-11 sm:h-11 object-contain drop-shadow-sm shrink-0" alt="MSTSC Logo">
                 <div class="min-w-0">
-                    <span class="font-black text-mstPurple text-base sm:text-lg tracking-tight leading-none block truncate">PUBLIC HEARING</span>
-                    <span class="text-[10px] font-bold text-gray-500 uppercase block mt-0.5">Student Council Admin</span>
+                    <div class="flex items-center gap-1.5">
+                        <span class="font-black text-mstPurple text-sm sm:text-lg tracking-tight leading-none truncate">PUBLIC HEARING</span>
+                        <span class="bg-mstPurple text-mstYellow text-[9px] font-black px-2 py-0.5 rounded-full uppercase shrink-0">SC ADMIN</span>
+                    </div>
+                    <p class="text-[10px] font-bold text-gray-500 truncate mt-0.5" id="showAdminNameMobile">ผู้ดูแลระบบสภานักเรียน</p>
                 </div>
             </div>
-            <div class="flex items-center gap-2 sm:gap-3 shrink-0">
-                <div class="hidden md:flex flex-col text-right">
+            <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
+                <div class="hidden md:flex flex-col text-right mr-1">
                     <span class="text-xs font-black text-gray-800" id="showAdminName">...</span>
-                    <span class="text-[9px] text-mstPurple font-bold uppercase tracking-widest bg-purple-100 px-2 py-0.5 rounded-full inline-block mt-0.5 self-end">VERIFIED</span>
+                    <span class="text-[9px] text-emerald-700 font-bold uppercase tracking-wider bg-emerald-100 px-2 py-0.5 rounded-full inline-block mt-0.5 self-end"><i class="fas fa-check-circle mr-0.5"></i>REGIS VERIFIED</span>
                 </div>
-                <img id="adminProfileImage" src="/logo.webp" class="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 border-mstYellow shadow-sm object-cover bg-white" alt="Profile" onerror="this.src='/logo.webp'">
-                <button onclick="loadAdminData(true)" class="bg-white text-mstPurple border border-purple-100 w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center transition-all shadow-sm hover:bg-mstPurple hover:text-white" title="รีเฟรชข้อมูล">
+                <img id="adminProfileImage" src="/logo.webp" style="width: 36px; height: 36px;" class="w-9 h-9 rounded-full border-2 border-mstYellow shadow-sm object-cover bg-white hidden sm:block" alt="Profile" onerror="this.src='/logo.webp'">
+                <button onclick="loadAdminData(true)" class="bg-white text-mstPurple border border-purple-100 w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center transition-all shadow-xs hover:bg-mstPurple hover:text-white" title="รีเฟรชข้อมูลล่าสุด">
                     <i class="fa-solid fa-rotate-right text-xs sm:text-sm"></i>
                 </button>
-                <button onclick="exitAdminMode()" class="bg-red-50 text-red-600 border border-red-200 w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center transition-all shadow-sm hover:bg-red-500 hover:text-white" title="กลับสู่หน้าหลัก">
-                    <i class="fas fa-sign-out-alt text-xs sm:text-sm"></i>
+                <button onclick="unlinkAdminSession()" class="bg-amber-50 text-amber-700 border border-amber-200 w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center transition-all shadow-xs hover:bg-amber-500 hover:text-white" title="เปลี่ยนบัญชีสภา / ยืนยันสิทธิ์ใหม่">
+                    <i class="fa-solid fa-user-lock text-xs sm:text-sm"></i>
+                </button>
+                <button onclick="exitAdminMode()" class="bg-red-50 text-red-600 border border-red-200 px-3 h-9 sm:h-10 rounded-xl flex items-center justify-center gap-1.5 transition-all shadow-xs hover:bg-red-500 hover:text-white text-xs font-bold" title="กลับสู่หน้าผู้ใช้งานทั่วไป">
+                    <i class="fas fa-sign-out-alt"></i> <span class="hidden sm:inline">ออกโหมดสภา</span>
                 </button>
             </div>
         </header>
     </div>
 
-    <main class="max-w-4xl mx-auto px-4 pt-2" id="mainContainer">
+    <main class="max-w-5xl mx-auto px-4 pt-2" id="mainContainer">
 
         <!-- 1. LOGIN -->
         <section id="loginPage" class="hidden fade-in flex flex-col items-center justify-center min-h-[78vh]">
             <div class="glass rounded-[2.5rem] p-8 text-center max-w-sm w-full relative shadow-lg">
-                <img src="/logo.webp" class="w-24 h-24 mx-auto mb-4 drop-shadow-md object-contain" alt="MSTSC Logo">
+                <img src="/logo.webp" style="width: 96px; height: 96px;" class="w-24 h-24 mx-auto mb-4 drop-shadow-md object-contain" alt="MSTSC Logo">
                 <span class="inline-block bg-purple-50 text-mstPurple text-[10px] font-extrabold px-3.5 py-1 rounded-full border border-purple-100 uppercase tracking-widest mb-2">MSTSC Official</span>
                 <h2 class="text-2xl font-black text-mstDark mb-1">PUBLIC HEARING</h2>
                 <p class="text-xs font-medium text-gray-500 mb-6">ระบบรับฟังความคิดเห็นและเรื่องร้องเรียนสภานักเรียน</p>
@@ -188,7 +202,7 @@
             <h2 class="text-xl font-black text-mstPurple mb-4 text-center">ข้อมูลส่วนตัวผู้ใช้งาน</h2>
 
             <div id="profileView" class="flex flex-col items-center text-center space-y-2.5">
-                <img id="profileViewImage" src="/logo.webp" class="w-24 h-24 rounded-full border-4 border-mstYellow shadow-md mb-1 object-cover bg-white" alt="Profile" onerror="this.src='/logo.webp'">
+                <img id="profileViewImage" src="/logo.webp" style="width: 96px; height: 96px;" class="w-24 h-24 rounded-full border-4 border-mstYellow shadow-md mb-1 object-cover bg-white" alt="Profile" onerror="this.src='/logo.webp'">
                 <h3 id="viewName" class="text-lg font-black text-gray-900"></h3>
                 <span id="viewStatus" class="bg-mstPurple text-white text-xs px-4 py-1 rounded-full font-bold shadow-xs"></span>
 
@@ -365,7 +379,7 @@
         </section>
 
         <!-- 7. TRACKING -->
-        <section id="trackPage" class="hidden fade-in glass rounded-[2rem] p-5 sm:p-6 min-h-[70vh] mt-2">
+        <section id="trackPage" class="hidden fade-in glass rounded-[2rem] p-5 sm:p-6 min-h-[70vh] max-w-3xl mx-auto mt-2">
             <div class="flex justify-between items-center mb-4 pb-3 border-b border-gray-200/80">
                 <div class="flex items-center gap-3">
                     <button onclick="nav('homePage')" class="text-mstPurple bg-purple-50 w-9 h-9 rounded-xl flex items-center justify-center border border-purple-100">
@@ -387,14 +401,14 @@
         </section>
 
         <!-- 8. DETAIL VIEW -->
-        <section id="detailPage" class="hidden fade-in glass rounded-[2rem] p-5 sm:p-6 mt-2">
+        <section id="detailPage" class="hidden fade-in glass rounded-[2rem] p-5 sm:p-6 max-w-3xl mx-auto mt-2">
             <button onclick="nav(lastNavPage)" class="text-mstPurple font-bold text-xs mb-4 flex items-center gap-2 bg-purple-50 px-3.5 py-2 rounded-xl border border-purple-100 w-fit">
                 <i class="fas fa-arrow-left"></i> ย้อนกลับ
             </button>
             <div class="bg-white rounded-2xl p-5 shadow-xs border border-gray-100 space-y-4" id="detailContent"></div>
         </section>
 
-        <!-- 9. ADMIN VERIFY MODAL -->
+        <!-- 9. ADMIN VERIFY MODAL (Strict 2-Factor REGIS Verification) -->
         <section id="verifyScreen" class="hidden fixed inset-0 flex items-center justify-center p-4 z-50 bg-slate-900/60 backdrop-blur-sm">
             <div class="glass bg-white/95 p-6 sm:p-8 rounded-[2.25rem] w-full max-w-md relative overflow-hidden fade-in shadow-2xl border border-white">
                 <button onclick="$('#verifyScreen').addClass('hidden')" class="absolute top-4 right-4 text-gray-400 hover:text-red-500 w-9 h-9 flex items-center justify-center bg-gray-100 rounded-full">
@@ -402,10 +416,10 @@
                 </button>
 
                 <div class="text-center mb-5 mt-1">
-                    <img src="/logo.webp" class="w-16 h-16 mx-auto mb-2.5 drop-shadow-sm object-contain" alt="MSTSC Logo">
-                    <span class="bg-purple-50 text-mstPurple text-[10px] font-black px-3 py-1 rounded-full border border-purple-100 uppercase tracking-wider">REGIS Security Check</span>
+                    <img src="/logo.webp" style="width: 64px; height: 64px;" class="w-16 h-16 mx-auto mb-2.5 drop-shadow-sm object-contain" alt="MSTSC Logo">
+                    <span class="bg-purple-50 text-mstPurple text-[10px] font-black px-3 py-1 rounded-full border border-purple-100 uppercase tracking-wider">REGIS Two-Factor Security</span>
                     <h2 class="text-xl font-black text-mstDark mt-2">ยืนยันตัวตนสภานักเรียน</h2>
-                    <p class="text-xs text-gray-500 mt-1">ตรวจสอบสิทธิ์จากฐานข้อมูลรายงานตัวคณะกรรมการสภา (REGIS)</p>
+                    <p class="text-xs text-gray-500 mt-1">ตรวจสอบรหัสนักเรียนและเลขบัตรประชาชนตรงกับฐานข้อมูล REGIS</p>
                 </div>
 
                 <form onsubmit="verifyCouncilIdentity(event)" class="space-y-4">
@@ -418,7 +432,7 @@
 
                     <div>
                         <label class="block text-xs font-bold text-gray-700 mb-1.5">
-                            <i class="fas fa-shield-alt text-mstPurple mr-1"></i> เลขประจำตัวประชาชน (13 หลัก ที่ลงทะเบียนใน REGIS) <span class="text-red-500">*</span>
+                            <i class="fas fa-shield-alt text-mstPurple mr-1"></i> เลขประจำตัวประชาชน 13 หลัก (ที่ลงทะเบียนใน REGIS) <span class="text-red-500">*</span>
                         </label>
                         <div class="relative">
                             <input type="password" id="verifyIdCardInput" maxlength="13" inputmode="numeric" required placeholder="ระบุเลขบัตรประชาชน 13 หลัก" class="w-full p-3.5 pr-11 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-mstPurple outline-none text-center text-base font-bold tracking-widest">
@@ -429,7 +443,7 @@
                     </div>
 
                     <div class="bg-purple-50/80 p-3 rounded-xl border border-purple-100 text-[11px] text-gray-600 leading-relaxed">
-                        <i class="fas fa-lock text-mstPurple mr-1"></i> ระบบจะตรวจสอบรหัสนักเรียนคู่กับเลขประจำตัวประชาชนจากฐานข้อมูล <b>REGIS</b> และผูกสิทธิ์กับบัญชี LINE ของท่านโดยอัตโนมัติ
+                        <i class="fas fa-lock text-mstPurple mr-1"></i> ระบบจะตรวจสอบรหัสนักเรียนคู่กับเลขประจำตัวประชาชน 13 หลักจากฐานข้อมูล <b>REGIS</b> แบบตรงกันทุกหลักก่อนอนุญาตให้เข้าใช้งาน
                     </div>
 
                     <button type="submit" id="btnVerifyCouncil" class="w-full bg-gradient-to-r from-mstPurple to-purple-800 text-white font-bold py-4 rounded-xl shadow-md hover:shadow-lg transition text-sm flex items-center justify-center gap-2">
@@ -439,88 +453,238 @@
             </div>
         </section>
 
-        <!-- 10. ADMIN DASHBOARD -->
-        <section id="adminDashboard" class="hidden fade-in pb-10 mt-2">
-            <a href="https://t.me/+ZEsGMYLa5UYxMWE1" target="_blank" rel="noopener noreferrer" class="mb-5 w-full bg-gradient-to-r from-[#0088cc] to-[#0099e5] text-white py-3.5 px-4 rounded-2xl shadow-sm hover:shadow-md font-bold flex items-center justify-center gap-2.5 text-sm transition-all">
-                <i class="fab fa-telegram-plane text-xl"></i> เข้าร่วมกลุ่มรับแจ้งเตือนผ่าน Telegram
-            </a>
+        <!-- ============================================== -->
+        <!-- 10. ADMIN DASHBOARD (ศูนย์บริหารจัดการเรื่องร้องเรียนสภานักเรียน) -->
+        <!-- ============================================== -->
+        <section id="adminDashboard" class="hidden fade-in pb-12 mt-2 space-y-5">
 
-            <!-- Filters Section -->
-            <div class="glass rounded-2xl p-4 sm:p-5 mb-5 border border-white shadow-sm">
-                <h3 class="text-xs font-black text-mstPurple uppercase tracking-wider mb-3 flex items-center gap-2">
-                    <i class="fas fa-filter text-mstYellow"></i> ค้นหาและกรองรายการร้องเรียน
-                </h3>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                    <div class="relative w-full">
-                        <i class="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
-                        <input type="text" id="searchInput" oninput="filterCards()" placeholder="ค้นหารหัส, ชื่อ, เนื้อหา..." class="w-full pl-9 pr-4 py-2.5 rounded-xl border border-gray-200 bg-white focus:border-mstPurple outline-none font-semibold text-xs">
+            <!-- แถบเครื่องมือด่วนของคณะกรรมการสภานักเรียน -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <a href="https://t.me/+ZEsGMYLa5UYxMWE1" target="_blank" rel="noopener noreferrer" class="bg-gradient-to-r from-[#0088cc] to-[#0099e5] text-white py-3.5 px-4 rounded-2xl shadow-sm hover:shadow-md font-bold flex items-center justify-center gap-2.5 text-xs sm:text-sm transition-all">
+                    <i class="fab fa-telegram-plane text-lg"></i> กลุ่มแจ้งเตือนเรื่องร้องเรียน (Telegram)
+                </a>
+                <div class="flex gap-2">
+                    <button onclick="exportFilteredToCSV()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-3.5 px-4 rounded-2xl shadow-sm font-bold flex items-center justify-center gap-2 text-xs sm:text-sm transition-all">
+                        <i class="fas fa-file-csv text-base"></i> ส่งออกไฟล์ Excel (CSV)
+                    </button>
+                    <button onclick="toggleCategoryAnalytics()" class="bg-white hover:bg-purple-50 text-mstPurple border border-purple-200 py-3.5 px-4 rounded-2xl shadow-xs font-bold flex items-center justify-center gap-1.5 text-xs sm:text-sm transition-all" title="ดูสถิติแยกตามหมวดหมู่">
+                        <i class="fas fa-chart-pie"></i> <span class="hidden sm:inline">สถิติหมวดหมู่</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- การ์ดสรุปสถิติ KPI 6 ช่อง (คลิกเพื่อกรองสถานะได้ทันที) -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 sm:gap-3">
+                <div onclick="quickFilterByCard('all')" id="kpiCard_all" class="glass bg-white/95 p-3.5 rounded-2xl border border-white cursor-pointer hover:border-mstPurple transition-all stat-card-active">
+                    <div class="flex items-center justify-between text-gray-400 text-xs mb-1">
+                        <span class="font-bold text-[11px] text-gray-500">เรื่องทั้งหมด</span>
+                        <i class="fas fa-layer-group text-mstPurple"></i>
                     </div>
+                    <p class="text-2xl font-black text-mstDark" id="kpiTotal">0</p>
+                    <p class="text-[10px] font-bold text-gray-400 mt-0.5" id="kpiPublicRatio">สาธารณะ 0 • ปกปิด 0</p>
+                </div>
+
+                <div onclick="quickFilterByCard('รอดำเนินการ')" id="kpiCard_pending" class="glass bg-white/95 p-3.5 rounded-2xl border border-white cursor-pointer hover:border-amber-400 transition-all">
+                    <div class="flex items-center justify-between text-amber-500 text-xs mb-1">
+                        <span class="font-bold text-[11px] text-amber-700">รอดำเนินการ</span>
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <p class="text-2xl font-black text-amber-600" id="kpiPending">0</p>
+                    <p class="text-[10px] font-bold text-amber-600/80 mt-0.5">รอสภาฯ รับเรื่อง</p>
+                </div>
+
+                <div onclick="quickFilterByCard('กำลังดำเนินการ')" id="kpiCard_progress" class="glass bg-white/95 p-3.5 rounded-2xl border border-white cursor-pointer hover:border-blue-400 transition-all">
+                    <div class="flex items-center justify-between text-blue-500 text-xs mb-1">
+                        <span class="font-bold text-[11px] text-blue-700">กำลังดำเนินการ</span>
+                        <i class="fas fa-spinner"></i>
+                    </div>
+                    <p class="text-2xl font-black text-blue-600" id="kpiProgress">0</p>
+                    <p class="text-[10px] font-bold text-blue-600/80 mt-0.5" id="kpiAcceptedSub">รับเรื่องแล้ว 0</p>
+                </div>
+
+                <div onclick="quickFilterByCard('เสร็จสิ้น')" id="kpiCard_done" class="glass bg-white/95 p-3.5 rounded-2xl border border-white cursor-pointer hover:border-emerald-400 transition-all">
+                    <div class="flex items-center justify-between text-emerald-500 text-xs mb-1">
+                        <span class="font-bold text-[11px] text-emerald-700">แก้ไขเสร็จสิ้น</span>
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <p class="text-2xl font-black text-emerald-600" id="kpiDone">0</p>
+                    <p class="text-[10px] font-bold text-emerald-600/80 mt-0.5" id="kpiDoneRate">สำเร็จ 0%</p>
+                </div>
+
+                <div onclick="quickFilterByCard('ปฏิเสธ/ไม่สามารถดำเนินการได้')" id="kpiCard_rejected" class="glass bg-white/95 p-3.5 rounded-2xl border border-white cursor-pointer hover:border-rose-400 transition-all">
+                    <div class="flex items-center justify-between text-rose-500 text-xs mb-1">
+                        <span class="font-bold text-[11px] text-rose-700">ปฏิเสธ/งดพิจารณา</span>
+                        <i class="fas fa-ban"></i>
+                    </div>
+                    <p class="text-2xl font-black text-rose-600" id="kpiRejected">0</p>
+                    <p class="text-[10px] font-bold text-rose-500/80 mt-0.5">ข้อมูลไม่เพียงพอ</p>
+                </div>
+
+                <div onclick="quickFilterByCard('MY_CASES')" id="kpiCard_mine" class="glass bg-white/95 p-3.5 rounded-2xl border border-white cursor-pointer hover:border-mstPurple transition-all">
+                    <div class="flex items-center justify-between text-mstPurple text-xs mb-1">
+                        <span class="font-bold text-[11px] text-mstPurple">เคสที่ฉันดูแล</span>
+                        <i class="fas fa-user-check"></i>
+                    </div>
+                    <p class="text-2xl font-black text-mstPurple" id="kpiMine">0</p>
+                    <p class="text-[10px] font-bold text-purple-500 mt-0.5">คลิกดูเฉพาะเคสฉัน</p>
+                </div>
+            </div>
+
+            <!-- กล่องสถิติแยกตามหมวดหมู่ (พับ/กางได้) -->
+            <div id="categoryAnalyticsBox" class="hidden glass rounded-2xl p-4 sm:p-5 border border-white shadow-xs space-y-3 fade-in">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-xs font-black text-mstPurple uppercase tracking-wider flex items-center gap-2">
+                        <i class="fas fa-chart-bar text-mstYellow"></i> สัดส่วนเรื่องร้องเรียนแยกตามหมวดหมู่ (คลิกเพื่อกรองหมวดหมู่)
+                    </h3>
+                    <button onclick="toggleCategoryAnalytics()" class="text-xs font-bold text-gray-400 hover:text-gray-600">ซ่อน</button>
+                </div>
+                <div id="categoryBreakdownList" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5"></div>
+            </div>
+
+            <!-- ตัวกรองและการค้นหาขั้นสูงสำหรับสภานักเรียน -->
+            <div class="glass rounded-2xl p-4 sm:p-5 border border-white shadow-sm space-y-3">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                    <h3 class="text-xs font-black text-mstPurple uppercase tracking-wider flex items-center gap-2">
+                        <i class="fas fa-sliders text-mstYellow"></i> ตัวกรองและค้นหาข้อมูลเคส
+                        <span id="filteredCountBadge" class="bg-purple-100 text-mstPurple px-2 py-0.5 rounded-full text-[10px] font-black">0 รายการ</span>
+                    </h3>
+                    <button onclick="resetAllAdminFilters()" class="text-[11px] font-bold text-gray-500 hover:text-mstPurple flex items-center gap-1">
+                        <i class="fas fa-rotate-left"></i> ล้างตัวกรองทั้งหมด
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5">
+                    <div class="relative sm:col-span-2 lg:col-span-1">
+                        <i class="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+                        <input type="text" id="searchInput" oninput="filterCards()" placeholder="ค้นหา ID, ชื่อ, เบอร์, เนื้อหา..." class="w-full pl-9 pr-3 py-2.5 rounded-xl border border-gray-200 bg-white focus:border-mstPurple outline-none font-semibold text-xs">
+                    </div>
+
                     <select id="categoryFilter" onchange="filterCards()" class="w-full py-2.5 px-3 rounded-xl border border-gray-200 bg-white focus:border-mstPurple outline-none font-bold text-gray-700 text-xs cursor-pointer">
                         <option value="all">ทุกหมวดหมู่</option>
                     </select>
+
                     <select id="statusFilter" onchange="filterCards()" class="w-full py-2.5 px-3 rounded-xl border border-gray-200 bg-white focus:border-mstPurple outline-none font-bold text-mstPurple text-xs cursor-pointer">
-                        <option value="all">ทุกสถานะ</option>
+                        <option value="all">ทุกสถานะการดำเนินงาน</option>
                         <option value="รอดำเนินการ">รอดำเนินการ</option>
                         <option value="รับเรื่องแล้ว">รับเรื่องแล้ว</option>
                         <option value="กำลังดำเนินการ">กำลังดำเนินการ</option>
                         <option value="เสร็จสิ้น">เสร็จสิ้น</option>
                         <option value="ปฏิเสธ/ไม่สามารถดำเนินการได้">ปฏิเสธ/ไม่สามารถดำเนินการได้</option>
                     </select>
+
+                    <select id="assignFilter" onchange="filterCards()" class="w-full py-2.5 px-3 rounded-xl border border-gray-200 bg-white focus:border-mstPurple outline-none font-bold text-gray-700 text-xs cursor-pointer">
+                        <option value="all">ผู้รับผิดชอบทั้งหมด</option>
+                        <option value="mine">เฉพาะเคสที่ฉันรับผิดชอบ</option>
+                        <option value="unassigned">ยังไม่มีผู้รับผิดชอบ</option>
+                    </select>
+
+                    <select id="consentFilter" onchange="filterCards()" class="w-full py-2.5 px-3 rounded-xl border border-gray-200 bg-white focus:border-mstPurple outline-none font-bold text-gray-700 text-xs cursor-pointer">
+                        <option value="all">การเปิดเผยทั้งหมด</option>
+                        <option value="ยินยอม">เฉพาะที่ยินยอมเปิดเผยสาธารณะ</option>
+                        <option value="ไม่ยินยอม">เฉพาะเคสปกปิดชื่อ (ลับ)</option>
+                    </select>
                 </div>
             </div>
 
             <!-- Cards Container -->
             <div id="cardsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+
+            <!-- ทางลัดระบบสารสนเทศสำหรับคณะกรรมการสภานักเรียน -->
+            <div class="glass rounded-2xl p-4 sm:p-5 border border-white shadow-xs">
+                <h4 class="text-xs font-black text-mstPurple uppercase tracking-wider mb-3 flex items-center gap-2">
+                    <i class="fas fa-server text-mstYellow"></i> ทางลัดระบบงานสภานักเรียน (MSTSC Staff Hub)
+                </h4>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs font-bold">
+                    <a href="/regis" target="_blank" class="bg-white hover:bg-purple-50 p-3 rounded-xl border border-gray-100 flex items-center gap-2.5 text-gray-700 hover:text-mstPurple transition">
+                        <i class="fas fa-id-card-clip text-mstPurple text-base"></i> ระบบรายงานตัว REGIS
+                    </a>
+                    <a href="/radio/admin_radio.html" target="_blank" class="bg-white hover:bg-purple-50 p-3 rounded-xl border border-gray-100 flex items-center gap-2.5 text-gray-700 hover:text-mstPurple transition">
+                        <i class="fas fa-tower-broadcast text-mstPurple text-base"></i> แผงควบคุมดีเจ Radio
+                    </a>
+                    <a href="/portfolio" target="_blank" class="bg-white hover:bg-purple-50 p-3 rounded-xl border border-gray-100 flex items-center gap-2.5 text-gray-700 hover:text-mstPurple transition">
+                        <i class="fas fa-book-open-reader text-amber-500 text-base"></i> อนุมัติ Portfolio รุ่นพี่
+                    </a>
+                    <a href="/admin.html" target="_blank" class="bg-white hover:bg-purple-50 p-3 rounded-xl border border-gray-100 flex items-center gap-2.5 text-gray-700 hover:text-mstPurple transition">
+                        <i class="fas fa-shield-halved text-emerald-600 text-base"></i> ระบบจัดการเว็บหลัก CMS
+                    </a>
+                </div>
+            </div>
         </section>
 
-        <!-- 11. ADMIN EDIT MODAL -->
-        <div id="adminEditModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-            <div class="glass bg-white rounded-[2rem] w-full max-w-lg shadow-2xl flex flex-col border border-white fade-in overflow-hidden">
-                <div class="bg-white p-5 flex justify-between items-center border-b border-gray-100">
-                    <div>
-                        <h3 class="text-lg font-black text-mstPurple flex items-center gap-2">
-                            <i class="fas fa-clipboard-check text-mstYellow text-xl"></i> อัปเดตการดำเนินงาน
-                        </h3>
-                        <p id="modalId" class="text-[11px] text-gray-500 font-mono font-bold mt-1 bg-gray-100 inline-block px-2 py-0.5 rounded border border-gray-200"></p>
+        <!-- 11. ADMIN EDIT MODAL (แสดงข้อมูลเรื่องร้องเรียน + ข้อมูลติดต่อผู้แจ้ง + ฟอร์มอัปเดตในหน้าต่างเดียว) -->
+        <div id="adminEditModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-4">
+            <div class="glass bg-white rounded-[2rem] w-full max-w-2xl shadow-2xl flex flex-col border border-white fade-in overflow-hidden max-h-[92vh]">
+                <div class="bg-white px-5 py-4 flex justify-between items-center border-b border-gray-100 shrink-0">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-10 h-10 rounded-xl bg-purple-50 text-mstPurple flex items-center justify-center text-lg border border-purple-100">
+                            <i class="fas fa-clipboard-check"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-base sm:text-lg font-black text-mstPurple leading-tight">จัดการและบันทึกผลการดำเนินงาน</h3>
+                            <p id="modalId" class="text-[11px] text-gray-500 font-mono font-bold mt-0.5"></p>
+                        </div>
                     </div>
                     <button onclick="$('#adminEditModal').addClass('hidden')" class="text-gray-400 hover:text-red-500 bg-gray-50 w-9 h-9 rounded-full flex items-center justify-center border border-gray-200">
                         <i class="fa-solid fa-xmark"></i>
                     </button>
                 </div>
 
-                <div class="p-5 overflow-y-auto max-h-[72vh] bg-gray-50/70 no-scrollbar">
+                <div class="p-4 sm:p-6 overflow-y-auto flex-1 bg-gray-50/70 space-y-4 no-scrollbar">
+
+                    <!-- กล่องแสดงรายละเอียดเรื่องที่แจ้งและข้อมูลผู้แจ้ง (อ่านได้ทันทีขณะพิมพ์ตอบ) -->
+                    <div id="modalCaseSummaryBox" class="bg-white p-4 rounded-2xl border border-purple-100 shadow-xs space-y-3 text-xs"></div>
+
                     <form id="adminEditForm" class="space-y-3.5">
                         <input type="hidden" id="adminEditRowId">
 
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div class="bg-white p-4 rounded-2xl shadow-xs border border-gray-100">
+                                <label class="block text-xs font-bold text-gray-600 uppercase mb-1.5"><i class="fas fa-tasks text-mstPurple mr-1"></i> สถานะการดำเนินการ</label>
+                                <select id="updateStatus" class="w-full p-3 border border-gray-200 rounded-xl font-bold text-mstPurple text-xs sm:text-sm outline-none bg-gray-50 focus:bg-white focus:border-mstPurple cursor-pointer">
+                                    <option value="รอดำเนินการ">รอดำเนินการ</option>
+                                    <option value="รับเรื่องแล้ว">รับเรื่องแล้ว</option>
+                                    <option value="กำลังดำเนินการ">กำลังดำเนินการ</option>
+                                    <option value="เสร็จสิ้น">เสร็จสิ้น</option>
+                                    <option value="ปฏิเสธ/ไม่สามารถดำเนินการได้">ปฏิเสธ/ไม่สามารถดำเนินการได้</option>
+                                </select>
+                            </div>
+
+                            <div class="bg-amber-50/80 border border-amber-200 p-4 rounded-2xl flex flex-col justify-between">
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <label class="text-xs font-bold text-mstPurple uppercase flex items-center gap-1"><i class="fas fa-user-shield text-emerald-600"></i> ผู้รับผิดชอบ</label>
+                                    <button type="button" onclick="$('#updateResponsible').val(adminName)" class="text-[10px] font-black bg-white hover:bg-purple-50 text-mstPurple px-2 py-0.5 rounded-lg border border-purple-200 shadow-2xs transition">
+                                        + ใส่ชื่อฉัน
+                                    </button>
+                                </div>
+                                <input type="text" id="updateResponsible" placeholder="ระบุชื่อกรรมการ หรือ ฝ่ายที่รับผิดชอบ" class="w-full p-2.5 bg-white rounded-xl border border-amber-200 text-mstPurple font-black text-xs sm:text-sm outline-none focus:border-mstPurple">
+                            </div>
+                        </div>
+
                         <div class="bg-white p-4 rounded-2xl shadow-xs border border-gray-100">
-                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5"><i class="fas fa-tasks text-mstPurple mr-1"></i> สถานะการดำเนินการ</label>
-                            <select id="updateStatus" class="w-full p-3 border border-gray-200 rounded-xl font-bold text-mstPurple text-sm outline-none bg-gray-50 cursor-pointer">
-                                <option value="รอดำเนินการ">รอดำเนินการ</option>
-                                <option value="รับเรื่องแล้ว">รับเรื่องแล้ว</option>
-                                <option value="กำลังดำเนินการ">กำลังดำเนินการ</option>
-                                <option value="เสร็จสิ้น">เสร็จสิ้น</option>
-                                <option value="ปฏิเสธ/ไม่สามารถดำเนินการได้">ปฏิเสธ/ไม่สามารถดำเนินการได้</option>
-                            </select>
-                        </div>
-
-                        <div class="bg-amber-50/80 border border-amber-200 p-4 rounded-2xl">
-                            <label class="block text-xs font-bold text-mstPurple uppercase mb-1 flex items-center gap-1"><i class="fas fa-user-shield text-emerald-600"></i> ผู้รับผิดชอบ</label>
-                            <input type="text" id="updateResponsible" readonly class="w-full bg-transparent text-mstPurple font-black text-base outline-none pointer-events-none">
+                            <div class="flex items-center justify-between mb-1.5">
+                                <label class="text-xs font-bold text-gray-600 uppercase"><i class="fas fa-wrench text-blue-500 mr-1"></i> การแก้ไขปัญหา / ความคืบหน้าที่จะแจ้งให้ผู้ร้องทราบ</label>
+                            </div>
+                            <textarea id="updateResolution" rows="3" class="w-full p-3 border border-gray-200 bg-gray-50 focus:bg-white focus:border-mstPurple rounded-xl outline-none text-xs sm:text-sm font-medium" placeholder="ระบุสิ่งที่สภานักเรียนได้ประสานงานหรือผลการแก้ไขปัญหา..."></textarea>
+                            <div class="flex flex-wrap gap-1.5 mt-2">
+                                <button type="button" onclick="insertQuickReply('คณะกรรมการสภานักเรียนได้รับเรื่องแล้ว อยู่ระหว่างนำเข้าที่ประชุมและประสานงานฝ่ายที่เกี่ยวข้อง')" class="text-[10px] font-bold bg-gray-100 hover:bg-purple-50 text-gray-600 hover:text-mstPurple px-2.5 py-1 rounded-lg transition">+ รับเรื่องประสานงาน</button>
+                                <button type="button" onclick="insertQuickReply('ประสานงานแจ้งฝ่ายบริหารทั่วไปและงานอาคารสถานที่ดำเนินการแก้ไขเรียบร้อยแล้ว')" class="text-[10px] font-bold bg-gray-100 hover:bg-purple-50 text-gray-600 hover:text-mstPurple px-2.5 py-1 rounded-lg transition">+ แจ้งฝ่ายอาคารแก้ไขแล้ว</button>
+                                <button type="button" onclick="insertQuickReply('นำเสนอต่อคณะผู้บริหารและครูที่ปรึกษาเพื่อพิจารณาตามขั้นตอนเรียบร้อยแล้ว')" class="text-[10px] font-bold bg-gray-100 hover:bg-purple-50 text-gray-600 hover:text-mstPurple px-2.5 py-1 rounded-lg transition">+ นำเสนอผู้บริหารแล้ว</button>
+                            </div>
                         </div>
 
                         <div class="bg-white p-4 rounded-2xl shadow-xs border border-gray-100">
-                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5"><i class="fas fa-wrench text-blue-500 mr-1"></i> การแก้ไขปัญหา / แนวทาง</label>
-                            <textarea id="updateResolution" rows="3" class="w-full p-3 border border-gray-200 bg-gray-50 rounded-xl outline-none text-sm font-medium" placeholder="ระบุสิ่งที่สภานักเรียนได้ประสานงานหรือดำเนินการ..."></textarea>
+                            <label class="block text-xs font-bold text-gray-600 uppercase mb-1.5"><i class="fas fa-comment-dots text-orange-400 mr-1"></i> หมายเหตุเพิ่มเติม (ถ้ามี)</label>
+                            <textarea id="updateRemarks" rows="2" class="w-full p-3 border border-gray-200 bg-gray-50 focus:bg-white focus:border-mstPurple rounded-xl outline-none text-xs sm:text-sm font-medium" placeholder="ข้อมูลเพิ่มเติมหรือบันทึกการติดตามงาน..."></textarea>
                         </div>
 
-                        <div class="bg-white p-4 rounded-2xl shadow-xs border border-gray-100">
-                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5"><i class="fas fa-comment-dots text-orange-400 mr-1"></i> หมายเหตุ (ถ้ามี)</label>
-                            <textarea id="updateRemarks" rows="2" class="w-full p-3 border border-gray-200 bg-gray-50 rounded-xl outline-none text-sm font-medium" placeholder="ข้อมูลเพิ่มเติม..."></textarea>
+                        <div class="flex gap-2.5 pt-1">
+                            <button type="button" onclick="$('#adminEditModal').addClass('hidden')" class="w-1/3 bg-gray-200 hover:bg-gray-300 text-gray-700 py-3.5 rounded-2xl font-bold text-xs sm:text-sm transition">
+                                ยกเลิก
+                            </button>
+                            <button type="submit" class="w-2/3 bg-gradient-to-r from-mstPurple to-purple-800 text-mstYellow py-3.5 rounded-2xl font-black shadow-md text-xs sm:text-sm flex justify-center items-center gap-2 transition">
+                                <i class="fa-solid fa-cloud-arrow-up"></i> บันทึกและอัปเดตสถานะ
+                            </button>
                         </div>
-
-                        <button type="submit" class="w-full bg-gradient-to-r from-mstPurple to-purple-800 text-mstYellow py-4 rounded-2xl font-black shadow-md text-sm flex justify-center items-center gap-2">
-                            <i class="fa-solid fa-cloud-arrow-up"></i> บันทึกและอัปเดตสถานะ
-                        </button>
                     </form>
                 </div>
             </div>
@@ -540,15 +704,14 @@
 
     <script>
         const LIFF_ID = "2008923798-7EBZdt6r";
-        // ใช้ Cloud Run ความเร็วสูงเป็นหลัก และมี Render เป็นตัวสำรองอัตโนมัติ
         const CLOUD_RUN_FEEDBACK_API = "https://admission-backend-592123078141.asia-southeast1.run.app/api/feedback";
         const LEGACY_RENDER_API = "https://mstsc-backend.onrender.com/api";
         const REGIS_CLOUD_RUN_URL = "https://admission-backend-592123078141.asia-southeast1.run.app/api/regis";
 
-        // คีย์สำหรับเก็บแคชความเร็วสูงในเครื่องผู้ใช้ (แสดงผลใน 0.01 วินาที)
+        // คีย์แคชรุ่นใหม่ (v3) เพื่อล้างเซสชันทดสอบเดิมที่ยังไม่ได้ตรวจเลขบัตรแบบเข้มงวด
         const CACHE_USER_KEY = "mstsc_hearing_user_v2_";
         const CACHE_COMPLAINTS_KEY = "mstsc_hearing_complaints_v2";
-        const CACHE_ADMIN_KEY = "mstsc_hearing_admin_v2_";
+        const CACHE_ADMIN_KEY = "mstsc_hearing_admin_strict_v3_";
 
         let liffProfile = null;
         let userData = null;
@@ -604,6 +767,31 @@
             nav('homePage');
         }
 
+        function unlinkAdminSession() {
+            Swal.fire({
+                title: 'ยืนยันสิทธิ์สภานักเรียนใหม่?',
+                text: 'ระบบจะล้างการจำสิทธิ์สภานักเรียนในเครื่องนี้ เพื่อให้ท่านกรอกรหัสนักเรียนและเลขบัตรประชาชน 13 หลักใหม่อีกครั้ง',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#4C1D95',
+                cancelButtonColor: '#9ca3af',
+                confirmButtonText: 'ยืนยันสิทธิ์ใหม่',
+                cancelButtonText: 'ยกเลิก'
+            }).then((r) => {
+                if (r.isConfirmed) {
+                    if (liffProfile) {
+                        localStorage.removeItem(CACHE_ADMIN_KEY + liffProfile.userId);
+                        localStorage.removeItem("mstsc_hearing_admin_v2_" + liffProfile.userId);
+                    }
+                    adminName = "";
+                    exitAdminMode();
+                    $('#verifyStdIdInput').val('');
+                    $('#verifyIdCardInput').val('');
+                    $('#verifyScreen').removeClass('hidden');
+                }
+            });
+        }
+
         function toggleVerifyIdCard() {
             const input = document.getElementById('verifyIdCardInput');
             const icon = document.getElementById('verifyEyeIcon');
@@ -616,7 +804,6 @@
             }
         }
 
-        // ฟังก์ชันเรียก API อัจฉริยะ (ยิงไปที่ Cloud Run ก่อน หากยังไม่ได้ตั้งค่าจะสลับไป Render อัตโนมัติ)
         async function smartApiRequest(actionName, payload = {}, legacyPath = "", legacyMethod = "GET") {
             try {
                 const crRes = await fetch(`${CLOUD_RUN_FEEDBACK_API}?t=${Date.now()}`, {
@@ -632,7 +819,6 @@
                 }
             } catch (e) {}
 
-            // Fallback ไปยัง API เดิม
             const url = `${LEGACY_RENDER_API}${legacyPath}`;
             const options = { method: legacyMethod, headers: { 'Content-Type': 'application/json' } };
             if (legacyMethod !== 'GET') {
@@ -644,16 +830,23 @@
 
         function normalizePhone(userObj) {
             if (!userObj) return userObj;
-            let phoneStr = String(userObj.phone || '');
+            let phoneStr = String(userObj.phone || '').trim();
             if (phoneStr.length === 9 && !phoneStr.startsWith('0')) {
                 userObj.phone = '0' + phoneStr;
             }
             return userObj;
         }
 
+        function formatPhoneDisplay(rawPhone) {
+            if (!rawPhone || rawPhone === '-') return '-';
+            let s = String(rawPhone).replace(/\.0$/, '').trim();
+            if (s.length === 9 && !s.startsWith('0')) s = '0' + s;
+            return s;
+        }
+
         async function main() {
             try {
-                // โหลดแคชรายการร้องเรียนจากเครื่องมารอไว้ก่อนทันที
+                // ล้างคีย์แคชรุ่นเก่าที่ยังไม่ผ่านการตรวจเลขบัตรแบบเข้มงวด
                 const cachedComplaints = localStorage.getItem(CACHE_COMPLAINTS_KEY);
                 if (cachedComplaints) {
                     try {
@@ -670,26 +863,25 @@
                 }
 
                 liffProfile = await liff.getProfile();
+                localStorage.removeItem("mstsc_hearing_admin_v2_" + liffProfile.userId);
+
                 if (liffProfile.pictureUrl) {
                     $('#profileImage').attr('src', liffProfile.pictureUrl);
                     $('#adminProfileImage').attr('src', liffProfile.pictureUrl);
                 }
                 $('#mainHeader').removeClass('hidden');
 
-                // 1. ตรวจสอบข้อมูลผู้ใช้จาก LocalStorage ก่อน ถ้ามีให้เปิดหน้าหลักทันทีใน 0.01 วินาที!
                 const cachedUserRaw = localStorage.getItem(CACHE_USER_KEY + liffProfile.userId);
                 if (cachedUserRaw) {
                     try {
                         userData = normalizePhone(JSON.parse(cachedUserRaw));
                         hideLoader();
                         nav('homePage');
-                        // ซิงค์ข้อมูลล่าสุดและดึงรายการร้องเรียนในพื้นหลังโดยไม่บล็อกหน้าจอ
                         backgroundSyncAll();
                         return;
                     } catch (e) {}
                 }
 
-                // กรณีเข้าครั้งแรกสุดและยังไม่มีแคชในเครื่อง
                 await checkUserStatus(true);
                 backgroundSyncAll();
             } catch (err) {
@@ -700,15 +892,13 @@
         }
         main();
 
-        // ซิงค์ข้อมูลผู้ใช้ + รายการร้องเรียน + สิทธิ์แอดมิน แบบขนานในพื้นหลัง (Pre-fetch)
         async function backgroundSyncAll() {
             if (!liffProfile) return;
             showSyncBadge(true);
             try {
-                const [userRes, compRes, admRes] = await Promise.allSettled([
+                const [userRes, compRes] = await Promise.allSettled([
                     smartApiRequest('getUser', { uid: liffProfile.userId }, `/user?uid=${liffProfile.userId}`, 'GET'),
-                    smartApiRequest('getComplaints', {}, `/complaints`, 'GET'),
-                    smartApiRequest('checkAdmin', { uid: liffProfile.userId }, `/admin/check?uid=${liffProfile.userId}`, 'GET')
+                    smartApiRequest('getComplaints', {}, `/complaints`, 'GET')
                 ]);
 
                 if (userRes.status === 'fulfilled' && userRes.value && userRes.value.status === 'found') {
@@ -720,19 +910,14 @@
                     globalComplaints = compRes.value.data.slice().reverse();
                     complaintsLoadedOnce = true;
                     localStorage.setItem(CACHE_COMPLAINTS_KEY, JSON.stringify(globalComplaints));
-                    // หากผู้ใช้เปิดหน้าติดตามสถานะหรือหน้าแอดมินอยู่ อัปเดตการ์ดให้เป็นข้อมูลล่าสุดทันที
                     if (!$('#trackPage').hasClass('hidden')) {
                         renderTrackingCards(currentTrackMode);
                     }
                     if (!$('#adminDashboard').hasClass('hidden')) {
                         populateAdminCategoryDropdown();
+                        updateAdminAnalytics();
                         filterCards();
                     }
-                }
-
-                if (admRes.status === 'fulfilled' && admRes.value && admRes.value.status === 'found') {
-                    adminName = admRes.value.name;
-                    localStorage.setItem(CACHE_ADMIN_KEY + liffProfile.userId, adminName);
                 }
             } catch (e) {
                 console.warn("Background sync warning:", e);
@@ -865,12 +1050,15 @@
                 };
                 const result = await smartApiRequest('submit', payload, `/submit`, 'POST');
                 if (result.status === 'success') {
-                    // เพิ่มรายการใหม่เข้าแคชทันทีเพื่อให้กดดูสถานะได้ทันทีไม่ต้องรอโหลดใหม่
                     const newItem = {
                         ID: result.id,
                         Timestamp: new Date().toISOString(),
                         LineUID: liffProfile.userId,
                         Name: userData.name,
+                        Gender: userData.gender,
+                        Email: userData.email,
+                        Phone: userData.phone,
+                        UserStatus: userData.userStatus,
                         Category: payload.category,
                         Details: payload.details,
                         PublicConsent: payload.publicConsent,
@@ -938,7 +1126,6 @@
             }
         }
 
-        // เปิดดูรายการทันทีใน 0 วินาทีหากมีแคชอยู่แล้ว พร้อมซิงค์ข้อมูลใหม่ในพื้นหลัง
         async function loadTracking(mode) {
             currentTrackMode = mode;
             lastNavPage = 'trackPage';
@@ -946,7 +1133,6 @@
             if (complaintsLoadedOnce) {
                 renderTrackingCards(mode);
                 nav('trackPage');
-                // อัปเดตข้อมูลล่าสุดเงียบๆ ในพื้นหลัง
                 refreshComplaintsManual(true);
                 return;
             }
@@ -985,11 +1171,11 @@
 
         function buildImageButtonsHtml(imagesStr) {
             if (!imagesStr || imagesStr === '-' || !imagesStr.includes('http')) return '';
-            const urls = imagesStr.split(',').map(u => u.trim()).filter(u => u.startsWith('http'));
+            const urls = String(imagesStr).split(',').map(u => u.trim()).filter(u => u.startsWith('http'));
             if (urls.length === 0) return '';
-            return `<div class="flex flex-wrap gap-2 mt-3">` + urls.map((u, idx) => `
-                <button type="button" onclick="viewImage('${u}')" class="bg-purple-50 text-mstPurple border border-purple-100 px-3 py-2 rounded-xl text-xs font-bold hover:bg-purple-100 transition-colors flex items-center gap-1.5">
-                    <i class="fas fa-image"></i> ดูรูปภาพแนบ ${urls.length > 1 ? (idx + 1) : ''}
+            return `<div class="flex flex-wrap gap-2 mt-2.5">` + urls.map((u, idx) => `
+                <button type="button" onclick="event.stopPropagation(); viewImage('${u}')" class="bg-purple-50 text-mstPurple border border-purple-200 px-3 py-1.5 rounded-xl text-[11px] font-bold hover:bg-mstPurple hover:text-white transition-colors flex items-center gap-1.5 shadow-2xs">
+                    <i class="fas fa-image"></i> รูปแนบ ${urls.length > 1 ? (idx + 1) : ''}
                 </button>
             `).join('') + `</div>`;
         }
@@ -1047,7 +1233,7 @@
                         <div class="bg-gradient-to-br from-mstDark to-mstPurple rounded-2xl p-5 text-white shadow-md relative overflow-hidden space-y-3">
                             <div>
                                 <p class="text-purple-200 text-[10px] font-bold uppercase tracking-wider">ผู้รับผิดชอบ</p>
-                                <p class="font-black text-mstYellow text-base border-b border-white/15 pb-2.5 mt-0.5">${item.Responsible || 'อยู่ระหว่างมอบหมายผู้รับผิดชอบ'}</p>
+                                <p class="font-black text-mstYellow text-base border-b border-white/15 pb-2.5 mt-0.5">${item.Responsible && item.Responsible !== '-' ? item.Responsible : 'อยู่ระหว่างมอบหมายผู้รับผิดชอบ'}</p>
                             </div>
                             <div class="bg-white/10 p-3.5 rounded-xl border border-white/15">
                                 <p class="text-purple-200 text-[10px] font-bold mb-1 uppercase tracking-wider"><i class="fas fa-wrench mr-1"></i> การแก้ไขปัญหา / ความคืบหน้า</p>
@@ -1064,53 +1250,34 @@
             nav('detailPage');
         }
 
-        function populateAdminCategoryDropdown() {
-            const currentVal = $('#categoryFilter').val() || 'all';
-            const categories = [...new Set(globalComplaints.map(c => c.Category).filter(Boolean))];
-            let catHtml = '<option value="all">ทุกหมวดหมู่</option>';
-            categories.forEach(cat => catHtml += `<option value="${cat}">${cat}</option>`);
-            $('#categoryFilter').html(catHtml).val(currentVal);
-        }
-
-        // ตรวจสอบสิทธิ์แอดมินแบบ Instant (หากเคยยืนยันไว้แล้วจะเปิดหน้าแดชบอร์ดทันทีใน 0.01 วินาที)
+        // ============================================================
+        // ระบบตรวจสอบสิทธิ์สภานักเรียนแบบเข้มงวด 100% (Strict 2-Factor REGIS Gate)
+        // บังคับตรวจรหัสนักเรียน 5 หลัก + เลขบัตรประชาชน 13 หลักตรงกับ REGIS ทุกหลัก
+        // ============================================================
         async function checkAdminAuth() {
             const cachedAdmin = localStorage.getItem(CACHE_ADMIN_KEY + liffProfile.userId);
             if (cachedAdmin) {
                 adminName = cachedAdmin;
                 $('#showAdminName').text(adminName);
+                $('#showAdminNameMobile').text(`สภานักเรียน: ${adminName}`);
                 $('#mainHeader').addClass('hidden');
                 $('#adminHeader').removeClass('hidden');
                 nav('adminDashboard');
                 if (complaintsLoadedOnce) {
                     populateAdminCategoryDropdown();
+                    updateAdminAnalytics();
                     filterCards();
-                    loadAdminData(false); // ซิงค์เงียบๆ ในพื้นหลัง
+                    loadAdminData(false);
                 } else {
                     await loadAdminData(true);
                 }
                 return;
             }
 
-            setLoader('กำลังตรวจสอบสิทธิ์สภานักเรียน...');
-            try {
-                const data = await smartApiRequest('checkAdmin', { uid: liffProfile.userId }, `/admin/check?uid=${liffProfile.userId}`, 'GET');
-                if (data.status === 'found') {
-                    adminName = data.name;
-                    localStorage.setItem(CACHE_ADMIN_KEY + liffProfile.userId, adminName);
-                    $('#showAdminName').text(adminName);
-                    $('#mainHeader').addClass('hidden');
-                    $('#adminHeader').removeClass('hidden');
-                    nav('adminDashboard');
-                    await loadAdminData(false);
-                } else {
-                    $('#verifyStdIdInput').val('');
-                    $('#verifyIdCardInput').val('');
-                    $('#verifyScreen').removeClass('hidden');
-                }
-            } catch (error) {
-                Swal.fire('ข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อฐานข้อมูลได้', 'error');
-            }
-            hideLoader();
+            // บังคับเปิดหน้าต่างยืนยันตัวตน 2 ชั้น (รหัสนักเรียน + เลขบัตรประชาชน 13 หลักใน REGIS)
+            $('#verifyStdIdInput').val('');
+            $('#verifyIdCardInput').val('');
+            $('#verifyScreen').removeClass('hidden');
         }
 
         async function verifyCouncilIdentity(e) {
@@ -1119,99 +1286,221 @@
             const idCard = $('#verifyIdCardInput').val().replace(/\D/g, '').trim();
 
             if (stdId.length !== 5) {
-                return Swal.fire({ icon: 'warning', title: 'ข้อมูลไม่ครบ', text: 'กรุณากรอกรหัสนักเรียนให้ครบ 5 หลัก', confirmButtonColor: '#4C1D95' });
+                return Swal.fire({ icon: 'warning', title: 'ข้อมูลไม่ครบ', text: 'กรุณากรอกรหัสประจำตัวนักเรียนให้ครบ 5 หลัก', confirmButtonColor: '#4C1D95' });
             }
             if (idCard.length !== 13) {
                 return Swal.fire({ icon: 'warning', title: 'ข้อมูลไม่ครบ', text: 'กรุณากรอกเลขประจำตัวประชาชนให้ครบ 13 หลัก', confirmButtonColor: '#4C1D95' });
             }
 
-            setLoader('กำลังตรวจสอบข้อมูลกับระบบทะเบียนสภานักเรียน (REGIS)...');
+            setLoader('กำลังตรวจสอบรหัสนักเรียนและเลขบัตรประชาชนกับระบบ REGIS...');
             try {
-                let regisVerified = false;
-                try {
-                    const regisRes = await fetch(`${REGIS_CLOUD_RUN_URL}?t=${Date.now()}`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ action: 'verifyLogin', std_id: stdId })
-                    });
-                    const regisData = await regisRes.json();
-                    if (regisData.status === 'success' && regisData.existing_data) {
-                        const savedIdCard = String(regisData.existing_data.id_card || '').replace(/\D/g, '').trim();
-                        if (savedIdCard && savedIdCard === idCard) {
-                            regisVerified = true;
-                        }
-                    }
-                } catch (regErr) {}
+                // ด่านบังคับที่ 1: ตรวจสอบกับฐานข้อมูล REGIS บน Cloud Run โดยตรง
+                const regisRes = await fetch(`${REGIS_CLOUD_RUN_URL}?t=${Date.now()}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'verifyLogin', std_id: stdId })
+                });
+                const regisData = await regisRes.json();
 
-                let data = await smartApiRequest('verifyAndRegisterAdmin', {
+                // หากไม่พบรหัสนักเรียนในระบบ REGIS เลย -> ปฏิเสธทันที!
+                if (!regisData || regisData.status !== 'success' || !regisData.existing_data) {
+                    hideLoader();
+                    return showVerifyFailedAlert('ไม่พบรหัสนักเรียนนี้ในฐานข้อมูลคณะกรรมการสภานักเรียน (REGIS)');
+                }
+
+                const d = regisData.existing_data;
+                const savedIdCard = String(d.id_card || '').replace(/\.0$/, '').replace(/\D/g, '').trim();
+
+                // หากกรรมการสภาคนนี้ยังไม่ได้กรอกเลขบัตรประชาชนในระบบ REGIS -> ปฏิเสธทันที!
+                if (!savedIdCard || savedIdCard.length !== 13) {
+                    hideLoader();
+                    return showVerifyFailedAlert('รหัสนักเรียนนี้ยังไม่ได้บันทึกเลขประจำตัวประชาชน 13 หลักในระบบรายงานตัว (REGIS) กรุณาเข้าระบบ REGIS เพื่อกรอกข้อมูลก่อน');
+                }
+
+                // ด่านบังคับที่ 2: เทียบเลขบัตรประชาชน 13 หลักแบบตรงกันทุกตัวอักษร (ห้ามผ่านเด็ดขาดถ้าไม่ตรง!)
+                if (savedIdCard !== idCard) {
+                    hideLoader();
+                    return showVerifyFailedAlert('เลขประจำตัวประชาชน 13 หลักไม่ถูกต้อง หรือไม่ตรงกับข้อมูลที่ลงทะเบียนไว้ในระบบ REGIS');
+                }
+
+                // เมื่อรหัสนักเรียนและเลขบัตรประชาชนตรงกับ REGIS 100% แล้วเท่านั้น จึงดึงชื่อและผูกสิทธิ์
+                const verifiedFullName = `${d.prefix || ''}${d.fname_th || ''} ${d.lname_th || ''}`.trim() || `สภานักเรียน (${stdId})`;
+
+                // บันทึกผูก LINE UID ลงหลังบ้านในพื้นหลัง
+                smartApiRequest('verifyAndRegisterAdmin', {
                     action: 'verifyAndRegisterAdmin',
                     uid: liffProfile.userId,
                     std_id: stdId,
                     id_card: idCard
-                }, `/admin/verify`, 'POST');
+                }, `/admin/verify`, 'POST').catch(() => {});
 
-                if (data.status !== 'success' && regisVerified) {
-                    data = await smartApiRequest('verifyAndRegisterAdmin', {
-                        action: 'verifyAndRegisterAdmin',
-                        uid: liffProfile.userId,
-                        std_id: stdId,
-                        id_card: "PASSPORT_SSO"
-                    }, `/admin/verify`, 'POST');
-                }
+                adminName = verifiedFullName;
+                localStorage.setItem(CACHE_ADMIN_KEY + liffProfile.userId, adminName);
 
                 hideLoader();
+                $('#verifyScreen').addClass('hidden');
 
-                if (data.status === 'success') {
-                    adminName = data.name;
-                    localStorage.setItem(CACHE_ADMIN_KEY + liffProfile.userId, adminName);
-                    $('#verifyScreen').addClass('hidden');
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'ยืนยันตัวตนสำเร็จ',
-                        text: `ยินดีต้อนรับ ${adminName}`,
-                        confirmButtonColor: '#4C1D95'
-                    }).then(() => {
-                        $('#showAdminName').text(adminName);
-                        $('#mainHeader').addClass('hidden');
-                        $('#adminHeader').removeClass('hidden');
-                        nav('adminDashboard');
-                        loadAdminData(false);
-                    });
-                } else {
-                    Swal.fire({
-                        imageUrl: '/logo.webp',
-                        imageWidth: 75,
-                        title: 'ตรวจสอบสิทธิ์ไม่ผ่าน',
-                        html: `
-                            <p class="text-xs sm:text-sm text-gray-600 mb-4">รหัสนักเรียนหรือเลขประจำตัวประชาชนไม่ตรงกับฐานข้อมูลสภานักเรียน (REGIS)</p>
-                            <div class="bg-purple-50 p-4 rounded-2xl border border-purple-100 text-left">
-                                <p class="text-xs font-black text-mstPurple mb-1"><i class="fas fa-info-circle text-mstYellow mr-1"></i> สำหรับคณะกรรมการสภานักเรียน</p>
-                                <p class="text-xs text-gray-600 leading-relaxed">กรุณารายงานตัวและกรอกเลขประจำตัวประชาชนในระบบทะเบียนสภานักเรียน (REGIS) ให้เรียบร้อยก่อนเข้าใช้งาน</p>
-                            </div>
-                        `,
-                        showCancelButton: true,
-                        confirmButtonText: '<i class="fas fa-copy mr-1"></i> คัดลอกลิงก์ระบบ REGIS',
-                        cancelButtonText: 'ปิดหน้าต่าง',
-                        confirmButtonColor: '#4C1D95',
-                        cancelButtonColor: '#9ca3af',
-                        reverseButtons: true
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            navigator.clipboard.writeText('https://reg-mstsc.pages.dev').then(() => {
-                                Swal.fire({ icon: 'success', title: 'คัดลอกลิงก์สำเร็จ', text: 'นำลิงก์ไปเปิดในเบราว์เซอร์เพื่อรายงานตัวได้เลย', confirmButtonColor: '#4C1D95' });
-                            });
-                        }
-                    });
-                }
+                Swal.fire({
+                    icon: 'success',
+                    title: 'ยืนยันตัวตนสำเร็จ',
+                    text: `ยินดีต้อนรับ ${adminName}`,
+                    confirmButtonColor: '#4C1D95',
+                    timer: 1600,
+                    showConfirmButton: false
+                }).then(() => {
+                    $('#showAdminName').text(adminName);
+                    $('#showAdminNameMobile').text(`สภานักเรียน: ${adminName}`);
+                    $('#mainHeader').addClass('hidden');
+                    $('#adminHeader').removeClass('hidden');
+                    nav('adminDashboard');
+                    loadAdminData(false);
+                });
             } catch (error) {
                 hideLoader();
-                Swal.fire('ข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อระบบตรวจสอบสิทธิ์ได้', 'error');
+                Swal.fire('ข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อฐานข้อมูล REGIS เพื่อตรวจสอบสิทธิ์ได้ กรุณาลองใหม่อีกครั้ง', 'error');
             }
+        }
+
+        function showVerifyFailedAlert(reasonText) {
+            Swal.fire({
+                imageUrl: '/logo.webp',
+                imageWidth: 72,
+                title: 'ตรวจสอบสิทธิ์ไม่ผ่าน!',
+                html: `
+                    <p class="text-xs sm:text-sm text-red-600 font-bold mb-3">${reasonText}</p>
+                    <div class="bg-purple-50 p-4 rounded-2xl border border-purple-100 text-left">
+                        <p class="text-xs font-black text-mstPurple mb-1"><i class="fas fa-info-circle text-mstYellow mr-1"></i> สำหรับคณะกรรมการสภานักเรียน</p>
+                        <p class="text-xs text-gray-600 leading-relaxed">ต้องใช้รหัสนักเรียน 5 หลัก และเลขประจำตัวประชาชน 13 หลักที่ตรงกับที่รายงานตัวไว้ในระบบ <b>REGIS</b> เท่านั้น</p>
+                    </div>
+                `,
+                showCancelButton: true,
+                confirmButtonText: '<i class="fas fa-copy mr-1"></i> คัดลอกลิงก์ระบบ REGIS',
+                cancelButtonText: 'ลองใหม่อีกครั้ง',
+                confirmButtonColor: '#4C1D95',
+                cancelButtonColor: '#9ca3af',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    navigator.clipboard.writeText('https://mstsc.pages.dev/regis').then(() => {
+                        Swal.fire({ icon: 'success', title: 'คัดลอกลิงก์สำเร็จ', text: 'นำลิงก์ไปเปิดในเบราว์เซอร์เพื่อรายงานตัวได้เลย', confirmButtonColor: '#4C1D95' });
+                    });
+                }
+            });
+        }
+
+        // ============================================================
+        // ระบบวิเคราะห์สถิติและบริหารจัดการเคสสำหรับสภานักเรียน
+        // ============================================================
+        function populateAdminCategoryDropdown() {
+            const currentVal = $('#categoryFilter').val() || 'all';
+            const categories = [...new Set(globalComplaints.map(c => c.Category).filter(Boolean))];
+            let catHtml = '<option value="all">ทุกหมวดหมู่</option>';
+            categories.forEach(cat => catHtml += `<option value="${cat}">${cat}</option>`);
+            $('#categoryFilter').html(catHtml).val(currentVal);
+        }
+
+        function updateAdminAnalytics() {
+            const total = globalComplaints.length;
+            let pending = 0, accepted = 0, inProgress = 0, done = 0, rejected = 0, mine = 0;
+            let publicCount = 0, privateCount = 0;
+            const catMap = {};
+
+            globalComplaints.forEach(c => {
+                const st = String(c.AdminStatus || 'รอดำเนินการ').trim();
+                if (st === 'เสร็จสิ้น') done++;
+                else if (st === 'รับเรื่องแล้ว') accepted++;
+                else if (st.includes('กำลัง')) inProgress++;
+                else if (st.includes('ปฏิเสธ')) rejected++;
+                else pending++;
+
+                if (c.PublicConsent === 'ยินยอม') publicCount++;
+                else privateCount++;
+
+                const resp = String(c.Responsible || '').trim();
+                if (adminName && resp && (resp.includes(adminName) || adminName.includes(resp))) {
+                    mine++;
+                }
+
+                const cat = c.Category || 'ไม่ระบุหมวดหมู่';
+                catMap[cat] = (catMap[cat] || 0) + 1;
+            });
+
+            const activeProgress = accepted + inProgress;
+            const doneRate = total > 0 ? Math.round((done / total) * 100) : 0;
+
+            $('#kpiTotal').text(total);
+            $('#kpiPublicRatio').text(`สาธารณะ ${publicCount} • ปกปิด ${privateCount}`);
+            $('#kpiPending').text(pending);
+            $('#kpiProgress').text(activeProgress);
+            $('#kpiAcceptedSub').text(`รับเรื่อง ${accepted} • ดำเนินการ ${inProgress}`);
+            $('#kpiDone').text(done);
+            $('#kpiDoneRate').text(`อัตราสำเร็จ ${doneRate}%`);
+            $('#kpiRejected').text(rejected);
+            $('#kpiMine').text(mine);
+
+            // สร้างหลอดสถิติแยกตามหมวดหมู่
+            const sortedCats = Object.entries(catMap).sort((a, b) => b[1] - a[1]);
+            const catBox = document.getElementById('categoryBreakdownList');
+            if (sortedCats.length === 0) {
+                catBox.innerHTML = `<p class="text-xs text-gray-400 col-span-full text-center py-2">ยังไม่มีข้อมูลหมวดหมู่</p>`;
+            } else {
+                catBox.innerHTML = sortedCats.map(([catName, count]) => {
+                    const pct = total > 0 ? Math.round((count / total) * 100) : 0;
+                    return `
+                        <div onclick="$('#categoryFilter').val('${catName}'); filterCards();" class="bg-white/90 hover:bg-purple-50 p-3 rounded-xl border border-gray-100 cursor-pointer transition">
+                            <div class="flex justify-between items-center text-xs font-bold mb-1.5">
+                                <span class="text-gray-700 truncate pr-2">${catName}</span>
+                                <span class="text-mstPurple shrink-0">${count} เรื่อง (${pct}%)</span>
+                            </div>
+                            <div class="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
+                                <div class="bg-gradient-to-r from-mstPurple to-purple-500 h-full rounded-full" style="width: ${pct}%"></div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+        }
+
+        function toggleCategoryAnalytics() {
+            $('#categoryAnalyticsBox').toggleClass('hidden');
+        }
+
+        function quickFilterByCard(mode) {
+            $('[id^="kpiCard_"]').removeClass('stat-card-active');
+            if (mode === 'all') {
+                $('#kpiCard_all').addClass('stat-card-active');
+                $('#statusFilter').val('all');
+                $('#assignFilter').val('all');
+            } else if (mode === 'MY_CASES') {
+                $('#kpiCard_mine').addClass('stat-card-active');
+                $('#statusFilter').val('all');
+                $('#assignFilter').val('mine');
+            } else {
+                if (mode === 'รอดำเนินการ') $('#kpiCard_pending').addClass('stat-card-active');
+                else if (mode === 'กำลังดำเนินการ') $('#kpiCard_progress').addClass('stat-card-active');
+                else if (mode === 'เสร็จสิ้น') $('#kpiCard_done').addClass('stat-card-active');
+                else if (mode.includes('ปฏิเสธ')) $('#kpiCard_rejected').addClass('stat-card-active');
+                $('#statusFilter').val(mode);
+                $('#assignFilter').val('all');
+            }
+            filterCards();
+        }
+
+        function resetAllAdminFilters() {
+            $('#searchInput').val('');
+            $('#categoryFilter').val('all');
+            $('#statusFilter').val('all');
+            $('#assignFilter').val('all');
+            $('#consentFilter').val('all');
+            $('[id^="kpiCard_"]').removeClass('stat-card-active');
+            $('#kpiCard_all').addClass('stat-card-active');
+            filterCards();
         }
 
         async function loadAdminData(showSpinLoader = true) {
             if (complaintsLoadedOnce) {
                 populateAdminCategoryDropdown();
+                updateAdminAnalytics();
                 filterCards();
             }
             if (showSpinLoader && !complaintsLoadedOnce) {
@@ -1224,6 +1513,7 @@
                     complaintsLoadedOnce = true;
                     localStorage.setItem(CACHE_COMPLAINTS_KEY, JSON.stringify(globalComplaints));
                     populateAdminCategoryDropdown();
+                    updateAdminAnalytics();
                     filterCards();
                 }
             } catch (error) {
@@ -1232,37 +1522,75 @@
             hideLoader();
         }
 
-        function filterCards() {
-            const searchTerm = ($('#searchInput').val() || '').toLowerCase();
-            const statusTerm = $('#statusFilter').val();
-            const categoryTerm = $('#categoryFilter').val();
+        function getFilteredAdminComplaints() {
+            const searchTerm = ($('#searchInput').val() || '').toLowerCase().trim();
+            const statusTerm = $('#statusFilter').val() || 'all';
+            const categoryTerm = $('#categoryFilter').val() || 'all';
+            const assignTerm = $('#assignFilter').val() || 'all';
+            const consentTerm = $('#consentFilter').val() || 'all';
 
-            let filtered = globalComplaints.filter(c => {
-                const matchSearch = String(c.Category || '').toLowerCase().includes(searchTerm) ||
-                                    String(c.ID || '').toLowerCase().includes(searchTerm) ||
-                                    String(c.Name || '').toLowerCase().includes(searchTerm) ||
-                                    String(c.Details || '').toLowerCase().includes(searchTerm);
-                const matchStatus = statusTerm === 'all' || c.AdminStatus === statusTerm;
+            return globalComplaints.filter(c => {
+                const st = String(c.AdminStatus || 'รอดำเนินการ').trim();
+                const resp = String(c.Responsible || '').trim();
+                const phone = formatPhoneDisplay(c.Phone || c.phone || '');
+
+                const matchSearch = !searchTerm ||
+                    String(c.Category || '').toLowerCase().includes(searchTerm) ||
+                    String(c.ID || '').toLowerCase().includes(searchTerm) ||
+                    String(c.Name || '').toLowerCase().includes(searchTerm) ||
+                    String(c.Details || '').toLowerCase().includes(searchTerm) ||
+                    String(c.Responsible || '').toLowerCase().includes(searchTerm) ||
+                    phone.toLowerCase().includes(searchTerm);
+
+                let matchStatus = true;
+                if (statusTerm !== 'all') {
+                    if (statusTerm === 'กำลังดำเนินการ') {
+                        matchStatus = (st === 'กำลังดำเนินการ' || st === 'รับเรื่องแล้ว');
+                    } else {
+                        matchStatus = (st === statusTerm);
+                    }
+                }
+
                 const matchCategory = categoryTerm === 'all' || c.Category === categoryTerm;
-                return matchSearch && matchStatus && matchCategory;
+
+                let matchAssign = true;
+                if (assignTerm === 'mine') {
+                    matchAssign = Boolean(adminName && resp && (resp.includes(adminName) || adminName.includes(resp)));
+                } else if (assignTerm === 'unassigned') {
+                    matchAssign = (!resp || resp === '-');
+                }
+
+                const matchConsent = consentTerm === 'all' || c.PublicConsent === consentTerm;
+
+                return matchSearch && matchStatus && matchCategory && matchAssign && matchConsent;
             });
+        }
+
+        function filterCards() {
+            const filtered = getFilteredAdminComplaints();
+            $('#filteredCountBadge').text(`${filtered.length} รายการ`);
 
             const container = document.getElementById('cardsContainer');
             if (filtered.length === 0) {
-                container.innerHTML = '<div class="col-span-full text-center py-14 glass rounded-[2rem] text-gray-400 border border-white"><i class="fas fa-folder-open text-4xl mb-3 opacity-40"></i><p class="font-bold text-sm">ไม่พบรายการที่ค้นหา</p></div>';
+                container.innerHTML = '<div class="col-span-full text-center py-14 glass rounded-[2rem] text-gray-400 border border-white"><i class="fas fa-folder-open text-4xl mb-3 opacity-40"></i><p class="font-bold text-sm">ไม่พบรายการเคสที่ตรงกับเงื่อนไข</p></div>';
                 return;
             }
 
             container.innerHTML = filtered.map(c => {
-                const dateStr = new Date(c.Timestamp).toLocaleDateString('th-TH');
+                const dateStr = new Date(c.Timestamp).toLocaleString('th-TH', { dateStyle: 'medium', timeStyle: 'short' });
                 const st = String(c.AdminStatus || 'รอดำเนินการ');
+                const phoneStr = formatPhoneDisplay(c.Phone || c.phone);
+                const userRole = c.UserStatus || c.userStatus || c.Status || 'ไม่ระบุ';
+                const userGender = c.Gender || c.gender || '';
+                const userEmail = c.Email || c.email || '-';
+                const isPrivate = c.PublicConsent === 'ไม่ยินยอม';
 
                 let statusIcon = '';
                 let badgeClass = '';
                 if (st === 'เสร็จสิ้น') {
                     statusIcon = '<i class="fas fa-check-circle mr-1"></i>';
                     badgeClass = 'bg-emerald-100 text-emerald-700 border-emerald-200';
-                } else if (st.includes('กำลัง')) {
+                } else if (st.includes('กำลัง') || st === 'รับเรื่องแล้ว') {
                     statusIcon = '<i class="fas fa-spinner fa-spin mr-1"></i>';
                     badgeClass = 'bg-blue-100 text-blue-700 border-blue-200';
                 } else if (st.includes('ปฏิเสธ')) {
@@ -1273,31 +1601,73 @@
                     badgeClass = 'bg-amber-100 text-amber-800 border-amber-200';
                 }
 
-                let imageBtn = '';
-                if (c.Images && c.Images !== '-' && c.Images.includes('http')) {
-                    const firstImage = c.Images.split(',')[0].trim();
-                    imageBtn = `<button onclick="viewImage('${firstImage}')" class="text-mstPurple bg-purple-50 px-3 py-2.5 rounded-xl text-xs font-bold hover:bg-purple-100 transition-colors border border-purple-100 flex items-center gap-1.5 shrink-0"><i class="fas fa-image"></i> ดูรูป</button>`;
-                }
+                const consentBadge = isPrivate
+                    ? `<span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-rose-50 text-rose-600 border border-rose-200"><i class="fas fa-eye-slash mr-1"></i>ปกปิดชื่อ</span>`
+                    : `<span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200"><i class="fas fa-globe mr-1"></i>สาธารณะ</span>`;
+
+                const allImagesHtml = buildImageButtonsHtml(c.Images);
+
+                const resolutionPreview = (c.Resolution && c.Resolution !== '-')
+                    ? `<div class="bg-purple-50/70 p-2.5 rounded-xl border border-purple-100 text-[11px] text-gray-700 mb-3">
+                           <span class="font-black text-mstPurple block mb-0.5"><i class="fas fa-wrench mr-1"></i>ผลการดำเนินงานล่าสุด:</span>
+                           <p class="line-clamp-2 break-words">${c.Resolution}</p>
+                       </div>`
+                    : '';
 
                 return `
-                <div class="bg-white/95 p-5 rounded-[1.75rem] shadow-xs border border-white hover:shadow-md transition-all flex flex-col h-full">
-                    <div class="flex justify-between items-center mb-3 gap-2">
-                        <span class="text-[10px] font-bold text-gray-500 bg-gray-100 px-2.5 py-1 rounded-md font-mono border border-gray-200"><i class="fas fa-hashtag text-gray-400 mr-0.5"></i>${c.ID}</span>
+                <div class="bg-white/95 p-5 rounded-[1.75rem] shadow-xs border border-white hover:shadow-md hover:border-purple-200 transition-all flex flex-col h-full">
+                    <div class="flex flex-wrap justify-between items-center mb-2.5 gap-1.5">
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-[10px] font-bold text-gray-600 bg-gray-100 px-2.5 py-1 rounded-md font-mono border border-gray-200"><i class="fas fa-hashtag text-gray-400 mr-0.5"></i>${c.ID}</span>
+                            ${consentBadge}
+                        </div>
                         <span class="px-3 py-1 rounded-full text-[10px] font-bold border ${badgeClass} shrink-0">${statusIcon}${st}</span>
                     </div>
-                    <h4 class="font-black text-mstPurple text-sm mb-2 leading-snug flex items-start gap-1.5"><i class="fas fa-tag mt-0.5 text-mstYellow shrink-0"></i> <span>${c.Category}</span></h4>
-                    <p class="text-xs text-gray-600 line-clamp-3 leading-relaxed mb-4 flex-grow bg-gray-50 p-3 rounded-xl border border-gray-100 break-words">${c.Details}</p>
 
-                    <div class="bg-white p-3 rounded-xl mb-4 text-[11px] space-y-1.5 border border-gray-100">
-                        <div class="flex justify-between items-center gap-2"><span class="text-gray-400 font-bold shrink-0"><i class="fas fa-user w-4"></i> ผู้แจ้ง</span><span class="font-bold text-gray-700 truncate">${c.Name}</span></div>
-                        <div class="flex justify-between items-center gap-2"><span class="text-gray-400 font-bold shrink-0"><i class="far fa-calendar-alt w-4"></i> วันที่</span><span class="font-bold text-gray-700">${dateStr}</span></div>
-                        <div class="flex justify-between items-center gap-2"><span class="text-gray-400 font-bold shrink-0"><i class="fas fa-user-shield w-4"></i> ผู้รับผิดชอบ</span><span class="font-bold truncate ${c.Responsible && c.Responsible !== '-' ? 'text-mstPurple' : 'text-gray-400'}">${c.Responsible || '-'}</span></div>
+                    <h4 class="font-black text-mstPurple text-sm mb-2 leading-snug flex items-start gap-1.5">
+                        <i class="fas fa-tag mt-0.5 text-mstYellow shrink-0"></i> <span>${c.Category}</span>
+                    </h4>
+
+                    <div class="bg-gray-50 p-3.5 rounded-xl border border-gray-100 mb-3 flex-grow">
+                        <p class="text-xs text-gray-700 leading-relaxed whitespace-pre-wrap break-words line-clamp-4">${c.Details}</p>
+                        ${allImagesHtml}
+                    </div>
+
+                    ${resolutionPreview}
+
+                    <!-- ข้อมูลผู้แจ้งแบบละเอียดสำหรับสภานักเรียน -->
+                    <div class="bg-white p-3 rounded-xl mb-3.5 text-[11px] space-y-1.5 border border-gray-100 shadow-2xs">
+                        <div class="flex justify-between items-center gap-2">
+                            <span class="text-gray-400 font-bold shrink-0"><i class="fas fa-user w-4 text-mstPurple/70"></i> ผู้แจ้ง</span>
+                            <span class="font-black text-gray-800 truncate">${c.Name || '-'} <span class="text-[10px] font-bold text-mstPurple bg-purple-50 px-1.5 py-0.5 rounded border border-purple-100 ml-1">${userRole}${userGender ? ' • ' + userGender : ''}</span></span>
+                        </div>
+                        <div class="flex justify-between items-center gap-2">
+                            <span class="text-gray-400 font-bold shrink-0"><i class="fas fa-phone w-4 text-emerald-600/70"></i> เบอร์ติดต่อ</span>
+                            <div class="flex items-center gap-1.5">
+                                ${phoneStr !== '-' ? `<a href="tel:${phoneStr}" class="font-bold text-emerald-700 hover:underline">${phoneStr}</a>` : `<span class="text-gray-400">-</span>`}
+                            </div>
+                        </div>
+                        ${userEmail && userEmail !== '-' ? `
+                        <div class="flex justify-between items-center gap-2">
+                            <span class="text-gray-400 font-bold shrink-0"><i class="fas fa-envelope w-4 text-blue-500/70"></i> อีเมล</span>
+                            <span class="font-semibold text-gray-600 truncate">${userEmail}</span>
+                        </div>` : ''}
+                        <div class="flex justify-between items-center gap-2">
+                            <span class="text-gray-400 font-bold shrink-0"><i class="far fa-calendar-alt w-4 text-amber-500/80"></i> เวลาแจ้ง</span>
+                            <span class="font-bold text-gray-600">${dateStr}</span>
+                        </div>
+                        <div class="flex justify-between items-center gap-2 pt-1 border-t border-gray-50">
+                            <span class="text-gray-400 font-bold shrink-0"><i class="fas fa-user-shield w-4 text-mstPurple"></i> ผู้รับผิดชอบ</span>
+                            <span class="font-black truncate ${c.Responsible && c.Responsible !== '-' ? 'text-mstPurple bg-purple-50 px-2 py-0.5 rounded border border-purple-100' : 'text-gray-400'}">${c.Responsible || 'ยังไม่ระบุ'}</span>
+                        </div>
                     </div>
 
                     <div class="flex gap-2 mt-auto">
-                        ${imageBtn}
-                        <button onclick="openAdminModal('${c.ID}')" class="flex-grow bg-mstCream text-mstPurple hover:bg-mstPurple hover:text-mstYellow border border-mstYellow py-2.5 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5">
-                            <i class="fas fa-edit"></i> จัดการเคสนี้
+                        <button onclick="copyCaseSummary('${c.ID}')" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1 shrink-0" title="คัดลอกสรุปเคสส่งเข้าไลน์กลุ่มสภาฯ">
+                            <i class="far fa-copy"></i> สรุปเคส
+                        </button>
+                        <button onclick="openAdminModal('${c.ID}')" class="flex-grow bg-gradient-to-r from-mstPurple to-purple-800 text-white hover:shadow-md py-2.5 px-4 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5">
+                            <i class="fas fa-edit text-mstYellow"></i> ดูรายละเอียด / จัดการเคส
                         </button>
                     </div>
                 </div>`;
@@ -1309,12 +1679,75 @@
             $('#imageModal').removeClass('hidden');
         }
 
+        function insertQuickReply(text) {
+            const cur = $('#updateResolution').val().trim();
+            $('#updateResolution').val(cur ? `${cur}\n${text}` : text);
+        }
+
+        function copyCaseSummary(id) {
+            const c = globalComplaints.find(item => item.ID === id);
+            if (!c) return;
+            const phoneStr = formatPhoneDisplay(c.Phone || c.phone);
+            const userRole = c.UserStatus || c.userStatus || 'ไม่ระบุ';
+            const summaryText = [
+                `📋 สรุปเคสเรื่องร้องเรียน [PUBLIC HEARING]`,
+                `รหัสอ้างอิง: ${c.ID}`,
+                `หมวดหมู่: ${c.Category}`,
+                `สถานะ: ${c.AdminStatus || 'รอดำเนินการ'}`,
+                `ผู้แจ้ง: ${c.Name} (${userRole}) | โทร: ${phoneStr}`,
+                `การเปิดเผย: ${c.PublicConsent}`,
+                `รายละเอียด: ${c.Details}`,
+                `ผู้รับผิดชอบ: ${c.Responsible || '-'}`,
+                `การแก้ไขปัญหา: ${c.Resolution || '-'}`
+            ].join('\n');
+
+            navigator.clipboard.writeText(summaryText).then(() => {
+                Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'คัดลอกสรุปเคสแล้ว', showConfirmButton: false, timer: 1400 });
+            });
+        }
+
+        function exportFilteredToCSV() {
+            const list = getFilteredAdminComplaints();
+            if (list.length === 0) {
+                return Swal.fire({ icon: 'info', title: 'ไม่มีข้อมูลสำหรับส่งออก', confirmButtonColor: '#4C1D95' });
+            }
+            const headers = ["รหัสอ้างอิง", "วันที่แจ้ง", "หมวดหมู่", "รายละเอียด", "ชื่อผู้แจ้ง", "สถานภาพ", "เบอร์โทรศัพท์", "อีเมล", "การเปิดเผย", "สถานะการดำเนินการ", "ผู้รับผิดชอบ", "การแก้ไขปัญหา", "หมายเหตุ"];
+            const escapeCsv = (val) => `"${String(val ?? '').replace(/"/g, '""')}"`;
+
+            const rows = list.map(c => [
+                c.ID,
+                new Date(c.Timestamp).toLocaleString('th-TH'),
+                c.Category,
+                c.Details,
+                c.Name,
+                c.UserStatus || c.userStatus || '-',
+                formatPhoneDisplay(c.Phone || c.phone),
+                c.Email || c.email || '-',
+                c.PublicConsent,
+                c.AdminStatus,
+                c.Responsible || '-',
+                c.Resolution || '-',
+                c.Remarks || '-'
+            ].map(escapeCsv).join(','));
+
+            const csvContent = "\uFEFF" + [headers.map(escapeCsv).join(','), ...rows].join('\r\n');
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `MSTSC_Public_Hearing_${new Date().toISOString().slice(0,10)}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
         function openAdminModal(id) {
             const item = globalComplaints.find(c => c.ID === id);
             if (!item) return;
             $('#adminEditRowId').val(item.ID);
-            $('#modalId').text(`Ref: ${item.ID}`);
-            $('#updateStatus').val(item.AdminStatus);
+            $('#modalId').text(`รหัสอ้างอิง: ${item.ID} • แจ้งเมื่อ ${new Date(item.Timestamp).toLocaleString('th-TH')}`);
+            $('#updateStatus').val(item.AdminStatus || 'รอดำเนินการ');
 
             if (!item.Responsible || item.Responsible === '-') {
                 $('#updateResponsible').val(adminName);
@@ -1322,8 +1755,42 @@
                 $('#updateResponsible').val(item.Responsible);
             }
 
-            $('#updateResolution').val(item.Resolution === '-' ? '' : item.Resolution);
-            $('#updateRemarks').val(item.Remarks === '-' ? '' : item.Remarks);
+            $('#updateResolution').val(!item.Resolution || item.Resolution === '-' ? '' : item.Resolution);
+            $('#updateRemarks').val(!item.Remarks || item.Remarks === '-' ? '' : item.Remarks);
+
+            // แสดงข้อมูลเรื่องร้องเรียนและผู้แจ้งด้านบนของ Modal เพื่อให้สภานักเรียนดูประกอบการพิมพ์ตอบได้ทันที
+            const phoneStr = formatPhoneDisplay(item.Phone || item.phone);
+            const userRole = item.UserStatus || item.userStatus || 'ไม่ระบุ';
+            const userEmail = item.Email || item.email || '-';
+            const imgsHtml = buildImageButtonsHtml(item.Images);
+
+            $('#modalCaseSummaryBox').html(`
+                <div class="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-gray-100">
+                    <span class="font-black text-mstPurple text-xs sm:text-sm"><i class="fas fa-tag text-mstYellow mr-1"></i> ${item.Category}</span>
+                    <span class="text-[11px] font-bold ${item.PublicConsent === 'ไม่ยินยอม' ? 'text-rose-600 bg-rose-50 border-rose-200' : 'text-emerald-700 bg-emerald-50 border-emerald-200'} px-2.5 py-0.5 rounded-full border">
+                        ${item.PublicConsent === 'ไม่ยินยอม' ? 'ปกปิดชื่อผู้แจ้ง' : 'ยินยอมเปิดเผยสาธารณะ'}
+                    </span>
+                </div>
+                <div class="bg-gray-50 p-3 rounded-xl border border-gray-100 text-gray-800 whitespace-pre-wrap break-words leading-relaxed max-h-40 overflow-y-auto">
+                    ${item.Details}
+                </div>
+                ${imgsHtml}
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1 text-[11px] text-gray-600">
+                    <div class="bg-purple-50/60 px-3 py-2 rounded-xl border border-purple-100">
+                        <span class="text-gray-400 font-bold block text-[10px]">ผู้แจ้งเรื่อง</span>
+                        <span class="font-black text-gray-800">${item.Name || '-'} (${userRole})</span>
+                    </div>
+                    <div class="bg-purple-50/60 px-3 py-2 rounded-xl border border-purple-100">
+                        <span class="text-gray-400 font-bold block text-[10px]">เบอร์โทรศัพท์</span>
+                        ${phoneStr !== '-' ? `<a href="tel:${phoneStr}" class="font-black text-emerald-700 underline">${phoneStr}</a>` : `<span class="font-bold">-</span>`}
+                    </div>
+                    <div class="bg-purple-50/60 px-3 py-2 rounded-xl border border-purple-100 truncate">
+                        <span class="text-gray-400 font-bold block text-[10px]">อีเมล</span>
+                        <span class="font-bold text-gray-700">${userEmail}</span>
+                    </div>
+                </div>
+            `);
+
             $('#adminEditModal').removeClass('hidden');
         }
 
@@ -1335,12 +1802,11 @@
                 action: 'updateAdmin',
                 id: targetId,
                 adminStatus: $('#updateStatus').val(),
-                responsible: $('#updateResponsible').val() || "-",
+                responsible: $('#updateResponsible').val().trim() || adminName || "-",
                 resolution: $('#updateResolution').val().trim() || "-",
                 remarks: $('#updateRemarks').val().trim() || "-"
             };
 
-            // อัปเดตการ์ดบนหน้าจอทันที (Optimistic UI) ไม่ต้องรอโหลดใหม่
             const idx = globalComplaints.findIndex(c => c.ID === targetId);
             if (idx !== -1) {
                 globalComplaints[idx].AdminStatus = payload.adminStatus;
@@ -1348,6 +1814,7 @@
                 globalComplaints[idx].Resolution = payload.resolution;
                 globalComplaints[idx].Remarks = payload.remarks;
                 localStorage.setItem(CACHE_COMPLAINTS_KEY, JSON.stringify(globalComplaints));
+                updateAdminAnalytics();
                 filterCards();
             }
 
