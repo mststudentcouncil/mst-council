@@ -487,29 +487,28 @@
     </div>
 
     <!-- Bottom Navigation Bar (แสดงเมื่อเข้าสู่ระบบแล้ว ทำให้ใช้งานง่าย ไม่หลงหน้า) -->
-    <nav id="bottomNavBar" class="hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-gray-200 px-2 py-1.5 pb-[calc(env(safe-area-inset-bottom)+0.35rem)] shadow-lg">
-        <div class="max-w-lg mx-auto grid grid-cols-4 gap-1">
+    <nav id="bottomNavBar" class="hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-gray-200 px-4 py-1.5 pb-[calc(env(safe-area-inset-bottom)+0.35rem)] shadow-lg">
+        <div class="max-w-md mx-auto grid grid-cols-3 gap-2">
             <button onclick="switchBottomTab('explore')" id="bNav_explore" class="flex flex-col items-center justify-center py-1 text-gray-500 transition nav-item-active">
-                <div class="nav-icon-box w-9 h-7 rounded-xl flex items-center justify-center text-sm transition-all">
+                <div class="nav-icon-box w-10 h-7 rounded-xl flex items-center justify-center text-sm transition-all">
                     <i class="fa-solid fa-book-open"></i>
                 </div>
-                <span class="text-[10px] mt-0.5">คลังพอร์ต</span>
+                <span class="text-[11px] mt-0.5">คลังพอร์ต</span>
             </button>
 
             <button onclick="switchBottomTab('saved')" id="bNav_saved" class="flex flex-col items-center justify-center py-1 text-gray-500 transition">
-                <div class="nav-icon-box w-9 h-7 rounded-xl flex items-center justify-center text-sm transition-all">
+                <div class="nav-icon-box w-10 h-7 rounded-xl flex items-center justify-center text-sm transition-all">
                     <i class="fa-solid fa-bookmark"></i>
                 </div>
-                <span class="text-[10px] mt-0.5">ที่บันทึกไว้</span>
+                <span class="text-[11px] mt-0.5">ที่บันทึกไว้</span>
             </button>
 
             <button onclick="switchBottomTab('myport')" id="bNav_myport" class="flex flex-col items-center justify-center py-1 text-gray-500 transition">
-                <div class="nav-icon-box w-9 h-7 rounded-xl flex items-center justify-center text-sm transition-all">
+                <div class="nav-icon-box w-10 h-7 rounded-xl flex items-center justify-center text-sm transition-all">
                     <i class="fa-solid fa-cloud-arrow-up"></i>
                 </div>
-                <span class="text-[10px] mt-0.5">พอร์ตของฉัน</span>
+                <span class="text-[11px] mt-0.5">พอร์ตของฉัน</span>
             </button>
-
         </div>
     </nav>
 
