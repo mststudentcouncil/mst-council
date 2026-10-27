@@ -903,7 +903,7 @@
         });
 
         function renderTrackingCards(mode) {
-            $('#trackTitle').text(mode === 'my' ? 'รายการของฉัน' : 'รายการทั้งหมด (สาธารณะ)');
+            $('#trackTitle').text(mode === 'my' ? 'รายการของฉัน' : 'รายการทั้งหมด');
             let filtered = mode === 'my'
                 ? globalComplaints.filter(c => c.LineUID === liffProfile.userId)
                 : globalComplaints.filter(c => c.PublicConsent === 'ยินยอม');
