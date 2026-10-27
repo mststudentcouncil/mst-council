@@ -114,9 +114,9 @@
 <body class="antialiased">
 
     <!-- Global Loader Overlay -->
-    <div id="globalLoader" class="loader-overlay hidden">
+    <div id="globalLoader" class="loader-overlay px-6 text-center">
         <i class="fas fa-circle-notch fa-spin text-5xl text-mstPurple mb-4 drop-shadow-md"></i>
-        <p class="text-base font-bold text-mstPurple" id="loaderText">กำลังตรวจสอบข้อมูล...</p>
+        <p class="text-base font-bold text-mstPurple" id="loaderText">กำลังเชื่อมต่อคลังพอร์ตโฟลิโอ...</p>
     </div>
 
     <div class="w-full max-w-lg mx-auto min-h-screen flex flex-col px-4">
@@ -144,13 +144,6 @@
                 </div>
             </div>
         </header>
-
-        <!-- 1. Initial Loading Screen -->
-        <div id="loading-screen" class="glass p-10 text-center rounded-[2rem] my-auto flex flex-col items-center justify-center">
-            <i class="fas fa-circle-notch fa-spin text-5xl text-mstPurple mb-4 drop-shadow-md"></i>
-            <p class="text-mstPurple font-black text-base">กำลังโหลดคลังพอร์ตโฟลิโอ...</p>
-            <p class="text-xs text-gray-500 font-medium mt-1">สภานักเรียน x งานแนะแนว โรงเรียนเมืองสุราษฎร์ธานี</p>
-        </div>
 
         <!-- 2. หน้ายืนยันตัวตนอัจฉริยะ (Smart 1-Step Verification) -->
         <div id="link-screen" class="hidden fade-in flex-col my-auto py-4">
@@ -745,6 +738,7 @@
         }
 
         async function initApp() {
+            setLoader('กำลังเชื่อมต่อคลังพอร์ตโฟลิโอ...');
             fetchTcasData();
 
             try {
@@ -756,15 +750,8 @@
                 console.warn("LIFF init fallback:", liffErr.message);
             }
 
-            // หากมีข้อมูลผู้ใช้ที่ยืนยันตัวตนไว้ในเครื่องแล้ว ให้เข้าหน้าหลักทันทีโดยไม่ติดหน้าโหลด
-            const cachedViewer = getSavedViewer();
-            if (cachedViewer && cachedViewer.std_id) {
-                currentViewer = cachedViewer;
-                updateHeaderViewerUI();
-                showScreen('home-screen');
-            }
-
             await loadPortfolioData();
+            hideLoader();
         }
 
         async function loadPortfolioData() {
