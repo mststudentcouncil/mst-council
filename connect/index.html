@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#4C1D95">
+    <title>เชื่อมต่อข้อมูลนักเรียนกับ LINE - MSTSC Connect</title>
+    <link rel="icon" type="image/webp" href="/logo.webp">
+
+    <!-- Google Fonts & Font Awesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+    <!-- Tailwind CSS & SweetAlert2 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- LINE LIFF SDK -->
+    <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Anuphan', 'sans-serif'] },
+                    colors: {
+                        mstPurple: '#4C1D95',
+                        mstPurpleLight: '#F3E8FF',
+                        mstYellow: '#FBBF24',
+                        mstCream: '#FEFCF5',
+                        mstDark: '#1E1B4B'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body {
+            font-family: 'Anuphan', sans-serif;
+            background: linear-gradient(135deg, #F3E5F5 0%, #FEFCF5 50%, #FFFDE7 100%);
+            min-height: 100vh;
+            color: #1E1B4B;
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
+            overflow-x: hidden;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.90);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.95);
+            box-shadow: 0 20px 40px -10px rgba(76, 29, 149, 0.08);
+        }
+        .id-card-gradient {
+            background: linear-gradient(135deg, #4C1D95 0%, #311068 60%, #1E1B4B 100%);
+        }
+        .fade-in {
+            animation: fadeIn 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .blob-bg-1 {
+            position: fixed; top: -10%; right: -15%; width: 320px; height: 320px;
+            background: rgba(251, 191, 36, 0.25); border-radius: 50%; filter: blur(80px); z-index: -1;
+        }
+        .blob-bg-2 {
+            position: fixed; bottom: -10%; left: -15%; width: 320px; height: 320px;
+            background: rgba(76, 29, 149, 0.18); border-radius: 50%; filter: blur(80px); z-index: -1;
+        }
+    </style>
+</head>
+<body class="flex flex-col justify-between min-h-screen p-4 sm:p-6 relative">
+
+    <div class="blob-bg-1"></div>
+    <div class="blob-bg-2"></div>
+
+    <!-- ส่วนหัว (Header) -->
+    <header class="w-full max-w-md mx-auto pt-2 pb-4 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-2xl bg-white p-1.5 shadow-md border border-purple-100 flex items-center justify-center">
+                <img src="https://mstsc.pages.dev/logo.webp" alt="MSTSC" class="w-full h-full object-contain" onerror="this.src='/logo.webp'">
+            </div>
+            <div>
+                <span class="text-[10px] font-extrabold uppercase tracking-widest text-purple-700 bg-purple-100 px-2.5 py-0.5 rounded-full">MSTSC IDENTITY</span>
+                <h1 class="text-lg font-black text-mstDark leading-tight mt-0.5">เชื่อมต่อข้อมูลนักเรียน</h1>
+            </div>
+        </div>
+        <a href="https://liff.line.me/2008923798-xBa4D5Dv" class="w-10 h-10 rounded-full bg-white/80 hover:bg-white text-mstPurple flex items-center justify-center shadow-sm border border-purple-100 transition" title="ศูนย์รวมบริการนักเรียน">
+            <i class="fa-solid fa-table-cells-large"></i>
+        </a>
+    </header>
+
+    <!-- พื้นที่หลัก (Main Container) -->
+    <main class="w-full max-w-md mx-auto my-auto flex-1 flex flex-col justify-center">
+
+        <!-- 1. สถานะกำลังโหลด (แสดงทันทีตั้งแต่เปิดหน้าเว็บ ไม่ปล่อยหน้าขาว) -->
+        <div id="loadingSection" class="glass-card rounded-[2rem] p-8 text-center fade-in">
+            <div class="relative w-20 h-20 mx-auto mb-5">
+                <div class="absolute inset-0 border-4 border-purple-100 rounded-full"></div>
+                <div class="absolute inset-0 border-4 border-mstPurple border-t-transparent rounded-full animate-spin"></div>
+                <img src="https://mstsc.pages.dev/logo.webp" class="absolute inset-0 w-11 h-11 m-auto rounded-full object-contain" alt="MSTSC" onerror="this.style.display='none'">
+            </div>
+            <h2 class="text-xl font-black text-mstPurple mb-1" id="loadingTitle">กำลังเชื่อมต่อกับ LINE...</h2>
+            <p class="text-xs text-gray-500 font-medium" id="loadingDesc">ระบบกำลังตรวจสอบข้อมูลยืนยันตัวตนของท่าน</p>
+        </div>
+
+        <!-- 2. หน้าแสดงบัตรนักเรียนดิจิทัล (กรณีผูกบัญชีสำเร็จแล้ว) -->
+        <div id="linkedSection" class="hidden space-y-5 fade-in">
+            <div class="id-card-gradient rounded-[2rem] p-6 text-white shadow-2xl relative overflow-hidden border border-purple-400/30">
+                <div class="absolute -right-8 -bottom-8 w-40 h-40 bg-white/5 rounded-full blur-xl pointer-events-none"></div>
+                
+                <div class="flex items-center justify-between mb-5">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                        <span class="text-[11px] font-bold tracking-wider uppercase text-purple-200">VERIFIED STUDENT PASS</span>
+                    </div>
+                    <span id="cardRoleBadge" class="bg-mstYellow text-mstDark text-[10px] font-black px-3 py-1 rounded-full uppercase shadow-sm">STUDENT</span>
+                </div>
+
+                <div class="flex items-center gap-4 mb-6">
+                    <img id="cardLinePic" src="https://mstsc.pages.dev/logo.webp" alt="Profile" class="w-16 h-16 rounded-2xl object-cover border-2 border-mstYellow shadow-md bg-white">
+                    <div class="min-w-0 flex-1">
+                        <p class="text-xs text-purple-200 font-medium truncate" id="cardLineName">LINE Profile</p>
+                        <h2 class="text-xl font-black text-white leading-snug truncate" id="cardFullName">-</h2>
+                        <p class="text-xs font-bold text-mstYellow mt-0.5">รหัสประจำตัว <span id="cardStdId" class="underline decoration-mstYellow/60">-</span></p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3 bg-white/10 backdrop-blur-md rounded-2xl p-3.5 border border-white/10 text-xs">
+                    <div>
+                        <p class="text-purple-200 text-[10px] font-semibold">ระดับชั้น / ห้อง</p>
+                        <p class="font-extrabold text-white text-sm mt-0.5" id="cardLevelRoom">-</p>
+                    </div>
+                    <div>
+                        <p class="text-purple-200 text-[10px] font-semibold">แผนการเรียน / สังกัด</p>
+                        <p class="font-extrabold text-white text-sm mt-0.5 truncate" id="cardPlan">-</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ปุ่มทางลัดเข้าใช้งานระบบต่างๆ -->
+            <div class="glass-card rounded-[2rem] p-6 space-y-3">
+                <h3 class="text-xs font-extrabold text-gray-400 uppercase tracking-wider mb-2 px-1">เข้าใช้งานบริการดิจิทัลสภานักเรียน</h3>
+                
+                <a href="https://liff.line.me/2008923798-TRND2m0M" class="w-full bg-gradient-to-r from-mstPurple to-purple-800 hover:from-purple-800 hover:to-mstPurple text-white font-bold py-3.5 px-5 rounded-2xl shadow-md flex items-center justify-between transition">
+                    <span class="flex items-center gap-3 text-sm">
+                        <span class="w-8 h-8 rounded-xl bg-white/15 flex items-center justify-center text-mstYellow"><i class="fa-solid fa-tower-broadcast"></i></span>
+                        ระบบขอเพลงเสียงตามสาย (Smart Radio)
+                    </span>
+                    <i class="fa-solid fa-chevron-right text-xs opacity-70"></i>
+                </a>
+
+                <a href="https://liff.line.me/2008923798-LmKWCP2j" class="w-full bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 font-bold py-3.5 px-5 rounded-2xl flex items-center justify-between transition">
+                    <span class="flex items-center gap-3 text-sm">
+                        <span class="w-8 h-8 rounded-xl bg-amber-400/20 flex items-center justify-center text-amber-600"><i class="fa-solid fa-book-open-reader"></i></span>
+                        คลังพอร์ตโฟลิโอรุ่นพี่ (Senior Portfolio)
+                    </span>
+                    <i class="fa-solid fa-chevron-right text-xs opacity-60"></i>
+                </a>
+
+                <a href="https://liff.line.me/2008923798-xBa4D5Dv" class="w-full bg-purple-50 hover:bg-purple-100 text-mstPurple border border-purple-200 font-bold py-3.5 px-5 rounded-2xl flex items-center justify-between transition">
+                    <span class="flex items-center gap-3 text-sm">
+                        <span class="w-8 h-8 rounded-xl bg-purple-200/50 flex items-center justify-center text-mstPurple"><i class="fa-solid fa-layer-group"></i></span>
+                        ศูนย์รวมบริการนักเรียน (LINE Hub)
+                    </span>
+                    <i class="fa-solid fa-chevron-right text-xs opacity-60"></i>
+                </a>
+
+                <div class="pt-3 border-t border-gray-100 flex items-center justify-between gap-2">
+                    <button onclick="closeLiffWindow()" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-2.5 rounded-xl text-xs transition">
+                        กลับไปหน้าแชท LINE
+                    </button>
+                    <button onclick="handleUnlinkAccount()" class="bg-red-50 hover:bg-red-100 text-red-600 font-bold py-2.5 px-4 rounded-xl text-xs transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-link-slash"></i> ยกเลิกผูกบัญชี
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. หน้าฟอร์มเชื่อมต่อข้อมูลนักเรียน (กรณียังไม่ได้ผูกบัญชี) -->
+        <div id="bindFormSection" class="hidden glass-card rounded-[2rem] p-6 sm:p-7 space-y-5 fade-in">
+            <!-- โปรไฟล์ LINE ที่กำลังเชื่อมต่อ -->
+            <div class="flex items-center gap-3.5 bg-purple-50/80 border border-purple-100 p-3.5 rounded-2xl">
+                <img id="formLinePic" src="https://mstsc.pages.dev/logo.webp" alt="LINE Pic" class="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm bg-white">
+                <div class="min-w-0 flex-1">
+                    <span class="text-[10px] font-extrabold text-mstPurple uppercase tracking-wider">บัญชี LINE ของคุณ</span>
+                    <h3 id="formLineName" class="text-sm font-black text-gray-900 truncate">กำลังโหลดชื่อ LINE...</h3>
+                </div>
+                <span class="text-[10px] bg-amber-100 text-amber-800 font-bold px-2.5 py-1 rounded-full">รอผูกข้อมูล</span>
+            </div>
+
+            <!-- แท็บสลับโหมด: กรอกรหัสนักเรียน / ค้นหาด้วยชื่อ / ศิษย์เก่า -->
+            <div class="grid grid-cols-3 gap-1.5 bg-gray-100 p-1.5 rounded-2xl text-xs font-bold">
+                <button type="button" onclick="switchMode('id')" id="tabBtnId" class="py-2 rounded-xl bg-white text-mstPurple shadow-sm transition">
+                    <i class="fa-solid fa-id-card mr-1"></i> รหัส 5 หลัก
+                </button>
+                <button type="button" onclick="switchMode('search')" id="tabBtnSearch" class="py-2 rounded-xl text-gray-500 hover:text-gray-800 transition">
+                    <i class="fa-solid fa-magnifying-glass mr-1"></i> ค้นหาชื่อ
+                </button>
+                <button type="button" onclick="switchMode('alumni')" id="tabBtnAlumni" class="py-2 rounded-xl text-gray-500 hover:text-gray-800 transition">
+                    <i class="fa-solid fa-user-graduate mr-1"></i> ศิษย์เก่า
+                </button>
+            </div>
+
+            <!-- โหมดที่ 1: กรอกรหัสประจำตัวนักเรียน 5 หลัก -->
+            <div id="modeIdPanel" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-extrabold text-gray-700 mb-1.5">
+                        รหัสประจำตัวนักเรียน 5 หลัก <span class="text-red-500">*</span>
+                    </label>
+                    <div class="flex gap-2">
+                        <input type="tel" id="inputStdId" maxlength="5" placeholder="เช่น 68999"
+                            class="flex-1 border-2 border-gray-200 focus:border-mstPurple rounded-2xl px-4 py-3 text-base font-black tracking-widest text-center outline-none transition bg-white"
+                            oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 5)">
+                        <button type="button" onclick="handleLookupStudent()" id="btnLookup"
+                            class="bg-mstPurple hover:bg-purple-900 text-white font-bold px-5 rounded-2xl text-sm shadow-md transition shrink-0 flex items-center gap-1.5">
+                            <i class="fa-solid fa-check-circle"></i> ตรวจสอบ
+                        </button>
+                    </div>
+                    <p class="text-[11px] text-gray-500 mt-1.5 font-medium">
+                        * รองรับนักเรียน ม.1–ม.6 ปัจจุบัน และทำเนียบคณะกรรมการสภานักเรียนทุกรุ่น
+                    </p>
+                </div>
+
+                <!-- กล่องแสดงผลข้อมูลนักเรียนที่ค้นพบ -->
+                <div id="studentPreviewBox" class="hidden bg-emerald-50/90 border-2 border-emerald-200 rounded-2xl p-4 space-y-3 fade-in">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <span class="text-[10px] font-black uppercase tracking-wider bg-emerald-200 text-emerald-900 px-2.5 py-0.5 rounded-full">พบข้อมูลในระบบ</span>
+                            <h4 id="previewFullName" class="text-base font-black text-gray-900 mt-1.5">-</h4>
+                            <p id="previewClassPlan" class="text-xs font-bold text-emerald-800 mt-0.5">-</p>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-[10px] text-gray-500 font-bold block">รหัสนักเรียน</span>
+                            <span id="previewStdId" class="text-sm font-black text-mstPurple">-</span>
+                        </div>
+                    </div>
+
+                    <button type="button" onclick="handleConfirmBind(false)" id="btnConfirmStudent"
+                        class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-black py-3.5 rounded-xl shadow-md transition flex items-center justify-center gap-2 text-sm">
+                        <i class="fa-solid fa-link"></i> ยืนยันการเชื่อมต่อข้อมูลนี้กับ LINE
+                    </button>
+                </div>
+            </div>
+
+            <!-- โหมดที่ 2: ค้นหารหัสนักเรียนด้วยชื่อจริง -->
+            <div id="modeSearchPanel" class="hidden space-y-4">
+                <div>
+                    <label class="block text-xs font-extrabold text-gray-700 mb-1.5">
+                        ค้นหาด้วยชื่อจริง หรือ นามสกุล
+                    </label>
+                    <div class="flex gap-2">
+                        <input type="text" id="inputSearchKeyword" placeholder="พิมพ์ชื่อจริงอย่างน้อย 2 ตัวอักษร..."
+                            class="flex-1 border-2 border-gray-200 focus:border-mstPurple rounded-2xl px-4 py-3 text-sm font-bold outline-none transition bg-white">
+                        <button type="button" onclick="handleSearchByName()" id="btnSearchName"
+                            class="bg-mstPurple hover:bg-purple-900 text-white font-bold px-4 rounded-2xl text-sm shadow-md transition shrink-0">
+                            <i class="fa-solid fa-magnifying-glass"></i> ค้นหา
+                        </button>
+                    </div>
+                </div>
+
+                <div id="searchResultList" class="space-y-2 max-h-60 overflow-y-auto pr-1"></div>
+            </div>
+
+            <!-- โหมดที่ 3: สำหรับศิษย์เก่า ม.ส.ธ. (กรอกข้อมูลเพิ่มเติม) -->
+            <div id="modeAlumniPanel" class="hidden space-y-3.5">
+                <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 text-[11px] text-amber-900 font-medium leading-relaxed">
+                    <i class="fa-solid fa-circle-info text-amber-600 mr-1"></i> สำหรับรุ่นพี่ศิษย์เก่าที่ต้องการร่วมแบ่งปันพอร์ตโฟลิโอในระบบ <b>Senior Portfolio Hub</b>
+                </div>
+
+                <div class="grid grid-cols-3 gap-2.5">
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-600 mb-1">รหัส 5 หลัก *</label>
+                        <input type="tel" id="alumniStdId" maxlength="5" placeholder="เช่น 65123"
+                            class="w-full border border-gray-200 rounded-xl p-2.5 text-sm font-black text-center outline-none focus:border-mstPurple bg-white"
+                            oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 5)">
+                    </div>
+                    <div class="col-span-2">
+                        <label class="block text-[11px] font-bold text-gray-600 mb-1">คำนำหน้า *</label>
+                        <select id="alumniPrefix" class="w-full border border-gray-200 rounded-xl p-2.5 text-sm font-bold outline-none focus:border-mstPurple bg-white">
+                            <option value="นาย">นาย</option>
+                            <option value="นางสาว">นางสาว</option>
+                            <option value="เด็กชาย">เด็กชาย</option>
+                            <option value="เด็กหญิง">เด็กหญิง</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2.5">
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-600 mb-1">ชื่อจริง (ภาษาไทย) *</label>
+                        <input type="text" id="alumniFname" placeholder="ไม่ต้องใส่คำนำหน้า"
+                            class="w-full border border-gray-200 rounded-xl p-2.5 text-sm font-bold outline-none focus:border-mstPurple bg-white">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-600 mb-1">นามสกุล *</label>
+                        <input type="text" id="alumniLname" placeholder="นามสกุล"
+                            class="w-full border border-gray-200 rounded-xl p-2.5 text-sm font-bold outline-none focus:border-mstPurple bg-white">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-[11px] font-bold text-gray-600 mb-1">สายการเรียนตอน ม.ปลาย / รุ่นปีการศึกษา</label>
+                    <input type="text" id="alumniPlan" placeholder="เช่น วิทย์-คณิต / รุ่น 2568"
+                        class="w-full border border-gray-200 rounded-xl p-2.5 text-sm font-bold outline-none focus:border-mstPurple bg-white">
+                </div>
+
+                <button type="button" onclick="handleConfirmBind(true)"
+                    class="w-full bg-mstYellow hover:bg-amber-400 text-mstDark font-black py-3.5 rounded-2xl shadow-md transition flex items-center justify-center gap-2 text-sm mt-2">
+                    <i class="fa-solid fa-user-check"></i> ยืนยันผูกบัญชีศิษย์เก่า
+                </button>
+            </div>
+        </div>
+
+        <!-- 4. หน้าแจ้งเตือนกรณีเปิดนอก LINE หรือ LIFF มีปัญหา -->
+        <div id="errorSection" class="hidden glass-card rounded-[2rem] p-8 text-center space-y-4 fade-in">
+            <div class="w-16 h-16 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center text-3xl mx-auto">
+                <i class="fa-brands fa-line"></i>
+            </div>
+            <h2 class="text-xl font-black text-gray-900" id="errorTitle">กรุณาเปิดผ่านแอป LINE</h2>
+            <p class="text-xs text-gray-600 leading-relaxed font-medium" id="errorMessage">
+                ระบบจำเป็นต้องตรวจสอบสิทธิ์จากบัญชี LINE ของท่านโดยตรง กรุณากดปุ่มด้านล่างเพื่อเปิดหน้านี้ในแอปพลิเคชัน LINE
+            </p>
+            <div class="pt-2 space-y-2.5">
+                <a href="https://liff.line.me/2008923798-pVEtog9o" class="block w-full bg-[#06C755] hover:bg-[#05b34c] text-white font-black py-3.5 rounded-2xl shadow-md text-sm transition">
+                    <i class="fa-brands fa-line mr-1.5"></i> เปิดในแอป LINE ทันที
+                </a>
+                <button onclick="window.location.reload()" class="block w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-2xl text-xs transition">
+                    <i class="fa-solid fa-rotate-right mr-1"></i> ลองโหลดใหม่อีกครั้ง
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- ส่วนท้าย (Footer) -->
+    <footer class="w-full max-w-md mx-auto pt-6 pb-2 text-center">
+        <p class="text-[11px] font-bold text-purple-900/60">
+            คณะกรรมการสภานักเรียนโรงเรียนเมืองสุราษฎร์ธานี (MSTSC)
+        </p>
+    </footer>
+
+    <script>
+        const LIFF_ID = "2008923798-pVEtog9o";
+        const RADIO_API_URL = "https://admission-backend-592123078141.asia-southeast1.run.app/api/radio";
+        const LOCAL_VIEWER_KEY = "mstsc_student_viewer";
+
+        let currentLineAccessToken = "";
+        let currentLineProfile = null;
+        let currentLookedUpStudent = null;
+
+        // ฟังก์ชันเรียกใช้งาน Backend API (/api/radio)
+        async function callConnectApi(payload) {
+            const res = await fetch(`${RADIO_API_URL}?t=${Date.now()}`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    ...payload,
+                    lineAccessToken: currentLineAccessToken
+                })
+            });
+            return await res.json();
+        }
+
+        // สลับหน้าจอที่แสดงผล
+        function showSection(sectionId) {
+            ["loadingSection", "linkedSection", "bindFormSection", "errorSection"].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    if (id === sectionId) el.classList.remove("hidden");
+                    else el.classList.add("hidden");
+                }
+            });
+        }
+
+        // สลับแท็บในฟอร์มผูกบัญชี
+        window.switchMode = function(mode) {
+            const modes = {
+                id: { panel: "modeIdPanel", btn: "tabBtnId" },
+                search: { panel: "modeSearchPanel", btn: "tabBtnSearch" },
+                alumni: { panel: "modeAlumniPanel", btn: "tabBtnAlumni" }
+            };
+            Object.keys(modes).forEach(k => {
+                const p = document.getElementById(modes[k].panel);
+                const b = document.getElementById(modes[k].btn);
+                if (k === mode) {
+                    p.classList.remove("hidden");
+                    b.className = "py-2 rounded-xl bg-white text-mstPurple shadow-sm transition";
+                } else {
+                    p.classList.add("hidden");
+                    b.className = "py-2 rounded-xl text-gray-500 hover:text-gray-800 transition";
+                }
+            });
+        };
+
+        // แสดงข้อมูลบัตรนักเรียนเมื่อผูกบัญชีแล้ว
+        function renderLinkedCard(linkedUser, lineProfile) {
+            if (!linkedUser) return;
+
+            // บันทึกลง LocalStorage เพื่อให้ระบบ Smart Radio / Portfolio ดึงไปใช้ต่อได้ทันที
+            try {
+                localStorage.setItem(LOCAL_VIEWER_KEY, JSON.stringify(linkedUser));
+            } catch (e) {}
+
+            const picUrl = linkedUser.linePic || (lineProfile && lineProfile.pictureUrl) || "https://mstsc.pages.dev/logo.webp";
+            const lineName = linkedUser.lineName || (lineProfile && lineProfile.displayName) || "บัญชี LINE";
+
+            document.getElementById("cardLinePic").src = picUrl;
+            document.getElementById("cardLineName").innerText = `LINE: ${lineName}`;
+            document.getElementById("cardFullName").innerText = linkedUser.fullName || `${linkedUser.prefix || ""}${linkedUser.fname || ""} ${linkedUser.lname || ""}`.trim();
+            document.getElementById("cardStdId").innerText = linkedUser.std_id || "-";
+
+            const roomText = linkedUser.room && linkedUser.room !== "-" ? `${linkedUser.level}/${linkedUser.room}` : (linkedUser.level || "-");
+            document.getElementById("cardLevelRoom").innerText = roomText;
+            document.getElementById("cardPlan").innerText = linkedUser.plan || "-";
+            document.getElementById("cardRoleBadge").innerText = linkedUser.isAdminOrDj ? "ADMIN / DJ" : (linkedUser.role || "STUDENT");
+
+            showSection("linkedSection");
+        }
+
+        // แสดงฟอร์มให้กรอกรหัสนักเรียน
+        function renderBindForm(lineProfile) {
+            if (lineProfile) {
+                document.getElementById("formLinePic").src = lineProfile.pictureUrl || "https://mstsc.pages.dev/logo.webp";
+                document.getElementById("formLineName").innerText = lineProfile.displayName || "ผู้ใช้งาน LINE";
+            }
+            showSection("bindFormSection");
+        }
+
+        // 1. ค้นหาข้อมูลจากรหัสประจำตัวนักเรียน 5 หลัก
+        window.handleLookupStudent = async function() {
+            const stdId = document.getElementById("inputStdId").value.replace(/\D/g, "").trim();
+            if (stdId.length !== 5) {
+                Swal.fire({ icon: "warning", title: "รหัสไม่ครบ 5 หลัก", text: "กรุณากรอกรหัสประจำตัวนักเรียนเป็นตัวเลข 5 หลักครับ", confirmButtonColor: "#4C1D95" });
+                return;
+            }
+
+            const btn = document.getElementById("btnLookup");
+            const origHtml = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i>`;
+
+            try {
+                const res = await callConnectApi({ action: "lookupStudentById", std_id: stdId });
+                if (res.status === "success" && res.student) {
+                    currentLookedUpStudent = res.student;
+                    const s = res.student;
+                    document.getElementById("previewFullName").innerText = `${s.prefix || ""}${s.fname || ""} ${s.lname || ""}`.trim();
+                    const roomStr = s.room && s.room !== "-" ? `${s.level}/${s.room}` : (s.level || "-");
+                    document.getElementById("previewClassPlan").innerText = `ชั้น ${roomStr} • แผนการเรียน: ${s.plan || "-"}`;
+                    document.getElementById("previewStdId").innerText = s.std_id;
+                    document.getElementById("studentPreviewBox").classList.remove("hidden");
+                } else {
+                    document.getElementById("studentPreviewBox").classList.add("hidden");
+                    Swal.fire({
+                        icon: "info",
+                        title: "ไม่พบรหัสนักเรียนนี้",
+                        text: res.message || "หากจำรหัสไม่ได้ สามารถกดแท็บ 'ค้นหาชื่อ' หรือหากเป็นศิษย์เก่าให้เลือกแท็บ 'ศิษย์เก่า' ครับ",
+                        confirmButtonColor: "#4C1D95"
+                    });
+                }
+            } catch (err) {
+                Swal.fire({ icon: "error", title: "เกิดข้อผิดพลาด", text: "ไม่สามารถเชื่อมต่อฐานข้อมูลได้ กรุณาลองใหม่อีกครั้ง", confirmButtonColor: "#4C1D95" });
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = origHtml;
+            }
+        };
+
+        // 2. ค้นหารหัสนักเรียนจากชื่อจริง
+        window.handleSearchByName = async function() {
+            const keyword = document.getElementById("inputSearchKeyword").value.trim();
+            if (keyword.length < 2) {
+                Swal.fire({ icon: "warning", title: "พิมพ์ชื่ออย่างน้อย 2 ตัวอักษร", text: "กรุณาระบุชื่อจริงหรือนามสกุลเพื่อค้นหาครับ", confirmButtonColor: "#4C1D95" });
+                return;
+            }
+
+            const listEl = document.getElementById("searchResultList");
+            listEl.innerHTML = `<div class="text-center py-6 text-xs text-gray-500 font-bold"><i class="fa-solid fa-spinner animate-spin mr-1.5 text-mstPurple"></i> กำลังค้นหารายชื่อ...</div>`;
+
+            try {
+                const res = await callConnectApi({ action: "searchStudentByName", keyword });
+                if (res.status === "success" && Array.isArray(res.matches) && res.matches.length > 0) {
+                    listEl.innerHTML = res.matches.map(s => {
+                        const fullName = `${s.prefix || ""}${s.fname || ""} ${s.lname || ""}`.trim();
+                        const roomStr = s.room && s.room !== "-" ? `${s.level}/${s.room}` : (s.level || "-");
+                        return `
+                            <div class="bg-white border border-purple-100 hover:border-mstPurple rounded-xl p-3 flex items-center justify-between gap-2 shadow-sm transition">
+                                <div class="min-w-0">
+                                    <p class="text-sm font-black text-gray-900 truncate">${fullName}</p>
+                                    <p class="text-[11px] font-bold text-gray-500">รหัส <span class="text-mstPurple">${s.std_id}</span> • ${roomStr}</p>
+                                </div>
+                                <button type="button" onclick="selectStudentFromSearch('${s.std_id}')"
+                                    class="bg-purple-100 hover:bg-mstPurple text-mstPurple hover:text-white font-bold text-xs px-3.5 py-2 rounded-lg transition shrink-0">
+                                    เลือก
+                                </button>
+                            </div>
+                        `;
+                    }).join("");
+                } else {
+                    listEl.innerHTML = `<div class="text-center py-6 text-xs text-gray-400 font-bold bg-white/60 rounded-xl">ไม่พบรายชื่อที่ตรงกับ "${keyword}"</div>`;
+                }
+            } catch (err) {
+                listEl.innerHTML = `<div class="text-center py-4 text-xs text-red-500 font-bold">เกิดข้อผิดพลาดในการค้นหา</div>`;
+            }
+        };
+
+        window.selectStudentFromSearch = function(stdId) {
+            switchMode("id");
+            document.getElementById("inputStdId").value = stdId;
+            handleLookupStudent();
+        };
+
+        // 3. ยืนยันการผูกบัญชีกับ LINE
+        window.handleConfirmBind = async function(isAlumniMode = false) {
+            let payload = { action: "confirmBindLine", isAlumni: isAlumniMode };
+
+            if (isAlumniMode) {
+                const stdId = document.getElementById("alumniStdId").value.replace(/\D/g, "").trim();
+                const prefix = document.getElementById("alumniPrefix").value.trim();
+                const fname = document.getElementById("alumniFname").value.trim();
+                const lname = document.getElementById("alumniLname").value.trim();
+                const plan = document.getElementById("alumniPlan").value.trim() || "ศิษย์เก่า ม.ส.ธ.";
+
+                if (stdId.length !== 5 || !fname || !lname) {
+                    Swal.fire({ icon: "warning", title: "ข้อมูลไม่ครบถ้วน", text: "กรุณากรอกรหัสประจำตัว 5 หลัก ชื่อ และนามสกุลให้ครบถ้วนครับ", confirmButtonColor: "#4C1D95" });
+                    return;
+                }
+                payload = { ...payload, std_id: stdId, prefix, fname, lname, plan };
+            } else {
+                const stdId = (currentLookedUpStudent && currentLookedUpStudent.std_id) || document.getElementById("inputStdId").value.replace(/\D/g, "").trim();
+                if (stdId.length !== 5) {
+                    Swal.fire({ icon: "warning", title: "กรุณาตรวจสอบรหัสนักเรียน", text: "กรุณากรอกรหัสนักเรียน 5 หลักแล้วกดปุ่มตรวจสอบก่อนครับ", confirmButtonColor: "#4C1D95" });
+                    return;
+                }
+                payload.std_id = stdId;
+            }
+
+            Swal.fire({
+                title: "กำลังบันทึกการเชื่อมต่อ...",
+                text: "กรุณารอสักครู่",
+                allowOutsideClick: false,
+                didOpen: () => Swal.showLoading()
+            });
+
+            try {
+                const res = await callConnectApi(payload);
+                Swal.close();
+
+                if (res.status === "success" && res.linkedUser) {
+                    await Swal.fire({
+                        icon: "success",
+                        title: "เชื่อมต่อข้อมูลสำเร็จ!",
+                        text: `ผูกบัญชีกับ ${res.linkedUser.fullName} เรียบร้อยแล้ว`,
+                        timer: 1800,
+                        showConfirmButton: false
+                    });
+                    renderLinkedCard(res.linkedUser, currentLineProfile);
+
+                    // หากมีพารามิเตอร์ returnUrl ให้พากลับไปหน้านั้นอัตโนมัติ
+                    const params = new URLSearchParams(window.location.search);
+                    const returnUrl = params.get("returnUrl");
+                    if (returnUrl && /^https?:\/\//i.test(returnUrl)) {
+                        window.location.replace(returnUrl);
+                    }
+                } else {
+                    Swal.fire({ icon: "error", title: "ไม่สามารถผูกบัญชีได้", text: res.message || "กรุณาตรวจสอบข้อมูลอีกครั้ง", confirmButtonColor: "#4C1D95" });
+                }
+            } catch (err) {
+                Swal.fire({ icon: "error", title: "เกิดข้อผิดพลาด", text: "ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาลองใหม่", confirmButtonColor: "#4C1D95" });
+            }
+        };
+
+        // 4. ยกเลิกการผูกบัญชี LINE
+        window.handleUnlinkAccount = async function() {
+            const confirmResult = await Swal.fire({
+                icon: "warning",
+                title: "ยืนยันการยกเลิกผูกบัญชี?",
+                text: "หากยกเลิกแล้ว ท่านสามารถเชื่อมรหัสประจำตัวนักเรียนใหม่ได้ตลอดเวลา",
+                showCancelButton: true,
+                confirmButtonColor: "#DC2626",
+                cancelButtonColor: "#64748B",
+                confirmButtonText: "ยืนยันยกเลิก",
+                cancelButtonText: "ปิด"
+            });
+
+            if (!confirmResult.isConfirmed) return;
+
+            Swal.fire({ title: "กำลังยกเลิกการผูกบัญชี...", allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+            try {
+                const res = await callConnectApi({ action: "unlinkLineAccount" });
+                Swal.close();
+                if (res.status === "success") {
+                    localStorage.removeItem(LOCAL_VIEWER_KEY);
+                    currentLookedUpStudent = null;
+                    document.getElementById("inputStdId").value = "";
+                    document.getElementById("studentPreviewBox").classList.add("hidden");
+                    renderBindForm(currentLineProfile);
+                    Swal.fire({ icon: "success", title: "ยกเลิกการผูกบัญชีแล้ว", timer: 1400, showConfirmButton: false });
+                } else {
+                    Swal.fire({ icon: "error", title: "ผิดพลาด", text: res.message || "ไม่สามารถยกเลิกได้" });
+                }
+            } catch (err) {
+                Swal.fire({ icon: "error", title: "ผิดพลาด", text: "ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้" });
+            }
+        };
+
+        window.closeLiffWindow = function() {
+            if (window.liff && liff.isInClient()) {
+                liff.closeWindow();
+            } else {
+                window.location.href = "https://liff.line.me/2008923798-xBa4D5Dv";
+            }
+        };
+
+        // 5. เริ่มต้นระบบ LIFF และดึงสถานะจากเซิร์ฟเวอร์
+        async function initConnectApp() {
+            try {
+                await liff.init({ liffId: LIFF_ID });
+
+                if (!liff.isLoggedIn()) {
+                    // สั่ง Login อัตโนมัติหากเปิดผ่านเบราว์เซอร์ภายนอกแล้วไม่ได้ล็อกอิน
+                    liff.login({ redirectUri: window.location.href });
+                    return;
+                }
+
+                currentLineAccessToken = liff.getAccessToken();
+                if (!currentLineAccessToken) {
+                    throw new Error("ไม่พบ LINE Access Token กรุณาเปิดผ่านแอป LINE");
+                }
+
+                try {
+                    currentLineProfile = await liff.getProfile();
+                } catch (pe) {
+                    console.warn("LIFF Profile Warning:", pe);
+                }
+
+                document.getElementById("loadingTitle").innerText = "กำลังตรวจสอบฐานข้อมูล...";
+
+                const statusRes = await callConnectApi({ action: "getLineIdentityStatus" });
+                if (statusRes.status === "success") {
+                    if (statusRes.lineProfile) {
+                        currentLineProfile = statusRes.lineProfile;
+                    }
+                    if (statusRes.linkedUser && statusRes.linkedUser.std_id) {
+                        renderLinkedCard(statusRes.linkedUser, currentLineProfile);
+                    } else {
+                        renderBindForm(currentLineProfile);
+                    }
+                } else {
+                    // หาก Token มีปัญหา ให้สั่ง Re-login ใหม่
+                    renderBindForm(currentLineProfile);
+                }
+            } catch (err) {
+                console.error("LIFF Init Error:", err);
+                document.getElementById("errorTitle").innerText = "ไม่สามารถเชื่อมต่อ LINE LIFF ได้";
+                document.getElementById("errorMessage").innerText = err.message || "กรุณากดปุ่มด้านล่างเพื่อเปิดหน้านี้ผ่านแอปพลิเคชัน LINE อีกครั้งครับ";
+                showSection("errorSection");
+            }
+        }
+
+        // รองรับการกดปุ่ม Enter ในช่องกรอกรหัสและช่องค้นหาชื่อ
+        document.addEventListener("DOMContentLoaded", () => {
+            const stdInput = document.getElementById("inputStdId");
+            if (stdInput) {
+                stdInput.addEventListener("keydown", e => {
+                    if (e.key === "Enter") {
+                        e.preventDefault();
+                        handleLookupStudent();
+                    }
+                });
+            }
+            const nameInput = document.getElementById("inputSearchKeyword");
+            if (nameInput) {
+                nameInput.addEventListener("keydown", e => {
+                    if (e.key === "Enter") {
+                        e.preventDefault();
+                        handleSearchByName();
+                    }
+                });
+            }
+            initConnectApp();
+        });
+    </script>
+</body>
+</html>
