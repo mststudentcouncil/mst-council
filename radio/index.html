@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#4C1D95">
-    <title>MSTSC Smart Radio</title>
+    <title>MSTSC</title>
     <link rel="icon" type="image/webp" href="/logo.webp">
 
     <link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -85,10 +85,10 @@
                     <img src="/logo.webp" class="w-10 h-10 object-contain drop-shadow-sm shrink-0" alt="MSTSC Logo">
                     <div class="min-w-0">
                         <div class="flex items-center gap-1.5">
-                            <h1 class="text-sm font-black text-mstPurple truncate">STUDENT COUNCIL</h1>
+                            <h1 class="text-sm font-black text-mstPurple truncate">MSTSC</h1>
                             <span class="bg-mstYellow text-mstDark text-[9px] font-black px-2 py-0.5 rounded-full shrink-0">RADIO</span>
                         </div>
-                        <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider truncate">ระบบขอเพลงเสียงตามสาย ม.ส.ธ.</p>
+                        <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider truncate">ระบบขอเพลงเสียงตามสาย</p>
                     </div>
                 </div>
                 <div id="headerActions" class="hidden items-center gap-1.5 shrink-0">
@@ -129,7 +129,7 @@
                     <i class="fa-solid fa-id-card text-2xl"></i>
                 </div>
                 <div>
-                    <h2 class="text-lg font-black text-mstDark">ยืนยันตัวตนนักเรียน ม.ส.ธ.</h2>
+                    <h2 class="text-lg font-black text-mstDark">ยืนยันตัวตนนักเรียน</h2>
                     <p class="text-xs text-gray-500 font-medium mt-0.5">กรอกรหัสประจำตัวนักเรียน 5 หลัก เพื่อเชื่อมกับ LINE</p>
                 </div>
 
@@ -333,7 +333,7 @@
             if (!item) return "ผู้ไม่ประสงค์ออกนาม";
             const isAnon = item.isAnonymous === true || String(item.isAnonymous).toLowerCase() === 'true';
             if (isAnon) return "ผู้ไม่ประสงค์ออกนาม";
-            return item.requesterName || "นักเรียน ม.ส.ธ.";
+            return item.requesterName || "นักเรียน";
         }
 
         async function refreshRadioData(isInitial = false) {
