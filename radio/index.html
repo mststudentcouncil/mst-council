@@ -133,6 +133,21 @@
                         </p>
                     </div>
                 </div>
+                <!-- วางต่อท้ายภายใน <div id="link-screen"> ของไฟล์ radio.html -->
+                <div class="mt-4 pt-3 border-t border-gray-200/70 text-center">
+                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">
+                        <i class="fas fa-database mr-1"></i> สำหรับผู้ดูแลระบบ (กรณีฐานข้อมูลยังว่าง)
+                    </p>
+                    <div class="flex gap-2">
+                        <button onclick="syncFromSchoolWebsite()" class="flex-1 py-2 px-2.5 rounded-xl bg-purple-50 text-mstPurple border border-purple-200 text-[11px] font-bold">
+                            <i class="fas fa-sync-alt mr-1"></i> ดึงจากเว็บ mst.ac.th
+                        </button>
+                        <label class="flex-1 py-2 px-2.5 rounded-xl bg-amber-50 text-amber-800 border border-amber-200 text-[11px] font-bold cursor-pointer">
+                            <i class="fas fa-file-excel mr-1"></i> อัปโหลดไฟล์ .xlsx
+                            <input type="file" accept=".xlsx,.xls" onchange="uploadExcelFileDirect(this)" class="hidden">
+                        </label>
+                    </div>
+                </div>
             </div>
 
             <!-- 4. Main Radio Screen -->
