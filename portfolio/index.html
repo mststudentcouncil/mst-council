@@ -4,14 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#4C1D95">
-    <title>MSTSC</title>
+    <title>Senior Portfolio Hub</title>
     <link rel="icon" type="image/webp" href="/logo.webp">
 
-    <link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <link href="[https://fonts.googleapis.com/css2?family=Anuphan:wght@300;400;500;600;700;800&display=swap](https://fonts.googleapis.com/css2?family=Anuphan:wght@300;400;500;600;700;800&display=swap)" rel="stylesheet">
+    <link rel="stylesheet" href="[https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css](https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css)">
+    <script src="[https://cdn.tailwindcss.com](https://cdn.tailwindcss.com)"></script>
+    <script src="[https://cdn.jsdelivr.net/npm/sweetalert2@11](https://cdn.jsdelivr.net/npm/sweetalert2@11)"></script>
+    <script charset="utf-8" src="[https://static.line-scdn.net/liff/edge/2/sdk.js](https://static.line-scdn.net/liff/edge/2/sdk.js)"></script>
 
     <script>
         tailwind.config = {
@@ -25,94 +25,144 @@
     </script>
 
     <style>
+        .hidden { display: none !important; }
         body {
             font-family: 'Anuphan', sans-serif;
-            background-color: #FEFCF5;
+            background: linear-gradient(135deg, #f3e5f5 0%, #fffde7 100%);
             color: #1E293B;
             min-height: 100vh;
             overflow-x: hidden;
             -webkit-tap-highlight-color: transparent;
             user-select: none;
             padding-top: env(safe-area-inset-top);
-            padding-bottom: env(safe-area-inset-bottom);
+            padding-bottom: calc(env(safe-area-inset-bottom) + 3rem);
         }
-        .blob-1 { position: fixed; top: -10%; left: -15%; width: 300px; height: 300px; background: rgba(251, 191, 36, 0.22); border-radius: 50%; filter: blur(80px); z-index: -1; pointer-events: none; }
-        .blob-2 { position: fixed; bottom: -10%; right: -15%; width: 300px; height: 300px; background: rgba(76, 29, 149, 0.16); border-radius: 50%; filter: blur(80px); z-index: -1; pointer-events: none; }
-
-        .glass { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.9); box-shadow: 0 10px 30px rgba(76, 29, 149, 0.06); }
+        .glass {
+            background: rgba(255, 255, 255, 0.82);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.92);
+            box-shadow: 0 10px 30px rgba(76, 29, 149, 0.06);
+        }
         .glass-input {
-            background: #F8FAFC; border: 1px solid #CBD5E1; border-radius: 0.9rem;
-            padding: 0.75rem 1rem; font-size: 15px !important; width: 100%;
-            color: #1E293B; font-weight: 600; transition: all 0.2s;
+            background: #FFFFFF;
+            border: 1px solid #CBD5E1;
+            border-radius: 0.9rem;
+            padding: 0.75rem 1rem;
+            font-size: 15px;
+            width: 100%;
+            color: #1E293B;
+            font-weight: 600;
+            transition: all 0.2s;
         }
-        .glass-input:focus { background: #FFFFFF; border-color: #4C1D95; outline: none; box-shadow: 0 0 0 3px rgba(76, 29, 149, 0.15); }
-        .btn-main { background: linear-gradient(135deg, #4C1D95 0%, #6D28D9 100%); color: white; font-weight: 700; padding: 0.9rem 1.2rem; border-radius: 1rem; display: flex; justify-content: center; align-items: center; gap: 0.5rem; font-size: 14px; box-shadow: 0 6px 16px rgba(76, 29, 149, 0.25); transition: all 0.15s; }
+        .glass-input:focus {
+            border-color: #4C1D95;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(76, 29, 149, 0.15);
+        }
+        .btn-main {
+            background: linear-gradient(135deg, #4C1D95 0%, #6D28D9 100%);
+            color: white;
+            font-weight: 700;
+            padding: 0.9rem 1.2rem;
+            border-radius: 1rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 14px;
+            box-shadow: 0 6px 16px rgba(76, 29, 149, 0.25);
+            transition: all 0.15s;
+        }
         .btn-main:active { transform: scale(0.97); }
+        .loader-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .fade-in { animation: fadeIn 0.25s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
         .swal-glass { background: #FFFFFF !important; border-radius: 1.75rem !important; font-family: 'Anuphan', sans-serif !important; }
     </style>
 </head>
 <body oncontextmenu="return false;" class="antialiased">
 
-    <div class="blob-1"></div>
-    <div class="blob-2"></div>
+    <!-- Global Loader Overlay (เหมือนระบบ Feedback) -->
+    <div id="globalLoader" class="loader-overlay hidden">
+        <i class="fas fa-circle-notch fa-spin text-5xl text-mstPurple mb-4 drop-shadow-md"></i>
+        <p class="text-base font-bold text-mstPurple" id="loaderText">กำลังตรวจสอบข้อมูล...</p>
+    </div>
 
-    <div class="w-full max-w-md mx-auto min-h-screen flex flex-col px-4 pb-24">
+    <div class="w-full max-w-md mx-auto min-h-screen flex flex-col px-4">
 
         <!-- Sticky Top Header -->
-        <header class="sticky top-2 z-30 pt-2 pb-3">
+        <header class="sticky top-0 z-30 pt-3 pb-2.5">
             <div class="glass rounded-2xl px-4 py-3 flex items-center justify-between gap-2">
                 <div class="flex items-center gap-3 min-w-0">
-                    <img src="/logo.webp" class="w-10 h-10 object-contain drop-shadow-sm shrink-0" alt="MSTSC Logo">
+                    <img src="/logo.webp" class="w-10 h-10 object-contain drop-shadow-sm shrink-0" alt="MSTSC Logo" onerror="this.style.opacity='0'">
                     <div class="min-w-0">
                         <div class="flex items-center gap-1.5">
-                            <h1 class="text-sm font-black text-mstPurple truncate">MSTSC</h1>
+                            <h1 class="text-sm font-black text-mstPurple truncate">STUDENT COUNCIL</h1>
                             <span class="bg-mstYellow text-mstDark text-[9px] font-black px-2 py-0.5 rounded-full shrink-0">PORTFOLIO</span>
                         </div>
-                        <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider truncate">คลังพอร์ตโฟลิโอ</p>
+                        <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider truncate">คลังพอร์ตโฟลิโอรุ่นพี่ ม.ส.ธ.</p>
                     </div>
                 </div>
                 <div class="flex items-center gap-1.5 shrink-0">
-                    <a href="/richmenuline" class="w-9 h-9 rounded-xl bg-purple-50 text-mstPurple border border-purple-100 flex items-center justify-center text-xs" title="เมนูบริการนักเรียน">
+                    <a href="/richmenuline" class="w-9 h-9 rounded-xl bg-purple-50 hover:bg-purple-100 text-mstPurple border border-purple-100 flex items-center justify-center text-xs transition" title="เมนูบริการนักเรียน">
                         <i class="fa-solid fa-grip"></i>
                     </a>
-                    <button id="btnOpenUpload" onclick="showScreen('upload-screen')" class="hidden bg-mstYellow hover:bg-amber-400 text-mstDark font-black px-3 py-2 rounded-xl text-xs shadow-sm items-center gap-1.5 transition">
+                    <button id="btnOpenUpload" onclick="showScreen('upload-screen')" class="hidden bg-mstYellow hover:bg-amber-400 text-mstDark font-black px-3 py-2 rounded-xl text-xs shadow-xs items-center gap-1.5 transition">
                         <i class="fa-solid fa-cloud-arrow-up"></i> ส่งพอร์ต
+                    </button>
+                    <button id="btnUnlinkPort" onclick="promptUnlinkPort()" class="hidden w-9 h-9 rounded-xl bg-white hover:bg-gray-50 text-gray-500 border border-gray-200 items-center justify-center text-xs transition" title="สลับรหัสนักเรียน">
+                        <i class="fa-solid fa-user-gear"></i>
                     </button>
                 </div>
             </div>
         </header>
 
+        <!-- 1. Loading Screen -->
         <div id="loading-screen" class="glass p-10 text-center rounded-[2rem] my-auto flex flex-col items-center justify-center">
-            <div class="w-12 h-12 border-4 border-mstYellow border-t-mstPurple rounded-full animate-spin mb-4"></div>
-            <p class="text-mstPurple font-black text-sm">กำลังโหลดคลังพอร์ตโฟลิโอสภานักเรียน...</p>
+            <i class="fas fa-circle-notch fa-spin text-5xl text-mstPurple mb-4 drop-shadow-md"></i>
+            <p class="text-mstPurple font-black text-base">กำลังโหลดคลังพอร์ตโฟลิโอสภานักเรียน...</p>
+            <p class="text-xs text-gray-500 font-medium mt-1">กรุณารอสักครู่</p>
         </div>
 
-        <div id="loginPage" class="hidden flex-col my-auto">
+        <!-- 2. Login Screen -->
+        <div id="loginPage" class="hidden fade-in flex-col my-auto py-4">
             <div class="glass rounded-[2.5rem] p-8 text-center w-full">
-                <img src="/logo.webp" class="w-20 h-20 mx-auto mb-4 drop-shadow-md" alt="MSTSC">
-                <span class="bg-purple-50 text-mstPurple text-[10px] font-extrabold px-3.5 py-1 rounded-full border border-purple-100 uppercase tracking-widest">MSTSC Academic Service</span>
+                <img src="/logo.webp" class="w-24 h-24 mx-auto mb-4 drop-shadow-md object-contain" alt="MSTSC">
+                <span class="inline-block bg-purple-50 text-mstPurple text-[10px] font-extrabold px-3.5 py-1 rounded-full border border-purple-100 uppercase tracking-widest">MSTSC Academic Service</span>
                 <h2 class="text-2xl font-black text-mstDark mt-3 mb-1">Senior Portfolio Hub</h2>
-                <p class="text-xs font-medium text-gray-500 mb-7">คลังพอร์ตโฟลิโอและรีวิวสัมภาษณ์จากรุ่นพี่</p>
-                <button onclick="liff.login()" class="w-full bg-[#06C755] text-white py-4 rounded-2xl font-bold shadow-md text-sm flex justify-center items-center gap-2">
+                <p class="text-xs font-medium text-gray-500 mb-7 leading-relaxed">คลังพอร์ตโฟลิโอและเทคนิคการสอบสัมภาษณ์จากรุ่นพี่โรงเรียนเมืองสุราษฎร์ธานี</p>
+                <button onclick="liff.login()" class="w-full bg-[#06C755] hover:bg-[#05b34c] active:scale-[0.98] text-white py-4 rounded-2xl font-bold shadow-md text-sm flex justify-center items-center gap-2 transition">
                     <i class="fa-brands fa-line text-xl"></i> เข้าสู่ระบบด้วย LINE
                 </button>
             </div>
         </div>
 
-        <!-- หน้ายืนยันตัวตน -->
-        <div id="link-screen" class="hidden flex-col mt-2">
+        <!-- 3. หน้ายืนยันตัวตน -->
+        <div id="link-screen" class="hidden fade-in flex-col mt-2">
             <div class="glass rounded-[2rem] p-6 text-center space-y-4">
-                <div class="w-14 h-14 mx-auto bg-purple-50 rounded-2xl flex items-center justify-center text-mstPurple border border-purple-100">
+                <div class="w-14 h-14 mx-auto bg-purple-50 rounded-2xl flex items-center justify-center text-mstPurple border border-purple-100 shadow-inner">
                     <i class="fa-solid fa-user-shield text-2xl"></i>
                 </div>
                 <div>
                     <h2 class="text-lg font-black text-mstDark">ยืนยันตัวตนเข้าใช้งาน</h2>
-                    <p class="text-xs text-gray-500 font-medium">สงวนสิทธิ์สำหรับนักเรียนปัจจุบัน (ม.1-ม.6) และศิษย์เก่า</p>
+                    <p class="text-xs text-gray-500 font-medium mt-0.5">สงวนสิทธิ์สำหรับนักเรียนปัจจุบัน (ม.1-ม.6) และศิษย์เก่า ม.ส.ธ.</p>
                 </div>
 
                 <div class="grid grid-cols-2 gap-1.5 bg-gray-100 p-1 rounded-xl text-xs font-bold">
-                    <button id="modeCurrentBtn" onclick="setBindMode(false)" class="py-2.5 rounded-lg bg-mstPurple text-white">นักเรียน ม.1-ม.6</button>
-                    <button id="modeAlumniBtn" onclick="setBindMode(true)" class="py-2.5 rounded-lg text-gray-600">รุ่นพี่ศิษย์เก่า</button>
+                    <button type="button" id="modeCurrentBtn" onclick="setBindMode(false)" class="py-2.5 rounded-lg bg-mstPurple text-white transition">นักเรียน / ศิษย์เก่าสภา</button>
+                    <button type="button" id="modeAlumniBtn" onclick="setBindMode(true)" class="py-2.5 rounded-lg text-gray-600 transition">ศิษย์เก่าทั่วไป</button>
                 </div>
 
                 <input type="tel" id="bindStdId" maxlength="5" class="glass-input text-center text-xl font-black p-3.5 tracking-[0.2em]" placeholder="รหัสนักเรียน 5 หลัก">
@@ -131,20 +181,24 @@
                 <button onclick="handleBindSubmit()" class="btn-main w-full py-4">
                     ยืนยันตัวตน <i class="fa-solid fa-arrow-right ml-1"></i>
                 </button>
+
+                <button onclick="searchPortStudentByName()" class="w-full py-3 rounded-xl bg-white border border-gray-200 text-xs font-bold text-gray-600 hover:border-mstPurple transition">
+                    <i class="fa-solid fa-magnifying-glass mr-1 text-mstPurple"></i> จำรหัสนักเรียนไม่ได้? ค้นหาด้วยชื่อจริง
+                </button>
             </div>
         </div>
 
-        <!-- หน้าหลักคลัง Portfolio -->
-        <div id="home-screen" class="hidden flex-col space-y-3.5">
+        <!-- 4. หน้าหลักคลัง Portfolio -->
+        <div id="home-screen" class="hidden fade-in flex-col space-y-3.5 pt-1">
             <div class="glass rounded-2xl p-3.5 flex items-center justify-between gap-2">
-                <div class="flex items-center gap-2.5 min-w-0">
+                <div class="flex items-center gap-2.5 min-w-0 flex-1">
                     <i class="fa-solid fa-id-badge text-mstPurple text-lg shrink-0"></i>
-                    <div class="min-w-0">
+                    <div class="min-w-0 flex-1">
                         <p id="viewerNameText" class="text-xs font-black text-gray-900 truncate">-</p>
                         <p id="viewerRoleText" class="text-[10px] font-bold text-mstPurple truncate">-</p>
                     </div>
                 </div>
-                <button id="btnFavFilter" onclick="toggleFavFilter()" class="px-3 py-1.5 rounded-xl bg-white border border-gray-200 text-[11px] font-bold text-gray-600 flex items-center gap-1 shrink-0">
+                <button id="btnFavFilter" onclick="toggleFavFilter()" class="px-3 py-1.5 rounded-xl bg-white border border-gray-200 text-[11px] font-bold text-gray-600 flex items-center gap-1 shrink-0 transition">
                     <i class="fa-solid fa-bookmark text-mstYellow"></i> ที่บันทึกไว้
                 </button>
             </div>
@@ -179,21 +233,21 @@
             <div id="portfolioListContainer" class="space-y-3"></div>
         </div>
 
-        <!-- หน้าอัปโหลด Portfolio -->
-        <div id="upload-screen" class="hidden flex-col space-y-4">
+        <!-- 5. หน้าอัปโหลด Portfolio -->
+        <div id="upload-screen" class="hidden fade-in flex-col space-y-4 pt-1">
             <div class="glass rounded-2xl p-3.5 flex items-center gap-3">
-                <button onclick="showScreen('home-screen')" class="w-10 h-10 bg-purple-50 rounded-xl flex items-center justify-center text-mstPurple border border-purple-100 shrink-0">
+                <button onclick="showScreen('home-screen')" class="w-10 h-10 bg-purple-50 hover:bg-purple-100 rounded-xl flex items-center justify-center text-mstPurple border border-purple-100 shrink-0 transition">
                     <i class="fa-solid fa-arrow-left text-sm"></i>
                 </button>
                 <div>
                     <h2 class="text-sm font-black text-mstPurple leading-tight">ส่ง Portfolio รุ่นพี่</h2>
-                    <p class="text-[11px] font-medium text-gray-500">แบ่งปันแนวทางและรีวิวสัมภาษณ์ให้น้องๆ</p>
+                    <p class="text-[11px] font-medium text-gray-500">แบ่งปันแนวทางและรีวิวสัมภาษณ์ให้น้องๆ ม.ส.ธ.</p>
                 </div>
             </div>
 
             <div class="glass p-4 rounded-[1.75rem] space-y-3">
-                <input type="text" id="p_uni" class="glass-input text-xs" placeholder="มหาวิทยาลัย (เช่น จุฬาลงกรณ์มหาวิทยาลัย)">
-                <input type="text" id="p_fac" class="glass-input text-xs" placeholder="คณะและสาขาวิชา (เช่น คณะวิทยาศาสตร์ วิทยาการคอมพิวเตอร์)">
+                <input type="text" id="p_uni" class="glass-input text-xs" placeholder="มหาวิทยาลัย (เช่น จุฬาลงกรณ์มหาวิทยาลัย) *">
+                <input type="text" id="p_fac" class="glass-input text-xs" placeholder="คณะและสาขาวิชา (เช่น คณะวิทยาศาสตร์ วิทยาการคอมพิวเตอร์) *">
                 <div class="grid grid-cols-2 gap-2">
                     <select id="p_round" class="glass-input text-xs px-2">
                         <option value="รอบ 1 Portfolio">รอบ 1 Portfolio</option>
@@ -225,17 +279,24 @@
                 <textarea id="p_highlights" rows="2" class="glass-input text-xs" placeholder="ผลงานเด่น 3 อันดับแรกที่ทำให้ติดคณะนี้..."></textarea>
                 <textarea id="p_tips" rows="3" class="glass-input text-xs" placeholder="คำถามสัมภาษณ์ที่เจอจริง และเทคนิคการเตรียมตัว..."></textarea>
                 <input type="text" id="p_ig" class="glass-input text-xs" placeholder="ช่องทางติดต่อสำหรับให้น้องปรึกษา (เช่น IG หรือ LINE)">
-                <input type="url" id="p_pdf_url" class="glass-input text-xs" placeholder="วางลิงก์ไฟล์ PDF บน Google Drive (ตั้งค่าเปิดอ่านทุกคน)">
+
+                <div class="bg-purple-50/70 p-3.5 rounded-2xl border border-purple-100 space-y-2.5">
+                    <label class="block text-xs font-black text-mstPurple">
+                        <i class="fa-solid fa-file-pdf mr-1"></i> แนบไฟล์เล่ม Portfolio (เลือกอัปโหลดไฟล์ PDF หรือวางลิงก์ Drive) *
+                    </label>
+                    <input type="file" id="p_pdf_file" accept="application/pdf" class="block w-full text-xs text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-mstPurple file:text-white cursor-pointer bg-white p-2 rounded-xl border border-gray-200">
+                    <input type="url" id="p_pdf_url" class="glass-input text-xs bg-white" placeholder="หรือวางลิงก์ไฟล์ PDF บน Google Drive (เปิดสิทธิ์อ่านทุกคน)">
+                </div>
             </div>
 
             <div class="bg-amber-50 border border-amber-200 p-4 rounded-2xl space-y-2">
                 <p class="text-xs font-black text-amber-800"><i class="fa-solid fa-shield-halved mr-1"></i> รายการตรวจสอบ PDPA Safety Checklist</p>
                 <label class="flex items-start gap-2 text-xs text-gray-700 cursor-pointer">
-                    <input type="checkbox" id="chk_pdpa_1" class="mt-0.5 rounded accent-mstPurple">
+                    <input type="checkbox" id="chk_pdpa_1" class="mt-0.5 rounded accent-mstPurple shrink-0">
                     <span>ฉันได้เบลอหรือลบ <b>เลขประจำตัวประชาชน 13 หลัก, ที่อยู่บ้าน และเบอร์โทรศัพท์ส่วนตัว</b> ออกจากไฟล์พอร์ตแล้ว</span>
                 </label>
                 <label class="flex items-start gap-2 text-xs text-gray-700 cursor-pointer">
-                    <input type="checkbox" id="chk_pdpa_2" class="mt-0.5 rounded accent-mstPurple">
+                    <input type="checkbox" id="chk_pdpa_2" class="mt-0.5 rounded accent-mstPurple shrink-0">
                     <span>ยินยอมให้เผยแพร่ในระบบสภานักเรียนพร้อมลายน้ำชื่อผู้เปิดดูเพื่อเป็นแนวทางแก่รุ่นน้อง</span>
                 </label>
             </div>
@@ -245,22 +306,22 @@
             </button>
         </div>
 
-        <!-- หน้าเปิดอ่านไฟล์พร้อมลายน้ำไดนามิก -->
-        <div id="viewer-screen" class="hidden flex-col space-y-3">
-            <div class="glass rounded-2xl p-3.5 flex items-center justify-between">
+        <!-- 6. หน้าเปิดอ่านไฟล์พร้อมลายน้ำไดนามิก -->
+        <div id="viewer-screen" class="hidden fade-in flex-col space-y-3 pt-1">
+            <div class="glass rounded-2xl p-3.5 flex items-center justify-between gap-2">
                 <button onclick="closeViewer()" class="w-9 h-9 bg-purple-50 rounded-xl flex items-center justify-center text-mstPurple border border-purple-100 shrink-0">
                     <i class="fa-solid fa-arrow-left text-xs"></i>
                 </button>
-                <div class="flex-1 px-3 min-w-0">
+                <div class="flex-1 px-2 min-w-0">
                     <h3 id="v_uni_title" class="text-xs font-black text-mstPurple truncate"></h3>
                     <p id="v_senior_sub" class="text-[10px] font-bold text-gray-500 truncate"></p>
                 </div>
-                <span class="bg-emerald-100 text-emerald-700 text-[10px] font-black px-2.5 py-1 rounded-full border border-emerald-200 shrink-0">
-                    <i class="fa-solid fa-circle-check mr-1"></i> Verified
-                </span>
+                <a id="v_external_btn" href="#" target="_blank" rel="noopener noreferrer" class="bg-purple-50 text-mstPurple text-[10px] font-black px-2.5 py-1.5 rounded-xl border border-purple-100 shrink-0">
+                    <i class="fa-solid fa-expand mr-1"></i> เต็มจอ
+                </a>
             </div>
 
-            <div class="relative w-full h-[420px] bg-mstDark rounded-2xl overflow-hidden border border-gray-300 shadow-inner">
+            <div class="relative w-full h-[430px] bg-mstDark rounded-2xl overflow-hidden border border-gray-300 shadow-inner">
                 <iframe id="v_pdf_frame" src="" class="w-full h-full border-0"></iframe>
                 <div id="v_watermark_layer" class="pointer-events-none absolute inset-0 overflow-hidden flex flex-wrap content-around justify-around opacity-25 p-3"></div>
             </div>
@@ -268,11 +329,11 @@
             <div class="glass p-4 rounded-2xl space-y-3 text-xs">
                 <div>
                     <p class="font-black text-mstPurple mb-1"><i class="fa-solid fa-award mr-1"></i> ผลงานเด่น 3 อันดับแรก</p>
-                    <p id="v_highlights" class="text-gray-700 bg-white p-3 rounded-xl border border-gray-100 whitespace-pre-line leading-relaxed"></p>
+                    <p id="v_highlights" class="text-gray-700 bg-white p-3 rounded-xl border border-gray-100 whitespace-pre-line leading-relaxed break-words"></p>
                 </div>
                 <div>
                     <p class="font-black text-mstPurple mb-1"><i class="fa-solid fa-comments mr-1"></i> คำถามสัมภาษณ์ & เทคนิคการเตรียมตัว</p>
-                    <p id="v_tips" class="text-gray-700 bg-white p-3 rounded-xl border border-gray-100 whitespace-pre-line leading-relaxed"></p>
+                    <p id="v_tips" class="text-gray-700 bg-white p-3 rounded-xl border border-gray-100 whitespace-pre-line leading-relaxed break-words"></p>
                 </div>
                 <div id="v_contact_card" class="p-3 rounded-xl bg-purple-50 border border-purple-100"></div>
             </div>
@@ -281,8 +342,8 @@
     </div>
 
     <script>
-        const API_PORTFOLIO_URL = "https://admission-backend-592123078141.asia-southeast1.run.app/api/portfolio";
-        const API_RADIO_URL = "https://admission-backend-592123078141.asia-southeast1.run.app/api/radio";
+        const API_PORTFOLIO_URL = "[https://admission-backend-592123078141.asia-southeast1.run.app/api/portfolio](https://admission-backend-592123078141.asia-southeast1.run.app/api/portfolio)";
+        const API_RADIO_URL = "[https://admission-backend-592123078141.asia-southeast1.run.app/api/radio](https://admission-backend-592123078141.asia-southeast1.run.app/api/radio)";
         const LIFF_ID = "2008923798-LmKWCP2j";
 
         let lineAccessToken = "";
@@ -290,6 +351,15 @@
         let allPortfolios = [];
         let favOnly = false;
         let isAlumniMode = false;
+
+        function setLoader(text) {
+            document.getElementById('loaderText').innerText = text || 'กำลังตรวจสอบข้อมูล...';
+            document.getElementById('globalLoader').classList.remove('hidden');
+        }
+
+        function hideLoader() {
+            document.getElementById('globalLoader').classList.add('hidden');
+        }
 
         function showScreen(screenId) {
             ['loading-screen', 'loginPage', 'link-screen', 'home-screen', 'upload-screen', 'viewer-screen'].forEach(id => {
@@ -303,8 +373,8 @@
 
         function setBindMode(alumni) {
             isAlumniMode = alumni;
-            document.getElementById('modeCurrentBtn').className = !alumni ? "py-2.5 rounded-lg bg-mstPurple text-white" : "py-2.5 rounded-lg text-gray-600";
-            document.getElementById('modeAlumniBtn').className = alumni ? "py-2.5 rounded-lg bg-mstPurple text-white" : "py-2.5 rounded-lg text-gray-600";
+            document.getElementById('modeCurrentBtn').className = !alumni ? "py-2.5 rounded-lg bg-mstPurple text-white transition" : "py-2.5 rounded-lg text-gray-600 transition";
+            document.getElementById('modeAlumniBtn').className = alumni ? "py-2.5 rounded-lg bg-mstPurple text-white transition" : "py-2.5 rounded-lg text-gray-600 transition";
             document.getElementById('alumniExtraFields').classList.toggle('hidden', !alumni);
         }
 
@@ -315,6 +385,15 @@
                 body: JSON.stringify({ ...payload, lineAccessToken })
             });
             return await res.json();
+        }
+
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = err => reject(err);
+            });
         }
 
         async function initApp() {
@@ -347,6 +426,10 @@
             btnUp.classList.remove('hidden');
             btnUp.classList.add('flex');
 
+            const btnUnlink = document.getElementById('btnUnlinkPort');
+            btnUnlink.classList.remove('hidden');
+            btnUnlink.classList.add('flex');
+
             document.getElementById('viewerNameText').innerText = currentViewer.fullName;
             document.getElementById('viewerRoleText').innerText = `รหัส ${currentViewer.std_id} (${currentViewer.level})`;
             renderPortfolios();
@@ -360,22 +443,32 @@
             }
 
             if (!isAlumniMode) {
+                setLoader('กำลังตรวจสอบรายชื่อ...');
                 const look = await callApi(API_RADIO_URL, { action: 'lookupStudentById', std_id });
+                hideLoader();
                 if (look.status !== 'success') {
                     return Swal.fire({ icon: 'error', title: 'ไม่พบรหัสนักเรียน', text: look.message, customClass: { popup: 'swal-glass' } });
                 }
                 const s = look.student;
                 const cf = await Swal.fire({
-                    title: 'ยืนยันข้อมูลนักเรียน',
-                    html: `<p class="text-xs">${s.prefix}${s.fname} ${s.lname} (${s.level}/${s.room})</p>`,
+                    title: 'ยืนยันข้อมูลผู้ใช้งาน',
+                    html: `
+                        <div class="text-left bg-purple-50 p-4 rounded-2xl border border-purple-100 text-xs space-y-1.5">
+                            <p><b>รหัสประจำตัว:</b> ${s.std_id}</p>
+                            <p><b>ชื่อ-นามสกุล:</b> ${s.prefix}${s.fname} ${s.lname}</p>
+                            <p><b>สถานะ/ระดับชั้น:</b> ${s.level}${s.room && s.room !== '-' ? '/' + s.room : ''}</p>
+                        </div>
+                    `,
                     showCancelButton: true,
-                    confirmButtonText: 'ยืนยัน',
+                    confirmButtonText: 'ยืนยันและเข้าสู่ระบบ',
+                    cancelButtonText: 'ยกเลิก',
                     confirmButtonColor: '#4C1D95',
                     customClass: { popup: 'swal-glass' }
                 });
                 if (!cf.isConfirmed) return;
             }
 
+            setLoader('กำลังผูกบัญชี LINE...');
             const bindRes = await callApi(API_RADIO_URL, {
                 action: 'confirmBindLine',
                 std_id,
@@ -384,6 +477,7 @@
                 fname: document.getElementById('alumniFname').value.trim(),
                 lname: document.getElementById('alumniLname').value.trim()
             });
+            hideLoader();
 
             if (bindRes.status === 'success') {
                 await loadPortfolioData();
@@ -392,11 +486,58 @@
             }
         }
 
+        async function searchPortStudentByName() {
+            const { value: kw } = await Swal.fire({
+                title: 'ค้นหารหัสนักเรียนจากชื่อ',
+                input: 'text',
+                inputPlaceholder: 'พิมพ์ชื่อจริง หรือ นามสกุล',
+                showCancelButton: true,
+                confirmButtonText: 'ค้นหา',
+                cancelButtonText: 'ยกเลิก',
+                confirmButtonColor: '#4C1D95',
+                customClass: { popup: 'swal-glass' }
+            });
+            if (!kw) return;
+            setLoader('กำลังค้นหารายชื่อ...');
+            const res = await callApi(API_RADIO_URL, { action: 'searchStudentByName', keyword: kw });
+            hideLoader();
+            if (!res.matches || res.matches.length === 0) {
+                return Swal.fire({ icon: 'info', title: 'ไม่พบรายชื่อที่ค้นหา', customClass: { popup: 'swal-glass' } });
+            }
+            const first = res.matches[0];
+            document.getElementById('bindStdId').value = first.std_id;
+            Swal.fire({
+                icon: 'success',
+                title: `พบรหัส ${first.std_id}`,
+                text: `${first.prefix}${first.fname} ${first.lname} (${first.level}) กดปุ่มยืนยันตัวตนได้เลย`,
+                confirmButtonColor: '#4C1D95',
+                customClass: { popup: 'swal-glass' }
+            });
+        }
+
+        async function promptUnlinkPort() {
+            const confirm = await Swal.fire({
+                icon: 'warning',
+                title: 'สลับบัญชีรหัสนักเรียน?',
+                text: 'ต้องการยกเลิกการผูกบัญชี LINE กับรหัสนักเรียนปัจจุบันหรือไม่',
+                showCancelButton: true,
+                confirmButtonText: 'ยืนยันยกเลิก',
+                cancelButtonText: 'ปิด',
+                confirmButtonColor: '#EF4444',
+                customClass: { popup: 'swal-glass' }
+            });
+            if (confirm.isConfirmed) {
+                setLoader('กำลังยกเลิกการผูกบัญชี...');
+                await callApi(API_RADIO_URL, { action: 'unlinkLineAccount' });
+                location.reload();
+            }
+        }
+
         function toggleFavFilter() {
             favOnly = !favOnly;
             document.getElementById('btnFavFilter').className = favOnly
-                ? "px-3 py-1.5 rounded-xl bg-mstPurple text-white text-[11px] font-bold flex items-center gap-1 shrink-0"
-                : "px-3 py-1.5 rounded-xl bg-white border border-gray-200 text-[11px] font-bold text-gray-600 flex items-center gap-1 shrink-0";
+                ? "px-3 py-1.5 rounded-xl bg-mstPurple text-white text-[11px] font-bold flex items-center gap-1 shrink-0 transition"
+                : "px-3 py-1.5 rounded-xl bg-white border border-gray-200 text-[11px] font-bold text-gray-600 flex items-center gap-1 shrink-0 transition";
             renderPortfolios();
         }
 
@@ -425,7 +566,7 @@
             }
 
             container.innerHTML = filtered.map(p => {
-                const safeObj = JSON.stringify(p).replace(/'/g, "&#39;");
+                const encodedPort = encodeURIComponent(JSON.stringify(p));
                 return `
                     <div class="glass p-4 rounded-2xl space-y-2.5">
                         <div class="flex items-center justify-between text-[10px]">
@@ -441,8 +582,8 @@
                         </div>
 
                         <div>
-                            <h3 class="text-sm font-black text-gray-900 leading-snug">${p.university}</h3>
-                            <p class="text-xs font-bold text-mstPurple mt-0.5">${p.faculty}</p>
+                            <h3 class="text-sm font-black text-gray-900 leading-snug break-words">${p.university}</h3>
+                            <p class="text-xs font-bold text-mstPurple mt-0.5 break-words">${p.faculty}</p>
                             <p class="text-[11px] text-gray-500 mt-0.5">โครงการ: ${p.projectName || '-'}</p>
                         </div>
 
@@ -452,15 +593,15 @@
                             <span class="bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200 text-amber-800">${p.designTag} (${p.colorTag})</span>
                         </div>
 
-                        <div class="pt-2 border-t border-gray-100 flex items-center justify-between text-[11px]">
-                            <span class="font-bold text-gray-600"><i class="fa-solid fa-user-graduate text-mstPurple mr-1"></i>${p.seniorName}</span>
-                            <span class="${p.mentorshipOpen ? 'text-emerald-600' : 'text-gray-400'} font-bold text-[10px]">
+                        <div class="pt-2 border-t border-gray-100 flex items-center justify-between text-[11px] gap-2">
+                            <span class="font-bold text-gray-600 truncate"><i class="fa-solid fa-user-graduate text-mstPurple mr-1"></i>${p.seniorName}</span>
+                            <span class="${p.mentorshipOpen ? 'text-emerald-600' : 'text-gray-400'} font-bold text-[10px] shrink-0">
                                 <i class="fa-solid ${p.mentorshipOpen ? 'fa-comments' : 'fa-eye-slash'} mr-1"></i>${p.mentorshipOpen ? 'ยินดีให้คำปรึกษา' : 'งดรับปรึกษาชั่วคราว'}
                             </span>
                         </div>
 
                         <div class="flex gap-2 pt-1">
-                            <button onclick='openViewer(${safeObj})' class="flex-1 btn-main py-2.5 rounded-xl text-xs">
+                            <button onclick="openViewer('${encodedPort}')" class="flex-1 btn-main py-2.5 rounded-xl text-xs">
                                 <i class="fa-solid fa-book-open mr-1"></i> เปิดดูพอร์ต & รีวิวสัมภาษณ์
                             </button>
                             ${p.isOwner ? `
@@ -477,7 +618,8 @@
             }).join('');
         }
 
-        function openViewer(p) {
+        function openViewer(pOrEncoded) {
+            const p = typeof pOrEncoded === 'string' ? JSON.parse(decodeURIComponent(pOrEncoded)) : pOrEncoded;
             document.getElementById('v_uni_title').innerText = `${p.university} • ${p.faculty}`;
             document.getElementById('v_senior_sub').innerText = `โดย ${p.seniorName} (${p.tcasRound})`;
             document.getElementById('v_highlights').innerText = p.highlights || '-';
@@ -491,11 +633,12 @@
             }
 
             let embedUrl = p.pdfUrl || '';
-            if (embedUrl.includes('drive.google.com/file/d/')) {
-                const match = embedUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
-                if (match && match[1]) embedUrl = `https://drive.google.com/file/d/${match[1]}/preview`;
+            const match = embedUrl.match(/(?:\/d\/|id=)([a-zA-Z0-9_-]{20,})/);
+            if (match && match[1]) {
+                embedUrl = `[https://drive.google.com/file/d/$](https://drive.google.com/file/d/$){match[1]}/preview`;
             }
             document.getElementById('v_pdf_frame').src = embedUrl;
+            document.getElementById('v_external_btn').href = embedUrl;
 
             const wmText = `MSTSC • ${currentViewer.std_id} ${currentViewer.fullName} • ห้ามคัดลอก`;
             document.getElementById('v_watermark_layer').innerHTML = Array(12).fill(
@@ -514,30 +657,59 @@
             if (!document.getElementById('chk_pdpa_1').checked || !document.getElementById('chk_pdpa_2').checked) {
                 return Swal.fire({ icon: 'warning', title: 'กรุณาติ๊กยืนยัน PDPA Checklist ทั้ง 2 ข้อ', customClass: { popup: 'swal-glass' } });
             }
-            Swal.fire({ title: 'กำลังส่งข้อมูล...', didOpen: () => Swal.showLoading(), customClass: { popup: 'swal-glass' } });
-            const res = await callApi(API_PORTFOLIO_URL, {
-                action: 'submitPortfolio',
-                pdpaConfirmed: true,
-                university: document.getElementById('p_uni').value.trim(),
-                faculty: document.getElementById('p_fac').value.trim(),
-                tcasRound: document.getElementById('p_round').value,
-                academicYear: document.getElementById('p_year').value.trim(),
-                projectName: document.getElementById('p_project').value.trim(),
-                track: document.getElementById('p_track').value,
-                gpaxRange: document.getElementById('p_gpax').value.trim(),
-                designTag: document.getElementById('p_style').value,
-                colorTag: document.getElementById('p_color').value.trim(),
-                highlights: document.getElementById('p_highlights').value.trim(),
-                interviewTips: document.getElementById('p_tips').value.trim(),
-                contactIg: document.getElementById('p_ig').value.trim(),
-                pdfUrl: document.getElementById('p_pdf_url').value.trim()
-            });
-            Swal.close();
-            if (res.status === 'success') {
-                Swal.fire({ icon: 'success', title: 'ส่ง Portfolio สำเร็จ', text: res.message, customClass: { popup: 'swal-glass' } });
-                await loadPortfolioData();
-            } else {
-                Swal.fire({ icon: 'error', title: 'ไม่สำเร็จ', text: res.message, customClass: { popup: 'swal-glass' } });
+
+            const uni = document.getElementById('p_uni').value.trim();
+            const fac = document.getElementById('p_fac').value.trim();
+            const pdfFile = document.getElementById('p_pdf_file').files[0];
+            const pdfUrlInput = document.getElementById('p_pdf_url').value.trim();
+
+            if (!uni || !fac) {
+                return Swal.fire({ icon: 'warning', title: 'กรุณาระบุมหาวิทยาลัยและคณะ', customClass: { popup: 'swal-glass' } });
+            }
+            if (!pdfFile && !pdfUrlInput) {
+                return Swal.fire({ icon: 'warning', title: 'กรุณาเลือกไฟล์ PDF หรือวางลิงก์ไฟล์ PDF', customClass: { popup: 'swal-glass' } });
+            }
+
+            setLoader('กำลังอัปโหลดและบันทึกข้อมูล Portfolio...');
+            try {
+                let pdfBase64 = "";
+                if (pdfFile) {
+                    if (pdfFile.size > 12 * 1024 * 1024) {
+                        hideLoader();
+                        return Swal.fire({ icon: 'warning', title: 'ไฟล์ขนาดใหญ่เกิน 12MB', text: 'กรุณาอัปโหลดขึ้น Google Drive แล้วนำลิงก์มาวางแทน', customClass: { popup: 'swal-glass' } });
+                    }
+                    pdfBase64 = await fileToBase64(pdfFile);
+                }
+
+                const res = await callApi(API_PORTFOLIO_URL, {
+                    action: 'submitPortfolio',
+                    pdpaConfirmed: true,
+                    university: uni,
+                    faculty: fac,
+                    tcasRound: document.getElementById('p_round').value,
+                    academicYear: document.getElementById('p_year').value.trim() || '2569',
+                    projectName: document.getElementById('p_project').value.trim(),
+                    track: document.getElementById('p_track').value,
+                    gpaxRange: document.getElementById('p_gpax').value.trim(),
+                    designTag: document.getElementById('p_style').value,
+                    colorTag: document.getElementById('p_color').value.trim(),
+                    highlights: document.getElementById('p_highlights').value.trim(),
+                    interviewTips: document.getElementById('p_tips').value.trim(),
+                    contactIg: document.getElementById('p_ig').value.trim(),
+                    pdfUrl: pdfUrlInput,
+                    pdfBase64: pdfBase64
+                });
+                hideLoader();
+
+                if (res.status === 'success') {
+                    Swal.fire({ icon: 'success', title: 'ส่ง Portfolio สำเร็จ', text: res.message, customClass: { popup: 'swal-glass' } });
+                    await loadPortfolioData();
+                } else {
+                    Swal.fire({ icon: 'error', title: 'ไม่สำเร็จ', text: res.message, customClass: { popup: 'swal-glass' } });
+                }
+            } catch (err) {
+                hideLoader();
+                Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: err.message, customClass: { popup: 'swal-glass' } });
             }
         }
 
@@ -547,12 +719,16 @@
         }
 
         async function toggleMentorship(portfolioId) {
+            setLoader('กำลังสลับสถานะการให้คำปรึกษา...');
             await callApi(API_PORTFOLIO_URL, { action: 'toggleMentorship', portfolioId });
+            hideLoader();
             await loadPortfolioData();
         }
 
         async function approvePort(portfolioId) {
+            setLoader('กำลังอนุมัติผลงาน...');
             await callApi(API_PORTFOLIO_URL, { action: 'verifyPortfolio', portfolioId, status: 'VERIFIED' });
+            hideLoader();
             await loadPortfolioData();
         }
 

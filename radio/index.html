@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#4C1D95">
-    <title>MSTSC</title>
+    <title>Smart Radio</title>
     <link rel="icon" type="image/webp" href="/logo.webp">
 
     <link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -23,7 +23,8 @@
                         mstPurpleLight: '#EDE9FE',
                         mstYellow: '#FBBF24',
                         mstCream: '#FEFCF5',
-                        mstDark: '#1E1B4B'
+                        mstDark: '#1E1B4B',
+                        lineGreen: '#06C755'
                     }
                 }
             }
@@ -31,32 +32,75 @@
     </script>
 
     <style>
+        .hidden { display: none !important; }
         body {
             font-family: 'Anuphan', sans-serif;
-            background-color: #FEFCF5;
+            background: linear-gradient(135deg, #f3e5f5 0%, #fffde7 100%);
             color: #1E293B;
             min-height: 100vh;
             overflow-x: hidden;
             -webkit-tap-highlight-color: transparent;
             padding-top: env(safe-area-inset-top);
-            padding-bottom: env(safe-area-inset-bottom);
+            padding-bottom: calc(env(safe-area-inset-bottom) + 4rem);
         }
-        .blob-1 { position: fixed; top: -10%; left: -15%; width: 300px; height: 300px; background: rgba(251, 191, 36, 0.22); border-radius: 50%; filter: blur(80px); z-index: -1; pointer-events: none; }
-        .blob-2 { position: fixed; bottom: -10%; right: -15%; width: 300px; height: 300px; background: rgba(76, 29, 149, 0.16); border-radius: 50%; filter: blur(80px); z-index: -1; pointer-events: none; }
-
-        .glass { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.9); box-shadow: 0 10px 30px rgba(76, 29, 149, 0.06); }
-        .glass-dark { background: linear-gradient(135deg, #1E1B4B 0%, #3B0764 100%); color: #FFFFFF; box-shadow: 0 12px 30px rgba(30, 27, 75, 0.22); }
+        .glass {
+            background: rgba(255, 255, 255, 0.82);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.92);
+            box-shadow: 0 10px 30px rgba(76, 29, 149, 0.06);
+        }
+        .glass-dark {
+            background: linear-gradient(135deg, #1E1B4B 0%, #3B0764 100%);
+            color: #FFFFFF;
+            box-shadow: 0 12px 30px rgba(30, 27, 75, 0.22);
+        }
         .glass-input {
-            background: #F8FAFC; border: 1px solid #CBD5E1; border-radius: 0.9rem;
-            padding: 0.8rem 1rem; font-size: 15px !important; width: 100%;
-            color: #1E293B; transition: all 0.2s; font-weight: 600;
+            background: #F8FAFC;
+            border: 1px solid #CBD5E1;
+            border-radius: 0.9rem;
+            padding: 0.8rem 1rem;
+            font-size: 15px;
+            width: 100%;
+            color: #1E293B;
+            transition: all 0.2s;
+            font-weight: 600;
         }
-        .glass-input:focus { background: #FFFFFF; border-color: #4C1D95; outline: none; box-shadow: 0 0 0 3px rgba(76, 29, 149, 0.15); }
-
-        .btn-main { background: linear-gradient(135deg, #4C1D95 0%, #6D28D9 100%); color: white; font-weight: 700; padding: 0.9rem 1.2rem; border-radius: 1rem; transition: all 0.15s; display: flex; justify-content: center; align-items: center; gap: 0.5rem; font-size: 14px; box-shadow: 0 6px 18px rgba(76, 29, 149, 0.25); }
+        .glass-input:focus {
+            background: #FFFFFF;
+            border-color: #4C1D95;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(76, 29, 149, 0.15);
+        }
+        .btn-main {
+            background: linear-gradient(135deg, #4C1D95 0%, #6D28D9 100%);
+            color: white;
+            font-weight: 700;
+            padding: 0.9rem 1.2rem;
+            border-radius: 1rem;
+            transition: all 0.15s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 14px;
+            box-shadow: 0 6px 18px rgba(76, 29, 149, 0.25);
+        }
         .btn-main:active { transform: scale(0.97); }
         .btn-main:disabled { opacity: 0.45; pointer-events: none; }
 
+        .loader-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
         .fade-in { animation: fadeIn 0.25s ease-out forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -69,60 +113,58 @@
         @keyframes eqBounce { 0% { height: 4px; } 100% { height: 14px; } }
 
         .swal-glass { background: #FFFFFF !important; border-radius: 1.75rem !important; font-family: 'Anuphan', sans-serif !important; }
+        .custom-scroll::-webkit-scrollbar { width: 5px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 9999px; }
     </style>
 </head>
 <body class="antialiased">
 
-    <div class="blob-1"></div>
-    <div class="blob-2"></div>
+    <!-- Global Loader (ไอคอนโหลดมาตรฐานเดียวกับระบบ Feedback) -->
+    <div id="globalLoader" class="loader-overlay">
+        <i class="fas fa-circle-notch fa-spin text-5xl text-mstPurple mb-4 drop-shadow-md"></i>
+        <p class="text-base font-bold text-mstPurple" id="loaderText">กำลังตรวจสอบข้อมูล...</p>
+    </div>
 
-    <div class="w-full max-w-md mx-auto min-h-screen flex flex-col px-4 pb-28">
+    <div class="w-full max-w-md mx-auto min-h-screen flex flex-col px-4">
 
         <!-- Sticky Top Header -->
-        <header class="sticky top-2 z-30 pt-2 pb-3">
-            <div class="glass rounded-2xl px-4 py-3 flex items-center justify-between">
+        <header class="sticky top-0 z-30 pt-3 pb-2.5">
+            <div class="glass rounded-2xl px-4 py-3 flex items-center justify-between gap-2 shadow-sm border border-white">
                 <div class="flex items-center gap-3 min-w-0">
-                    <img src="/logo.webp" class="w-10 h-10 object-contain drop-shadow-sm shrink-0" alt="MSTSC Logo">
+                    <img src="/logo.webp" class="w-10 h-10 object-contain drop-shadow-sm shrink-0" alt="MSTSC Logo" onerror="this.style.opacity='0'">
                     <div class="min-w-0">
                         <div class="flex items-center gap-1.5">
-                            <h1 class="text-sm font-black text-mstPurple truncate">MSTSC</h1>
+                            <h1 class="text-sm font-black text-mstPurple truncate">STUDENT COUNCIL</h1>
                             <span class="bg-mstYellow text-mstDark text-[9px] font-black px-2 py-0.5 rounded-full shrink-0">RADIO</span>
                         </div>
-                        <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider truncate">ระบบขอเพลงเสียงตามสาย</p>
+                        <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider truncate">ระบบขอเพลงเสียงตามสาย ม.ส.ธ.</p>
                     </div>
                 </div>
                 <div id="headerActions" class="hidden items-center gap-1.5 shrink-0">
-                    <a href="/richmenuline" class="w-9 h-9 rounded-xl bg-purple-50 text-mstPurple border border-purple-100 flex items-center justify-center text-xs shadow-xs" title="เมนูบริการนักเรียน">
+                    <a href="/richmenuline" class="w-9 h-9 rounded-xl bg-purple-50 hover:bg-purple-100 text-mstPurple border border-purple-100 flex items-center justify-center text-xs shadow-xs transition" title="เมนูบริการนักเรียน">
                         <i class="fa-solid fa-grip"></i>
                     </a>
-                    <button onclick="promptUnlink()" class="w-9 h-9 rounded-xl bg-white text-gray-500 border border-gray-200 flex items-center justify-center text-xs shadow-xs" title="เปลี่ยนรหัสนักเรียน">
+                    <button onclick="promptUnlink()" class="w-9 h-9 rounded-xl bg-white hover:bg-gray-50 text-gray-500 border border-gray-200 flex items-center justify-center text-xs shadow-xs transition" title="เปลี่ยนรหัสนักเรียน">
                         <i class="fa-solid fa-user-gear"></i>
                     </button>
                 </div>
             </div>
         </header>
 
-        <!-- 1. Loading Screen -->
-        <div id="loading-screen" class="glass p-10 text-center rounded-[2rem] my-auto flex flex-col items-center justify-center">
-            <div class="w-12 h-12 border-4 border-mstYellow border-t-mstPurple rounded-full animate-spin mb-4"></div>
-            <p class="text-mstPurple font-black text-sm">กำลังเชื่อมต่อฐานข้อมูลสภานักเรียน...</p>
-            <p class="text-xs text-gray-400 font-medium mt-1">กรุณารอสักครู่</p>
-        </div>
-
-        <!-- 2. LINE Login Screen -->
-        <div id="loginPage" class="hidden fade-in flex-col my-auto">
-            <div class="glass rounded-[2.5rem] p-8 text-center w-full">
-                <img src="/logo.webp" class="w-20 h-20 mx-auto mb-4 drop-shadow-md" alt="MSTSC">
-                <span class="bg-purple-50 text-mstPurple text-[10px] font-extrabold px-3.5 py-1 rounded-full border border-purple-100 uppercase tracking-widest">MSTSC Smart Radio</span>
+        <!-- 1. LINE Login Screen -->
+        <div id="loginPage" class="hidden fade-in flex-col my-auto py-6">
+            <div class="glass rounded-[2.5rem] p-8 text-center w-full shadow-lg">
+                <img src="/logo.webp" class="w-24 h-24 mx-auto mb-4 drop-shadow-md object-contain" alt="MSTSC">
+                <span class="inline-block bg-purple-50 text-mstPurple text-[10px] font-extrabold px-3.5 py-1 rounded-full border border-purple-100 uppercase tracking-widest">MSTSC Smart Radio</span>
                 <h2 class="text-2xl font-black text-mstDark mt-3 mb-1">เสียงตามสายสภานักเรียน</h2>
                 <p class="text-xs font-medium text-gray-500 mb-7 leading-relaxed">ร่วมขอเพลงที่ชอบ ส่งข้อความให้เพื่อน และกดหัวใจโหวตเพลงขึ้นคิวออกอากาศแบบเรียลไทม์</p>
-                <button onclick="liff.login()" class="w-full bg-[#06C755] hover:bg-[#05b34c] text-white py-4 rounded-2xl font-bold shadow-md text-sm flex justify-center items-center gap-2 transition">
+                <button onclick="liff.login()" class="w-full bg-lineGreen hover:bg-[#05b34c] active:scale-[0.98] text-white py-4 rounded-2xl font-bold shadow-md text-sm flex justify-center items-center gap-2.5 transition">
                     <i class="fa-brands fa-line text-xl"></i> เข้าสู่ระบบด้วย LINE
                 </button>
             </div>
         </div>
 
-        <!-- 3. Student Verification Screen -->
+        <!-- 2. Student Verification Screen -->
         <div id="link-screen" class="hidden fade-in flex-col mt-2">
             <div class="glass rounded-[2rem] p-6 text-center space-y-4">
                 <div class="w-14 h-14 mx-auto bg-purple-50 rounded-2xl flex items-center justify-center text-mstPurple border border-purple-100 shadow-inner">
@@ -145,14 +187,14 @@
             </div>
         </div>
 
-        <!-- 4. Main Radio Screen -->
-        <div id="home-screen" class="hidden flex-col fade-in space-y-4">
+        <!-- 3. Main Radio Screen -->
+        <div id="home-screen" class="hidden flex-col fade-in space-y-3.5 pt-1">
 
             <!-- แถบข้อมูลนักเรียนและสถานะสถานี -->
             <div class="glass rounded-2xl p-3.5 flex items-center justify-between gap-2">
-                <div class="flex items-center gap-3 min-w-0">
-                    <img id="user-avatar" src="/logo.webp" class="w-11 h-11 rounded-full object-cover border-2 border-mstYellow shrink-0 shadow-xs" onerror="this.src='/logo.webp'">
-                    <div class="min-w-0">
+                <div class="flex items-center gap-3 min-w-0 flex-1">
+                    <img id="user-avatar" src="/logo.webp" class="w-11 h-11 rounded-full object-cover border-2 border-mstYellow shrink-0 shadow-xs bg-white" onerror="this.src='/logo.webp'">
+                    <div class="min-w-0 flex-1">
                         <p id="user-fullname" class="text-xs font-black text-gray-900 truncate">-</p>
                         <p id="user-meta" class="text-[11px] font-bold text-mstPurple truncate">-</p>
                     </div>
@@ -164,16 +206,16 @@
 
             <!-- การ์ดสถานะโควตาและปุ่มขอเพลง -->
             <div class="glass-dark rounded-[1.75rem] p-5 flex items-center justify-between gap-3 relative overflow-hidden">
-                <div class="space-y-1 min-w-0 flex-1">
+                <div class="space-y-1.5 min-w-0 flex-1">
                     <div class="flex items-center gap-2">
                         <span class="text-[10px] font-black text-mstYellow uppercase tracking-widest">ตารางออกอากาศวันนี้</span>
                     </div>
-                    <p id="stationReasonText" class="text-xs font-bold text-white leading-snug">-</p>
-                    <div class="flex items-center gap-2 pt-1">
-                        <div class="w-24 bg-white/20 h-2 rounded-full overflow-hidden">
+                    <p id="stationReasonText" class="text-xs font-bold text-white leading-snug break-words">-</p>
+                    <div class="flex items-center gap-2 pt-1 flex-wrap">
+                        <div class="w-24 bg-white/20 h-2 rounded-full overflow-hidden shrink-0">
                             <div id="quotaProgressBar" class="bg-mstYellow h-full rounded-full transition-all duration-300" style="width: 0%"></div>
                         </div>
-                        <span id="stationQuotaText" class="text-[11px] font-extrabold text-mstYellow">0 / 20 เพลง</span>
+                        <span id="stationQuotaText" class="text-[11px] font-extrabold text-mstYellow whitespace-nowrap">0 / 20 เพลง</span>
                     </div>
                 </div>
                 <button id="btnOpenSongModal" onclick="openRequestScreen()" class="bg-mstYellow hover:bg-amber-400 text-mstDark font-black px-4 py-3.5 rounded-2xl text-xs shrink-0 flex items-center gap-1.5 shadow-lg transition active:scale-95">
@@ -183,14 +225,14 @@
 
             <!-- NOW PLAYING CARD -->
             <div class="glass rounded-[1.75rem] p-4 border-2 border-purple-100">
-                <div class="flex items-center justify-between mb-3">
-                    <span class="text-[10px] font-black uppercase tracking-wider text-mstPurple bg-purple-50 px-3 py-1 rounded-full border border-purple-100 flex items-center gap-2">
-                        <span class="flex items-end gap-0.5 h-3">
+                <div class="flex items-center justify-between gap-2 mb-3">
+                    <span class="text-[10px] font-black uppercase tracking-wider text-mstPurple bg-purple-50 px-3 py-1 rounded-full border border-purple-100 flex items-center gap-2 truncate">
+                        <span class="flex items-end gap-0.5 h-3 shrink-0">
                             <span class="eq-bar"></span><span class="eq-bar"></span><span class="eq-bar"></span>
                         </span>
-                        กำลังออกอากาศ (Now Playing)
+                        <span class="truncate">กำลังออกอากาศ (Now Playing)</span>
                     </span>
-                    <span class="text-[10px] font-black text-red-500 flex items-center gap-1">
+                    <span class="text-[10px] font-black text-red-500 flex items-center gap-1 shrink-0">
                         <i class="fa-solid fa-circle text-[6px] animate-ping"></i> ON AIR
                     </span>
                 </div>
@@ -198,16 +240,18 @@
             </div>
 
             <!-- แถบสลับหน้า คิวถัดไป / เปิดแล้ว / Top 5 -->
-            <div class="grid grid-cols-3 gap-1.5 bg-white/90 p-1.5 rounded-2xl border border-gray-200/80 shadow-xs sticky top-[76px] z-20 backdrop-blur-md">
-                <button id="tabBtnQueue" onclick="switchTab('queue')" class="py-2.5 rounded-xl text-xs font-black bg-mstPurple text-white shadow-sm transition">
-                    <i class="fa-solid fa-list-ol mr-1"></i> คิวถัดไป <span id="queueCountBadge" class="ml-0.5 text-[10px] bg-white/20 px-1.5 py-0.5 rounded-full">0</span>
-                </button>
-                <button id="tabBtnPlayed" onclick="switchTab('played')" class="py-2.5 rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-50 transition">
-                    <i class="fa-solid fa-clock-rotate-left mr-1"></i> เปิดแล้ว
-                </button>
-                <button id="tabBtnChart" onclick="switchTab('chart')" class="py-2.5 rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-50 transition">
-                    <i class="fa-solid fa-trophy mr-1"></i> Top 5
-                </button>
+            <div class="pt-1">
+                <div class="grid grid-cols-3 gap-1.5 bg-white/95 p-1.5 rounded-2xl border border-gray-200/80 shadow-xs">
+                    <button id="tabBtnQueue" onclick="switchTab('queue')" class="py-2.5 px-1 rounded-xl text-xs font-black bg-mstPurple text-white shadow-sm transition flex items-center justify-center gap-1 truncate">
+                        <i class="fa-solid fa-list-ol"></i> <span>คิวถัดไป</span> <span id="queueCountBadge" class="text-[10px] bg-white/20 px-1.5 py-0.5 rounded-full">0</span>
+                    </button>
+                    <button id="tabBtnPlayed" onclick="switchTab('played')" class="py-2.5 px-1 rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-50 transition flex items-center justify-center gap-1 truncate">
+                        <i class="fa-solid fa-clock-rotate-left"></i> <span>เปิดแล้ว</span>
+                    </button>
+                    <button id="tabBtnChart" onclick="switchTab('chart')" class="py-2.5 px-1 rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-50 transition flex items-center justify-center gap-1 truncate">
+                        <i class="fa-solid fa-trophy"></i> <span>Top 5</span>
+                    </button>
+                </div>
             </div>
 
             <!-- รายการคิวเพลง -->
@@ -216,10 +260,10 @@
             <div id="panelChart" class="hidden space-y-2.5"></div>
         </div>
 
-        <!-- 5. หน้าค้นหาและส่งคำขอเพลง -->
-        <div id="request-screen" class="hidden flex-col fade-in space-y-4">
+        <!-- 4. หน้าค้นหาและส่งคำขอเพลง -->
+        <div id="request-screen" class="hidden flex-col fade-in space-y-4 pt-1">
             <div class="glass rounded-2xl p-3.5 flex items-center gap-3">
-                <button onclick="showScreen('home-screen')" class="w-10 h-10 bg-purple-50 hover:bg-purple-100 rounded-xl flex items-center justify-center text-mstPurple border border-purple-100 shrink-0 transition">
+                <button onclick="showScreen('home-screen')" class="w-10 h-10 bg-purple-50 hover:bg-purple-100 rounded-xl flex items-center justify-center text-mstPurple border border-purple-100 shrink-0 transition active:scale-95">
                     <i class="fa-solid fa-arrow-left text-sm"></i>
                 </button>
                 <div class="min-w-0">
@@ -230,12 +274,12 @@
 
             <!-- ขั้นตอนที่ 1: ค้นหาเวอร์ชันเพลงหรือวางลิงก์ -->
             <div class="glass p-4 rounded-[1.75rem] space-y-3">
-                <label class="block text-xs font-black text-gray-800">
+                <label class="block text-xs font-black text-gray-800 leading-relaxed">
                     <span class="bg-mstPurple text-white w-5 h-5 inline-flex items-center justify-center rounded-full text-[10px] mr-1">1</span>
                     ค้นหาชื่อเพลง (ระบุเวอร์ชัน เช่น Live, MV) หรือวางลิงก์ YouTube
                 </label>
                 <div class="flex gap-2">
-                    <input type="text" id="songQueryInput" onkeydown="if(event.key==='Enter') searchTracks()" class="glass-input text-sm py-2.5" placeholder="พิมพ์ชื่อเพลง ศิลปิน หรือวางลิงก์...">
+                    <input type="text" id="songQueryInput" onkeydown="if(event.key==='Enter') searchTracks()" class="glass-input text-sm py-2.5 min-w-0 flex-1" placeholder="พิมพ์ชื่อเพลง ศิลปิน หรือวางลิงก์...">
                     <button onclick="searchTracks()" class="btn-main px-4 py-2.5 rounded-xl text-xs shrink-0">
                         <i class="fa-solid fa-magnifying-glass"></i> ค้นหา
                     </button>
@@ -243,19 +287,19 @@
 
                 <!-- การ์ดแสดงเพลงที่เลือกแล้ว -->
                 <div id="selectedTrackBox" class="hidden bg-purple-50 border-2 border-mstPurple rounded-2xl p-3 flex items-center gap-3">
-                    <img id="selTrackArt" src="" class="w-14 h-12 rounded-xl object-cover shrink-0 border border-purple-200">
+                    <img id="selTrackArt" src="" class="w-14 h-12 rounded-xl object-cover shrink-0 border border-purple-200 bg-white" onerror="this.src='/logo.webp'">
                     <div class="flex-1 min-w-0">
                         <span class="text-[10px] font-black text-mstPurple uppercase tracking-wider block">เวอร์ชันเพลงที่เลือก</span>
-                        <p id="selTrackTitle" class="text-xs font-black text-gray-900 line-clamp-1"></p>
+                        <p id="selTrackTitle" class="text-xs font-black text-gray-900 line-clamp-1 break-all"></p>
                         <p id="selTrackArtist" class="text-[11px] font-bold text-gray-500 truncate"></p>
                     </div>
-                    <button onclick="clearSelectedTrack()" class="text-xs font-bold text-red-500 bg-white px-2.5 py-1.5 rounded-lg border border-red-100 shrink-0">
+                    <button onclick="clearSelectedTrack()" class="text-xs font-bold text-red-500 hover:bg-red-50 bg-white px-2.5 py-1.5 rounded-lg border border-red-100 shrink-0 transition">
                         เปลี่ยน
                     </button>
                 </div>
 
                 <!-- รายการผลลัพธ์การค้นหา -->
-                <div id="trackResultsList" class="space-y-2 max-h-72 overflow-y-auto pr-0.5"></div>
+                <div id="trackResultsList" class="space-y-2 max-h-72 overflow-y-auto pr-1 custom-scroll"></div>
             </div>
 
             <!-- ขั้นตอนที่ 2: ข้อความฝากบอกและตัวเลือกซ่อนชื่อ -->
@@ -271,7 +315,7 @@
 
                 <label class="flex items-start gap-3 p-3.5 bg-purple-50/60 rounded-2xl border border-purple-100 cursor-pointer transition hover:bg-purple-50">
                     <input type="checkbox" id="anonCheckInput" class="mt-0.5 w-4 h-4 accent-mstPurple rounded shrink-0">
-                    <div class="text-xs leading-relaxed">
+                    <div class="text-xs leading-relaxed min-w-0">
                         <span class="font-black text-mstPurple block"><i class="fa-solid fa-user-secret mr-1"></i> ไม่ประสงค์ออกนามบนหน้าไทม์ไลน์สาธารณะ</span>
                         <span class="text-[11px] text-gray-500 font-medium">หน้าเว็บของเพื่อนๆ จะแสดงชื่อผู้ขอเป็น <b>"ผู้ไม่ประสงค์ออกนาม"</b></span>
                     </div>
@@ -292,15 +336,33 @@
         let lineAccessToken = "";
         let currentUser = null;
         let selectedTrack = null;
+        let currentScreenId = "";
+
+        function setLoader(text) {
+            document.getElementById('loaderText').innerText = text || 'กำลังตรวจสอบข้อมูล...';
+            const loader = document.getElementById('globalLoader');
+            loader.classList.remove('hidden');
+            loader.style.display = 'flex';
+        }
+
+        function hideLoader() {
+            const loader = document.getElementById('globalLoader');
+            loader.classList.add('hidden');
+            loader.style.display = 'none';
+        }
 
         function showScreen(screenId) {
-            ['loading-screen', 'loginPage', 'link-screen', 'home-screen', 'request-screen'].forEach(id => {
+            const isChanged = currentScreenId !== screenId;
+            currentScreenId = screenId;
+            ['loginPage', 'link-screen', 'home-screen', 'request-screen'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) { el.classList.add('hidden'); el.classList.remove('flex'); }
             });
             const target = document.getElementById(screenId);
             if (target) { target.classList.remove('hidden'); target.classList.add('flex'); }
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            if (isChanged) {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
         }
 
         async function apiCall(payload) {
@@ -313,22 +375,27 @@
         }
 
         async function initApp() {
+            setLoader('กำลังเชื่อมต่อระบบเสียงตามสาย...');
             try {
                 await liff.init({ liffId: LIFF_ID });
                 if (!liff.isLoggedIn()) {
+                    hideLoader();
                     if (liff.isInClient()) liff.login();
                     else showScreen('loginPage');
                     return;
                 }
                 lineAccessToken = liff.getAccessToken();
                 await refreshRadioData(true);
-                setInterval(() => refreshRadioData(false), 10000);
+                hideLoader();
+                setInterval(() => {
+                    if (!document.hidden) refreshRadioData(false);
+                }, 10000);
             } catch (e) {
+                hideLoader();
                 Swal.fire({ icon: 'error', title: 'เชื่อมต่อ LINE ไม่สำเร็จ', text: e.message, customClass: { popup: 'swal-glass' } });
             }
         }
 
-        // ฟังก์ชันตรวจสอบและบังคับซ่อนชื่อผู้ขอเพลงหากติ๊กไม่ประสงค์ออกนาม
         function getPublicRequesterLabel(item) {
             if (!item) return "ผู้ไม่ประสงค์ออกนาม";
             const isAnon = item.isAnonymous === true || String(item.isAnonymous).toLowerCase() === 'true';
@@ -337,25 +404,30 @@
         }
 
         async function refreshRadioData(isInitial = false) {
-            const data = await apiCall({ action: 'initRadio', isPcAdminLogin: false });
-            if (data.status !== 'success') return;
+            try {
+                const data = await apiCall({ action: 'initRadio', isPcAdminLogin: false });
+                if (data.status !== 'success') return;
 
-            currentUser = data.linkedUser;
-            if (!currentUser) {
-                showScreen('link-screen');
-                return;
+                currentUser = data.linkedUser;
+                if (!currentUser) {
+                    if (currentScreenId !== 'link-screen') showScreen('link-screen');
+                    return;
+                }
+
+                const headerActions = document.getElementById('headerActions');
+                headerActions.classList.remove('hidden');
+                headerActions.classList.add('flex');
+                document.getElementById('user-avatar').src = currentUser.linePic || '/logo.webp';
+                document.getElementById('user-fullname').innerText = currentUser.fullName;
+                document.getElementById('user-meta').innerText = `รหัส ${currentUser.std_id} • ชั้น ${currentUser.level}${currentUser.room && currentUser.room !== '-' ? '/' + currentUser.room : ''}`;
+
+                renderStationStatus(data.radioStatus);
+                renderTimeline(data.timeline);
+                renderChart(data.topChart);
+                if (isInitial) showScreen('home-screen');
+            } catch (err) {
+                console.error("Refresh radio error:", err);
             }
-
-            document.getElementById('headerActions').classList.remove('hidden');
-            document.getElementById('headerActions').classList.add('flex');
-            document.getElementById('user-avatar').src = currentUser.linePic || '/logo.webp';
-            document.getElementById('user-fullname').innerText = currentUser.fullName;
-            document.getElementById('user-meta').innerText = `รหัส ${currentUser.std_id} • ชั้น ${currentUser.level}/${currentUser.room}`;
-
-            renderStationStatus(data.radioStatus);
-            renderTimeline(data.timeline);
-            renderChart(data.topChart);
-            if (isInitial) showScreen('home-screen');
         }
 
         async function verifyAndBindStudent() {
@@ -363,9 +435,9 @@
             if (std_id.length !== 5) {
                 return Swal.fire({ icon: 'warning', title: 'กรุณากรอกรหัสนักเรียน 5 หลัก', customClass: { popup: 'swal-glass' } });
             }
-            Swal.fire({ title: 'กำลังตรวจสอบรายชื่อ...', didOpen: () => Swal.showLoading(), customClass: { popup: 'swal-glass' } });
+            setLoader('กำลังตรวจสอบรายชื่อนักเรียน...');
             const res = await apiCall({ action: 'lookupStudentById', std_id });
-            Swal.close();
+            hideLoader();
 
             if (res.status !== 'success') {
                 return Swal.fire({ icon: 'error', title: 'ไม่พบรหัสนักเรียน', text: res.message, customClass: { popup: 'swal-glass' } });
@@ -378,7 +450,7 @@
                     <div class="text-left bg-purple-50 p-4 rounded-2xl border border-purple-100 text-xs space-y-1.5">
                         <p><b>รหัสประจำตัว:</b> ${stu.std_id}</p>
                         <p><b>ชื่อ-นามสกุล:</b> ${stu.prefix}${stu.fname} ${stu.lname}</p>
-                        <p><b>ระดับชั้น:</b> ${stu.level}/${stu.room}</p>
+                        <p><b>ระดับชั้น:</b> ${stu.level}${stu.room && stu.room !== '-' ? '/' + stu.room : ''}</p>
                         <p><b>แผนการเรียน:</b> ${stu.plan || '-'}</p>
                     </div>
                 `,
@@ -390,12 +462,13 @@
             });
 
             if (confirm.isConfirmed) {
-                Swal.fire({ title: 'กำลังผูกบัญชี...', didOpen: () => Swal.showLoading(), customClass: { popup: 'swal-glass' } });
+                setLoader('กำลังผูกบัญชีกับ LINE...');
                 const bindRes = await apiCall({ action: 'confirmBindLine', std_id: stu.std_id });
-                Swal.close();
                 if (bindRes.status === 'success') {
                     await refreshRadioData(true);
+                    hideLoader();
                 } else {
+                    hideLoader();
                     Swal.fire({ icon: 'error', title: 'ผูกบัญชีไม่สำเร็จ', text: bindRes.message, customClass: { popup: 'swal-glass' } });
                 }
             }
@@ -408,11 +481,14 @@
                 inputPlaceholder: 'พิมพ์ชื่อจริง หรือ นามสกุล',
                 showCancelButton: true,
                 confirmButtonText: 'ค้นหา',
+                cancelButtonText: 'ยกเลิก',
                 confirmButtonColor: '#4C1D95',
                 customClass: { popup: 'swal-glass' }
             });
             if (!kw) return;
+            setLoader('กำลังค้นหารายชื่อ...');
             const res = await apiCall({ action: 'searchStudentByName', keyword: kw });
+            hideLoader();
             if (!res.matches || res.matches.length === 0) {
                 return Swal.fire({ icon: 'info', title: 'ไม่พบรายชื่อที่ค้นหา', customClass: { popup: 'swal-glass' } });
             }
@@ -421,7 +497,7 @@
             Swal.fire({
                 icon: 'success',
                 title: `พบรหัส ${first.std_id}`,
-                text: `${first.prefix}${first.fname} ${first.lname} (${first.level}/${first.room}) กดปุ่มตรวจสอบข้อมูลได้เลย`,
+                text: `${first.prefix}${first.fname} ${first.lname} (${first.level}${first.room && first.room !== '-' ? '/' + first.room : ''}) กดปุ่มตรวจสอบข้อมูลได้เลย`,
                 confirmButtonColor: '#4C1D95',
                 customClass: { popup: 'swal-glass' }
             });
@@ -434,22 +510,25 @@
                 text: 'ต้องการยกเลิกการผูกบัญชี LINE กับรหัสนักเรียนปัจจุบันหรือไม่',
                 showCancelButton: true,
                 confirmButtonText: 'ยืนยันยกเลิก',
+                cancelButtonText: 'ปิด',
                 confirmButtonColor: '#EF4444',
                 customClass: { popup: 'swal-glass' }
             });
             if (confirm.isConfirmed) {
+                setLoader('กำลังยกเลิกการผูกบัญชี...');
                 await apiCall({ action: 'unlinkLineAccount' });
                 location.reload();
             }
         }
 
         function renderStationStatus(st) {
+            if (!st) return;
             const badge = document.getElementById('stationStatusBadge');
             const btn = document.getElementById('btnOpenSongModal');
-            document.getElementById('stationReasonText').innerText = st.statusReason;
-            document.getElementById('stationQuotaText').innerText = `${st.currentCount} / ${st.dailyQuota} เพลง`;
+            document.getElementById('stationReasonText').innerText = st.statusReason || '-';
+            document.getElementById('stationQuotaText').innerText = `${st.currentCount || 0} / ${st.dailyQuota || 20} เพลง`;
 
-            const pct = Math.min(100, Math.round((st.currentCount / (st.dailyQuota || 20)) * 100));
+            const pct = Math.min(100, Math.round(((st.currentCount || 0) / (st.dailyQuota || 20)) * 100));
             document.getElementById('quotaProgressBar').style.width = `${pct}%`;
 
             if (st.isOpen) {
@@ -466,6 +545,7 @@
         }
 
         function renderTimeline(tl) {
+            if (!tl) return;
             const npBox = document.getElementById('nowPlayingBox');
 
             if (tl.nowPlaying) {
@@ -475,17 +555,17 @@
 
                 npBox.innerHTML = `
                     <div class="flex items-start gap-3.5">
-                        <img src="${np.albumArt || '/logo.webp'}" class="w-16 h-16 rounded-full object-cover border-2 border-mstPurple vinyl-spin shadow-md shrink-0" onerror="this.src='/logo.webp'">
+                        <img src="${np.albumArt || '/logo.webp'}" class="w-16 h-16 rounded-full object-cover border-2 border-mstPurple vinyl-spin shadow-md shrink-0 bg-white" onerror="this.src='/logo.webp'">
                         <div class="min-w-0 flex-1 space-y-1">
-                            <p class="text-sm font-black text-gray-900 leading-snug line-clamp-2">${np.title}</p>
+                            <p class="text-sm font-black text-gray-900 leading-snug line-clamp-2 break-words">${np.title}</p>
                             <p class="text-xs font-bold text-mstPurple truncate">${np.artist}</p>
                             <div class="bg-purple-50/80 p-2.5 rounded-xl border border-purple-100 mt-1.5 text-xs">
                                 <p class="text-gray-700 font-semibold break-words leading-relaxed">
                                     <i class="fa-solid fa-quote-left text-mstPurple/40 mr-1"></i>${np.message || '-'}
                                 </p>
-                                <div class="flex items-center justify-between mt-1.5 pt-1.5 border-t border-purple-100/80 text-[10px] font-bold text-gray-500">
-                                    <span><i class="fa-solid ${isAnon ? 'fa-user-secret text-mstPurple' : 'fa-user text-gray-400'} mr-1"></i>ขอโดย: ${senderName}</span>
-                                    <a href="${np.externalUrl}" target="_blank" class="text-mstPurple font-black hover:underline">
+                                <div class="flex items-center justify-between gap-2 mt-1.5 pt-1.5 border-t border-purple-100/80 text-[10px] font-bold text-gray-500">
+                                    <span class="truncate"><i class="fa-solid ${isAnon ? 'fa-user-secret text-mstPurple' : 'fa-user text-gray-400'} mr-1"></i>ขอโดย: ${senderName}</span>
+                                    <a href="${np.externalUrl}" target="_blank" rel="noopener noreferrer" class="text-mstPurple font-black hover:underline shrink-0">
                                         <i class="fa-brands fa-youtube mr-0.5"></i> ดูคลิป
                                     </a>
                                 </div>
@@ -523,13 +603,13 @@
                     const isAnon = item.isAnonymous === true || String(item.isAnonymous).toLowerCase() === 'true';
                     return `
                         <div class="glass p-3.5 rounded-2xl space-y-2.5 transition">
-                            <div class="flex items-start gap-3">
+                            <div class="flex items-start gap-2.5">
                                 <div class="w-8 h-8 rounded-xl bg-purple-100 text-mstPurple font-black text-xs flex items-center justify-center shrink-0 mt-0.5">
                                     #${item.queueOrder}
                                 </div>
-                                <img src="${item.albumArt || '/logo.webp'}" class="w-14 h-12 rounded-xl object-cover shrink-0 border border-gray-100" onerror="this.src='/logo.webp'">
+                                <img src="${item.albumArt || '/logo.webp'}" class="w-14 h-12 rounded-xl object-cover shrink-0 border border-gray-100 bg-white" onerror="this.src='/logo.webp'">
                                 <div class="flex-1 min-w-0">
-                                    <p class="text-xs font-black text-gray-900 leading-snug line-clamp-2">${item.title}</p>
+                                    <p class="text-xs font-black text-gray-900 leading-snug line-clamp-2 break-words">${item.title}</p>
                                     <p class="text-[11px] font-bold text-gray-500 truncate mt-0.5">
                                         ${item.artist} • <span class="text-emerald-600">อีก ~${item.estimatedWaitMin} นาที</span>
                                     </p>
@@ -539,10 +619,10 @@
                                 </button>
                             </div>
                             <div class="bg-gray-50/90 px-3 py-2 rounded-xl border border-gray-100 flex items-center justify-between gap-2 text-[11px]">
-                                <span class="text-gray-600 font-medium truncate">
+                                <span class="text-gray-600 font-medium truncate min-w-0 flex-1">
                                     <i class="fa-solid fa-comment-dots text-mstPurple/60 mr-1"></i>${item.message || '-'}
                                 </span>
-                                <span class="text-[10px] font-bold text-gray-400 shrink-0">
+                                <span class="text-[10px] font-bold text-gray-400 shrink-0 max-w-[45%] truncate">
                                     <i class="fa-solid ${isAnon ? 'fa-user-secret text-mstPurple' : 'fa-user'} mr-1"></i>${senderName}
                                 </span>
                             </div>
@@ -556,10 +636,10 @@
                 pPanel.innerHTML = `<div class="glass p-8 rounded-[1.75rem] text-center text-xs font-bold text-gray-400">ยังไม่มีประวัติเพลงที่เปิดในวันนี้</div>`;
             } else {
                 pPanel.innerHTML = tl.playedList.map(item => `
-                    <div class="glass p-3 rounded-2xl flex items-center justify-between gap-3 opacity-85">
-                        <div class="flex items-center gap-3 min-w-0">
-                            <img src="${item.albumArt || '/logo.webp'}" class="w-11 h-10 rounded-xl object-cover shrink-0" onerror="this.src='/logo.webp'">
-                            <div class="min-w-0">
+                    <div class="glass p-3 rounded-2xl flex items-center justify-between gap-3 opacity-90">
+                        <div class="flex items-center gap-3 min-w-0 flex-1">
+                            <img src="${item.albumArt || '/logo.webp'}" class="w-11 h-10 rounded-xl object-cover shrink-0 bg-white border border-gray-100" onerror="this.src='/logo.webp'">
+                            <div class="min-w-0 flex-1">
                                 <p class="text-xs font-bold text-gray-800 truncate">${item.title}</p>
                                 <p class="text-[10px] text-gray-500 truncate">${item.artist} • ขอโดย ${getPublicRequesterLabel(item)}</p>
                             </div>
@@ -581,7 +661,7 @@
             cPanel.innerHTML = list.map((item, idx) => `
                 <div class="glass p-3.5 rounded-2xl flex items-center gap-3">
                     <div class="w-8 h-8 rounded-xl bg-mstYellow text-mstDark font-black text-xs flex items-center justify-center shrink-0">#${idx + 1}</div>
-                    <img src="${item.albumArt || '/logo.webp'}" class="w-12 h-11 rounded-xl object-cover shrink-0" onerror="this.src='/logo.webp'">
+                    <img src="${item.albumArt || '/logo.webp'}" class="w-12 h-11 rounded-xl object-cover shrink-0 bg-white border border-gray-100" onerror="this.src='/logo.webp'">
                     <div class="flex-1 min-w-0">
                         <p class="text-xs font-black text-gray-800 truncate">${item.title}</p>
                         <p class="text-[11px] text-gray-500 truncate">${item.artist}</p>
@@ -595,8 +675,8 @@
             ['queue', 'played', 'chart'].forEach(t => {
                 const cap = t.charAt(0).toUpperCase() + t.slice(1);
                 document.getElementById('tabBtn' + cap).className = (t === tab)
-                    ? "py-2.5 rounded-xl text-xs font-black bg-mstPurple text-white shadow-sm transition"
-                    : "py-2.5 rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-50 transition";
+                    ? "py-2.5 px-1 rounded-xl text-xs font-black bg-mstPurple text-white shadow-sm transition flex items-center justify-center gap-1 truncate"
+                    : "py-2.5 px-1 rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-50 transition flex items-center justify-center gap-1 truncate";
                 document.getElementById('panel' + cap).classList.toggle('hidden', t !== tab);
             });
         }
@@ -620,25 +700,25 @@
             const query = document.getElementById('songQueryInput').value.trim();
             if (!query) return;
             const listEl = document.getElementById('trackResultsList');
-            listEl.innerHTML = `<p class="text-center text-xs font-bold text-mstPurple py-4"><i class="fa-solid fa-spinner fa-spin mr-1"></i> กำลังค้นหาเวอร์ชันเพลง...</p>`;
+            listEl.innerHTML = `<p class="text-center text-xs font-bold text-mstPurple py-4"><i class="fas fa-circle-notch fa-spin mr-1.5"></i> กำลังค้นหาเวอร์ชันเพลง...</p>`;
             const res = await apiCall({ action: 'searchTracks', query });
             if (!res.tracks || res.tracks.length === 0) {
                 listEl.innerHTML = `<p class="text-center text-xs text-gray-400 py-4">ไม่พบเพลงที่ค้นหา ลองพิมพ์ชื่อเพลงใหม่ หรือวางลิงก์ YouTube โดยตรง</p>`;
                 return;
             }
             listEl.innerHTML = res.tracks.map(t => {
-                const safe = JSON.stringify(t).replace(/'/g, "&#39;");
+                const encodedTrack = encodeURIComponent(JSON.stringify(t));
                 return `
                     <div class="bg-white hover:bg-purple-50/70 p-2.5 rounded-2xl border border-gray-200 flex items-center gap-2.5 transition">
-                        <img src="${t.albumArt}" class="w-14 h-11 rounded-xl object-cover shrink-0 border border-gray-100" onerror="this.src='/logo.webp'">
-                        <div onclick='chooseTrack(${safe})' class="flex-1 min-w-0 cursor-pointer">
-                            <p class="text-xs font-black text-gray-900 line-clamp-1">${t.title}</p>
+                        <img src="${t.albumArt}" class="w-14 h-11 rounded-xl object-cover shrink-0 border border-gray-100 bg-gray-50" onerror="this.src='/logo.webp'">
+                        <div onclick="chooseTrack('${encodedTrack}')" class="flex-1 min-w-0 cursor-pointer">
+                            <p class="text-xs font-black text-gray-900 line-clamp-1 break-all">${t.title}</p>
                             <p class="text-[11px] text-gray-500 truncate">${t.artist} • <span class="text-mstPurple font-bold">${t.durationText || ''}</span></p>
                         </div>
-                        <a href="${t.externalUrl}" target="_blank" title="เปิดฟังเช็คเวอร์ชัน" class="w-8 h-8 rounded-xl bg-gray-100 text-gray-600 text-xs flex items-center justify-center shrink-0">
+                        <a href="${t.externalUrl}" target="_blank" rel="noopener noreferrer" title="เปิดฟังเช็คเวอร์ชัน" class="w-8 h-8 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-600 text-xs flex items-center justify-center shrink-0 transition">
                             <i class="fa-solid fa-arrow-up-right-from-square"></i>
                         </a>
-                        <button onclick='chooseTrack(${safe})' class="text-xs font-black text-white bg-mstPurple px-3.5 py-2 rounded-xl shrink-0 shadow-xs">
+                        <button onclick="chooseTrack('${encodedTrack}')" class="text-xs font-black text-white bg-mstPurple hover:bg-purple-800 px-3.5 py-2 rounded-xl shrink-0 shadow-xs active:scale-95 transition">
                             เลือก
                         </button>
                     </div>
@@ -646,7 +726,8 @@
             }).join('');
         }
 
-        function chooseTrack(t) {
+        function chooseTrack(tOrEncoded) {
+            const t = typeof tOrEncoded === 'string' ? JSON.parse(decodeURIComponent(tOrEncoded)) : tOrEncoded;
             selectedTrack = t;
             document.getElementById('selectedTrackBox').classList.remove('hidden');
             document.getElementById('selTrackArt').src = t.albumArt;
@@ -658,14 +739,14 @@
             if (!selectedTrack) {
                 return Swal.fire({ icon: 'warning', title: 'กรุณาค้นหาและแตะเลือกเพลงก่อน', customClass: { popup: 'swal-glass' } });
             }
-            Swal.fire({ title: 'กำลังส่งคำขอเพลง...', didOpen: () => Swal.showLoading(), customClass: { popup: 'swal-glass' } });
+            setLoader('กำลังส่งคำขอเพลงเข้าสู่คิว...');
             const res = await apiCall({
                 action: 'submitSong',
                 ...selectedTrack,
                 message: document.getElementById('dedicationInput').value.trim(),
                 isAnonymous: document.getElementById('anonCheckInput').checked
             });
-            Swal.close();
+            hideLoader();
             if (res.status === 'success') {
                 Swal.fire({ icon: 'success', title: 'ส่งเพลงเข้าคิวสำเร็จ', timer: 1600, showConfirmButton: false, customClass: { popup: 'swal-glass' } });
                 await refreshRadioData(true);
