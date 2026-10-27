@@ -3,58 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MSTSC</title>
+    <title>MSTSC - ศูนย์บริการนักเรียนสภานักเรียน</title>
     <link rel="icon" type="image/webp" href="/logo.webp">
 
-    <link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             theme: {
-                extend: { 
-                    fontFamily: { anuphan: ['Anuphan', 'sans-serif'] }, 
-                    colors: { mstPurple: '#4A148C', mstYellow: '#FFC107', mstCream: '#FFF9C4' } 
+                extend: {
+                    fontFamily: { anuphan: ['Anuphan', 'sans-serif'] },
+                    colors: { mstPurple: '#4C1D95', mstYellow: '#FBBF24', mstCream: '#FEFCF5', mstDark: '#1E1B4B' }
                 }
             }
         }
     </script>
-    
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
     <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <style>
-        body { 
-            font-family: 'Anuphan', sans-serif; 
-            background: linear-gradient(135deg, #f3e5f5 0%, #fffde7 100%); 
-            min-height: 100vh; 
+        body {
+            font-family: 'Anuphan', sans-serif;
+            background: linear-gradient(135deg, #f3e5f5 0%, #fffde7 100%);
+            min-height: 100vh;
             margin: 0; padding: 0;
             display: flex; justify-content: center;
         }
-        .glass { 
-            background: rgba(255, 255, 255, 0.6); 
-            backdrop-filter: blur(12px); 
-            -webkit-backdrop-filter: blur(12px); 
-            border: 1px solid rgba(255, 255, 255, 0.8); 
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05); 
+        .glass {
+            background: rgba(255, 255, 255, 0.72);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.85);
+            box-shadow: 0 8px 32px 0 rgba(76, 29, 149, 0.06);
         }
         .fade-in { animation: fadeIn 0.4s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        
-        .loader-overlay { 
-            position: fixed; inset: 0; 
-            background: rgba(255, 255, 255, 0.85); 
-            backdrop-filter: blur(5px); 
-            z-index: 100; 
-            display: flex; flex-direction: column; 
-            justify-content: center; align-items: center; 
+        .loader-overlay {
+            position: fixed; inset: 0;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(5px);
+            z-index: 100;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
         }
-        
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
@@ -73,7 +67,7 @@
                 <img src="/logo.webp" class="w-11 h-11 object-contain drop-shadow-md" alt="MSTSC Logo">
                 <div>
                     <h1 class="text-sm font-black text-mstPurple leading-tight tracking-wide">STUDENT COUNCIL</h1>
-                    <p class="text-[10px] font-bold text-gray-500 tracking-widest">MUANGSURATTHANI</p>
+                    <p class="text-[10px] font-bold text-gray-500 tracking-widest">OF MUANGSURATTHANI SCHOOL</p>
                 </div>
             </div>
         </header>
@@ -83,6 +77,20 @@
                 <i class="fas fa-concierge-bell text-mstYellow text-xl"></i> เมนูบริการนักเรียน
             </h2>
             <div class="grid grid-cols-2 gap-4">
+                <!-- ปุ่มที่ 1: ระบบขอเพลงเสียงตามสาย (MSTSC Smart Radio) -->
+                <a href="/radio" class="bg-white/90 border-2 border-purple-100 rounded-2xl p-4 text-center shadow-sm hover:shadow-md transition-all flex flex-col items-center gap-3 group relative overflow-hidden">
+                    <span class="absolute top-2 right-2 bg-mstYellow text-mstDark text-[8px] font-black px-2 py-0.5 rounded-full">NEW</span>
+                    <div class="w-12 h-12 bg-gradient-to-br from-mstPurple to-purple-600 text-white rounded-full flex items-center justify-center text-xl shadow-inner group-hover:scale-110 transition-transform"><i class="fa-solid fa-tower-broadcast"></i></div>
+                    <span class="font-extrabold text-mstPurple text-xs">ขอเพลงเสียงตามสาย</span>
+                </a>
+
+                <!-- ปุ่มที่ 2: ระบบคลังพอร์ตโฟลิโอรุ่นพี่ (Senior Portfolio Hub) -->
+                <a href="/portfolio" class="bg-white/90 border-2 border-amber-100 rounded-2xl p-4 text-center shadow-sm hover:shadow-md transition-all flex flex-col items-center gap-3 group relative overflow-hidden">
+                    <span class="absolute top-2 right-2 bg-mstPurple text-white text-[8px] font-black px-2 py-0.5 rounded-full">TCAS</span>
+                    <div class="w-12 h-12 bg-gradient-to-br from-amber-400 to-amber-600 text-white rounded-full flex items-center justify-center text-xl shadow-inner group-hover:scale-110 transition-transform"><i class="fa-solid fa-book-open-reader"></i></div>
+                    <span class="font-extrabold text-gray-800 text-xs">พอร์ตโฟลิโอรุ่นพี่</span>
+                </a>
+
                 <a href="https://liff.line.me/2008923798-hd6mzZd8" class="bg-white/80 border border-gray-100 rounded-2xl p-4 text-center shadow-sm hover:shadow-md transition-all flex flex-col items-center gap-3 group">
                     <div class="w-12 h-12 bg-gradient-to-br from-red-400 to-red-600 text-white rounded-full flex items-center justify-center text-xl shadow-inner group-hover:scale-110 transition-transform"><i class="fa-solid fa-check-to-slot"></i></div>
                     <span class="font-bold text-gray-700 text-xs">e-Voting</span>
@@ -168,7 +176,6 @@
     </div>
 
     <div id="pagesView" class="w-full max-w-md min-h-screen flex flex-col relative px-4 pb-10 hidden fade-in">
-        
         <header class="glass sticky top-0 z-40 mt-4 rounded-2xl px-5 py-3 flex justify-between items-center mb-6 shadow-sm border border-white">
             <div class="flex items-center gap-3">
                 <img src="/logo.webp" class="w-10 h-10 object-contain" alt="MSTSC Logo">
@@ -249,13 +256,12 @@
     </div>
 
     <script>
-        const GAS_SCHEDULE_URL = "https://mst-schedule-api.studentcouncil-f38.workers.dev"; 
-        const LIFF_ID = "2006504682-IXtwh7Yn"; 
+        const GAS_SCHEDULE_URL = "https://mst-schedule-api.studentcouncil-f38.workers.dev";
+        const LIFF_ID = "2006504682-IXtwh7Yn";
 
         function showLoader() { $('#globalLoader').css('display', 'flex').hide().fadeIn(200); }
         function hideLoader() { $('#globalLoader').fadeOut(200); }
 
-        // ฟังก์ชันสลับหน้าจอ (Switch View)
         function switchView(viewId) {
             $('#homeView, #pagesView').addClass('hidden');
             $(`#${viewId}`).removeClass('hidden');
@@ -267,7 +273,7 @@
             try {
                 if (LIFF_ID && !LIFF_ID.includes("ใส่_LIFF_ID")) {
                     await liff.init({ liffId: LIFF_ID });
-                    isLiffReady = true; 
+                    isLiffReady = true;
                 }
             } catch (err) { console.error("LIFF Init Error:", err); }
         });
@@ -286,7 +292,7 @@
                     }
                 } else { throw new Error('Error'); }
             } catch (error) {
-                Swal.fire({ icon: 'warning', title: 'ดึงลิงก์ไม่สำเร็จ', text: 'ระบบจะพาคุณไปยังหน้าเว็บโรงเรียนโดยตรง', confirmButtonColor: '#4A148C' }).then(() => {
+                Swal.fire({ icon: 'warning', title: 'ดึงลิงก์ไม่สำเร็จ', text: 'ระบบจะพาคุณไปยังหน้าเว็บโรงเรียนโดยตรง', confirmButtonColor: '#4C1D95' }).then(() => {
                     if (isLiffReady && liff.isLoggedIn()) { liff.openWindow({ url: 'http://www.mst.ac.th/index.php', external: true }); }
                     else { window.open('http://www.mst.ac.th/index.php', '_blank'); }
                 });

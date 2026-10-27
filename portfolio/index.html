@@ -3,19 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>MSTSC Senior Portfolio Hub - คลังพอร์ตโฟลิโอรุ่นพี่</title>
+    <title>MSTSC Senior Portfolio Hub - คลังพอร์ตโฟลิโอสภานักเรียน</title>
     <link rel="icon" type="image/webp" href="/logo.webp">
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             theme: {
                 extend: {
-                    fontFamily: { anuphan: ['Anuphan', 'sans-serif'] },
-                    colors: { mstPurple: '#5A189A', mstYellow: '#FFC107', appBg: '#FEFCF3' }
+                    fontFamily: { sans: ['Anuphan', 'sans-serif'] },
+                    colors: { mstPurple: '#4C1D95', mstYellow: '#FBBF24', mstCream: '#FEFCF5', mstDark: '#1E1B4B' }
                 }
             }
         }
@@ -28,77 +26,80 @@
     <style>
         html, body {
             position: fixed; inset: 0; width: 100%; height: 100%;
-            background-color: #FEFCF3; color: #334155;
+            background-color: #FEFCF5; color: #1E293B;
             overflow: hidden; overscroll-behavior: none; -webkit-tap-highlight-color: transparent;
             user-select: none;
         }
-        .blob-purple { position: absolute; top: -10%; left: -10%; width: 250px; height: 250px; background: #D0BFFF; border-radius: 50%; filter: blur(70px); opacity: 0.6; z-index: 0; pointer-events: none; }
-        .blob-yellow { position: absolute; bottom: -10%; right: -10%; width: 250px; height: 250px; background: #FFEBA8; border-radius: 50%; filter: blur(70px); opacity: 0.6; z-index: 0; pointer-events: none; }
+        .blob-1 { position: absolute; top: -10%; left: -10%; width: 260px; height: 260px; background: rgba(251, 191, 36, 0.28); border-radius: 50%; filter: blur(70px); z-index: 0; pointer-events: none; }
+        .blob-2 { position: absolute; bottom: -10%; right: -10%; width: 260px; height: 260px; background: rgba(76, 29, 149, 0.18); border-radius: 50%; filter: blur(70px); z-index: 0; pointer-events: none; }
 
-        .glass-panel { background: rgba(255, 255, 255, 0.78); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.9); box-shadow: 0 4px 20px -2px rgba(90, 24, 154, 0.06); }
+        .glass { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.9); box-shadow: 0 10px 30px rgba(76, 29, 149, 0.06); }
         .glass-input {
-            background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 0.8rem;
+            background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 0.85rem;
             padding: 0.8rem 1rem; font-size: 16px !important; width: 100%;
             color: #1E293B; font-weight: 600;
         }
-        .glass-input:focus { border-color: #5A189A; outline: none; box-shadow: 0 0 0 3px rgba(90, 24, 154, 0.15); }
-        .btn-main { background: #5A189A; color: white; font-weight: 700; padding: 0.9rem 1rem; border-radius: 1rem; display: flex; justify-content: center; align-items: center; gap: 0.5rem; font-size: 15px; box-shadow: 0 4px 10px rgba(90,24,154,0.2); }
+        .glass-input:focus { border-color: #4C1D95; outline: none; box-shadow: 0 0 0 3px rgba(76, 29, 149, 0.15); }
+        .btn-main { background: linear-gradient(135deg, #4C1D95 0%, #6D28D9 100%); color: white; font-weight: 700; padding: 0.9rem 1rem; border-radius: 1rem; display: flex; justify-content: center; align-items: center; gap: 0.5rem; font-size: 15px; box-shadow: 0 6px 16px rgba(76, 29, 149, 0.25); }
         ::-webkit-scrollbar { width: 0px; background: transparent; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        .swal-glass { background: #FFFFFF !important; border-radius: 1.5rem !important; }
+        .swal-glass { background: #FFFFFF !important; border-radius: 1.75rem !important; }
     </style>
 </head>
-<body oncontextmenu="return false;" class="font-anuphan antialiased flex justify-center">
+<body oncontextmenu="return false;" class="font-sans antialiased flex justify-center">
 
-    <div class="blob-purple"></div>
-    <div class="blob-yellow"></div>
+    <div class="blob-1"></div>
+    <div class="blob-2"></div>
 
     <div class="w-full max-w-md h-full relative flex flex-col overflow-hidden z-10 mx-auto">
 
-        <header class="pt-5 pb-3 px-5 shrink-0 flex items-center justify-between z-20">
-            <div class="flex items-center gap-3">
-                <div class="w-11 h-11 rounded-2xl bg-mstPurple text-white flex items-center justify-center shadow-md">
-                    <i class="fas fa-graduation-cap text-lg"></i>
+        <!-- Header สไตล์สภานักเรียน MSTSC -->
+        <header class="pt-4 pb-2 px-4 shrink-0 z-20">
+            <div class="glass rounded-2xl px-4 py-3 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <img src="/logo.webp" class="w-10 h-10 object-contain drop-shadow-sm" alt="MSTSC Logo">
+                    <div>
+                        <div class="flex items-center gap-1.5">
+                            <h1 class="text-sm font-black text-mstPurple leading-tight">STUDENT COUNCIL</h1>
+                            <span class="bg-mstYellow text-mstDark text-[9px] font-black px-2 py-0.5 rounded-full">PORTFOLIO</span>
+                        </div>
+                        <p class="text-[9px] font-bold text-gray-500 uppercase tracking-widest">MUANGSURATTHANI SCHOOL</p>
+                    </div>
                 </div>
-                <div>
-                    <h1 class="text-[16px] font-extrabold text-mstPurple leading-tight">Senior Portfolio Hub</h1>
-                    <p class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">คลังพอร์ตโฟลิโอสภานักเรียน ม.ส.ธ.</p>
-                </div>
+                <button id="btnOpenUpload" onclick="showScreen('upload-screen')" class="hidden bg-mstYellow text-mstDark font-black px-3 py-2 rounded-xl text-xs shadow-sm items-center gap-1.5">
+                    <i class="fa-solid fa-cloud-arrow-up"></i> ส่งพอร์ต
+                </button>
             </div>
-            <button id="btnOpenUpload" onclick="showScreen('upload-screen')" class="hidden bg-mstYellow text-gray-900 font-extrabold px-3 py-2 rounded-xl text-xs shadow-sm items-center gap-1.5">
-                <i class="fas fa-cloud-upload-alt"></i> ส่งพอร์ต
-            </button>
         </header>
 
-        <main class="flex-1 relative px-4 overflow-y-auto no-scrollbar pb-24" id="app-content">
+        <main class="flex-1 relative px-4 overflow-y-auto no-scrollbar pb-24 pt-2" id="app-content">
 
-            <div id="loading-screen" class="glass-panel p-8 text-center rounded-[1.5rem] mt-10 flex flex-col items-center justify-center min-h-[250px]">
-                <div class="w-10 h-10 border-[3px] border-purple-100 border-t-mstPurple rounded-full animate-spin mb-3"></div>
-                <p class="text-mstPurple font-bold text-[15px]">กำลังเชื่อมต่อฐานข้อมูลสภานักเรียน...</p>
+            <div id="loading-screen" class="glass p-8 text-center rounded-[2rem] mt-8 flex flex-col items-center justify-center min-h-[250px]">
+                <div class="w-11 h-11 border-4 border-mstYellow border-t-mstPurple rounded-full animate-spin mb-4"></div>
+                <p class="text-mstPurple font-black text-sm">กำลังโหลดคลังพอร์ตโฟลิโอสภานักเรียน...</p>
             </div>
 
-            <div id="loginPage" class="hidden flex-col mt-12 pb-10">
-                <div class="glass-panel rounded-[2rem] p-8 text-center w-full">
-                    <div class="w-20 h-20 mx-auto bg-purple-50 text-mstPurple rounded-3xl flex items-center justify-center mb-5 border border-purple-100">
-                        <i class="fas fa-book-reader text-4xl"></i>
-                    </div>
-                    <h2 class="text-2xl font-black text-mstPurple mb-1">Senior Portfolio Hub</h2>
-                    <p class="text-[11px] font-medium text-gray-500 mb-8 uppercase tracking-widest">คลังพอร์ตโฟลิโอและรีวิวสัมภาษณ์รุ่นพี่</p>
-                    <button onclick="liff.login()" class="w-full bg-[#06C755] text-white py-4 rounded-xl font-bold shadow-sm text-[15px] flex justify-center items-center gap-2">
-                        <i class="fab fa-line text-xl"></i> เข้าสู่ระบบด้วย LINE
+            <div id="loginPage" class="hidden flex-col mt-8 pb-10">
+                <div class="glass rounded-[2.5rem] p-8 text-center w-full">
+                    <img src="/logo.webp" class="w-20 h-20 mx-auto mb-4 drop-shadow-md" alt="MSTSC">
+                    <span class="bg-purple-50 text-mstPurple text-[10px] font-extrabold px-3.5 py-1 rounded-full border border-purple-100 uppercase tracking-widest">MSTSC Academic Service</span>
+                    <h2 class="text-2xl font-black text-mstDark mt-3 mb-1">Senior Portfolio Hub</h2>
+                    <p class="text-xs font-medium text-gray-500 mb-7">คลังพอร์ตโฟลิโอและรีวิวสัมภาษณ์รุ่นพี่ ม.ส.ธ.</p>
+                    <button onclick="liff.login()" class="w-full bg-[#06C755] text-white py-4 rounded-2xl font-bold shadow-md text-sm flex justify-center items-center gap-2">
+                        <i class="fa-brands fa-line text-xl"></i> เข้าสู่ระบบด้วย LINE
                     </button>
                 </div>
             </div>
 
-            <!-- หน้ายืนยันตัวตน (รองรับทั้งนักเรียน ม.1-ม.6 ในชีต Students_All และรุ่นพี่ศิษย์เก่า) -->
-            <div id="link-screen" class="hidden flex-col mt-4 pb-20">
-                <div class="glass-panel rounded-[1.5rem] p-6 text-center space-y-4">
-                    <div class="w-14 h-14 mx-auto bg-white rounded-full flex items-center justify-center text-mstPurple shadow-sm border border-purple-100">
-                        <i class="fas fa-user-shield text-2xl"></i>
+            <!-- หน้ายืนยันตัวตน -->
+            <div id="link-screen" class="hidden flex-col mt-3 pb-20">
+                <div class="glass rounded-[2rem] p-6 text-center space-y-4">
+                    <div class="w-14 h-14 mx-auto bg-purple-50 rounded-2xl flex items-center justify-center text-mstPurple border border-purple-100">
+                        <i class="fa-solid fa-user-shield text-2xl"></i>
                     </div>
                     <div>
-                        <h2 class="text-[18px] font-black text-gray-800">ยืนยันตัวตนเข้าใช้งาน</h2>
-                        <p class="text-[12px] text-gray-500 font-medium">สำหรับนักเรียนปัจจุบัน (ม.1-ม.6) และรุ่นพี่ศิษย์เก่า ม.ส.ธ.</p>
+                        <h2 class="text-lg font-black text-mstDark">ยืนยันตัวตนเข้าใช้งาน</h2>
+                        <p class="text-xs text-gray-500 font-medium">สงวนสิทธิ์สำหรับนักเรียนปัจจุบัน (ม.1-ม.6) และศิษย์เก่า ม.ส.ธ.</p>
                     </div>
 
                     <div class="grid grid-cols-2 gap-1.5 bg-gray-100 p-1 rounded-xl text-xs font-bold">
@@ -120,29 +121,29 @@
                     </div>
 
                     <button onclick="handleBindSubmit()" class="btn-main w-full py-4">
-                        ยืนยันตัวตน <i class="fas fa-arrow-right ml-1"></i>
+                        ยืนยันตัวตน <i class="fa-solid fa-arrow-right ml-1"></i>
                     </button>
                 </div>
             </div>
 
             <!-- หน้าหลักคลัง Portfolio -->
-            <div id="home-screen" class="hidden flex-col space-y-3.5 pt-1 pb-12">
-                <div class="glass-panel rounded-2xl p-3 flex items-center justify-between">
+            <div id="home-screen" class="hidden flex-col space-y-3.5 pb-12">
+                <div class="glass rounded-2xl p-3.5 flex items-center justify-between">
                     <div class="flex items-center gap-2.5 min-w-0">
-                        <i class="fas fa-id-badge text-mstPurple text-lg"></i>
+                        <i class="fa-solid fa-id-badge text-mstPurple text-lg"></i>
                         <div class="min-w-0">
-                            <p id="viewerNameText" class="text-xs font-extrabold text-gray-800 truncate">-</p>
+                            <p id="viewerNameText" class="text-xs font-black text-gray-900 truncate">-</p>
                             <p id="viewerRoleText" class="text-[10px] font-bold text-mstPurple truncate">-</p>
                         </div>
                     </div>
                     <button id="btnFavFilter" onclick="toggleFavFilter()" class="px-3 py-1.5 rounded-xl bg-white border border-gray-200 text-[11px] font-bold text-gray-600 flex items-center gap-1 shrink-0">
-                        <i class="fas fa-bookmark text-amber-500"></i> ที่บันทึกไว้
+                        <i class="fa-solid fa-bookmark text-mstYellow"></i> ที่บันทึกไว้
                     </button>
                 </div>
 
-                <div class="glass-panel rounded-2xl p-3.5 space-y-2.5">
+                <div class="glass rounded-2xl p-3.5 space-y-2.5">
                     <div class="relative">
-                        <i class="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+                        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
                         <input type="text" id="fltKeyword" oninput="renderPortfolios()" class="glass-input pl-9 py-2.5 text-xs" placeholder="ค้นหามหาวิทยาลัย, คณะ, สาขา, โครงการ...">
                     </div>
                     <div class="grid grid-cols-3 gap-2">
@@ -172,18 +173,18 @@
 
             <!-- หน้าอัปโหลด Portfolio -->
             <div id="upload-screen" class="hidden flex-col pb-24">
-                <div class="sticky top-0 z-30 bg-white/80 backdrop-blur-xl pt-4 pb-3 px-4 -mx-4 flex items-center gap-3 mb-4 border-b border-white shadow-sm">
-                    <button onclick="showScreen('home-screen')" class="w-9 h-9 bg-white rounded-full flex items-center justify-center text-gray-500 border border-gray-200">
-                        <i class="fas fa-arrow-left text-xs"></i>
+                <div class="glass rounded-2xl p-3.5 flex items-center gap-3 mb-4">
+                    <button onclick="showScreen('home-screen')" class="w-9 h-9 bg-purple-50 rounded-xl flex items-center justify-center text-mstPurple border border-purple-100">
+                        <i class="fa-solid fa-arrow-left text-xs"></i>
                     </button>
                     <div>
-                        <h2 class="text-[16px] font-bold text-mstPurple leading-tight">ส่ง Portfolio รุ่นพี่</h2>
-                        <p class="text-[11px] font-medium text-gray-400">อัปโหลดไฟล์ PDF หรือลิงก์เข้าสู่ระบบสภานักเรียน</p>
+                        <h2 class="text-sm font-black text-mstPurple leading-tight">ส่ง Portfolio รุ่นพี่</h2>
+                        <p class="text-[11px] font-medium text-gray-500">แบ่งปันแนวทางและรีวิวสัมภาษณ์ให้น้องๆ ม.ส.ธ.</p>
                     </div>
                 </div>
 
                 <div class="space-y-3.5">
-                    <div class="glass-panel p-4 rounded-2xl space-y-3">
+                    <div class="glass p-4 rounded-2xl space-y-3">
                         <input type="text" id="p_uni" class="glass-input text-xs" placeholder="มหาวิทยาลัย (เช่น จุฬาลงกรณ์มหาวิทยาลัย)">
                         <input type="text" id="p_fac" class="glass-input text-xs" placeholder="คณะและสาขาวิชา (เช่น คณะวิทยาศาสตร์ วิทยาการคอมพิวเตอร์)">
                         <div class="grid grid-cols-2 gap-2">
@@ -213,7 +214,7 @@
                         </div>
                     </div>
 
-                    <div class="glass-panel p-4 rounded-2xl space-y-3">
+                    <div class="glass p-4 rounded-2xl space-y-3">
                         <textarea id="p_highlights" rows="2" class="glass-input text-xs" placeholder="ผลงานเด่น 3 อันดับแรกที่ทำให้ติดคณะนี้..."></textarea>
                         <textarea id="p_tips" rows="3" class="glass-input text-xs" placeholder="คำถามสัมภาษณ์ที่เจอจริง และเทคนิคการเตรียมตัว..."></textarea>
                         <input type="text" id="p_ig" class="glass-input text-xs" placeholder="ช่องทางติดต่อสำหรับให้น้องปรึกษา (เช่น IG หรือ LINE)">
@@ -221,50 +222,50 @@
                     </div>
 
                     <div class="bg-amber-50 border border-amber-200 p-4 rounded-2xl space-y-2">
-                        <p class="text-xs font-extrabold text-amber-800"><i class="fas fa-shield-alt mr-1"></i> รายการตรวจสอบ PDPA Safety Checklist</p>
+                        <p class="text-xs font-black text-amber-800"><i class="fa-solid fa-shield-halved mr-1"></i> รายการตรวจสอบ PDPA Safety Checklist</p>
                         <label class="flex items-start gap-2 text-xs text-gray-700 cursor-pointer">
-                            <input type="checkbox" id="chk_pdpa_1" class="mt-0.5 rounded text-mstPurple">
+                            <input type="checkbox" id="chk_pdpa_1" class="mt-0.5 rounded accent-mstPurple">
                             <span>ฉันได้เบลอหรือลบ <b>เลขประจำตัวประชาชน 13 หลัก, ที่อยู่บ้าน และเบอร์โทรศัพท์ส่วนตัว</b> ออกจากไฟล์พอร์ตแล้ว</span>
                         </label>
                         <label class="flex items-start gap-2 text-xs text-gray-700 cursor-pointer">
-                            <input type="checkbox" id="chk_pdpa_2" class="mt-0.5 rounded text-mstPurple">
+                            <input type="checkbox" id="chk_pdpa_2" class="mt-0.5 rounded accent-mstPurple">
                             <span>ยินยอมให้เผยแพร่ในระบบสภานักเรียนพร้อมลายน้ำชื่อผู้เปิดดูเพื่อเป็นแนวทางแก่รุ่นน้อง ม.ส.ธ.</span>
                         </label>
                     </div>
 
                     <button onclick="submitPortfolio()" class="btn-main w-full py-4">
-                        <i class="fas fa-check-circle mr-1"></i> ยืนยันและส่ง Portfolio เข้าระบบ
+                        <i class="fa-solid fa-circle-check mr-1"></i> ยืนยันและส่ง Portfolio เข้าระบบ
                     </button>
                 </div>
             </div>
 
             <!-- หน้าเปิดอ่านไฟล์พร้อมลายน้ำไดนามิก -->
             <div id="viewer-screen" class="hidden flex-col pb-20">
-                <div class="sticky top-0 z-30 bg-white/90 backdrop-blur-xl pt-4 pb-3 px-4 -mx-4 flex items-center justify-between mb-3 border-b border-gray-200">
-                    <button onclick="closeViewer()" class="w-9 h-9 bg-white rounded-full flex items-center justify-center text-gray-600 border border-gray-200">
-                        <i class="fas fa-arrow-left text-xs"></i>
+                <div class="glass rounded-2xl p-3.5 flex items-center justify-between mb-3">
+                    <button onclick="closeViewer()" class="w-9 h-9 bg-purple-50 rounded-xl flex items-center justify-center text-mstPurple border border-purple-100">
+                        <i class="fa-solid fa-arrow-left text-xs"></i>
                     </button>
                     <div class="flex-1 px-3 min-w-0">
-                        <h3 id="v_uni_title" class="text-xs font-extrabold text-mstPurple truncate"></h3>
+                        <h3 id="v_uni_title" class="text-xs font-black text-mstPurple truncate"></h3>
                         <p id="v_senior_sub" class="text-[10px] font-bold text-gray-500 truncate"></p>
                     </div>
-                    <span class="bg-green-100 text-green-700 text-[10px] font-bold px-2.5 py-1 rounded-full border border-green-200 shrink-0">
-                        <i class="fas fa-check-circle mr-1"></i> Verified
+                    <span class="bg-emerald-100 text-emerald-700 text-[10px] font-black px-2.5 py-1 rounded-full border border-emerald-200 shrink-0">
+                        <i class="fa-solid fa-circle-check mr-1"></i> Verified
                     </span>
                 </div>
 
-                <div class="relative w-full h-[380px] bg-slate-900 rounded-2xl overflow-hidden border border-gray-300 mb-3">
+                <div class="relative w-full h-[380px] bg-mstDark rounded-2xl overflow-hidden border border-gray-300 mb-3 shadow-inner">
                     <iframe id="v_pdf_frame" src="" class="w-full h-full border-0"></iframe>
                     <div id="v_watermark_layer" class="pointer-events-none absolute inset-0 overflow-hidden flex flex-wrap content-around justify-around opacity-25 p-3"></div>
                 </div>
 
-                <div class="glass-panel p-4 rounded-2xl space-y-3 text-xs">
+                <div class="glass p-4 rounded-2xl space-y-3 text-xs">
                     <div>
-                        <p class="font-extrabold text-mstPurple mb-1"><i class="fas fa-award mr-1"></i> ผลงานเด่น 3 อันดับแรก</p>
+                        <p class="font-black text-mstPurple mb-1"><i class="fa-solid fa-award mr-1"></i> ผลงานเด่น 3 อันดับแรก</p>
                         <p id="v_highlights" class="text-gray-700 bg-white p-3 rounded-xl border border-gray-100 whitespace-pre-line"></p>
                     </div>
                     <div>
-                        <p class="font-extrabold text-mstPurple mb-1"><i class="fas fa-comments mr-1"></i> คำถามสัมภาษณ์ & เทคนิคการเตรียมตัว</p>
+                        <p class="font-black text-mstPurple mb-1"><i class="fa-solid fa-comments mr-1"></i> คำถามสัมภาษณ์ & เทคนิคการเตรียมตัว</p>
                         <p id="v_tips" class="text-gray-700 bg-white p-3 rounded-xl border border-gray-100 whitespace-pre-line"></p>
                     </div>
                     <div id="v_contact_card" class="p-3 rounded-xl bg-purple-50 border border-purple-100"></div>
@@ -277,7 +278,7 @@
     <script>
         const API_PORTFOLIO_URL = "https://admission-backend-592123078141.asia-southeast1.run.app/api/portfolio";
         const API_RADIO_URL = "https://admission-backend-592123078141.asia-southeast1.run.app/api/radio";
-        const LIFF_ID = "2008923798-LmKWCP2j";
+        const LIFF_ID = "2006504682-IXtwh7Yn";
 
         let lineAccessToken = "";
         let currentViewer = null;
@@ -364,7 +365,7 @@
                     html: `<p class="text-xs">${s.prefix}${s.fname} ${s.lname} (${s.level}/${s.room})</p>`,
                     showCancelButton: true,
                     confirmButtonText: 'ยืนยัน',
-                    confirmButtonColor: '#5A189A',
+                    confirmButtonColor: '#4C1D95',
                     customClass: { popup: 'swal-glass' }
                 });
                 if (!cf.isConfirmed) return;
@@ -414,28 +415,28 @@
 
             const container = document.getElementById('portfolioListContainer');
             if (filtered.length === 0) {
-                container.innerHTML = `<div class="glass-panel p-8 rounded-2xl text-center text-xs font-bold text-gray-400"><i class="fas fa-folder-open text-2xl mb-2 block opacity-40"></i>ไม่พบรายการ Portfolio ที่ค้นหา</div>`;
+                container.innerHTML = `<div class="glass p-8 rounded-2xl text-center text-xs font-bold text-gray-400"><i class="fa-solid fa-folder-open text-2xl mb-2 block opacity-40"></i>ไม่พบรายการ Portfolio ที่ค้นหา</div>`;
                 return;
             }
 
             container.innerHTML = filtered.map(p => {
                 const safeObj = JSON.stringify(p).replace(/'/g, "&#39;");
                 return `
-                    <div class="glass-panel p-4 rounded-2xl space-y-2.5">
+                    <div class="glass p-4 rounded-2xl space-y-2.5">
                         <div class="flex items-center justify-between text-[10px]">
-                            <span class="bg-purple-50 text-mstPurple font-extrabold px-2.5 py-1 rounded-lg border border-purple-100">${p.tcasRound}</span>
+                            <span class="bg-purple-50 text-mstPurple font-black px-2.5 py-1 rounded-lg border border-purple-100">${p.tcasRound}</span>
                             <div class="flex items-center gap-2">
                                 ${p.status === 'VERIFIED'
-                                    ? `<span class="text-green-600 font-bold"><i class="fas fa-check-circle mr-0.5"></i> Verified</span>`
-                                    : `<span class="text-amber-600 font-bold"><i class="fas fa-clock mr-0.5"></i> รอตรวจสอบ</span>`}
-                                <button onclick="toggleBookmark('${p.id}')" class="text-sm ${p.isBookmarked ? 'text-amber-500' : 'text-gray-300'}">
-                                    <i class="fas fa-bookmark"></i>
+                                    ? `<span class="text-emerald-600 font-bold"><i class="fa-solid fa-circle-check mr-0.5"></i> Verified</span>`
+                                    : `<span class="text-amber-600 font-bold"><i class="fa-solid fa-clock mr-0.5"></i> รอตรวจสอบ</span>`}
+                                <button onclick="toggleBookmark('${p.id}')" class="text-sm ${p.isBookmarked ? 'text-mstYellow' : 'text-gray-300'}">
+                                    <i class="fa-solid fa-bookmark"></i>
                                 </button>
                             </div>
                         </div>
 
                         <div>
-                            <h3 class="text-sm font-black text-gray-800">${p.university}</h3>
+                            <h3 class="text-sm font-black text-gray-900">${p.university}</h3>
                             <p class="text-xs font-bold text-mstPurple">${p.faculty}</p>
                             <p class="text-[11px] text-gray-500 mt-0.5">โครงการ: ${p.projectName || '-'}</p>
                         </div>
@@ -447,23 +448,23 @@
                         </div>
 
                         <div class="pt-2 border-t border-gray-100 flex items-center justify-between text-[11px]">
-                            <span class="font-bold text-gray-600"><i class="fas fa-user-graduate text-mstPurple mr-1"></i>${p.seniorName}</span>
-                            <span class="${p.mentorshipOpen ? 'text-green-600' : 'text-gray-400'} font-bold text-[10px]">
-                                <i class="fas ${p.mentorshipOpen ? 'fa-comments' : 'fa-eye-slash'} mr-1"></i>${p.mentorshipOpen ? 'ยินดีให้คำปรึกษา' : 'งดรับปรึกษาชั่วคราว'}
+                            <span class="font-bold text-gray-600"><i class="fa-solid fa-user-graduate text-mstPurple mr-1"></i>${p.seniorName}</span>
+                            <span class="${p.mentorshipOpen ? 'text-emerald-600' : 'text-gray-400'} font-bold text-[10px]">
+                                <i class="fa-solid ${p.mentorshipOpen ? 'fa-comments' : 'fa-eye-slash'} mr-1"></i>${p.mentorshipOpen ? 'ยินดีให้คำปรึกษา' : 'งดรับปรึกษาชั่วคราว'}
                             </span>
                         </div>
 
                         <div class="flex gap-2 pt-1">
                             <button onclick='openViewer(${safeObj})' class="flex-1 btn-main py-2.5 rounded-xl text-xs">
-                                <i class="fas fa-book-open mr-1"></i> เปิดดูพอร์ต & รีวิวสัมภาษณ์
+                                <i class="fa-solid fa-book-open mr-1"></i> เปิดดูพอร์ต & รีวิวสัมภาษณ์
                             </button>
                             ${p.isOwner ? `
                             <button onclick="toggleMentorship('${p.id}')" class="px-3 py-2.5 rounded-xl bg-white border border-gray-200 text-gray-600 text-xs font-bold" title="สลับสถานะเปิด/ปิดรับคำปรึกษา">
-                                <i class="fas fa-user-clock"></i>
+                                <i class="fa-solid fa-user-clock"></i>
                             </button>` : ''}
                             ${(currentViewer && currentViewer.isAdminOrDj && p.status !== 'VERIFIED') ? `
-                            <button onclick="approvePort('${p.id}')" class="px-3 py-2.5 rounded-xl bg-green-600 text-white text-xs font-bold">
-                                <i class="fas fa-check mr-1"></i> อนุมัติ
+                            <button onclick="approvePort('${p.id}')" class="px-3 py-2.5 rounded-xl bg-emerald-600 text-white text-xs font-bold">
+                                <i class="fa-solid fa-check mr-1"></i> อนุมัติ
                             </button>` : ''}
                         </div>
                     </div>
@@ -479,9 +480,9 @@
 
             const contactEl = document.getElementById('v_contact_card');
             if (p.mentorshipOpen && p.contactIg) {
-                contactEl.innerHTML = `<p class="font-extrabold text-green-700"><i class="fas fa-comments mr-1"></i> ช่องทางปรึกษารุ่นพี่: <span class="text-gray-800">${p.contactIg}</span></p>`;
+                contactEl.innerHTML = `<p class="font-black text-emerald-700"><i class="fa-solid fa-comments mr-1"></i> ช่องทางปรึกษารุ่นพี่: <span class="text-gray-800">${p.contactIg}</span></p>`;
             } else {
-                contactEl.innerHTML = `<p class="font-bold text-gray-500"><i class="fas fa-eye-slash mr-1"></i> ขณะนี้รุ่นพี่ปิดรับคำปรึกษาชั่วคราว (ซ่อนช่องทางติดต่อ)</p>`;
+                contactEl.innerHTML = `<p class="font-bold text-gray-500"><i class="fa-solid fa-eye-slash mr-1"></i> ขณะนี้รุ่นพี่ปิดรับคำปรึกษาชั่วคราว (ซ่อนช่องทางติดต่อ)</p>`;
             }
 
             let embedUrl = p.pdfUrl || '';
