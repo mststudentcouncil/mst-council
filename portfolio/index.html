@@ -3,11 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#4C1D95">
     <title>MSTSC Senior Portfolio Hub - คลังพอร์ตโฟลิโอสภานักเรียน</title>
     <link rel="icon" type="image/webp" href="/logo.webp">
 
     <link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+
     <script>
         tailwind.config = {
             theme: {
@@ -19,260 +24,260 @@
         }
     </script>
 
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-
     <style>
-        html, body {
-            position: fixed; inset: 0; width: 100%; height: 100%;
-            background-color: #FEFCF5; color: #1E293B;
-            overflow: hidden; overscroll-behavior: none; -webkit-tap-highlight-color: transparent;
+        body {
+            font-family: 'Anuphan', sans-serif;
+            background-color: #FEFCF5;
+            color: #1E293B;
+            min-height: 100vh;
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
             user-select: none;
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
         }
-        .blob-1 { position: absolute; top: -10%; left: -10%; width: 260px; height: 260px; background: rgba(251, 191, 36, 0.28); border-radius: 50%; filter: blur(70px); z-index: 0; pointer-events: none; }
-        .blob-2 { position: absolute; bottom: -10%; right: -10%; width: 260px; height: 260px; background: rgba(76, 29, 149, 0.18); border-radius: 50%; filter: blur(70px); z-index: 0; pointer-events: none; }
+        .blob-1 { position: fixed; top: -10%; left: -15%; width: 300px; height: 300px; background: rgba(251, 191, 36, 0.22); border-radius: 50%; filter: blur(80px); z-index: -1; pointer-events: none; }
+        .blob-2 { position: fixed; bottom: -10%; right: -15%; width: 300px; height: 300px; background: rgba(76, 29, 149, 0.16); border-radius: 50%; filter: blur(80px); z-index: -1; pointer-events: none; }
 
-        .glass { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.9); box-shadow: 0 10px 30px rgba(76, 29, 149, 0.06); }
+        .glass { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.9); box-shadow: 0 10px 30px rgba(76, 29, 149, 0.06); }
         .glass-input {
-            background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 0.85rem;
-            padding: 0.8rem 1rem; font-size: 16px !important; width: 100%;
-            color: #1E293B; font-weight: 600;
+            background: #F8FAFC; border: 1px solid #CBD5E1; border-radius: 0.9rem;
+            padding: 0.75rem 1rem; font-size: 15px !important; width: 100%;
+            color: #1E293B; font-weight: 600; transition: all 0.2s;
         }
-        .glass-input:focus { border-color: #4C1D95; outline: none; box-shadow: 0 0 0 3px rgba(76, 29, 149, 0.15); }
-        .btn-main { background: linear-gradient(135deg, #4C1D95 0%, #6D28D9 100%); color: white; font-weight: 700; padding: 0.9rem 1rem; border-radius: 1rem; display: flex; justify-content: center; align-items: center; gap: 0.5rem; font-size: 15px; box-shadow: 0 6px 16px rgba(76, 29, 149, 0.25); }
-        ::-webkit-scrollbar { width: 0px; background: transparent; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        .swal-glass { background: #FFFFFF !important; border-radius: 1.75rem !important; }
+        .glass-input:focus { background: #FFFFFF; border-color: #4C1D95; outline: none; box-shadow: 0 0 0 3px rgba(76, 29, 149, 0.15); }
+        .btn-main { background: linear-gradient(135deg, #4C1D95 0%, #6D28D9 100%); color: white; font-weight: 700; padding: 0.9rem 1.2rem; border-radius: 1rem; display: flex; justify-content: center; align-items: center; gap: 0.5rem; font-size: 14px; box-shadow: 0 6px 16px rgba(76, 29, 149, 0.25); transition: all 0.15s; }
+        .btn-main:active { transform: scale(0.97); }
+        .swal-glass { background: #FFFFFF !important; border-radius: 1.75rem !important; font-family: 'Anuphan', sans-serif !important; }
     </style>
 </head>
-<body oncontextmenu="return false;" class="font-sans antialiased flex justify-center">
+<body oncontextmenu="return false;" class="antialiased">
 
     <div class="blob-1"></div>
     <div class="blob-2"></div>
 
-    <div class="w-full max-w-md h-full relative flex flex-col overflow-hidden z-10 mx-auto">
+    <div class="w-full max-w-md mx-auto min-h-screen flex flex-col px-4 pb-24">
 
-        <!-- Header สไตล์สภานักเรียน MSTSC -->
-        <header class="pt-4 pb-2 px-4 shrink-0 z-20">
-            <div class="glass rounded-2xl px-4 py-3 flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                    <img src="/logo.webp" class="w-10 h-10 object-contain drop-shadow-sm" alt="MSTSC Logo">
-                    <div>
+        <!-- Sticky Top Header -->
+        <header class="sticky top-2 z-30 pt-2 pb-3">
+            <div class="glass rounded-2xl px-4 py-3 flex items-center justify-between gap-2">
+                <div class="flex items-center gap-3 min-w-0">
+                    <img src="/logo.webp" class="w-10 h-10 object-contain drop-shadow-sm shrink-0" alt="MSTSC Logo">
+                    <div class="min-w-0">
                         <div class="flex items-center gap-1.5">
-                            <h1 class="text-sm font-black text-mstPurple leading-tight">STUDENT COUNCIL</h1>
-                            <span class="bg-mstYellow text-mstDark text-[9px] font-black px-2 py-0.5 rounded-full">PORTFOLIO</span>
+                            <h1 class="text-sm font-black text-mstPurple truncate">STUDENT COUNCIL</h1>
+                            <span class="bg-mstYellow text-mstDark text-[9px] font-black px-2 py-0.5 rounded-full shrink-0">PORTFOLIO</span>
                         </div>
-                        <p class="text-[9px] font-bold text-gray-500 uppercase tracking-widest">MUANGSURATTHANI SCHOOL</p>
+                        <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider truncate">คลังพอร์ตโฟลิโอรุ่นพี่ ม.ส.ธ.</p>
                     </div>
                 </div>
-                <button id="btnOpenUpload" onclick="showScreen('upload-screen')" class="hidden bg-mstYellow text-mstDark font-black px-3 py-2 rounded-xl text-xs shadow-sm items-center gap-1.5">
-                    <i class="fa-solid fa-cloud-arrow-up"></i> ส่งพอร์ต
-                </button>
+                <div class="flex items-center gap-1.5 shrink-0">
+                    <a href="/richmenuline" class="w-9 h-9 rounded-xl bg-purple-50 text-mstPurple border border-purple-100 flex items-center justify-center text-xs" title="เมนูบริการนักเรียน">
+                        <i class="fa-solid fa-grip"></i>
+                    </a>
+                    <button id="btnOpenUpload" onclick="showScreen('upload-screen')" class="hidden bg-mstYellow hover:bg-amber-400 text-mstDark font-black px-3 py-2 rounded-xl text-xs shadow-sm items-center gap-1.5 transition">
+                        <i class="fa-solid fa-cloud-arrow-up"></i> ส่งพอร์ต
+                    </button>
+                </div>
             </div>
         </header>
 
-        <main class="flex-1 relative px-4 overflow-y-auto no-scrollbar pb-24 pt-2" id="app-content">
+        <div id="loading-screen" class="glass p-10 text-center rounded-[2rem] my-auto flex flex-col items-center justify-center">
+            <div class="w-12 h-12 border-4 border-mstYellow border-t-mstPurple rounded-full animate-spin mb-4"></div>
+            <p class="text-mstPurple font-black text-sm">กำลังโหลดคลังพอร์ตโฟลิโอสภานักเรียน...</p>
+        </div>
 
-            <div id="loading-screen" class="glass p-8 text-center rounded-[2rem] mt-8 flex flex-col items-center justify-center min-h-[250px]">
-                <div class="w-11 h-11 border-4 border-mstYellow border-t-mstPurple rounded-full animate-spin mb-4"></div>
-                <p class="text-mstPurple font-black text-sm">กำลังโหลดคลังพอร์ตโฟลิโอสภานักเรียน...</p>
+        <div id="loginPage" class="hidden flex-col my-auto">
+            <div class="glass rounded-[2.5rem] p-8 text-center w-full">
+                <img src="/logo.webp" class="w-20 h-20 mx-auto mb-4 drop-shadow-md" alt="MSTSC">
+                <span class="bg-purple-50 text-mstPurple text-[10px] font-extrabold px-3.5 py-1 rounded-full border border-purple-100 uppercase tracking-widest">MSTSC Academic Service</span>
+                <h2 class="text-2xl font-black text-mstDark mt-3 mb-1">Senior Portfolio Hub</h2>
+                <p class="text-xs font-medium text-gray-500 mb-7">คลังพอร์ตโฟลิโอและรีวิวสัมภาษณ์รุ่นพี่ ม.ส.ธ.</p>
+                <button onclick="liff.login()" class="w-full bg-[#06C755] text-white py-4 rounded-2xl font-bold shadow-md text-sm flex justify-center items-center gap-2">
+                    <i class="fa-brands fa-line text-xl"></i> เข้าสู่ระบบด้วย LINE
+                </button>
             </div>
+        </div>
 
-            <div id="loginPage" class="hidden flex-col mt-8 pb-10">
-                <div class="glass rounded-[2.5rem] p-8 text-center w-full">
-                    <img src="/logo.webp" class="w-20 h-20 mx-auto mb-4 drop-shadow-md" alt="MSTSC">
-                    <span class="bg-purple-50 text-mstPurple text-[10px] font-extrabold px-3.5 py-1 rounded-full border border-purple-100 uppercase tracking-widest">MSTSC Academic Service</span>
-                    <h2 class="text-2xl font-black text-mstDark mt-3 mb-1">Senior Portfolio Hub</h2>
-                    <p class="text-xs font-medium text-gray-500 mb-7">คลังพอร์ตโฟลิโอและรีวิวสัมภาษณ์รุ่นพี่ ม.ส.ธ.</p>
-                    <button onclick="liff.login()" class="w-full bg-[#06C755] text-white py-4 rounded-2xl font-bold shadow-md text-sm flex justify-center items-center gap-2">
-                        <i class="fa-brands fa-line text-xl"></i> เข้าสู่ระบบด้วย LINE
-                    </button>
+        <!-- หน้ายืนยันตัวตน -->
+        <div id="link-screen" class="hidden flex-col mt-2">
+            <div class="glass rounded-[2rem] p-6 text-center space-y-4">
+                <div class="w-14 h-14 mx-auto bg-purple-50 rounded-2xl flex items-center justify-center text-mstPurple border border-purple-100">
+                    <i class="fa-solid fa-user-shield text-2xl"></i>
                 </div>
-            </div>
-
-            <!-- หน้ายืนยันตัวตน -->
-            <div id="link-screen" class="hidden flex-col mt-3 pb-20">
-                <div class="glass rounded-[2rem] p-6 text-center space-y-4">
-                    <div class="w-14 h-14 mx-auto bg-purple-50 rounded-2xl flex items-center justify-center text-mstPurple border border-purple-100">
-                        <i class="fa-solid fa-user-shield text-2xl"></i>
-                    </div>
-                    <div>
-                        <h2 class="text-lg font-black text-mstDark">ยืนยันตัวตนเข้าใช้งาน</h2>
-                        <p class="text-xs text-gray-500 font-medium">สงวนสิทธิ์สำหรับนักเรียนปัจจุบัน (ม.1-ม.6) และศิษย์เก่า ม.ส.ธ.</p>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-1.5 bg-gray-100 p-1 rounded-xl text-xs font-bold">
-                        <button id="modeCurrentBtn" onclick="setBindMode(false)" class="py-2 rounded-lg bg-mstPurple text-white">นักเรียน ม.1-ม.6</button>
-                        <button id="modeAlumniBtn" onclick="setBindMode(true)" class="py-2 rounded-lg text-gray-600">รุ่นพี่ศิษย์เก่า</button>
-                    </div>
-
-                    <input type="tel" id="bindStdId" maxlength="5" class="glass-input text-center text-xl font-black p-3.5 tracking-[0.15em]" placeholder="รหัสนักเรียน 5 หลัก">
-
-                    <div id="alumniExtraFields" class="hidden space-y-2.5 text-left">
-                        <div class="grid grid-cols-3 gap-2">
-                            <select id="alumniPrefix" class="glass-input text-xs px-2">
-                                <option value="นาย">นาย</option>
-                                <option value="นางสาว">นางสาว</option>
-                            </select>
-                            <input type="text" id="alumniFname" class="glass-input text-xs col-span-2" placeholder="ชื่อจริง">
-                        </div>
-                        <input type="text" id="alumniLname" class="glass-input text-xs" placeholder="นามสกุล">
-                    </div>
-
-                    <button onclick="handleBindSubmit()" class="btn-main w-full py-4">
-                        ยืนยันตัวตน <i class="fa-solid fa-arrow-right ml-1"></i>
-                    </button>
-                </div>
-            </div>
-
-            <!-- หน้าหลักคลัง Portfolio -->
-            <div id="home-screen" class="hidden flex-col space-y-3.5 pb-12">
-                <div class="glass rounded-2xl p-3.5 flex items-center justify-between">
-                    <div class="flex items-center gap-2.5 min-w-0">
-                        <i class="fa-solid fa-id-badge text-mstPurple text-lg"></i>
-                        <div class="min-w-0">
-                            <p id="viewerNameText" class="text-xs font-black text-gray-900 truncate">-</p>
-                            <p id="viewerRoleText" class="text-[10px] font-bold text-mstPurple truncate">-</p>
-                        </div>
-                    </div>
-                    <button id="btnFavFilter" onclick="toggleFavFilter()" class="px-3 py-1.5 rounded-xl bg-white border border-gray-200 text-[11px] font-bold text-gray-600 flex items-center gap-1 shrink-0">
-                        <i class="fa-solid fa-bookmark text-mstYellow"></i> ที่บันทึกไว้
-                    </button>
+                <div>
+                    <h2 class="text-lg font-black text-mstDark">ยืนยันตัวตนเข้าใช้งาน</h2>
+                    <p class="text-xs text-gray-500 font-medium">สงวนสิทธิ์สำหรับนักเรียนปัจจุบัน (ม.1-ม.6) และศิษย์เก่า ม.ส.ธ.</p>
                 </div>
 
-                <div class="glass rounded-2xl p-3.5 space-y-2.5">
-                    <div class="relative">
-                        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
-                        <input type="text" id="fltKeyword" oninput="renderPortfolios()" class="glass-input pl-9 py-2.5 text-xs" placeholder="ค้นหามหาวิทยาลัย, คณะ, สาขา, โครงการ...">
-                    </div>
+                <div class="grid grid-cols-2 gap-1.5 bg-gray-100 p-1 rounded-xl text-xs font-bold">
+                    <button id="modeCurrentBtn" onclick="setBindMode(false)" class="py-2.5 rounded-lg bg-mstPurple text-white">นักเรียน ม.1-ม.6</button>
+                    <button id="modeAlumniBtn" onclick="setBindMode(true)" class="py-2.5 rounded-lg text-gray-600">รุ่นพี่ศิษย์เก่า</button>
+                </div>
+
+                <input type="tel" id="bindStdId" maxlength="5" class="glass-input text-center text-xl font-black p-3.5 tracking-[0.2em]" placeholder="รหัสนักเรียน 5 หลัก">
+
+                <div id="alumniExtraFields" class="hidden space-y-2.5 text-left">
                     <div class="grid grid-cols-3 gap-2">
-                        <select id="fltRound" onchange="renderPortfolios()" class="glass-input py-2 px-2 text-[11px]">
-                            <option value="">ทุกรอบ TCAS</option>
-                            <option value="รอบ 1 Portfolio">รอบ 1 Portfolio</option>
-                            <option value="รอบ 2 Quota">รอบ 2 Quota</option>
-                            <option value="โครงการพิเศษ">โครงการพิเศษ</option>
+                        <select id="alumniPrefix" class="glass-input text-xs px-2">
+                            <option value="นาย">นาย</option>
+                            <option value="นางสาว">นางสาว</option>
                         </select>
-                        <select id="fltTrack" onchange="renderPortfolios()" class="glass-input py-2 px-2 text-[11px]">
-                            <option value="">ทุกสายการเรียน</option>
-                            <option value="วิทย์-คณิต">วิทย์-คณิต</option>
-                            <option value="ศิลป์-คำนวณ">ศิลป์-คำนวณ</option>
-                            <option value="ศิลป์-ภาษา">ศิลป์-ภาษา</option>
-                        </select>
-                        <select id="fltStyle" onchange="renderPortfolios()" class="glass-input py-2 px-2 text-[11px]">
-                            <option value="">ทุกสไตล์</option>
-                            <option value="Minimal">Minimal</option>
-                            <option value="Infographic">Infographic</option>
-                            <option value="Creative">Creative</option>
-                        </select>
+                        <input type="text" id="alumniFname" class="glass-input text-xs col-span-2" placeholder="ชื่อจริง">
                     </div>
+                    <input type="text" id="alumniLname" class="glass-input text-xs" placeholder="นามสกุล">
                 </div>
 
-                <div id="portfolioListContainer" class="space-y-3"></div>
+                <button onclick="handleBindSubmit()" class="btn-main w-full py-4">
+                    ยืนยันตัวตน <i class="fa-solid fa-arrow-right ml-1"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- หน้าหลักคลัง Portfolio -->
+        <div id="home-screen" class="hidden flex-col space-y-3.5">
+            <div class="glass rounded-2xl p-3.5 flex items-center justify-between gap-2">
+                <div class="flex items-center gap-2.5 min-w-0">
+                    <i class="fa-solid fa-id-badge text-mstPurple text-lg shrink-0"></i>
+                    <div class="min-w-0">
+                        <p id="viewerNameText" class="text-xs font-black text-gray-900 truncate">-</p>
+                        <p id="viewerRoleText" class="text-[10px] font-bold text-mstPurple truncate">-</p>
+                    </div>
+                </div>
+                <button id="btnFavFilter" onclick="toggleFavFilter()" class="px-3 py-1.5 rounded-xl bg-white border border-gray-200 text-[11px] font-bold text-gray-600 flex items-center gap-1 shrink-0">
+                    <i class="fa-solid fa-bookmark text-mstYellow"></i> ที่บันทึกไว้
+                </button>
             </div>
 
-            <!-- หน้าอัปโหลด Portfolio -->
-            <div id="upload-screen" class="hidden flex-col pb-24">
-                <div class="glass rounded-2xl p-3.5 flex items-center gap-3 mb-4">
-                    <button onclick="showScreen('home-screen')" class="w-9 h-9 bg-purple-50 rounded-xl flex items-center justify-center text-mstPurple border border-purple-100">
-                        <i class="fa-solid fa-arrow-left text-xs"></i>
-                    </button>
-                    <div>
-                        <h2 class="text-sm font-black text-mstPurple leading-tight">ส่ง Portfolio รุ่นพี่</h2>
-                        <p class="text-[11px] font-medium text-gray-500">แบ่งปันแนวทางและรีวิวสัมภาษณ์ให้น้องๆ ม.ส.ธ.</p>
-                    </div>
+            <div class="glass rounded-2xl p-3.5 space-y-2.5">
+                <div class="relative">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+                    <input type="text" id="fltKeyword" oninput="renderPortfolios()" class="glass-input pl-9 py-2.5 text-xs" placeholder="ค้นหามหาวิทยาลัย, คณะ, สาขา, โครงการ...">
                 </div>
-
-                <div class="space-y-3.5">
-                    <div class="glass p-4 rounded-2xl space-y-3">
-                        <input type="text" id="p_uni" class="glass-input text-xs" placeholder="มหาวิทยาลัย (เช่น จุฬาลงกรณ์มหาวิทยาลัย)">
-                        <input type="text" id="p_fac" class="glass-input text-xs" placeholder="คณะและสาขาวิชา (เช่น คณะวิทยาศาสตร์ วิทยาการคอมพิวเตอร์)">
-                        <div class="grid grid-cols-2 gap-2">
-                            <select id="p_round" class="glass-input text-xs px-2">
-                                <option value="รอบ 1 Portfolio">รอบ 1 Portfolio</option>
-                                <option value="รอบ 2 Quota">รอบ 2 Quota</option>
-                                <option value="โครงการพิเศษ">โครงการพิเศษ</option>
-                            </select>
-                            <input type="text" id="p_year" class="glass-input text-xs" placeholder="รุ่นปีการศึกษา (เช่น 2569)">
-                        </div>
-                        <input type="text" id="p_project" class="glass-input text-xs" placeholder="ชื่อโครงการที่ใช้ยื่น">
-                        <div class="grid grid-cols-2 gap-2">
-                            <select id="p_track" class="glass-input text-xs px-2">
-                                <option value="วิทย์-คณิต">วิทย์-คณิต</option>
-                                <option value="ศิลป์-คำนวณ">ศิลป์-คำนวณ</option>
-                                <option value="ศิลป์-ภาษา">ศิลป์-ภาษา</option>
-                            </select>
-                            <input type="text" id="p_gpax" class="glass-input text-xs" placeholder="ช่วงเกรด GPAX (เช่น 3.50 - 3.75)">
-                        </div>
-                        <div class="grid grid-cols-2 gap-2">
-                            <select id="p_style" class="glass-input text-xs px-2">
-                                <option value="Minimal">สไตล์: Minimal</option>
-                                <option value="Infographic">สไตล์: Infographic</option>
-                                <option value="Creative">สไตล์: Creative</option>
-                            </select>
-                            <input type="text" id="p_color" class="glass-input text-xs" placeholder="โทนสี (เช่น ม่วง-เหลือง)">
-                        </div>
-                    </div>
-
-                    <div class="glass p-4 rounded-2xl space-y-3">
-                        <textarea id="p_highlights" rows="2" class="glass-input text-xs" placeholder="ผลงานเด่น 3 อันดับแรกที่ทำให้ติดคณะนี้..."></textarea>
-                        <textarea id="p_tips" rows="3" class="glass-input text-xs" placeholder="คำถามสัมภาษณ์ที่เจอจริง และเทคนิคการเตรียมตัว..."></textarea>
-                        <input type="text" id="p_ig" class="glass-input text-xs" placeholder="ช่องทางติดต่อสำหรับให้น้องปรึกษา (เช่น IG หรือ LINE)">
-                        <input type="url" id="p_pdf_url" class="glass-input text-xs" placeholder="วางลิงก์ไฟล์ PDF บน Google Drive">
-                    </div>
-
-                    <div class="bg-amber-50 border border-amber-200 p-4 rounded-2xl space-y-2">
-                        <p class="text-xs font-black text-amber-800"><i class="fa-solid fa-shield-halved mr-1"></i> รายการตรวจสอบ PDPA Safety Checklist</p>
-                        <label class="flex items-start gap-2 text-xs text-gray-700 cursor-pointer">
-                            <input type="checkbox" id="chk_pdpa_1" class="mt-0.5 rounded accent-mstPurple">
-                            <span>ฉันได้เบลอหรือลบ <b>เลขประจำตัวประชาชน 13 หลัก, ที่อยู่บ้าน และเบอร์โทรศัพท์ส่วนตัว</b> ออกจากไฟล์พอร์ตแล้ว</span>
-                        </label>
-                        <label class="flex items-start gap-2 text-xs text-gray-700 cursor-pointer">
-                            <input type="checkbox" id="chk_pdpa_2" class="mt-0.5 rounded accent-mstPurple">
-                            <span>ยินยอมให้เผยแพร่ในระบบสภานักเรียนพร้อมลายน้ำชื่อผู้เปิดดูเพื่อเป็นแนวทางแก่รุ่นน้อง ม.ส.ธ.</span>
-                        </label>
-                    </div>
-
-                    <button onclick="submitPortfolio()" class="btn-main w-full py-4">
-                        <i class="fa-solid fa-circle-check mr-1"></i> ยืนยันและส่ง Portfolio เข้าระบบ
-                    </button>
+                <div class="grid grid-cols-3 gap-2">
+                    <select id="fltRound" onchange="renderPortfolios()" class="glass-input py-2 px-2 text-[11px]">
+                        <option value="">ทุกรอบ TCAS</option>
+                        <option value="รอบ 1 Portfolio">รอบ 1 Portfolio</option>
+                        <option value="รอบ 2 Quota">รอบ 2 Quota</option>
+                        <option value="โครงการพิเศษ">โครงการพิเศษ</option>
+                    </select>
+                    <select id="fltTrack" onchange="renderPortfolios()" class="glass-input py-2 px-2 text-[11px]">
+                        <option value="">ทุกสายการเรียน</option>
+                        <option value="วิทย์-คณิต">วิทย์-คณิต</option>
+                        <option value="ศิลป์-คำนวณ">ศิลป์-คำนวณ</option>
+                        <option value="ศิลป์-ภาษา">ศิลป์-ภาษา</option>
+                    </select>
+                    <select id="fltStyle" onchange="renderPortfolios()" class="glass-input py-2 px-2 text-[11px]">
+                        <option value="">ทุกสไตล์</option>
+                        <option value="Minimal">Minimal</option>
+                        <option value="Infographic">Infographic</option>
+                        <option value="Creative">Creative</option>
+                    </select>
                 </div>
             </div>
 
-            <!-- หน้าเปิดอ่านไฟล์พร้อมลายน้ำไดนามิก -->
-            <div id="viewer-screen" class="hidden flex-col pb-20">
-                <div class="glass rounded-2xl p-3.5 flex items-center justify-between mb-3">
-                    <button onclick="closeViewer()" class="w-9 h-9 bg-purple-50 rounded-xl flex items-center justify-center text-mstPurple border border-purple-100">
-                        <i class="fa-solid fa-arrow-left text-xs"></i>
-                    </button>
-                    <div class="flex-1 px-3 min-w-0">
-                        <h3 id="v_uni_title" class="text-xs font-black text-mstPurple truncate"></h3>
-                        <p id="v_senior_sub" class="text-[10px] font-bold text-gray-500 truncate"></p>
-                    </div>
-                    <span class="bg-emerald-100 text-emerald-700 text-[10px] font-black px-2.5 py-1 rounded-full border border-emerald-200 shrink-0">
-                        <i class="fa-solid fa-circle-check mr-1"></i> Verified
-                    </span>
-                </div>
+            <div id="portfolioListContainer" class="space-y-3"></div>
+        </div>
 
-                <div class="relative w-full h-[380px] bg-mstDark rounded-2xl overflow-hidden border border-gray-300 mb-3 shadow-inner">
-                    <iframe id="v_pdf_frame" src="" class="w-full h-full border-0"></iframe>
-                    <div id="v_watermark_layer" class="pointer-events-none absolute inset-0 overflow-hidden flex flex-wrap content-around justify-around opacity-25 p-3"></div>
-                </div>
-
-                <div class="glass p-4 rounded-2xl space-y-3 text-xs">
-                    <div>
-                        <p class="font-black text-mstPurple mb-1"><i class="fa-solid fa-award mr-1"></i> ผลงานเด่น 3 อันดับแรก</p>
-                        <p id="v_highlights" class="text-gray-700 bg-white p-3 rounded-xl border border-gray-100 whitespace-pre-line"></p>
-                    </div>
-                    <div>
-                        <p class="font-black text-mstPurple mb-1"><i class="fa-solid fa-comments mr-1"></i> คำถามสัมภาษณ์ & เทคนิคการเตรียมตัว</p>
-                        <p id="v_tips" class="text-gray-700 bg-white p-3 rounded-xl border border-gray-100 whitespace-pre-line"></p>
-                    </div>
-                    <div id="v_contact_card" class="p-3 rounded-xl bg-purple-50 border border-purple-100"></div>
+        <!-- หน้าอัปโหลด Portfolio -->
+        <div id="upload-screen" class="hidden flex-col space-y-4">
+            <div class="glass rounded-2xl p-3.5 flex items-center gap-3">
+                <button onclick="showScreen('home-screen')" class="w-10 h-10 bg-purple-50 rounded-xl flex items-center justify-center text-mstPurple border border-purple-100 shrink-0">
+                    <i class="fa-solid fa-arrow-left text-sm"></i>
+                </button>
+                <div>
+                    <h2 class="text-sm font-black text-mstPurple leading-tight">ส่ง Portfolio รุ่นพี่</h2>
+                    <p class="text-[11px] font-medium text-gray-500">แบ่งปันแนวทางและรีวิวสัมภาษณ์ให้น้องๆ ม.ส.ธ.</p>
                 </div>
             </div>
 
-        </main>
+            <div class="glass p-4 rounded-[1.75rem] space-y-3">
+                <input type="text" id="p_uni" class="glass-input text-xs" placeholder="มหาวิทยาลัย (เช่น จุฬาลงกรณ์มหาวิทยาลัย)">
+                <input type="text" id="p_fac" class="glass-input text-xs" placeholder="คณะและสาขาวิชา (เช่น คณะวิทยาศาสตร์ วิทยาการคอมพิวเตอร์)">
+                <div class="grid grid-cols-2 gap-2">
+                    <select id="p_round" class="glass-input text-xs px-2">
+                        <option value="รอบ 1 Portfolio">รอบ 1 Portfolio</option>
+                        <option value="รอบ 2 Quota">รอบ 2 Quota</option>
+                        <option value="โครงการพิเศษ">โครงการพิเศษ</option>
+                    </select>
+                    <input type="text" id="p_year" class="glass-input text-xs" placeholder="รุ่นปีการศึกษา (เช่น 2569)">
+                </div>
+                <input type="text" id="p_project" class="glass-input text-xs" placeholder="ชื่อโครงการที่ใช้ยื่น">
+                <div class="grid grid-cols-2 gap-2">
+                    <select id="p_track" class="glass-input text-xs px-2">
+                        <option value="วิทย์-คณิต">วิทย์-คณิต</option>
+                        <option value="ศิลป์-คำนวณ">ศิลป์-คำนวณ</option>
+                        <option value="ศิลป์-ภาษา">ศิลป์-ภาษา</option>
+                    </select>
+                    <input type="text" id="p_gpax" class="glass-input text-xs" placeholder="ช่วงเกรด GPAX (เช่น 3.50 - 3.75)">
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <select id="p_style" class="glass-input text-xs px-2">
+                        <option value="Minimal">สไตล์: Minimal</option>
+                        <option value="Infographic">สไตล์: Infographic</option>
+                        <option value="Creative">สไตล์: Creative</option>
+                    </select>
+                    <input type="text" id="p_color" class="glass-input text-xs" placeholder="โทนสี (เช่น ม่วง-เหลือง)">
+                </div>
+            </div>
+
+            <div class="glass p-4 rounded-[1.75rem] space-y-3">
+                <textarea id="p_highlights" rows="2" class="glass-input text-xs" placeholder="ผลงานเด่น 3 อันดับแรกที่ทำให้ติดคณะนี้..."></textarea>
+                <textarea id="p_tips" rows="3" class="glass-input text-xs" placeholder="คำถามสัมภาษณ์ที่เจอจริง และเทคนิคการเตรียมตัว..."></textarea>
+                <input type="text" id="p_ig" class="glass-input text-xs" placeholder="ช่องทางติดต่อสำหรับให้น้องปรึกษา (เช่น IG หรือ LINE)">
+                <input type="url" id="p_pdf_url" class="glass-input text-xs" placeholder="วางลิงก์ไฟล์ PDF บน Google Drive (ตั้งค่าเปิดอ่านทุกคน)">
+            </div>
+
+            <div class="bg-amber-50 border border-amber-200 p-4 rounded-2xl space-y-2">
+                <p class="text-xs font-black text-amber-800"><i class="fa-solid fa-shield-halved mr-1"></i> รายการตรวจสอบ PDPA Safety Checklist</p>
+                <label class="flex items-start gap-2 text-xs text-gray-700 cursor-pointer">
+                    <input type="checkbox" id="chk_pdpa_1" class="mt-0.5 rounded accent-mstPurple">
+                    <span>ฉันได้เบลอหรือลบ <b>เลขประจำตัวประชาชน 13 หลัก, ที่อยู่บ้าน และเบอร์โทรศัพท์ส่วนตัว</b> ออกจากไฟล์พอร์ตแล้ว</span>
+                </label>
+                <label class="flex items-start gap-2 text-xs text-gray-700 cursor-pointer">
+                    <input type="checkbox" id="chk_pdpa_2" class="mt-0.5 rounded accent-mstPurple">
+                    <span>ยินยอมให้เผยแพร่ในระบบสภานักเรียนพร้อมลายน้ำชื่อผู้เปิดดูเพื่อเป็นแนวทางแก่รุ่นน้อง ม.ส.ธ.</span>
+                </label>
+            </div>
+
+            <button onclick="submitPortfolio()" class="btn-main w-full py-4">
+                <i class="fa-solid fa-circle-check mr-1"></i> ยืนยันและส่ง Portfolio เข้าระบบ
+            </button>
+        </div>
+
+        <!-- หน้าเปิดอ่านไฟล์พร้อมลายน้ำไดนามิก -->
+        <div id="viewer-screen" class="hidden flex-col space-y-3">
+            <div class="glass rounded-2xl p-3.5 flex items-center justify-between">
+                <button onclick="closeViewer()" class="w-9 h-9 bg-purple-50 rounded-xl flex items-center justify-center text-mstPurple border border-purple-100 shrink-0">
+                    <i class="fa-solid fa-arrow-left text-xs"></i>
+                </button>
+                <div class="flex-1 px-3 min-w-0">
+                    <h3 id="v_uni_title" class="text-xs font-black text-mstPurple truncate"></h3>
+                    <p id="v_senior_sub" class="text-[10px] font-bold text-gray-500 truncate"></p>
+                </div>
+                <span class="bg-emerald-100 text-emerald-700 text-[10px] font-black px-2.5 py-1 rounded-full border border-emerald-200 shrink-0">
+                    <i class="fa-solid fa-circle-check mr-1"></i> Verified
+                </span>
+            </div>
+
+            <div class="relative w-full h-[420px] bg-mstDark rounded-2xl overflow-hidden border border-gray-300 shadow-inner">
+                <iframe id="v_pdf_frame" src="" class="w-full h-full border-0"></iframe>
+                <div id="v_watermark_layer" class="pointer-events-none absolute inset-0 overflow-hidden flex flex-wrap content-around justify-around opacity-25 p-3"></div>
+            </div>
+
+            <div class="glass p-4 rounded-2xl space-y-3 text-xs">
+                <div>
+                    <p class="font-black text-mstPurple mb-1"><i class="fa-solid fa-award mr-1"></i> ผลงานเด่น 3 อันดับแรก</p>
+                    <p id="v_highlights" class="text-gray-700 bg-white p-3 rounded-xl border border-gray-100 whitespace-pre-line leading-relaxed"></p>
+                </div>
+                <div>
+                    <p class="font-black text-mstPurple mb-1"><i class="fa-solid fa-comments mr-1"></i> คำถามสัมภาษณ์ & เทคนิคการเตรียมตัว</p>
+                    <p id="v_tips" class="text-gray-700 bg-white p-3 rounded-xl border border-gray-100 whitespace-pre-line leading-relaxed"></p>
+                </div>
+                <div id="v_contact_card" class="p-3 rounded-xl bg-purple-50 border border-purple-100"></div>
+            </div>
+        </div>
+
     </div>
 
     <script>
@@ -293,18 +298,18 @@
             });
             const target = document.getElementById(screenId);
             if (target) { target.classList.remove('hidden'); target.classList.add('flex'); }
-            document.getElementById('app-content').scrollTo({ top: 0, behavior: 'smooth' });
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function setBindMode(alumni) {
             isAlumniMode = alumni;
-            document.getElementById('modeCurrentBtn').className = !alumni ? "py-2 rounded-lg bg-mstPurple text-white" : "py-2 rounded-lg text-gray-600";
-            document.getElementById('modeAlumniBtn').className = alumni ? "py-2 rounded-lg bg-mstPurple text-white" : "py-2 rounded-lg text-gray-600";
+            document.getElementById('modeCurrentBtn').className = !alumni ? "py-2.5 rounded-lg bg-mstPurple text-white" : "py-2.5 rounded-lg text-gray-600";
+            document.getElementById('modeAlumniBtn').className = alumni ? "py-2.5 rounded-lg bg-mstPurple text-white" : "py-2.5 rounded-lg text-gray-600";
             document.getElementById('alumniExtraFields').classList.toggle('hidden', !alumni);
         }
 
         async function callApi(url, payload) {
-            const res = await fetch(url, {
+            const res = await fetch(`${url}?t=${Date.now()}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ ...payload, lineAccessToken })
@@ -343,7 +348,7 @@
             btnUp.classList.add('flex');
 
             document.getElementById('viewerNameText').innerText = currentViewer.fullName;
-            document.getElementById('viewerRoleText').innerText = `รหัส: ${currentViewer.std_id} (${currentViewer.level})`;
+            document.getElementById('viewerRoleText').innerText = `รหัส ${currentViewer.std_id} (${currentViewer.level})`;
             renderPortfolios();
             showScreen('home-screen');
         }
@@ -415,7 +420,7 @@
 
             const container = document.getElementById('portfolioListContainer');
             if (filtered.length === 0) {
-                container.innerHTML = `<div class="glass p-8 rounded-2xl text-center text-xs font-bold text-gray-400"><i class="fa-solid fa-folder-open text-2xl mb-2 block opacity-40"></i>ไม่พบรายการ Portfolio ที่ค้นหา</div>`;
+                container.innerHTML = `<div class="glass p-8 rounded-[1.75rem] text-center text-xs font-bold text-gray-400"><i class="fa-solid fa-folder-open text-2xl mb-2 block opacity-40"></i>ไม่พบรายการ Portfolio ที่ค้นหา</div>`;
                 return;
             }
 
@@ -436,8 +441,8 @@
                         </div>
 
                         <div>
-                            <h3 class="text-sm font-black text-gray-900">${p.university}</h3>
-                            <p class="text-xs font-bold text-mstPurple">${p.faculty}</p>
+                            <h3 class="text-sm font-black text-gray-900 leading-snug">${p.university}</h3>
+                            <p class="text-xs font-bold text-mstPurple mt-0.5">${p.faculty}</p>
                             <p class="text-[11px] text-gray-500 mt-0.5">โครงการ: ${p.projectName || '-'}</p>
                         </div>
 

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <meta name="referrer" content="no-referrer">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
     <title>MSTSC Radio Console - ระบบบริหารเสียงตามสายสภานักเรียน</title>
     <link rel="icon" type="image/webp" href="/logo.webp">
 
@@ -543,7 +543,12 @@
                     syncStdIdTagsFromTextarea();
 
                     if (!refreshTimer) {
-                        refreshTimer = setInterval(() => verifyAndLoadConsole(djEmail, name, picture, false), 8000);
+                        // ซิงค์เฉพาะตอนที่เปิดดูหน้าจออยู่ (หากพับจอหรือสลับแท็บจะพักการซิงค์อัตโนมัติ)
+                        refreshTimer = setInterval(() => {
+                            if (!document.hidden) {
+                                verifyAndLoadConsole(djEmail, name, picture, false);
+                            }
+                        }, 10000);
                     }
                 }
 
@@ -575,18 +580,10 @@
 
             if (np) {
                 if (np.videoId && currentPlayingVideoId !== np.videoId) {
-                    currentPlayingVideoId = np.videoId;
-                    playerBox.innerHTML = `<iframe class="w-full h-full border-0" src="https://www.youtube.com/embed/${np.videoId}?autoplay=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
-                } else if (!np.videoId) {
-                    currentPlayingVideoId = "";
-                    playerBox.innerHTML = `
-                        <div class="p-6 text-center space-y-2">
-                            <p class="text-white font-bold text-xs">เพลงนี้เป็นลิงก์ตรงภายนอก (Spotify / YouTube)</p>
-                            <a href="${np.externalUrl}" target="_blank" class="inline-flex items-center gap-1.5 bg-mstYellow text-mstDark px-4 py-2 rounded-xl text-xs font-black">
-                                <i class="fa-solid fa-arrow-up-right-from-square"></i> คลิกเพื่อเปิดลิงก์ต้นฉบับ
-                            </a>
-                        </div>`;
-                }
+                currentPlayingVideoId = np.videoId;
+                const originParam = encodeURIComponent(window.location.origin);
+                playerBox.innerHTML = `<iframe class="w-full h-full border-0" referrerpolicy="strict-origin-when-cross-origin" src="https://www.youtube.com/embed/${np.videoId}?autoplay=1&rel=0&enablejsapi=1&origin=${originParam}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>`;
+            }
 
                 npDetail.innerHTML = `
                     <div class="bg-purple-50/90 p-4 rounded-2xl border border-purple-200 space-y-2.5">
