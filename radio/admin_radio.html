@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MSTSC DJ & Admin Console - แผงควบคุมระบบเสียงตามสาย (สำหรับคอมพิวเตอร์)</title>
+    <link rel="icon" type="image/png" href="/logo.webp">
+    <link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { anuphan: ['Anuphan', 'sans-serif'] },
+                    colors: { mstPurple: '#5A189A', mstYellow: '#FFC107', appBg: '#FEFCF3' }
+                }
+            }
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Anuphan', sans-serif; background-color: #FEFCF3; color: #1E293B; min-height: 100vh; }
+        .glass-card { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(16px); border: 1px solid #E2E8F0; box-shadow: 0 4px 20px -2px rgba(90, 24, 154, 0.06); }
+        .form-input { background: #FFFFFF; border: 1px solid #CBD5E1; border-radius: 0.75rem; padding: 0.65rem 0.9rem; font-size: 14px; font-weight: 600; width: 100%; }
+        .form-input:focus { border-color: #5A189A; outline: none; box-shadow: 0 0 0 3px rgba(90, 24, 154, 0.15); }
+    </style>
+</head>
+<body class="pb-16">
+
+    <!-- Top Navbar -->
+    <nav class="bg-white/90 backdrop-blur-md border-b border-gray-200 sticky top-0 z-40 px-6 py-3.5 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <div class="w-11 h-11 rounded-2xl bg-mstPurple text-white flex items-center justify-center shadow-md">
+                <i class="fas fa-sliders-h text-lg"></i>
+            </div>
+            <div>
+                <h1 class="text-lg font-extrabold text-mstPurple leading-tight">MSTSC DJ & Broadcast Console</h1>
+                <p class="text-xs font-semibold text-gray-500">แผงควบคุมระบบเสียงตามสายสำหรับคอมพิวเตอร์ • สภานักเรียนโรงเรียนเมืองสุราษฎร์ธานี</p>
+            </div>
+        </div>
+        <div id="authUserBox" class="hidden items-center gap-3">
+            <span id="djEmailBadge" class="text-xs font-bold bg-purple-50 text-mstPurple px-3.5 py-2 rounded-xl border border-purple-200">
+                <i class="fas fa-user-check mr-1"></i> -
+            </span>
+            <button onclick="window.logoutDj()" class="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 font-bold px-3.5 py-2 rounded-xl text-xs transition">
+                <i class="fas fa-sign-out-alt mr-1"></i> ออกจากระบบ
+            </button>
+        </div>
+    </nav>
+
+    <!-- 1. หน้าล็อกอินด้วยอีเมล Google สำหรับ DJ / Admin บนคอมพิวเตอร์ -->
+    <div id="loginSection" class="max-w-md mx-auto mt-20 px-4">
+        <div class="glass-card rounded-3xl p-8 text-center space-y-5">
+            <div class="w-20 h-20 rounded-3xl bg-purple-50 text-mstPurple border border-purple-100 flex items-center justify-center mx-auto shadow-sm">
+                <i class="fas fa-desktop text-3xl"></i>
+            </div>
+            <div>
+                <h2 class="text-2xl font-black text-mstPurple">เข้าสู่ระบบสำหรับฝ่ายโสตฯ / DJ</h2>
+                <p class="text-xs font-medium text-gray-500 mt-1">เข้าใช้งานผ่านคอมพิวเตอร์ด้วยบัญชี Google ของโรงเรียน (@mst.ac.th) หรืออีเมลผู้ดูแลระบบ</p>
+            </div>
+            <button onclick="window.loginWithGoogle()" class="w-full bg-mstPurple hover:bg-purple-800 text-white font-bold py-4 rounded-2xl shadow-lg flex items-center justify-center gap-3 text-sm transition">
+                <i class="fab fa-google text-lg"></i> เข้าสู่ระบบด้วยบัญชี Google
+            </button>
+        </div>
+    </div>
+
+    <!-- 2. หน้าแผงควบคุมหลักบนคอมพิวเตอร์ (แสดงเมื่อล็อกอินผ่านแล้ว) -->
+    <main id="consoleSection" class="hidden max-w-7xl mx-auto px-6 pt-6 space-y-6">
+
+        <!-- แถบสถิติภาพรวม -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="glass-card rounded-2xl p-4 flex items-center gap-4">
+                <div class="w-12 h-12 rounded-2xl bg-purple-100 text-mstPurple flex items-center justify-center text-xl">
+                    <i class="fas fa-signal"></i>
+                </div>
+                <div>
+                    <p class="text-xs font-bold text-gray-400 uppercase">สถานะการรับเพลง</p>
+                    <p id="statStationState" class="text-sm font-black text-gray-800">-</p>
+                </div>
+            </div>
+            <div class="glass-card rounded-2xl p-4 flex items-center gap-4">
+                <div class="w-12 h-12 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center text-xl">
+                    <i class="fas fa-list-ol"></i>
+                </div>
+                <div>
+                    <p class="text-xs font-bold text-gray-400 uppercase">คิวเพลงวันนี้</p>
+                    <p id="statQueueQuota" class="text-sm font-black text-mstPurple">0 / 20 เพลง</p>
+                </div>
+            </div>
+            <div class="glass-card rounded-2xl p-4 flex items-center gap-4">
+                <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-xl">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div>
+                    <p class="text-xs font-bold text-gray-400 uppercase">ฐานข้อมูลนักเรียน ม.1-ม.6</p>
+                    <p id="statStudentDbCount" class="text-sm font-black text-emerald-700">0 คน</p>
+                </div>
+            </div>
+            <div class="glass-card rounded-2xl p-4 flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-bold text-gray-400 uppercase">รีเฟรชข้อมูล</p>
+                    <p class="text-xs font-semibold text-gray-600">อัปเดตอัตโนมัติทุก 8 วินาที</p>
+                </div>
+                <button onclick="window.fetchConsoleData()" class="bg-purple-50 hover:bg-purple-100 text-mstPurple border border-purple-200 px-3.5 py-2 rounded-xl text-xs font-bold">
+                    <i class="fas fa-sync-alt mr-1"></i> รีเฟรชทันที
+                </button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+            <!-- คอลัมน์ซ้าย (5 ส่วน): เครื่องเล่นเพลงปัจจุบัน + ตั้งค่าสถานี + ซิงค์รายชื่อนักเรียน -->
+            <div class="lg:col-span-5 space-y-6">
+
+                <!-- เครื่องเล่นเพลงและลิงก์ต้นฉบับตามเวอร์ชันที่นักเรียนขอ -->
+                <div class="glass-card rounded-3xl p-5 space-y-4 border-2 border-purple-200">
+                    <div class="flex items-center justify-between border-b border-gray-200 pb-3">
+                        <span class="text-xs font-black text-mstPurple uppercase tracking-wider flex items-center gap-2">
+                            <i class="fas fa-play-circle text-base"></i> เครื่องเล่นและควบคุมเพลงปัจจุบัน (Now Playing Deck)
+                        </span>
+                        <span class="text-[11px] font-bold bg-red-100 text-red-600 px-2.5 py-0.5 rounded-full">
+                            <i class="fas fa-circle text-[8px] mr-1"></i>ON AIR
+                        </span>
+                    </div>
+
+                    <!-- จอฝังวิดีโอ YouTube ตามเวอร์ชันที่ขอ -->
+                    <div id="playerEmbedContainer" class="w-full aspect-video bg-slate-900 rounded-2xl overflow-hidden flex items-center justify-center text-gray-400 text-xs font-bold">
+                        <span>กดปุ่ม "เริ่มเปิดเพลงนี้" จากคิวด้านขวาเพื่อโหลดวิดีโอ</span>
+                    </div>
+
+                    <div id="nowPlayingDetailBox" class="space-y-3">
+                        <p class="text-sm font-bold text-gray-400 text-center py-2">ยังไม่มีเพลงที่กำลังออกอากาศ</p>
+                    </div>
+                </div>
+
+                <!-- ตั้งค่าเวลาเปิด-ปิด โควตา และสิทธิ์อีเมลดีเจ -->
+                <div class="glass-card rounded-3xl p-5 space-y-4">
+                    <h3 class="text-sm font-black text-gray-800 border-b border-gray-200 pb-2.5">
+                        <i class="fas fa-cog text-mstPurple mr-1.5"></i> ตั้งค่าเวลาเปิด-ปิดสถานีและสิทธิ์ดีเจ
+                    </h3>
+
+                    <div class="grid grid-cols-2 gap-3 text-xs">
+                        <div class="col-span-2">
+                            <label class="font-bold text-gray-600 block mb-1">โหมดเปิด-ปิดรับเพลง (Manual Override)</label>
+                            <select id="cfgOverride" class="form-input">
+                                <option value="auto">เปิด-ปิดอัตโนมัติตามวันและเวลาที่ตั้งไว้</option>
+                                <option value="force_open">บังคับเปิดรับเพลงทันที (Manual Open)</option>
+                                <option value="force_closed">ปิดรับเพลงฉุกเฉิน (งดเสียงตามสาย)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="font-bold text-gray-600 block mb-1">เวลาเปิดรับเพลง</label>
+                            <input type="time" id="cfgOpenTime" class="form-input">
+                        </div>
+                        <div>
+                            <label class="font-bold text-gray-600 block mb-1">เวลาปิดรับเพลง</label>
+                            <input type="time" id="cfgCloseTime" class="form-input">
+                        </div>
+                        <div>
+                            <label class="font-bold text-gray-600 block mb-1">โควตาสูงสุด/วัน (เพลง)</label>
+                            <input type="number" id="cfgQuota" class="form-input">
+                        </div>
+                        <div>
+                            <label class="font-bold text-gray-600 block mb-1">วันเปิด (1=จ ถึง 5=ศ)</label>
+                            <input type="text" id="cfgOpenDays" class="form-input" placeholder="1,2,3,4,5">
+                        </div>
+                        <div class="col-span-2">
+                            <label class="font-bold text-gray-600 block mb-1">อีเมลที่มีสิทธิ์เข้าหน้าดีเจบนคอมพิวเตอร์ (คั่นด้วยลูกน้ำ)</label>
+                            <input type="text" id="cfgDjEmails" class="form-input" placeholder="studentcouncil@mst.ac.th,6829903@mst.ac.th">
+                        </div>
+                        <div class="col-span-2">
+                            <label class="font-bold text-gray-600 block mb-1">รหัสนักเรียนดีเจ (คั่นด้วยลูกน้ำ)</label>
+                            <input type="text" id="cfgDjIds" class="form-input" placeholder="29903">
+                        </div>
+                    </div>
+
+                    <button onclick="window.saveStationConfig()" class="w-full bg-mstPurple hover:bg-purple-800 text-white font-bold py-3 rounded-xl text-xs shadow-md transition">
+                        <i class="fas fa-save mr-1"></i> บันทึกการตั้งค่าสถานี
+                    </button>
+                </div>
+
+                <!-- ซิงค์รายชื่อนักเรียน ม.1-ม.6 (จากเว็บโรงเรียน หรืออัปโหลดไฟล์ .xlsx) -->
+                <div class="glass-card rounded-3xl p-5 space-y-3 bg-purple-50/60 border border-purple-200">
+                    <h3 class="text-sm font-black text-mstPurple">
+                        <i class="fas fa-database mr-1.5"></i> อัปเดตฐานข้อมูลนักเรียน ม.1-ม.6 (อ่านเฉพาะชีตที่แสดงผล)
+                    </h3>
+                    <p class="text-xs text-gray-600 leading-relaxed">
+                        ดึงไฟล์จากเมนู <b>"รายชื่อนักเรียน 1/2569"</b> บนหน้าเว็บ <code class="bg-white px-1.5 py-0.5 rounded border">http://www.mst.ac.th/index.php</code> หรือเลือกไฟล์ Excel (<code class="bg-white px-1.5 py-0.5 rounded border">.xlsx</code>) จากคอมพิวเตอร์ ระบบจะอ่านเฉพาะชีต <b>m.1 ถึง m.6</b> ที่แสดงผลและข้ามชีตที่ซ่อนอยู่โดยอัตโนมัติ
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-2 pt-1">
+                        <button onclick="window.syncFromSchoolWeb()" class="flex-1 bg-mstPurple hover:bg-purple-800 text-white font-bold py-2.5 px-3 rounded-xl text-xs shadow-sm">
+                            <i class="fas fa-globe mr-1"></i> ดึงจากเว็บ mst.ac.th
+                        </button>
+                        <label class="flex-1 bg-amber-500 hover:bg-amber-600 text-white font-bold py-2.5 px-3 rounded-xl text-xs shadow-sm text-center cursor-pointer">
+                            <i class="fas fa-file-excel mr-1"></i> เลือกไฟล์ Excel (.xlsx)
+                            <input type="file" accept=".xlsx,.xls" onchange="window.uploadExcelFile(this)" class="hidden">
+                        </label>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- คอลัมน์ขวา (7 ส่วน): รายการคิวเพลงรอเปิด (พร้อมปุ่มเปิดลิงก์ตรงตามเวอร์ชันที่ขอ) -->
+            <div class="lg:col-span-7 space-y-6">
+
+                <div class="glass-card rounded-3xl p-6 space-y-4">
+                    <div class="flex items-center justify-between border-b border-gray-200 pb-3">
+                        <div>
+                            <h2 class="text-base font-black text-gray-800">
+                                <i class="fas fa-list-ul text-mstPurple mr-1.5"></i> รายการคิวเพลงที่รอเปิด (Up Next Queue)
+                            </h2>
+                            <p class="text-xs text-gray-500">เรียงตามจำนวนหัวใจโหวต • กดปุ่ม "เปิดลิงก์เวอร์ชันที่ขอ" เพื่อเปิดแท็บ YouTube/Spotify ต้นฉบับได้ทันที</p>
+                        </div>
+                        <button onclick="window.clearTodayQueue()" class="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 px-3.5 py-2 rounded-xl text-xs font-bold">
+                            <i class="fas fa-trash-alt mr-1"></i> ล้างคิววันนี้ทั้งหมด
+                        </button>
+                    </div>
+
+                    <div id="djUpNextList" class="space-y-3"></div>
+                </div>
+
+                <!-- ประวัติเพลงที่เปิดจบไปแล้วในวันนี้ -->
+                <div class="glass-card rounded-3xl p-6 space-y-4">
+                    <h3 class="text-sm font-black text-gray-700">
+                        <i class="fas fa-history text-gray-400 mr-1.5"></i> ประวัติเพลงที่เปิดแล้ววันนี้ (Played History)
+                    </h3>
+                    <div id="djPlayedList" class="space-y-2.5"></div>
+                </div>
+
+            </div>
+
+        </div>
+    </main>
+
+    <!-- ใช้ Firebase Auth สำหรับล็อกอิน Google Email บนคอมพิวเตอร์เหมือนหน้าแอดมินระบบรับสมัคร -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        // ตั้งค่า URL ของ Cloud Run API ของคุณ
+        const API_RADIO_URL = "https://ใส่-url-cloud-run-ของคุณ.a.run.app/api/radio";
+
+        // ใช้ Firebase Config ของระบบสภานักเรียน (จาก admission/firebase-config.js) เพื่อล็อกอิน Google บนคอมพิวเตอร์
+        import { firebaseConfig } from "./admission/firebase-config.js";
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
+
+        let djEmail = "";
+        let googleAccessToken = sessionStorage.getItem('mstsc_dj_token') || "";
+        let currentPlayingVideoId = "";
+        let refreshTimer = null;
+
+        async function callRadioApi(payload) {
+            const res = await fetch(API_RADIO_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    ...payload,
+                    email: djEmail,
+                    accessToken: googleAccessToken
+                })
+            });
+            return await res.json();
+        }
+
+        window.loginWithGoogle = async () => {
+            try {
+                const result = await signInWithPopup(auth, provider);
+                const credential = GoogleAuthProvider.credentialFromResult(result);
+                if (credential && credential.accessToken) {
+                    googleAccessToken = credential.accessToken;
+                    sessionStorage.setItem('mstsc_dj_token', googleAccessToken);
+                }
+                djEmail = result.user.email.toLowerCase();
+                await verifyAndLoadConsole(true);
+            } catch (err) {
+                Swal.fire({ icon: 'error', title: 'เข้าสู่ระบบไม่สำเร็จ', text: err.message });
+            }
+        };
+
+        window.logoutDj = async () => {
+            sessionStorage.removeItem('mstsc_dj_token');
+            if (refreshTimer) clearInterval(refreshTimer);
+            await signOut(auth);
+            location.reload();
+        };
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user && user.email) {
+                djEmail = user.email.toLowerCase();
+                await verifyAndLoadConsole(true);
+            }
+        });
+
+        async function verifyAndLoadConsole(isFirstLoad = false) {
+            const data = await callRadioApi({ action: 'initRadio', isPcAdminLogin: true });
+            if (data.status !== 'success') {
+                Swal.fire({ icon: 'error', title: 'ไม่มีสิทธิ์เข้าถึง', text: data.message || 'บัญชีอีเมลนี้ไม่มีสิทธิ์ใช้งานแผงควบคุมดีเจ' });
+                await signOut(auth);
+                return;
+            }
+
+            document.getElementById('loginSection').classList.add('hidden');
+            document.getElementById('consoleSection').classList.remove('hidden');
+            const authBox = document.getElementById('authUserBox');
+            authBox.classList.remove('hidden');
+            authBox.classList.add('flex');
+            document.getElementById('djEmailBadge').innerHTML = `<i class="fas fa-user-check mr-1"></i> ${djEmail}`;
+
+            if (isFirstLoad && data.adminSettings) {
+                const s = data.adminSettings;
+                document.getElementById('cfgOverride').value = s.manualOverride || 'auto';
+                document.getElementById('cfgOpenTime').value = s.openTime || '07:30';
+                document.getElementById('cfgCloseTime').value = s.closeTime || '12:30';
+                document.getElementById('cfgQuota').value = s.dailyQuota || 20;
+                document.getElementById('cfgOpenDays').value = s.openDays || '1,2,3,4,5';
+                document.getElementById('cfgDjEmails').value = s.djEmails || '';
+                document.getElementById('cfgDjIds').value = s.djStdIds || '29903';
+
+                if (!refreshTimer) {
+                    refreshTimer = setInterval(() => verifyAndLoadConsole(false), 8000);
+                }
+            }
+
+            renderDashboard(data);
+        }
+
+        window.fetchConsoleData = () => verifyAndLoadConsole(false);
+
+        function renderDashboard(data) {
+            const st = data.radioStatus;
+            document.getElementById('statStationState').innerHTML = st.isOpen
+                ? `<span class="text-emerald-600"><i class="fas fa-check-circle mr-1"></i>เปิดรับเพลง (${st.openTime}-${st.closeTime})</span>`
+                : `<span class="text-rose-600"><i class="fas fa-lock mr-1"></i>ปิดรับเพลง</span>`;
+            document.getElementById('statQueueQuota').innerText = `${st.currentCount} / ${st.dailyQuota} เพลง`;
+            document.getElementById('statStudentDbCount').innerText = `${(data.studentsCountInDb || 0).toLocaleString()} คน`;
+
+            // Render Now Playing & Embedded Player
+            const np = data.timeline.nowPlaying;
+            const npDetail = document.getElementById('nowPlayingDetailBox');
+            const playerBox = document.getElementById('playerEmbedContainer');
+
+            if (np) {
+                if (np.videoId && currentPlayingVideoId !== np.videoId) {
+                    currentPlayingVideoId = np.videoId;
+                    playerBox.innerHTML = `<iframe class="w-full h-full border-0" src="https://www.youtube.com/embed/${np.videoId}?autoplay=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+                } else if (!np.videoId) {
+                    currentPlayingVideoId = "";
+                    playerBox.innerHTML = `<div class="p-6 text-center"><p class="text-white font-bold mb-2">เพลงนี้เป็นลิงก์ภายนอก (Spotify / ลิงก์ตรง)</p><a href="${np.externalUrl}" target="_blank" class="inline-block bg-emerald-500 text-white px-4 py-2 rounded-xl text-xs font-bold"><i class="fas fa-external-link-alt mr-1"></i> คลิกเพื่อเปิดลิงก์ต้นฉบับ</a></div>`;
+                }
+
+                npDetail.innerHTML = `
+                    <div class="bg-purple-50/90 p-4 rounded-2xl border border-purple-200 space-y-2">
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="min-w-0">
+                                <h4 class="font-black text-base text-gray-900">${np.title}</h4>
+                                <p class="text-xs font-bold text-mstPurple">${np.artist}</p>
+                            </div>
+                            <a href="${np.externalUrl}" target="_blank" class="bg-red-600 hover:bg-red-700 text-white font-bold px-3.5 py-2 rounded-xl text-xs shrink-0 flex items-center gap-1.5 shadow-sm">
+                                <i class="fas fa-external-link-alt"></i> เปิดลิงก์เวอร์ชันนี้ในแท็บใหม่
+                            </a>
+                        </div>
+                        <div class="bg-white p-3 rounded-xl border border-purple-100 text-xs">
+                            <p class="font-semibold text-gray-700"><i class="fas fa-comment-dots text-mstPurple mr-1"></i> ข้อความฝากบอก: "${np.message}"</p>
+                            <p class="text-[11px] font-bold text-gray-500 mt-1"><i class="fas fa-id-badge mr-1"></i> ผู้ขอเพลง (ข้อมูลจริงสำหรับแอดมิน): ${np.requesterName}</p>
+                        </div>
+                        <button onclick="window.djUpdateStatus('${np.id}', 'PLAYED')" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl text-xs shadow-sm">
+                            <i class="fas fa-check-circle mr-1"></i> เปิดเพลงนี้จบแล้ว (เลื่อนคิวถัดไป)
+                        </button>
+                    </div>
+                `;
+            } else {
+                currentPlayingVideoId = "";
+                playerBox.innerHTML = `<span>กดปุ่ม "เริ่มเปิดเพลงนี้" จากรายการคิวด้านขวา</span>`;
+                npDetail.innerHTML = `<p class="text-xs font-bold text-gray-400 text-center py-2">ยังไม่มีเพลงที่กำลังออกอากาศในขณะนี้</p>`;
+            }
+
+            // Render Up Next Queue
+            const upList = data.timeline.upNext || [];
+            const upContainer = document.getElementById('djUpNextList');
+            if (upList.length === 0) {
+                upContainer.innerHTML = `<div class="p-10 text-center text-gray-400 font-bold text-sm border-2 border-dashed border-gray-200 rounded-2xl"><i class="fas fa-inbox text-2xl mb-2 block"></i>ยังไม่มีคิวเพลงที่รอเปิดในขณะนี้</div>`;
+            } else {
+                upContainer.innerHTML = upList.map(item => `
+                    <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 hover:border-mstPurple transition">
+                        <div class="flex items-center gap-3.5 min-w-0 flex-1">
+                            <div class="w-10 h-10 rounded-xl bg-purple-100 text-mstPurple font-black text-sm flex items-center justify-center shrink-0">
+                                #${item.queueOrder}
+                            </div>
+                            <img src="${item.albumArt || '/logo.webp'}" class="w-14 h-14 rounded-xl object-cover border border-gray-200 shrink-0">
+                            <div class="min-w-0 flex-1">
+                                <h4 class="font-extrabold text-sm text-gray-900 truncate">${item.title}</h4>
+                                <p class="text-xs font-bold text-mstPurple truncate">${item.artist} • <span class="text-pink-600"><i class="fas fa-heart mr-0.5"></i> ${item.upvotesCount} โหวต</span></p>
+                                <p class="text-xs text-gray-600 mt-1"><i class="fas fa-quote-left text-gray-400 mr-1"></i>${item.message}</p>
+                                <p class="text-[11px] font-bold text-gray-400 mt-0.5"><i class="fas fa-user mr-1"></i>ผู้ขอ: ${item.requesterName}</p>
+                            </div>
+                        </div>
+                        <div class="flex flex-wrap sm:flex-nowrap items-center gap-2 shrink-0 w-full sm:w-auto">
+                            <button onclick="window.djPlayNow('${item.id}', '${item.externalUrl}')" class="flex-1 sm:flex-initial bg-mstPurple hover:bg-purple-800 text-white font-bold px-3.5 py-2.5 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-sm">
+                                <i class="fas fa-play"></i> เริ่มเปิดเพลงนี้
+                            </button>
+                            <a href="${item.externalUrl}" target="_blank" title="เปิดลิงก์ต้นฉบับตามเวอร์ชันที่นักเรียนขอ" class="bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 font-bold px-3 py-2.5 rounded-xl text-xs flex items-center gap-1">
+                                <i class="fas fa-external-link-alt"></i> ลิงก์ตรง
+                            </a>
+                            <button onclick="window.djRejectSong('${item.id}')" title="ปฏิเสธเพลงพร้อมส่งเหตุผลเข้า LINE นักเรียน" class="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 font-bold px-3 py-2.5 rounded-xl text-xs">
+                                <i class="fas fa-ban"></i>
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            // Render Played List
+            const played = data.timeline.playedList || [];
+            const playedBox = document.getElementById('djPlayedList');
+            if (played.length === 0) {
+                playedBox.innerHTML = `<p class="text-xs text-gray-400 font-bold text-center py-4">ยังไม่มีประวัติเพลงที่เปิดจบในวันนี้</p>`;
+            } else {
+                playedBox.innerHTML = played.map(item => `
+                    <div class="bg-gray-50 p-3 rounded-xl border border-gray-200 flex items-center justify-between text-xs">
+                        <div class="flex items-center gap-3 min-w-0">
+                            <img src="${item.albumArt || '/logo.webp'}" class="w-10 h-10 rounded-lg object-cover">
+                            <div class="min-w-0">
+                                <p class="font-bold text-gray-800 truncate">${item.title}</p>
+                                <p class="text-gray-500 truncate">${item.artist} • ขอโดย ${item.requesterName}</p>
+                            </div>
+                        </div>
+                        <a href="${item.externalUrl}" target="_blank" class="text-mstPurple font-bold hover:underline shrink-0 ml-2">
+                            <i class="fas fa-external-link-alt mr-1"></i>ดูลิงก์เดิม
+                        </a>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // เมื่อดีเจกดเริ่มเปิดเพลง จะเปลี่ยนสถานะเป็น PLAYING (พร้อมฝังวิดีโอในหน้าเว็บ และเลือกเปิดแท็บลิงก์ตรงได้ทันที)
+        window.djPlayNow = async (queueId, directUrl) => {
+            await callRadioApi({ action: 'djUpdateQueueStatus', queueId, newStatus: 'PLAYING' });
+            await verifyAndLoadConsole(false);
+        };
+
+        window.djUpdateStatus = async (queueId, newStatus) => {
+            await callRadioApi({ action: 'djUpdateQueueStatus', queueId, newStatus });
+            await verifyAndLoadConsole(false);
+        };
+
+        window.djRejectSong = async (queueId) => {
+            const { value: reason } = await Swal.fire({
+                title: 'ระบุเหตุผลที่ปฏิเสธเพลง',
+                input: 'text',
+                inputPlaceholder: 'เช่น เนื้อหาไม่เหมาะสม หรือเป็นเพลงนอกระเบียบเสียงตามสาย',
+                showCancelButton: true,
+                confirmButtonText: 'ยืนยันปฏิเสธเพลง',
+                confirmButtonColor: '#EF4444'
+            });
+            if (reason !== undefined) {
+                await callRadioApi({ action: 'djUpdateQueueStatus', queueId, newStatus: 'REJECTED', rejectReason: reason });
+                await verifyAndLoadConsole(false);
+            }
+        };
+
+        window.saveStationConfig = async () => {
+            Swal.fire({ title: 'กำลังบันทึก...', didOpen: () => Swal.showLoading() });
+            const res = await callRadioApi({
+                action: 'saveRadioSettings',
+                manualOverride: document.getElementById('cfgOverride').value,
+                openTime: document.getElementById('cfgOpenTime').value,
+                closeTime: document.getElementById('cfgCloseTime').value,
+                dailyQuota: document.getElementById('cfgQuota').value,
+                openDays: document.getElementById('cfgOpenDays').value.trim(),
+                djEmails: document.getElementById('cfgDjEmails').value.trim(),
+                djStdIds: document.getElementById('cfgDjIds').value.trim()
+            });
+            Swal.close();
+            if (res.status === 'success') {
+                Swal.fire({ icon: 'success', title: 'บันทึกการตั้งค่าเรียบร้อย', timer: 1500, showConfirmButton: false });
+                await verifyAndLoadConsole(false);
+            }
+        };
+
+        window.clearTodayQueue = async () => {
+            const cf = await Swal.fire({
+                icon: 'warning',
+                title: 'ล้างคิวเพลงวันนี้ทั้งหมด?',
+                text: 'ข้อมูลสถิติเพลงฮิตประจำสัปดาห์จะยังคงถูกเก็บไว้ตามปกติ',
+                showCancelButton: true,
+                confirmButtonColor: '#EF4444',
+                confirmButtonText: 'ยืนยันล้างคิว'
+            });
+            if (cf.isConfirmed) {
+                await callRadioApi({ action: 'manualClearQueue' });
+                await verifyAndLoadConsole(false);
+            }
+        };
+
+        window.syncFromSchoolWeb = async () => {
+            Swal.fire({ title: 'กำลังดึงไฟล์จากเว็บ mst.ac.th...', text: 'อ่านเฉพาะชีต m.1 - m.6 ที่แสดงผล', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+            const res = await callRadioApi({ action: 'syncStudentsFromSchoolWeb' });
+            Swal.close();
+            if (res.status === 'success') {
+                Swal.fire({ icon: 'success', title: 'ซิงค์รายชื่อนักเรียนสำเร็จ', text: res.message });
+                await verifyAndLoadConsole(false);
+            } else {
+                Swal.fire({ icon: 'error', title: 'ดึงไม่สำเร็จ', text: res.message });
+            }
+        };
+
+        window.uploadExcelFile = (inputEl) => {
+            const file = inputEl.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                Swal.fire({ title: 'กำลังนำเข้าไฟล์ Excel...', text: 'อ่านเฉพาะชีต m.1 - m.6 ที่ไม่ซ่อน', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+                const res = await callRadioApi({ action: 'uploadSchoolExcelBase64', excelBase64: e.target.result });
+                Swal.close();
+                if (res.status === 'success') {
+                    Swal.fire({ icon: 'success', title: 'นำเข้าข้อมูลสำเร็จ', text: res.message });
+                    await verifyAndLoadConsole(false);
+                } else {
+                    Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: res.message });
+                }
+            };
+            reader.readAsDataURL(file);
+        };
+    </script>
+</body>
+</html>

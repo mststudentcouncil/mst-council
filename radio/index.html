@@ -317,7 +317,7 @@
     <script>
         // ตั้งค่า URL ของ Cloud Run ของสภานักเรียน และ LIFF ID
         const API_BASE_URL = "https://admission-backend-592123078141.asia-southeast1.run.app/api/radio";
-        const LIFF_ID = "2006504682-3Kvzr0GK";
+        const LIFF_ID = "2008923798-TRND2m0M";
 
         let lineAccessToken = "";
         let currentUser = null;
@@ -636,22 +636,32 @@
             showScreen('request-screen');
         }
 
+        // นำไปวางแทนที่ฟังก์ชัน searchTracks() เดิมในไฟล์ radio.html
         async function searchTracks() {
             const query = document.getElementById('songQueryInput').value.trim();
             if (!query) return;
             const listEl = document.getElementById('trackResultsList');
-            listEl.innerHTML = `<p class="text-center text-xs font-bold text-mstPurple py-3"><i class="fas fa-spinner fa-spin mr-1"></i> กำลังค้นหาเพลง...</p>`;
+            listEl.innerHTML = `<p class="text-center text-xs font-bold text-mstPurple py-3"><i class="fas fa-spinner fa-spin mr-1"></i> กำลังค้นหาเวอร์ชันเพลง...</p>`;
             const res = await apiCall({ action: 'searchTracks', query });
-            listEl.innerHTML = (res.tracks || []).map(t => {
+            if (!res.tracks || res.tracks.length === 0) {
+                listEl.innerHTML = `<p class="text-center text-xs text-gray-400 py-3">ไม่พบเพลงที่ค้นหา ลองพิมพ์ชื่อเพลงใหม่ หรือวางลิงก์ YouTube / Spotify โดยตรง</p>`;
+                return;
+            }
+            listEl.innerHTML = res.tracks.map(t => {
                 const safe = JSON.stringify(t).replace(/'/g, "&#39;");
                 return `
-                    <div onclick='chooseTrack(${safe})' class="bg-white hover:bg-purple-50 p-2.5 rounded-xl border border-gray-200 flex items-center gap-3 cursor-pointer">
-                        <img src="${t.albumArt}" class="w-11 h-11 rounded-lg object-cover shrink-0">
-                        <div class="flex-1 min-w-0">
-                            <p class="text-xs font-extrabold text-gray-800 truncate">${t.title}</p>
-                            <p class="text-[11px] text-gray-500 truncate">${t.artist}</p>
+                    <div class="bg-white hover:bg-purple-50 p-2.5 rounded-xl border border-gray-200 flex items-center gap-3 transition">
+                        <img src="${t.albumArt}" class="w-14 h-11 rounded-lg object-cover shrink-0">
+                        <div onclick='chooseTrack(${safe})' class="flex-1 min-w-0 cursor-pointer">
+                            <p class="text-xs font-extrabold text-gray-800 line-clamp-1">${t.title}</p>
+                            <p class="text-[11px] text-gray-500 truncate">${t.artist} • <span class="text-mstPurple font-bold">${t.durationText || ''}</span></p>
                         </div>
-                        <span class="text-[11px] font-bold text-mstPurple bg-purple-50 px-2.5 py-1 rounded-lg">เลือก</span>
+                        <a href="${t.externalUrl}" target="_blank" title="เปิดดูคลิปต้นฉบับเพื่อเช็คเวอร์ชัน" class="px-2.5 py-1.5 rounded-lg bg-gray-100 text-gray-600 text-[11px] font-bold shrink-0">
+                            <i class="fas fa-external-link-alt"></i>
+                        </a>
+                        <button onclick='chooseTrack(${safe})' class="text-[11px] font-bold text-white bg-mstPurple px-3 py-1.5 rounded-lg shrink-0">
+                            เลือก
+                        </button>
                     </div>
                 `;
             }).join('');
