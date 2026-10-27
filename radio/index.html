@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>MSTSC Smart Radio - ระบบขอเพลงเสียงตามสาย</title>
-    <link rel="icon" type="image/png" href="logo.png">
+    <link rel="icon" type="image/webp" href="/logo.webp">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -141,7 +141,7 @@
                 <!-- ข้อมูลผู้ใช้งาน -->
                 <div class="glass-panel rounded-2xl p-3 flex items-center justify-between">
                     <div class="flex items-center gap-3 min-w-0">
-                        <img id="user-avatar" src="logo.png" class="w-10 h-10 rounded-full object-cover border-2 border-purple-200 shrink-0">
+                        <img id="user-avatar" src="/logo.webp" class="w-10 h-10 rounded-full object-cover border-2 border-purple-200 shrink-0">
                         <div class="min-w-0">
                             <p id="user-fullname" class="text-[13px] font-extrabold text-gray-800 truncate">-</p>
                             <p id="user-meta" class="text-[11px] font-bold text-mstPurple truncate">-</p>
@@ -370,7 +370,7 @@
 
             document.getElementById('headerActions').classList.remove('hidden');
             document.getElementById('headerActions').classList.add('flex');
-            document.getElementById('user-avatar').src = currentUser.linePic || 'logo.png';
+            document.getElementById('user-avatar').src = currentUser.linePic || '/logo.webp';
             document.getElementById('user-fullname').innerText = currentUser.fullName;
             document.getElementById('user-meta').innerText = `รหัส: ${currentUser.std_id} • ชั้น ${currentUser.level}/${currentUser.room}`;
 
@@ -505,7 +505,7 @@
             if (tl.nowPlaying) {
                 const np = tl.nowPlaying;
                 npBox.innerHTML = `
-                    <img src="${np.albumArt || 'logo.png'}" class="w-16 h-16 rounded-full object-cover border-2 border-mstPurple vinyl-spin shadow-md shrink-0">
+                    <img src="${np.albumArt || '/logo.webp'}" class="w-16 h-16 rounded-full object-cover border-2 border-mstPurple vinyl-spin shadow-md shrink-0">
                     <div class="min-w-0 flex-1">
                         <p class="text-[14px] font-extrabold text-gray-800 truncate">${np.title}</p>
                         <p class="text-[11px] font-bold text-mstPurple truncate">${np.artist}</p>
@@ -547,7 +547,7 @@
                                 <span class="text-[9px] font-bold text-gray-400 block">คิวที่</span>
                                 <span class="text-sm font-black text-mstPurple">${item.queueOrder}</span>
                             </div>
-                            <img src="${item.albumArt || 'logo.png'}" class="w-12 h-12 rounded-xl object-cover shrink-0">
+                            <img src="${item.albumArt || '/logo.webp'}" class="w-12 h-12 rounded-xl object-cover shrink-0">
                             <div class="flex-1 min-w-0">
                                 <p class="text-xs font-extrabold text-gray-800 truncate">${item.title}</p>
                                 <p class="text-[11px] font-bold text-gray-500 truncate">${item.artist} • <span class="text-green-600">อีก ~${item.estimatedWaitMin} นาที</span></p>
@@ -580,7 +580,7 @@
                 pPanel.innerHTML = tl.playedList.map(item => `
                     <div class="glass-panel p-3 rounded-2xl flex items-center justify-between gap-3 opacity-80">
                         <div class="flex items-center gap-3 min-w-0">
-                            <img src="${item.albumArt || 'logo.png'}" class="w-10 h-10 rounded-xl object-cover shrink-0">
+                            <img src="${item.albumArt || '/logo.webp'}" class="w-10 h-10 rounded-xl object-cover shrink-0">
                             <div class="min-w-0">
                                 <p class="text-xs font-bold text-gray-800 truncate">${item.title}</p>
                                 <p class="text-[10px] text-gray-500 truncate">${item.artist}</p>
@@ -603,7 +603,7 @@
             cPanel.innerHTML = list.map((item, idx) => `
                 <div class="glass-panel p-3.5 rounded-2xl flex items-center gap-3">
                     <div class="w-8 h-8 rounded-xl bg-amber-100 text-amber-700 font-black text-xs flex items-center justify-center shrink-0">#${idx + 1}</div>
-                    <img src="${item.albumArt || 'logo.png'}" class="w-11 h-11 rounded-xl object-cover shrink-0">
+                    <img src="${item.albumArt || '/logo.webp'}" class="w-11 h-11 rounded-xl object-cover shrink-0">
                     <div class="flex-1 min-w-0">
                         <p class="text-xs font-extrabold text-gray-800 truncate">${item.title}</p>
                         <p class="text-[11px] text-gray-500 truncate">${item.artist}</p>
