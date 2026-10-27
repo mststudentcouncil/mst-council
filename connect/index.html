@@ -160,24 +160,38 @@
         <div id="link-screen" class="hidden fade-in flex-col mt-2 space-y-3.5">
             <div class="glass rounded-[2rem] p-6 text-center space-y-4">
                 
-                <!-- ส่วนแสดงเส้นเชื่อม: โลโก้สภา -> โลโก้ LINE -> โปรไฟล์ผู้ใช้พร้อมชื่อ -->
-                <div class="flex items-center justify-center gap-2 py-2">
-                    <!-- โลโก้สภานักเรียน -->
-                    <div class="w-12 h-12 rounded-2xl bg-white p-1 shadow-md border border-purple-100 flex items-center justify-center shrink-0">
-                        <img src="/logo.webp" class="w-full h-full object-contain" alt="MSTSC" onerror="this.src='https://mstsc.pages.dev/logo.webp'">
+                <!-- ส่วนแสดงเส้นเชื่อม: MSTSC + โลโก้สภา -> โลโก้ LINE -> โปรไฟล์ผู้ใช้พร้อมชื่อ -->
+                <div class="flex items-center justify-center gap-1.5 sm:gap-2.5 py-2 overflow-x-hidden">
+                    <!-- MSTSC + โลโก้สภา -->
+                    <div class="flex flex-col items-center shrink-0">
+                        <div class="flex items-center gap-1 bg-white/90 border border-purple-100 py-1 px-2.5 rounded-2xl shadow-sm">
+                            <span class="text-[11px] font-black text-mstPurple tracking-wider">MSTSC</span>
+                            <img src="/logo.webp" class="w-6 h-6 object-contain" alt="MSTSC" onerror="this.src='https://mstsc.pages.dev/logo.webp'">
+                        </div>
+                        <span class="text-[9px] font-bold text-gray-500 mt-1">สภานักเรียน</span>
                     </div>
+
                     <!-- เส้นเชื่อมที่ 1 -->
-                    <div class="w-6 sm:w-10 h-0.5 bg-gradient-to-r from-mstPurple to-lineGreen"></div>
+                    <div class="w-4 sm:w-8 h-0.5 bg-gradient-to-r from-mstPurple to-lineGreen"></div>
+
                     <!-- โลโก้ LINE -->
-                    <div class="w-12 h-12 rounded-2xl bg-lineGreen text-white shadow-md flex items-center justify-center text-xl shrink-0">
-                        <i class="fa-brands fa-line"></i>
+                    <div class="flex flex-col items-center shrink-0">
+                        <div class="w-10 h-10 rounded-2xl bg-lineGreen text-white shadow-md flex items-center justify-center text-lg">
+                            <i class="fa-brands fa-line"></i>
+                        </div>
+                        <span class="text-[9px] font-bold text-gray-500 mt-1">LINE OA</span>
                     </div>
+
                     <!-- เส้นเชื่อมที่ 2 -->
-                    <div class="w-6 sm:w-10 h-0.5 bg-gradient-to-r from-lineGreen to-purple-400"></div>
+                    <div class="w-4 sm:w-8 h-0.5 bg-gradient-to-r from-lineGreen to-purple-400"></div>
+
                     <!-- รูปโปรไฟล์ LINE พร้อมชื่อ -->
-                    <div class="flex items-center gap-2 bg-white/90 border border-purple-100 py-1.5 px-3 rounded-2xl shadow-sm max-w-[140px] shrink-0">
-                        <img id="linkingLineAvatar" src="/logo.webp" class="w-8 h-8 rounded-full object-cover border border-purple-200 shrink-0 bg-white" onerror="this.src='https://mstsc.pages.dev/logo.webp'">
-                        <span id="linkingLineName" class="text-xs font-bold text-gray-800 truncate">LINE User</span>
+                    <div class="flex flex-col items-center shrink-0">
+                        <div class="flex items-center gap-1.5 bg-white/90 border border-purple-100 py-1 px-2.5 rounded-2xl shadow-sm max-w-[120px]">
+                            <img id="linkingLineAvatar" src="/logo.webp" class="w-7 h-7 rounded-full object-cover border border-purple-200 shrink-0 bg-white" onerror="this.src='https://mstsc.pages.dev/logo.webp'">
+                            <span id="linkingLineName" class="text-[11px] font-bold text-gray-800 truncate">LINE User</span>
+                        </div>
+                        <span class="text-[9px] font-bold text-gray-500 mt-1">บัญชีของคุณ</span>
                     </div>
                 </div>
 
