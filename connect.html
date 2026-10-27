@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#4C1D95">
-    <title>เชื่อมต่อข้อมูลนักเรียนกับ LINE - MSTSC</title>
+    <title>เชื่อมต่อข้อมูลนักเรียนกับ LINE</title>
     <link rel="icon" type="image/webp" href="/logo.webp">
 
     <link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -102,7 +102,6 @@
 </head>
 <body class="antialiased">
 
-    <!-- Global Loader มาตรฐานเดียวกับ Smart Radio -->
     <div id="globalLoader" class="loader-overlay">
         <i class="fas fa-circle-notch fa-spin text-5xl text-mstPurple mb-4 drop-shadow-md"></i>
         <p class="text-base font-bold text-mstPurple" id="loaderText">กำลังตรวจสอบข้อมูล...</p>
@@ -110,7 +109,6 @@
 
     <div class="w-full max-w-md mx-auto min-h-screen flex flex-col px-4">
 
-        <!-- Sticky Top Header -->
         <header class="sticky top-0 z-30 pt-3 pb-2.5">
             <div class="glass rounded-2xl px-4 py-3 flex items-center justify-between gap-2 border border-white">
                 <div class="flex items-center gap-3 min-w-0">
@@ -136,7 +134,7 @@
             </div>
         </header>
 
-        <!-- 1. LINE Login Screen (กรณีเปิดนอกแอป LINE และยังไม่ได้ล็อกอิน) -->
+        <!-- 1. Login Screen -->
         <div id="loginPage" class="hidden fade-in flex-col my-auto py-6">
             <div class="glass rounded-[2.5rem] p-8 text-center w-full shadow-lg">
                 <img src="/logo.webp" class="w-24 h-24 mx-auto mb-4 drop-shadow-md object-contain" alt="MSTSC">
@@ -149,9 +147,9 @@
             </div>
         </div>
 
-        <!-- แถบแสดงบัญชี LINE ปัจจุบัน -->
+        <!-- LINE Profile Banner -->
         <div id="lineProfileBanner" class="hidden glass rounded-[1.75rem] p-4 mt-1 mb-3.5 items-center gap-3.5 border border-white fade-in">
-            <img id="lineAvatar" src="/logo.webp" class="w-13 h-13 w-12 h-12 rounded-full object-cover border-2 border-mstYellow shadow-sm bg-white p-0.5 shrink-0" alt="Profile" onerror="this.src='/logo.webp'">
+            <img id="lineAvatar" src="/logo.webp" class="w-12 h-12 rounded-full object-cover border-2 border-mstYellow shadow-sm bg-white p-0.5 shrink-0" alt="Profile" onerror="this.src='/logo.webp'">
             <div class="min-w-0 flex-1">
                 <span class="text-[10px] font-extrabold text-mstPurple bg-purple-50 border border-purple-100 px-2.5 py-0.5 rounded-full inline-block mb-0.5">บัญชี LINE ที่ใช้งาน</span>
                 <h2 id="lineName" class="text-sm font-black text-mstDark truncate">-</h2>
@@ -159,7 +157,7 @@
             </div>
         </div>
 
-        <!-- 2. หน้ายืนยันตัวตนนักเรียน (เหมือนระบบ Smart Radio 100%) -->
+        <!-- 2. Link Screen -->
         <div id="link-screen" class="hidden fade-in flex-col">
             <div class="glass rounded-[2rem] p-6 text-center space-y-4 border border-white">
                 <div class="w-14 h-14 mx-auto bg-purple-50 rounded-2xl flex items-center justify-center text-mstPurple border border-purple-100 shadow-inner">
@@ -190,10 +188,9 @@
             </div>
         </div>
 
-        <!-- 3. หน้าบัตรนักเรียนดิจิทัล (แสดงเมื่อเชื่อมข้อมูลในชีต LIFF_Users แล้ว) -->
+        <!-- 3. Digital Student Pass Screen -->
         <div id="home-screen" class="hidden fade-in flex-col space-y-4">
             <div class="glass rounded-[2rem] p-5 border border-white">
-                <!-- Digital Student Pass Card -->
                 <div class="bg-gradient-to-br from-mstPurple via-purple-800 to-mstDark rounded-2xl p-5 text-white shadow-lg mb-5 relative overflow-hidden">
                     <div class="flex justify-between items-start gap-2 mb-4">
                         <div class="min-w-0">
@@ -218,7 +215,6 @@
                     </div>
                 </div>
 
-                <!-- บริการที่เชื่อมต่ออัตโนมัติ -->
                 <p class="text-xs font-black text-mstPurple mb-2.5 px-1 flex items-center gap-1.5">
                     <i class="fa-solid fa-bolt text-mstYellow"></i> เข้าใช้งานระบบด้วยบัญชีนี้ได้ทันที
                 </p>
@@ -254,7 +250,6 @@
     </div>
 
     <script>
-        // ใช้ API และฐานข้อมูลเดียวกับระบบ Smart Radio (Students_All, Data, LIFF_Users)
         const API_BASE_URL = "https://admission-backend-592123078141.asia-southeast1.run.app/api/radio";
         const LIFF_ID = "2008923798-pVEtog9o";
 
@@ -323,7 +318,7 @@
         }
 
         async function refreshIdentityData() {
-            const data = await apiCall({ action: 'initRadio', isPcAdminLogin: false });
+            const data = await apiCall({ action: 'getLineIdentityStatus' });
             if (data.status !== 'success') return;
 
             currentUser = data.linkedUser;
@@ -340,7 +335,6 @@
                 return;
             }
 
-            // แสดงข้อมูลนักเรียนที่ผูกไว้แล้วจากชีต LIFF_Users
             badge.innerText = "VERIFIED";
             badge.className = "bg-emerald-500 text-white text-[9px] font-black px-2 py-0.5 rounded-full shrink-0";
             headerActions.classList.remove('hidden');
@@ -439,7 +433,6 @@
                 return;
             }
 
-            // กรณีพบหลายคน ให้แตะเลือกชื่อของตัวเองได้เลย
             const inputOptions = {};
             res.matches.forEach(m => {
                 const roomLabel = `${m.level}${m.room && m.room !== '-' ? '/' + m.room : ''}`;
