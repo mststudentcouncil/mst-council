@@ -142,50 +142,23 @@
             </div>
         </header>
 
-        <!-- 2. หน้ายืนยันตัวตนอัจฉริยะ (Smart 1-Step Verification) -->
-        <div id="link-screen" class="hidden fade-in flex-col my-auto py-4">
-            <div class="glass rounded-[2rem] p-6 text-center space-y-4">
+        <!-- 2. บังคับเชื่อมต่อผ่านหน้า Connect เท่านั้น -->
+        <div id="link-screen" class="hidden fade-in flex-col my-auto py-6">
+            <div class="glass rounded-[2rem] p-7 text-center space-y-4 shadow-lg">
                 <div class="w-16 h-16 mx-auto bg-purple-50 rounded-2xl flex items-center justify-center text-mstPurple border border-purple-100 shadow-inner">
                     <i class="fa-solid fa-graduation-cap text-3xl"></i>
                 </div>
                 <div>
-                    <span class="bg-purple-50 text-mstPurple text-[10px] font-black px-3 py-1 rounded-full border border-purple-100 uppercase tracking-wider">Student & Alumni Access</span>
-                    <h2 class="text-xl font-black text-mstDark mt-2">เข้าใช้งานคลังพอร์ตโฟลิโอ</h2>
-                    <p class="text-xs text-gray-500 font-medium mt-0.5">ใช้ได้ทั้งนักเรียนปัจจุบัน และศิษย์เก่า</p>
+                    <span class="bg-purple-50 text-mstPurple text-[10px] font-black px-3 py-1 rounded-full border border-purple-100 uppercase tracking-wider">MSTSC Student Connect</span>
+                    <h2 class="text-lg font-black text-mstDark mt-2">กรุณาเชื่อมข้อมูลก่อนเข้าคลังพอร์ตโฟลิโอ</h2>
+                    <p class="text-xs text-gray-500 font-medium mt-1 leading-relaxed">รองรับทั้งนักเรียนปัจจุบัน (ม.1-ม.6) และศิษย์เก่า กรุณาผูกบัญชีที่หน้าระบบเชื่อมต่อกลางเพื่อเข้าใช้งาน</p>
                 </div>
-
-                <div class="space-y-2.5 text-left">
-                    <label class="block text-xs font-bold text-gray-700 text-center">รหัสประจำตัวนักเรียน</label>
-                    <input type="tel" id="bindStdId" maxlength="5" oninput="onStdIdInput()" onkeydown="if(event.key==='Enter') handleSmartVerify()" class="glass-input text-center text-2xl font-black p-3.5 tracking-[0.25em]" placeholder="เช่น 12345" inputmode="numeric">
-                </div>
-
-                <!-- กล่องกรอกชื่อเพิ่มเติม (แสดงอัตโนมัติเฉพาะกรณีไม่พบรหัสในฐานข้อมูลปีปัจจุบัน สำหรับศิษย์เก่า) -->
-                <div id="alumniExtraFields" class="hidden bg-amber-50/80 p-4 rounded-2xl border border-amber-200 space-y-3 text-left fade-in">
-                    <div class="flex items-start gap-2 text-xs text-amber-900">
-                        <i class="fa-solid fa-user-graduate mt-0.5 text-amber-600"></i>
-                        <div>
-                            <b class="font-black block">ลงทะเบียนสำหรับรุ่นพี่ศิษย์เก่า ม.ส.ธ.</b>
-                            <span class="text-[11px] text-amber-800">กรุณาระบุชื่อ-นามสกุลจริง เพื่อผูกกับรหัสประจำตัว <b id="alumniPreviewId"></b></span>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-3 gap-2">
-                        <select id="alumniPrefix" class="glass-input text-xs px-2">
-                            <option value="นาย">นาย</option>
-                            <option value="นางสาว">นางสาว</option>
-                            <option value="ด.ช.">ด.ช.</option>
-                            <option value="ด.ญ.">ด.ญ.</option>
-                        </select>
-                        <input type="text" id="alumniFname" class="glass-input text-xs col-span-2" placeholder="ชื่อจริง (ไม่ต้องใส่คำนำหน้า)">
-                    </div>
-                    <div class="grid grid-cols-3 gap-2">
-                        <input type="text" id="alumniLname" class="glass-input text-xs col-span-2" placeholder="นามสกุล">
-                        <input type="text" id="alumniGradYear" class="glass-input text-xs text-center" placeholder="รุ่นปี (เช่น 68)" value="68">
-                    </div>
-                </div>
-
-                <button onclick="handleSmartVerify()" id="btnVerifyMain" class="btn-main w-full py-4 text-sm">
-                    <i class="fa-solid fa-circle-check"></i> <span>ตรวจสอบและเข้าใช้งาน</span>
-                </button>
+                <a href="https://liff.line.me/2008923798-pVEtog9o" class="btn-main w-full py-4 text-sm">
+                    <i class="fa-solid fa-id-card mr-1"></i> ไปหน้าเชื่อมต่อข้อมูลนักเรียน
+                </a>
+                <a href="/richmenuline" class="block w-full py-3 rounded-xl bg-white border border-gray-200 text-xs font-bold text-gray-600 hover:border-mstPurple transition">
+                    กลับสู่ศูนย์รวมบริการนักเรียน
+                </a>
             </div>
         </div>
 
@@ -759,11 +732,13 @@
             fetchTcasData();
 
             try {
-                await Promise.race([
-                    liff.init({ liffId: LIFF_ID }),
-                    new Promise((_, reject) => setTimeout(() => reject(new Error('LIFF_TIMEOUT')), 2500))
-                ]);
-                if (liff.isLoggedIn()) {
+                await liff.init({ liffId: LIFF_ID });
+                if (!liff.isLoggedIn()) {
+                    if (liff.isInClient()) {
+                        liff.login({ redirectUri: window.location.href });
+                        return;
+                    }
+                } else {
                     lineAccessToken = liff.getAccessToken() || "";
                 }
             } catch (liffErr) {
@@ -777,24 +752,15 @@
         async function loadPortfolioData() {
             try {
                 const data = await callApi(API_PORTFOLIO_URL, { action: 'getPortfolios' });
-                if (!data || data.status !== 'success') {
-                    if (!currentViewer) showScreen('link-screen');
-                    else showScreen('home-screen');
-                    return;
-                }
-
-                if (data.viewer && data.viewer.std_id) {
-                    currentViewer = data.viewer;
-                    saveUnifiedViewer(currentViewer);
-                } else if (!currentViewer) {
-                    currentViewer = getSavedViewer();
-                }
-
-                if (!currentViewer || !currentViewer.std_id) {
+                if (!data || data.status !== 'success' || !data.viewer || !data.viewer.std_id) {
+                    currentViewer = null;
+                    clearUnifiedViewer();
                     showScreen('link-screen');
                     return;
                 }
 
+                currentViewer = data.viewer;
+                saveUnifiedViewer(currentViewer);
                 allPortfolios = data.portfolios || [];
                 updateHeaderViewerUI();
                 renderPortfolios();
@@ -806,22 +772,12 @@
                 }
             } catch (e) {
                 console.error("Load portfolio error:", e);
-                if (currentViewer && currentViewer.std_id) {
-                    showScreen('home-screen');
-                } else {
-                    showScreen('link-screen');
-                }
+                showScreen('link-screen');
             }
         }
 
         function updateHeaderViewerUI() {
             if (!currentViewer) return;
-            const btnUnlink = document.getElementById('btnUnlinkPort');
-            if (btnUnlink) {
-                btnUnlink.classList.remove('hidden');
-                btnUnlink.classList.add('flex');
-            }
-
             const nameEl = document.getElementById('viewerNameText');
             if (nameEl) nameEl.innerText = currentViewer.fullName || '-';
 
@@ -832,9 +788,7 @@
 
             const badgeEl = document.getElementById('viewerBadgeRole');
             if (badgeEl) {
-                badgeEl.innerText = currentViewer.isAdminOrDj
-                    ? 'ADMIN'
-                    : (String(currentViewer.level || '').includes('ศิษย์เก่า') ? 'ALUMNI' : 'STUDENT');
+                badgeEl.innerText = currentViewer.role || (currentViewer.isAdminOrDj ? 'ADMIN' : 'STUDENT');
             }
         }
 
