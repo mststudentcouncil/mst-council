@@ -1457,28 +1457,33 @@
     let isRefreshingThreads = false;
     async function loadThreads(silent = false, force = false) {
       if (isRefreshingThreads && !force) return;
-   isRefreshingThreads = true;
-   const refreshBtn = document.getElementById('btnRefreshThreads');
-   if (!silent && refreshBtn) {
-     refreshBtn.disabled = true;
-     refreshBtn.innerHTML = '<i class="fa-solid fa-rotate-right fa-spin"></i>';
-     setTopBusyBar(true);
-   }
-   try {
-     const res = await callAdminApi({ action: "getThreads" });
+      isRefreshingThreads = true;
+      const refreshBtn = document.getElementById('btnRefreshThreads');
+      if (!silent && refreshBtn) {
+        refreshBtn.disabled = true;
+        refreshBtn.innerHTML = '<i class="fa-solid fa-rotate-right fa-spin"></i>';
+        setTopBusyBar(true);
+      }
+      try {
+        // ส่ง activeUserId ไปพร้อมกับ getThreads เพื่อดึงข้อความล่าสุดของห้องที่เปิดอยู่มาในรอบเดียว
+        const res = await callAdminApi({
+          action: "getThreads",
+          activeUserId: currentUserId || ""
+        });
         if (res.status === "success") {
           threads = res.threads || [];
           updateUnreadCounters();
           renderThreadsList();
+
           if (currentUserId) {
-            const activeInList = threads.find(t => t.userId === currentUserId);
-            const cached = threadDetailCache[currentUserId];
-            const needRefreshDetail = !cached ||
-              !activeInList ||
-              (activeInList.unreadCount || 0) > 0 ||
-              activeInList.lastMessage !== cached.lastMessage ||
-              activeInList.status !== cached.status;
-            if (!silent || needRefreshDetail) {
+            if (res.activeThread && res.activeThread.userId === currentUserId) {
+              threadDetailCache[currentUserId] = res.activeThread;
+              currentThreadObj = res.activeThread;
+              document.getElementById('activeUserPic').src = res.activeThread.pictureUrl || '/logo.webp';
+              document.getElementById('activeUserName').innerText = res.activeThread.displayName || 'ผู้ใช้งาน LINE';
+              updateRoomHeaderStatusUI(res.activeThread.status === 'HUMAN_MODE');
+              renderMessagesStream(res.activeThread, false, false);
+            } else {
               await selectThread(currentUserId, true);
             }
           }
@@ -1488,12 +1493,12 @@
       } finally {
         isRefreshingThreads = false;
         if (refreshBtn) {
-       refreshBtn.disabled = false;
-       refreshBtn.innerHTML = '<i class="fa-solid fa-rotate-right"></i>';
-     }
-     if (!silent) setTopBusyBar(false);
-   }
- }
+          refreshBtn.disabled = false;
+          refreshBtn.innerHTML = '<i class="fa-solid fa-rotate-right"></i>';
+        }
+        if (!silent) setTopBusyBar(false);
+      }
+    }
 
     function setInboxFilter(filter) {
       currentInboxFilter = filter;
@@ -1792,9 +1797,6 @@
         if (!silent) setTopBusyBar(false);
         if (res.status !== "success" || !res.thread) return;
 
-        // บันทึก lastMessage ลงในแคชด้วย เพื่อให้ loadThreads เปรียบเทียบได้อย่างแม่นยำ
-        const currentInList = threads.find(t => t.userId === userId);
-        res.thread.lastMessage = res.thread.lastMessage || (currentInList ? currentInList.lastMessage : '');
         threadDetailCache[userId] = res.thread;
         if (currentUserId !== userId) return;
 
