@@ -135,6 +135,9 @@
                     </div>
                 </div>
                 <div class="flex items-center gap-1.5 shrink-0">
+                    <button id="btnUnlinkPort" onclick="promptUnlinkPort()" class="hidden w-9 h-9 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 items-center justify-center text-xs transition" title="ข้อมูลผู้ใช้งาน / สลับบัญชี">
+                        <i class="fa-solid fa-user-check"></i>
+                    </button>
                     <a href="/richmenuline" class="w-9 h-9 rounded-xl bg-purple-50 hover:bg-purple-100 text-mstPurple border border-purple-100 flex items-center justify-center text-xs transition" title="เมนูบริการนักเรียน">
                         <i class="fa-solid fa-grip"></i>
                     </a>
@@ -186,12 +189,6 @@
                 <button onclick="handleSmartVerify()" id="btnVerifyMain" class="btn-main w-full py-4 text-sm">
                     <i class="fa-solid fa-circle-check"></i> <span>ตรวจสอบและเข้าใช้งาน</span>
                 </button>
-
-                <div class="pt-2 border-t border-gray-100 flex flex-col gap-2">
-                    <button onclick="searchPortStudentByName()" class="w-full py-2.5 rounded-xl bg-white border border-gray-200 text-xs font-bold text-gray-600 hover:border-mstPurple transition">
-                        <i class="fa-solid fa-magnifying-glass mr-1 text-mstPurple"></i> จำรหัสนักเรียนไม่ได้? ค้นหาด้วยชื่อจริง
-                    </button>
-                </div>
             </div>
         </div>
 
@@ -476,7 +473,7 @@
 
     </div>
 
-    <!-- Bottom Navigation Bar (แสดงเมื่อเข้าสู่ระบบแล้ว ทำให้ใช้งานง่าย ไม่หลงหน้า) -->
+    <!-- Bottom Navigation Bar -->
     <nav id="bottomNavBar" class="hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-gray-200 px-4 py-1.5 pb-[calc(env(safe-area-inset-bottom)+0.35rem)] shadow-lg">
         <div class="max-w-md mx-auto grid grid-cols-3 gap-2">
             <button onclick="switchBottomTab('explore')" id="bNav_explore" class="flex flex-col items-center justify-center py-1 text-gray-500 transition nav-item-active">
@@ -508,6 +505,7 @@
         const MYTCAS_COURSES_URL = "https://my-tcas.s3.ap-southeast-1.amazonaws.com/mytcas/courses.json";
         const LIFF_ID = "2008923798-LmKWCP2j";
         const PORT_USER_CACHE_KEY = "mstsc_portfolio_viewer_v3";
+        const UNIFIED_USER_CACHE_KEY = "mstsc_unified_user";
 
         let lineAccessToken = "";
         let currentViewer = null;
@@ -520,12 +518,21 @@
         let tcasDataLoaded = false;
 
         function setLoader(text) {
-            document.getElementById('loaderText').innerText = text || 'กำลังตรวจสอบข้อมูล...';
-            document.getElementById('globalLoader').classList.remove('hidden');
+            const txtEl = document.getElementById('loaderText');
+            if (txtEl) txtEl.innerText = text || 'กำลังตรวจสอบข้อมูล...';
+            const loader = document.getElementById('globalLoader');
+            if (loader) {
+                loader.classList.remove('hidden');
+                loader.style.display = 'flex';
+            }
         }
 
         function hideLoader() {
-            document.getElementById('globalLoader').classList.add('hidden');
+            const loader = document.getElementById('globalLoader');
+            if (loader) {
+                loader.classList.add('hidden');
+                loader.style.display = 'none';
+            }
         }
 
         function showScreen(screenId) {
@@ -537,10 +544,12 @@
             if (target) { target.classList.remove('hidden'); target.classList.add('flex'); }
 
             const bottomNav = document.getElementById('bottomNavBar');
-            if (currentViewer && ['home-screen', 'my-port-screen', 'upload-screen'].includes(screenId)) {
-                bottomNav.classList.remove('hidden');
-            } else {
-                bottomNav.classList.add('hidden');
+            if (bottomNav) {
+                if (currentViewer && ['home-screen', 'my-port-screen', 'upload-screen'].includes(screenId)) {
+                    bottomNav.classList.remove('hidden');
+                } else {
+                    bottomNav.classList.add('hidden');
+                }
             }
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
@@ -576,9 +585,6 @@
             renderPortfolios();
         }
 
-        // ==========================================
-        // ดึงข้อมูลมหาวิทยาลัย วิทยาเขต คณะ และสาขาวิชาจาก MyTCAS
-        // ==========================================
         function fetchTcasData() {
             if (tcasDataLoaded) return;
             const loadingText = document.getElementById('tcas-loading-text');
@@ -702,13 +708,30 @@
             }
         }
 
+        // ดึงข้อมูลผู้ใช้งานที่เคยยืนยันตัวตนแล้วจากทั้งระบบพอร์ตและระบบขอเพลง
         function getSavedViewer() {
-            try {
-                const raw = localStorage.getItem(PORT_USER_CACHE_KEY);
-                return raw ? JSON.parse(raw) : null;
-            } catch (e) {
-                return null;
+            const keys = [PORT_USER_CACHE_KEY, UNIFIED_USER_CACHE_KEY];
+            for (const key of keys) {
+                try {
+                    const raw = localStorage.getItem(key);
+                    if (!raw) continue;
+                    const parsed = JSON.parse(raw);
+                    if (parsed && parsed.std_id) return parsed;
+                } catch (e) {}
             }
+            return null;
+        }
+
+        function saveUnifiedViewer(viewerObj) {
+            if (!viewerObj || !viewerObj.std_id) return;
+            const str = JSON.stringify(viewerObj);
+            localStorage.setItem(PORT_USER_CACHE_KEY, str);
+            localStorage.setItem(UNIFIED_USER_CACHE_KEY, str);
+        }
+
+        function clearUnifiedViewer() {
+            localStorage.removeItem(PORT_USER_CACHE_KEY);
+            localStorage.removeItem(UNIFIED_USER_CACHE_KEY);
         }
 
         async function callApi(url, payload) {
@@ -739,7 +762,10 @@
             fetchTcasData();
 
             try {
-                await liff.init({ liffId: LIFF_ID });
+                await Promise.race([
+                    liff.init({ liffId: LIFF_ID }),
+                    new Promise((_, reject) => setTimeout(() => reject(new Error('LIFF_TIMEOUT')), 2500))
+                ]);
                 if (liff.isLoggedIn()) {
                     lineAccessToken = liff.getAccessToken() || "";
                 }
@@ -756,12 +782,13 @@
                 const data = await callApi(API_PORTFOLIO_URL, { action: 'getPortfolios' });
                 if (!data || data.status !== 'success') {
                     if (!currentViewer) showScreen('link-screen');
+                    else showScreen('home-screen');
                     return;
                 }
 
                 if (data.viewer && data.viewer.std_id) {
                     currentViewer = data.viewer;
-                    localStorage.setItem(PORT_USER_CACHE_KEY, JSON.stringify(currentViewer));
+                    saveUnifiedViewer(currentViewer);
                 } else if (!currentViewer) {
                     currentViewer = getSavedViewer();
                 }
@@ -781,19 +808,37 @@
                     showScreen('home-screen');
                 }
             } catch (e) {
-                if (!currentViewer) showScreen('link-screen');
+                console.error("Load portfolio error:", e);
+                if (currentViewer && currentViewer.std_id) {
+                    showScreen('home-screen');
+                } else {
+                    showScreen('link-screen');
+                }
             }
         }
 
         function updateHeaderViewerUI() {
             if (!currentViewer) return;
             const btnUnlink = document.getElementById('btnUnlinkPort');
-            btnUnlink.classList.remove('hidden');
-            btnUnlink.classList.add('flex');
+            if (btnUnlink) {
+                btnUnlink.classList.remove('hidden');
+                btnUnlink.classList.add('flex');
+            }
 
-            document.getElementById('viewerNameText').innerText = currentViewer.fullName || '-';
-            document.getElementById('viewerRoleText').innerText = `รหัส ${currentViewer.std_id} • ${currentViewer.level || 'นักเรียน'}${currentViewer.plan && currentViewer.plan !== '-' ? ' (' + currentViewer.plan + ')' : ''}`;
-            document.getElementById('viewerBadgeRole').innerText = currentViewer.isAdminOrDj ? 'ADMIN' : (String(currentViewer.level || '').includes('ศิษย์เก่า') ? 'ALUMNI' : 'STUDENT');
+            const nameEl = document.getElementById('viewerNameText');
+            if (nameEl) nameEl.innerText = currentViewer.fullName || '-';
+
+            const roleEl = document.getElementById('viewerRoleText');
+            if (roleEl) {
+                roleEl.innerText = `รหัส ${currentViewer.std_id} • ${currentViewer.level || 'นักเรียน'}${currentViewer.plan && currentViewer.plan !== '-' ? ' (' + currentViewer.plan + ')' : ''}`;
+            }
+
+            const badgeEl = document.getElementById('viewerBadgeRole');
+            if (badgeEl) {
+                badgeEl.innerText = currentViewer.isAdminOrDj
+                    ? 'ADMIN'
+                    : (String(currentViewer.level || '').includes('ศิษย์เก่า') ? 'ALUMNI' : 'STUDENT');
+            }
         }
 
         function onStdIdInput() {
@@ -803,7 +848,6 @@
             }
         }
 
-        // ระบบยืนยันตัวตนอัจฉริยะในขั้นตอนเดียว (ค้นหาในฐานข้อมูลก่อน ถ้าไม่พบให้กรอกข้อมูลศิษย์เก่าต่อได้ทันที)
         async function handleSmartVerify() {
             const std_id = document.getElementById('bindStdId').value.replace(/\D/g, '').trim();
             if (std_id.length !== 5) {
@@ -838,7 +882,6 @@
                     if (!cf.isConfirmed) return;
                     resolvedStudent = s;
                 } else {
-                    // ไม่พบในฐานข้อมูลปีการศึกษาปัจจุบัน -> เปิดช่องให้กรอกชื่อรุ่นพี่ศิษย์เก่าต่อทันทีโดยไม่ฟ้อง Error
                     needAlumniManualInput = true;
                     document.getElementById('alumniPreviewId').innerText = std_id;
                     document.getElementById('alumniExtraFields').classList.remove('hidden');
@@ -890,7 +933,7 @@
                     };
 
                 currentViewer = viewerObj;
-                localStorage.setItem(PORT_USER_CACHE_KEY, JSON.stringify(viewerObj));
+                saveUnifiedViewer(viewerObj);
                 hideLoader();
                 await loadPortfolioData();
             } catch (err) {
@@ -941,18 +984,20 @@
                 customClass: { popup: 'swal-glass' }
             });
             if (confirm.isConfirmed) {
-                localStorage.removeItem(PORT_USER_CACHE_KEY);
+                clearUnifiedViewer();
                 currentViewer = null;
                 needAlumniManualInput = false;
+                const btnUnlink = document.getElementById('btnUnlinkPort');
+                if (btnUnlink) {
+                    btnUnlink.classList.add('hidden');
+                    btnUnlink.classList.remove('flex');
+                }
                 document.getElementById('bindStdId').value = '';
                 document.getElementById('alumniExtraFields').classList.add('hidden');
                 showScreen('link-screen');
             }
         }
 
-        // ==========================================
-        // การแสดงผลการ์ดคลังพอร์ตโฟลิโอ (Explore & Saved)
-        // ==========================================
         function renderPortfolios() {
             const kw = document.getElementById('fltKeyword').value.trim().toLowerCase();
             const round = document.getElementById('fltRound').value;
@@ -960,7 +1005,6 @@
             const style = document.getElementById('fltStyle').value;
 
             const filtered = allPortfolios.filter(p => {
-                // ในแท็บคลังพอร์ตหลัก แสดงเฉพาะเล่มที่อนุมัติแล้ว (VERIFIED) หรือเป็นของตัวเอง/แอดมิน
                 if (p.status === 'REJECTED') return false;
                 if (favOnly && !p.isBookmarked) return false;
                 if (round && p.tcasRound !== round) return false;
@@ -1138,7 +1182,6 @@
 
             showScreen('viewer-screen');
 
-            // บันทึกจำนวนการเปิดดูในพื้นหลัง
             callApi(API_PORTFOLIO_URL, { action: 'recordView', portfolioId: p.id }).catch(() => {});
         }
 

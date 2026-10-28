@@ -119,7 +119,7 @@
 </head>
 <body class="antialiased">
 
-    <!-- Global Loader (ไอคอนโหลดมาตรฐานเดียวกับระบบ Feedback) -->
+    <!-- Global Loader -->
     <div id="globalLoader" class="loader-overlay">
         <i class="fas fa-circle-notch fa-spin text-5xl text-mstPurple mb-4 drop-shadow-md"></i>
         <p class="text-base font-bold text-mstPurple" id="loaderText">กำลังตรวจสอบข้อมูล...</p>
@@ -169,17 +169,13 @@
                 </div>
                 <div>
                     <h2 class="text-lg font-black text-mstDark">ยืนยันตัวตนนักเรียน</h2>
-                    <p class="text-xs text-gray-500 font-medium mt-0.5">กรอกรหัสประจำตัวนักเรียน 5 หลัก เพื่อเชื่อมกับ LINE</p>
+                    <p class="text-xs text-gray-500 font-medium mt-0.5">กรอกรหัสประจำตัวนักเรียน 5 หลัก เพื่อเชื่อมกับระบบสภานักเรียน</p>
                 </div>
 
                 <input type="tel" id="input-sid" maxlength="5" class="glass-input text-center text-xl font-black p-4 tracking-[0.2em]" placeholder="รหัสนักเรียน 5 หลัก">
 
                 <button onclick="verifyAndBindStudent()" class="btn-main w-full py-4">
                     ตรวจสอบข้อมูลนักเรียน <i class="fa-solid fa-arrow-right ml-1"></i>
-                </button>
-
-                <button onclick="searchStudentByNameModal()" class="w-full py-3 rounded-xl bg-white border border-gray-200 text-xs font-bold text-gray-600 hover:border-mstPurple transition">
-                    <i class="fa-solid fa-magnifying-glass mr-1 text-mstPurple"></i> จำรหัสนักเรียนไม่ได้? ค้นหาด้วยชื่อจริง
                 </button>
             </div>
         </div>
@@ -329,6 +325,8 @@
     <script>
         const API_BASE_URL = "https://admission-backend-592123078141.asia-southeast1.run.app/api/radio";
         const LIFF_ID = "2008923798-TRND2m0M";
+        const PORT_USER_CACHE_KEY = "mstsc_portfolio_viewer_v3";
+        const UNIFIED_USER_CACHE_KEY = "mstsc_unified_user";
 
         let lineAccessToken = "";
         let currentUser = null;
@@ -348,6 +346,26 @@
             loader.style.display = 'none';
         }
 
+        function getSavedUnifiedViewer() {
+            const keys = [PORT_USER_CACHE_KEY, UNIFIED_USER_CACHE_KEY];
+            for (const key of keys) {
+                try {
+                    const raw = localStorage.getItem(key);
+                    if (!raw) continue;
+                    const parsed = JSON.parse(raw);
+                    if (parsed && parsed.std_id) return parsed;
+                } catch (e) {}
+            }
+            return null;
+        }
+
+        function saveUnifiedViewer(userObj) {
+            if (!userObj || !userObj.std_id) return;
+            const str = JSON.stringify(userObj);
+            localStorage.setItem(PORT_USER_CACHE_KEY, str);
+            localStorage.setItem(UNIFIED_USER_CACHE_KEY, str);
+        }
+
         function showScreen(screenId) {
             const isChanged = currentScreenId !== screenId;
             currentScreenId = screenId;
@@ -363,10 +381,15 @@
         }
 
         async function apiCall(payload) {
+            const savedViewer = getSavedUnifiedViewer();
             const res = await fetch(`${API_BASE_URL}?t=${Date.now()}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ ...payload, lineAccessToken })
+                body: JSON.stringify({
+                    ...payload,
+                    lineAccessToken,
+                    savedViewer: savedViewer || undefined
+                })
             });
             return await res.json();
         }
@@ -374,23 +397,30 @@
         async function initApp() {
             setLoader('กำลังเชื่อมต่อระบบเสียงตามสาย...');
             try {
-                await liff.init({ liffId: LIFF_ID });
-                if (!liff.isLoggedIn()) {
-                    hideLoader();
-                    if (liff.isInClient()) liff.login();
-                    else showScreen('loginPage');
-                    return;
+                await Promise.race([
+                    liff.init({ liffId: LIFF_ID }),
+                    new Promise((_, reject) => setTimeout(() => reject(new Error('LIFF_TIMEOUT')), 2500))
+                ]);
+                if (liff.isLoggedIn()) {
+                    lineAccessToken = liff.getAccessToken() || "";
                 }
-                lineAccessToken = liff.getAccessToken();
-                await refreshRadioData(true);
-                hideLoader();
-                setInterval(() => {
-                    if (!document.hidden) refreshRadioData(false);
-                }, 10000);
             } catch (e) {
-                hideLoader();
-                Swal.fire({ icon: 'error', title: 'เชื่อมต่อ LINE ไม่สำเร็จ', text: e.message, customClass: { popup: 'swal-glass' } });
+                console.warn("LIFF init fallback:", e.message);
             }
+
+            const savedViewer = getSavedUnifiedViewer();
+            if (!lineAccessToken && !savedViewer) {
+                hideLoader();
+                if (window.liff && liff.isInClient && liff.isInClient()) liff.login();
+                else showScreen('link-screen');
+                return;
+            }
+
+            await refreshRadioData(true);
+            hideLoader();
+            setInterval(() => {
+                if (!document.hidden) refreshRadioData(false);
+            }, 10000);
         }
 
         function getPublicRequesterLabel(item) {
@@ -405,11 +435,13 @@
                 const data = await apiCall({ action: 'initRadio', isPcAdminLogin: false });
                 if (data.status !== 'success') return;
 
-                currentUser = data.linkedUser;
-                if (!currentUser) {
+                currentUser = data.linkedUser || getSavedUnifiedViewer();
+                if (!currentUser || !currentUser.std_id) {
                     if (currentScreenId !== 'link-screen') showScreen('link-screen');
                     return;
                 }
+
+                saveUnifiedViewer(currentUser);
 
                 const headerActions = document.getElementById('headerActions');
                 headerActions.classList.remove('hidden');
@@ -459,9 +491,10 @@
             });
 
             if (confirm.isConfirmed) {
-                setLoader('กำลังผูกบัญชีกับ LINE...');
+                setLoader('กำลังเข้าสู่ระบบ...');
                 const bindRes = await apiCall({ action: 'confirmBindLine', std_id: stu.std_id });
                 if (bindRes.status === 'success') {
+                    if (bindRes.linkedUser) saveUnifiedViewer(bindRes.linkedUser);
                     await refreshRadioData(true);
                     hideLoader();
                 } else {
@@ -504,7 +537,7 @@
             const confirm = await Swal.fire({
                 icon: 'warning',
                 title: 'สลับบัญชีรหัสนักเรียน?',
-                text: 'ต้องการยกเลิกการผูกบัญชี LINE กับรหัสนักเรียนปัจจุบันหรือไม่',
+                text: 'ต้องการยกเลิกการผูกบัญชีกับรหัสนักเรียนปัจจุบันหรือไม่',
                 showCancelButton: true,
                 confirmButtonText: 'ยืนยันยกเลิก',
                 cancelButtonText: 'ปิด',
@@ -513,6 +546,8 @@
             });
             if (confirm.isConfirmed) {
                 setLoader('กำลังยกเลิกการผูกบัญชี...');
+                localStorage.removeItem(PORT_USER_CACHE_KEY);
+                localStorage.removeItem(UNIFIED_USER_CACHE_KEY);
                 await apiCall({ action: 'unlinkLineAccount' });
                 location.reload();
             }

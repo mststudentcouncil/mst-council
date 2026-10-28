@@ -207,12 +207,8 @@
                     ตรวจสอบข้อมูลนักเรียน <i class="fa-solid fa-arrow-right ml-1"></i>
                 </button>
 
-                <button onclick="searchStudentByNameModal()" class="w-full py-3 rounded-xl bg-white border border-gray-200 text-xs font-bold text-gray-600 hover:border-mstPurple transition">
-                    <i class="fa-solid fa-magnifying-glass mr-1 text-mstPurple"></i> จำรหัสนักเรียนไม่ได้? ค้นหาด้วยชื่อจริง
-                </button>
-
                 <button onclick="openAlumniBindModal()" class="w-full py-2.5 rounded-xl bg-amber-50/80 border border-amber-200 text-[11px] font-bold text-amber-800 hover:bg-amber-100 transition">
-                    <i class="fa-solid fa-user-graduate mr-1 text-amber-600"></i> สำหรับรุ่นพี่ศิษย์เก่า (เลือกแผนการเรียน / รุ่นปีการศึกษาได้)
+                    <i class="fa-solid fa-user-graduate mr-1 text-amber-600"></i> สำหรับรุ่นพี่ศิษย์เก่า
                 </button>
             </div>
         </div>
@@ -703,16 +699,18 @@
                         <div>
                             <label class="font-bold text-gray-600 block mb-1">แผนการเรียน / รุ่นปีการศึกษา *</label>
                             <select id="sw-alumni-plan" class="glass-input text-sm py-2.5">
+                                <option value="ห้องเรียนพิเศษ: S.M.">ห้องเรียนพิเศษ: วิทยาศาสตร์ - คณิตศาสตร์</option>
+                                <option value="ห้องเรียนพิเศษ: S.M.T.">ห้องเรียนพิเศษ: วิทยาศาสตร์ - คณิตศาสตร์ - เทคโนโลยี</option>
+                                <option value="ห้องเรียนพิเศษ: S.M.E.">ห้องเรียนพิเศษ: วิทยาศาสตร์ - คณิตศาสตร์ - ภาษาอังกฤษ</option>
                                 <option value="วิทยาศาสตร์ - คณิตศาสตร์">แผนการเรียน: วิทยาศาสตร์ - คณิตศาสตร์</option>
-                                <option value="ศิลป์ - ภาษาอังกฤษ">แผนการเรียน: ศิลป์ - ภาษาอังกฤษ</option>
-                                <option value="ศิลป์ - ภาษาจีน">แผนการเรียน: ศิลป์ - ภาษาจีน</option>
+                                <option value="คณิตศาสตร์ - ภาษาอังกฤษ">แผนการเรียน: คณิตศาสตร์ - ภาษาอังกฤษ</option>
+                                <option value="ศิลป์ภาษาจีน">แผนการเรียน: ศิลป์ภาษาจีน</option>
                                 <option value="ภาษาไทย - สังคมศึกษา">แผนการเรียน: ภาษาไทย - สังคมศึกษา</option>
-                                <option value="ศิษย์เก่าสภานักเรียน (รุ่นทั่วไป)">ศิษย์เก่าสภานักเรียน (รุ่นทั่วไป)</option>
                             </select>
                         </div>
                         <div>
                             <label class="font-bold text-gray-600 block mb-1">ระบุรุ่นปีการศึกษา (พ.ศ.)</label>
-                            <input id="sw-alumni-year" type="text" class="glass-input text-sm py-2.5" placeholder="เช่น รุ่นปีการศึกษา 2567">
+                            <input id="sw-alumni-year" type="text" class="glass-input text-sm py-2.5" placeholder="เช่น 2567">
                         </div>
                     </div>
                 `,
