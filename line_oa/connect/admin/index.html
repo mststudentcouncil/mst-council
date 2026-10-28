@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="th" class="h-full">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -26,7 +26,12 @@
         theme: {
           extend: {
             fontFamily: { sans: ['Anuphan', 'sans-serif'] },
-            colors: { mstPurple: '#4C1D95', mstYellow: '#FBBF24', mstDark: '#1E1B4B' }
+            colors: {
+              mstPurple: '#4C1D95',
+              mstPurpleLight: '#6D28D9',
+              mstYellow: '#FBBF24',
+              mstDark: '#1E1B4B'
+            }
           }
         }
       };
@@ -34,312 +39,623 @@
   </script>
   <style>
     .hidden { display: none !important; }
-    body {
+    * { -webkit-tap-highlight-color: transparent; }
+
+    html, body {
       font-family: 'Anuphan', sans-serif;
-      background: linear-gradient(135deg, #f3e5f5 0%, #fffde7 100%);
-      min-height: 100vh;
+      background: linear-gradient(135deg, #f3e5f5 0%, #f8fafc 50%, #fffde7 100%);
       color: #1E293B;
       margin: 0;
-      padding-top: env(safe-area-inset-top);
+      padding: 0;
+      height: 100%;
+      height: 100dvh;
+      overflow: hidden;
+      overscroll-behavior: none;
     }
+
+    /* Safe Area Support for iPhone / iPad Standalone PWA */
+    .safe-top { padding-top: env(safe-area-inset-top, 0px); }
+    .safe-bottom { padding-bottom: env(safe-area-inset-bottom, 0px); }
+    .safe-pb-composer { padding-bottom: max(0.65rem, env(safe-area-inset-bottom, 0.65rem)); }
+
     .glass {
-      background: rgba(255, 255, 255, 0.9);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-      border: 1px solid rgba(255, 255, 255, 0.96);
-      box-shadow: 0 12px 30px rgba(76, 29, 149, 0.06);
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.95);
+      box-shadow: 0 10px 30px rgba(76, 29, 149, 0.06);
     }
+
+    .chat-bg-pattern {
+      background-color: #F4F1FA;
+      background-image: radial-gradient(rgba(76, 29, 149, 0.06) 1px, transparent 1px);
+      background-size: 20px 20px;
+    }
+
     .form-input {
       background: #FFFFFF;
       border: 1px solid #CBD5E1;
-      border-radius: 0.8rem;
+      border-radius: 0.85rem;
       padding: 0.6rem 0.85rem;
-      font-size: 12px;
+      font-size: 13px;
       font-weight: 600;
       width: 100%;
       outline: none;
-      transition: all 0.2s;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    .form-input:focus { border-color: #4C1D95; box-shadow: 0 0 0 3px rgba(76, 29, 149, 0.12); }
+    .form-input:focus {
+      border-color: #4C1D95;
+      box-shadow: 0 0 0 3px rgba(76, 29, 149, 0.12);
+    }
+
     .custom-scroll::-webkit-scrollbar { width: 5px; height: 5px; }
+    .custom-scroll::-webkit-scrollbar-track { background: transparent; }
     .custom-scroll::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 999px; }
+    .custom-scroll::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    @keyframes pulseSubtle {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.06); }
+    }
+    .badge-pulse { animation: pulseSubtle 2s infinite ease-in-out; }
   </style>
 </head>
-<body class="pb-8">
+<body class="flex flex-col h-full w-full select-none sm:select-auto">
 
-  <!-- Top Navbar -->
-  <nav class="glass sticky top-0 z-40 px-4 sm:px-6 h-16 flex items-center justify-between border-b border-gray-200/80">
-    <div class="flex items-center gap-3 min-w-0">
-      <img src="/logo.webp" style="width: 40px; height: 40px;" class="w-10 h-10 object-contain shrink-0" alt="MSTSC">
-      <div class="min-w-0">
-        <div class="flex items-center gap-2">
-          <h1 class="font-black text-mstPurple text-sm sm:text-base truncate">MSTSC CONNECT</h1>
-          <span class="bg-mstYellow text-mstDark text-[9px] font-black px-2 py-0.5 rounded-full shrink-0">LINE OA ADMIN</span>
+  <!-- ========================================================= -->
+  <!-- TOP NAVBAR (ซ่อนอัตโนมัติบนมือถือเมื่ออยู่ในห้องแชทเพื่อให้ได้พื้นที่เต็มจอ) -->
+  <!-- ========================================================= -->
+  <header id="mainTopNavbar" class="glass safe-top z-30 shrink-0 border-b border-purple-100/80 transition-all">
+    <div class="max-w-[1600px] mx-auto px-3 sm:px-5 h-14 sm:h-16 flex items-center justify-between gap-2">
+      <!-- Brand -->
+      <div class="flex items-center gap-2.5 min-w-0">
+        <div class="relative shrink-0">
+          <img src="/logo.webp" class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl object-contain bg-white p-0.5 shadow-xs border border-purple-100" alt="MSTSC">
+          <span id="liveSyncDot" class="w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-white absolute -bottom-0.5 -right-0.5" title="เชื่อมต่อระบบเรียลไทม์"></span>
         </div>
-        <p class="text-[10px] text-gray-500 font-bold truncate">ระบบแชทและตั้งค่าบอทสภานักเรียน</p>
-      </div>
-    </div>
-
-    <div id="navAdminBox" class="hidden items-center gap-1.5 sm:gap-2 shrink-0">
-      <div class="flex bg-gray-100 p-1 rounded-xl text-xs font-bold">
-        <button onclick="switchMainView('chat')" id="tabBtnChat" class="px-3 py-1.5 rounded-lg bg-mstPurple text-white transition flex items-center gap-1.5">
-          <i class="fa-solid fa-comments"></i> <span>ห้องแชท</span> <span id="navUnreadBadge" class="hidden bg-red-500 text-white text-[9px] px-1.5 rounded-full">0</span>
-        </button>
-        <button onclick="switchMainView('settings')" id="tabBtnSettings" class="px-3 py-1.5 rounded-lg text-gray-600 hover:text-mstPurple transition flex items-center gap-1.5">
-          <i class="fa-solid fa-sliders"></i> <span>ตั้งค่าบอท</span>
-        </button>
+        <div class="min-w-0">
+          <div class="flex items-center gap-1.5">
+            <h1 class="font-black text-mstPurple text-sm sm:text-base tracking-tight truncate">MSTSC CONNECT</h1>
+            <span class="bg-mstYellow text-mstDark text-[9px] font-black px-2 py-0.5 rounded-full shrink-0 shadow-2xs">OA ADMIN</span>
+          </div>
+          <p class="text-[10px] text-gray-500 font-bold truncate" id="showLoggedInAdmin">ระบบแชทและบอทสภานักเรียน</p>
+        </div>
       </div>
 
-      <button onclick="toggleSoundAlert()" id="btnSoundToggle" class="w-9 h-9 rounded-xl bg-purple-50 text-mstPurple border border-purple-100 flex items-center justify-center text-xs" title="เปิด/ปิดเสียงแจ้งเตือนเมื่อมีข้อความใหม่">
-        <i class="fa-solid fa-volume-high"></i>
-      </button>
+      <!-- Right Controls -->
+      <div id="navAdminBox" class="hidden items-center gap-1.5 sm:gap-2 shrink-0">
+        <!-- Desktop / Tablet View Switcher -->
+        <div class="hidden md:flex bg-purple-950/5 p-1 rounded-xl text-xs font-bold border border-purple-100/60">
+          <button onclick="switchMainView('chat')" id="tabBtnChat" class="px-3.5 py-1.5 rounded-lg bg-mstPurple text-white shadow-xs transition flex items-center gap-1.5">
+            <i class="fa-solid fa-comments"></i>
+            <span>ห้องแชท</span>
+            <span id="navUnreadBadge" class="hidden bg-red-500 text-white text-[10px] font-black px-1.5 py-0.2 rounded-full">0</span>
+          </button>
+          <button onclick="switchMainView('settings')" id="tabBtnSettings" class="px-3.5 py-1.5 rounded-lg text-gray-600 hover:text-mstPurple transition flex items-center gap-1.5">
+            <i class="fa-solid fa-sliders"></i>
+            <span>ตั้งค่าบอท & คำตอบด่วน</span>
+          </button>
+        </div>
 
-      <a href="/admin.html" class="hidden sm:flex w-9 h-9 rounded-xl bg-white text-mstPurple border border-purple-100 items-center justify-center text-xs" title="กลับหน้าแอดมินหลัก">
-        <i class="fa-solid fa-shield-halved"></i>
-      </a>
+        <!-- Install App Button (PWA) -->
+        <button onclick="openInstallAppModal()" id="btnInstallPwaTop" class="px-2.5 py-1.5 h-9 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200/80 flex items-center gap-1.5 text-xs font-black transition" title="ติดตั้งเป็นแอปลงมือถือ / iPad / คอม">
+          <i class="fa-solid fa-mobile-screen-button text-amber-600"></i>
+          <span class="hidden lg:inline">ติดตั้งแอป</span>
+        </button>
 
-      <button onclick="logoutChatAdmin()" class="w-9 h-9 rounded-xl bg-red-50 border border-red-200 text-red-600 flex items-center justify-center text-xs" title="ออกจากระบบ">
-        <i class="fa-solid fa-power-off"></i>
-      </button>
+        <!-- Sound Alert Toggle -->
+        <button onclick="toggleSoundAlert()" id="btnSoundToggle" class="w-9 h-9 rounded-xl bg-purple-50 hover:bg-purple-100 text-mstPurple border border-purple-100 flex items-center justify-center text-xs transition" title="เปิด/ปิดเสียงแจ้งเตือน">
+          <i class="fa-solid fa-volume-high"></i>
+        </button>
+
+        <!-- Back to Main Admin Portal -->
+        <a href="/admin.html" class="hidden sm:flex w-9 h-9 rounded-xl bg-white hover:bg-gray-50 text-mstPurple border border-purple-100 items-center justify-center text-xs transition" title="กลับหน้าแอดมินหลัก">
+          <i class="fa-solid fa-shield-halved"></i>
+        </a>
+
+        <!-- Logout -->
+        <button onclick="logoutChatAdmin()" class="w-9 h-9 rounded-xl bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-600 flex items-center justify-center text-xs transition" title="ออกจากระบบ">
+          <i class="fa-solid fa-power-off"></i>
+        </button>
+      </div>
     </div>
-  </nav>
+  </header>
 
-  <!-- Login Modal (รองรับทั้งอีเมลสภานักเรียน @mst.ac.th บนโดเมน mstsc.pages.dev และรหัส REGIS) -->
-  <div id="loginModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div class="glass p-6 sm:p-8 rounded-[2.25rem] w-full max-w-md text-center space-y-4">
-      <img src="/logo.webp" style="width: 64px; height: 64px;" class="w-16 h-16 mx-auto object-contain drop-shadow-sm" alt="MSTSC">
+  <!-- ========================================================= -->
+  <!-- LOGIN MODAL (SSO อีเมลสภานักเรียน @mst.ac.th & REGIS 2FA) -->
+  <!-- ========================================================= -->
+  <div id="loginModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-50 flex items-center justify-center p-4 overflow-y-auto">
+    <div class="glass p-6 sm:p-8 rounded-[2.25rem] w-full max-w-md text-center space-y-4 my-auto border border-white shadow-2xl">
+      <div class="relative inline-block">
+        <img src="/logo.webp" class="w-16 h-16 mx-auto object-contain drop-shadow-sm bg-white rounded-2xl p-1.5 border border-purple-100" alt="MSTSC">
+        <span class="absolute -bottom-1 -right-1 bg-mstYellow text-mstDark text-[9px] font-black px-2 py-0.5 rounded-full border border-white">SSO</span>
+      </div>
+
       <div>
-        <span class="bg-purple-50 text-mstPurple text-[10px] font-black px-3 py-1 rounded-full border border-purple-100 uppercase">Student Council SSO</span>
+        <span class="bg-purple-50 text-mstPurple text-[10px] font-black px-3 py-1 rounded-full border border-purple-100 uppercase tracking-wider">Student Council Console</span>
         <h2 class="text-xl font-black text-mstDark mt-2">เข้าสู่ระบบแอดมิน LINE OA</h2>
-        <p class="text-xs text-gray-500 mt-0.5">ใช้อีเมลสภานักเรียน (@mst.ac.th) ที่ลงทะเบียนในระบบ REGIS</p>
+        <p class="text-xs text-gray-500 mt-0.5">บริหารจัดการแชทนักเรียนและตั้งค่าสมองกลน้องคอนเนค AI</p>
       </div>
 
-      <div class="grid grid-cols-2 gap-1.5 bg-gray-100 p-1 rounded-xl text-xs font-bold">
-        <button type="button" id="loginTabGoogle" onclick="switchLoginTab('google')" class="py-2 rounded-lg bg-mstPurple text-white transition">
+      <div class="grid grid-cols-2 gap-1.5 bg-gray-100/90 p-1 rounded-2xl text-xs font-bold">
+        <button type="button" id="loginTabGoogle" onclick="switchLoginTab('google')" class="py-2.5 rounded-xl bg-mstPurple text-white shadow-xs transition">
           <i class="fa-brands fa-google mr-1"></i> อีเมลสภานักเรียน
         </button>
-        <button type="button" id="loginTabRegis" onclick="switchLoginTab('regis')" class="py-2 rounded-lg text-gray-600 transition">
+        <button type="button" id="loginTabRegis" onclick="switchLoginTab('regis')" class="py-2.5 rounded-xl text-gray-600 hover:text-mstPurple transition">
           <i class="fa-solid fa-id-card mr-1"></i> รหัสนักเรียน REGIS
         </button>
       </div>
 
       <!-- แท็บที่ 1: Google Sign-In -->
-      <div id="loginBoxGoogle" class="space-y-3 py-2">
-        <div class="flex justify-center">
+      <div id="loginBoxGoogle" class="space-y-3 py-3">
+        <div class="flex justify-center min-h-[44px]">
           <div id="g_id_onload"
                data-client_id="1055496557-rm1petnl1gtd6c1ed01q9o6k880ik2ta.apps.googleusercontent.com"
                data-callback="handleGoogleCredential"
                data-auto_prompt="false"></div>
           <div class="g_id_signin" data-type="standard" data-shape="pill" data-theme="filled_blue" data-text="signin_with" data-size="large" data-logo_alignment="left"></div>
         </div>
-        <p class="text-[11px] text-gray-500 leading-relaxed">
-          รองรับอีเมลกรรมการสภา <b class="text-mstPurple">@mst.ac.th</b> ทุกท่าน และ <b class="text-mstPurple">studentcouncil@mst.ac.th</b>
+        <p class="text-[11px] text-gray-500 leading-relaxed bg-purple-50/60 p-3 rounded-xl border border-purple-100">
+          รองรับอีเมลกรรมการสภานักเรียน <b class="text-mstPurple">@mst.ac.th</b> ทุกท่าน และ <b class="text-mstPurple">studentcouncil@mst.ac.th</b>
         </p>
       </div>
 
       <!-- แท็บที่ 2: REGIS 2FA -->
-      <form id="loginBoxRegis" onsubmit="handleRegisLogin(event)" class="hidden space-y-3 text-left">
+      <form id="loginBoxRegis" onsubmit="handleRegisLogin(event)" class="hidden space-y-3 text-left pt-1">
         <div>
           <label class="block text-xs font-bold text-gray-700 mb-1">รหัสประจำตัวนักเรียน (5 หลัก)</label>
-          <input type="tel" id="admStdId" maxlength="5" placeholder="เช่น 29903" class="form-input text-center text-base font-black tracking-widest">
+          <input type="tel" id="admStdId" maxlength="5" inputmode="numeric" placeholder="เช่น 29903" class="form-input text-center text-base font-black tracking-widest">
         </div>
         <div>
           <label class="block text-xs font-bold text-gray-700 mb-1">เลขประจำตัวประชาชน 13 หลัก (ใน REGIS)</label>
           <input type="password" id="admIdCard" maxlength="13" inputmode="numeric" placeholder="เลขบัตรประชาชน 13 หลัก" class="form-input text-center text-sm font-bold tracking-widest">
         </div>
-        <button type="submit" id="btnLogin" class="w-full bg-gradient-to-r from-mstPurple to-purple-800 text-white font-bold py-3.5 rounded-xl text-xs shadow-md">
+        <button type="submit" id="btnLogin" class="w-full bg-gradient-to-r from-mstPurple to-purple-800 hover:from-purple-800 hover:to-mstPurple text-white font-black py-3.5 rounded-xl text-xs shadow-md transition active:scale-[0.99]">
           <i class="fa-solid fa-shield-check text-mstYellow mr-1"></i> ยืนยันสิทธิ์และเปิดกระดานแชท
         </button>
       </form>
+
+      <div class="pt-2 border-t border-gray-100 flex items-center justify-center gap-2 text-[11px] text-gray-400 font-semibold">
+        <i class="fa-solid fa-lock text-[10px]"></i>
+        <span>จำสิทธิ์การเข้าใช้งานอัตโนมัติเมื่อติดตั้งเป็นแอปบนหน้าจอโฮม</span>
+      </div>
     </div>
   </div>
 
   <!-- ========================================================= -->
-  <!-- VIEW 1: กระดานแชทและตัวสร้างการ์ด Flex Message ยืดหยุ่น -->
+  <!-- VIEW 1: CHAT WORKSPACE (APP-SHELL SPLIT VIEW / MOBILE SLIDE) -->
   <!-- ========================================================= -->
-  <main id="chatWorkspace" class="hidden max-w-7xl mx-auto px-3 sm:px-6 pt-4 grid grid-cols-1 lg:grid-cols-12 gap-4">
+  <main id="chatWorkspace" class="hidden flex-1 flex overflow-hidden max-w-[1600px] w-full mx-auto md:px-4 md:py-3 md:gap-4 relative">
 
-    <!-- รายชื่อห้องแชท (ซ้าย 4 ส่วน) -->
-    <div class="lg:col-span-4 glass rounded-[1.75rem] p-4 flex flex-col h-[84vh]">
-      <div class="flex items-center justify-between pb-3 border-b border-gray-100">
-        <div>
-          <h3 class="text-xs font-black text-mstPurple uppercase flex items-center gap-1.5">
-            <i class="fa-solid fa-inbox"></i> รายการแชทผู้ติดต่อ
-          </h3>
-          <p class="text-[10px] text-gray-400 font-bold mt-0.5" id="showLoggedInAdmin">-</p>
-        </div>
-        <div class="flex items-center gap-1.5">
-          <span id="threadCountBadge" class="text-[10px] font-black bg-purple-100 text-mstPurple px-2.5 py-0.5 rounded-full">0</span>
-          <button onclick="loadThreads(false)" class="w-7 h-7 rounded-lg bg-gray-100 hover:bg-purple-100 text-mstPurple text-xs flex items-center justify-center"><i class="fa-solid fa-rotate-right"></i></button>
-        </div>
-      </div>
-
-      <div class="pt-2.5 pb-1">
-        <input type="text" id="searchThreadInput" oninput="renderThreadsList()" placeholder="ค้นหาชื่อผู้ใช้ หรือข้อความ..." class="form-input py-1.5 text-xs">
-      </div>
-
-      <div id="threadsListBox" class="flex-1 overflow-y-auto custom-scroll space-y-2 pt-2 pr-1"></div>
-    </div>
-
-    <!-- ห้องสนทนา + เครื่องมือปรับแต่งการ์ด Flex (ขวา 8 ส่วน) -->
-    <div class="lg:col-span-8 glass rounded-[1.75rem] p-4 sm:p-5 flex flex-col h-[84vh]">
-      <div id="emptyChatState" class="my-auto text-center text-gray-400 space-y-2">
-        <i class="fa-regular fa-comments text-4xl text-mstPurple/40"></i>
-        <p class="text-sm font-bold">เลือกห้องสนทนาทางด้านซ้ายเพื่ออ่านข้อความและส่งการ์ดตอบกลับ</p>
-        <p class="text-xs text-gray-400">สามารถกดแชร์แล้วเลือก "เพิ่มไปยังหน้าจอโฮม (Add to Home Screen)" เพื่อติดตั้งเป็นแอปได้ทันที</p>
-      </div>
-
-      <div id="activeChatBox" class="hidden flex-col h-full">
-        <!-- แถบหัวห้องแชท + ปุ่มสลับโหมด AI / Human -->
-        <div class="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-gray-100 shrink-0">
-          <div class="flex items-center gap-3 min-w-0">
-            <img id="activeUserPic" src="/logo.webp" class="w-10 h-10 rounded-full object-cover border-2 border-mstYellow" onerror="this.src='/logo.webp'">
-            <div class="min-w-0">
-              <h4 id="activeUserName" class="text-sm font-black text-gray-900 truncate">-</h4>
-              <p id="activeUserStatus" class="text-[10px] font-bold text-mstPurple">-</p>
-            </div>
+    <!-- ------------------------------------------------------- -->
+    <!-- LEFT PANE: INBOX THREAD LIST (เต็มจอบนมือถือ / Sidebar บน iPad & PC) -->
+    <!-- ------------------------------------------------------- -->
+    <aside id="inboxPane" class="w-full md:w-80 lg:w-96 shrink-0 glass md:rounded-[1.75rem] flex flex-col h-full overflow-hidden border-0 md:border">
+      <!-- Inbox Header & Search -->
+      <div class="p-3.5 sm:p-4 border-b border-gray-100 space-y-2.5 shrink-0 bg-white/60">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <h2 class="text-xs sm:text-sm font-black text-mstPurple uppercase tracking-wide flex items-center gap-1.5">
+              <i class="fa-solid fa-inbox"></i> รายการแชทผู้ติดต่อ
+            </h2>
+            <span id="threadCountBadge" class="text-[10px] font-black bg-purple-100 text-mstPurple px-2 py-0.5 rounded-full">0</span>
           </div>
-          <div class="flex items-center gap-1.5">
-            <button type="button" onclick="toggleThreadMode()" id="btnToggleThreadMode" class="px-3 py-1.5 rounded-xl text-[11px] font-black border transition"></button>
-            <button type="button" onclick="openFlexPreviewModal()" class="px-3 py-1.5 rounded-xl bg-purple-50 hover:bg-purple-100 text-mstPurple border border-purple-200 text-[11px] font-bold transition">
-              <i class="fa-regular fa-eye mr-1"></i> พรีวิวการ์ด
+          <div class="flex items-center gap-1">
+            <button onclick="loadThreads(false)" id="btnRefreshThreads" class="w-8 h-8 rounded-xl bg-gray-100 hover:bg-purple-100 text-mstPurple text-xs flex items-center justify-center transition active:rotate-180" title="รีเฟรชข้อมูลล่าสุด">
+              <i class="fa-solid fa-rotate-right"></i>
             </button>
           </div>
         </div>
 
-        <!-- ประวัติข้อความแชท -->
-        <div id="messagesContainer" class="flex-1 overflow-y-auto custom-scroll py-3 space-y-2.5 pr-1"></div>
+        <!-- Search Input -->
+        <div class="relative">
+          <i class="fa-solid fa-magnifying-glass text-gray-400 text-xs absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+          <input type="text" id="searchThreadInput" oninput="renderThreadsList()" placeholder="ค้นหาชื่อนักเรียน หรือข้อความ..." class="form-input pl-9 pr-8 py-2 text-xs bg-slate-50/90 focus:bg-white rounded-xl">
+          <button type="button" id="btnClearSearch" onclick="clearThreadSearch()" class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-xs w-5 h-5 items-center justify-center">
+            <i class="fa-solid fa-circle-xmark"></i>
+          </button>
+        </div>
 
-        <!-- กล่องเครื่องมือสร้างและปรับแต่งการ์ดตอบกลับแบบยืดหยุ่น -->
-        <form onsubmit="sendFlexReply(event)" class="pt-3 border-t border-gray-200 space-y-2.5 shrink-0">
+        <!-- Filter Tabs (All / Waiting Human / Unread / AI) -->
+        <div class="grid grid-cols-4 gap-1 bg-slate-100 p-1 rounded-xl text-[11px] font-extrabold">
+          <button type="button" onclick="setInboxFilter('all')" id="filterBtn_all" class="py-1.5 rounded-lg bg-white text-mstPurple shadow-2xs transition truncate">
+            ทั้งหมด <span id="count_all" class="text-[9px] opacity-75"></span>
+          </button>
+          <button type="button" onclick="setInboxFilter('human')" id="filterBtn_human" class="py-1.5 rounded-lg text-gray-600 hover:text-mstPurple transition truncate flex items-center justify-center gap-1">
+            <span>รอสภาฯ</span>
+            <span id="count_human" class="hidden bg-amber-500 text-white text-[9px] px-1.5 rounded-full">0</span>
+          </button>
+          <button type="button" onclick="setInboxFilter('unread')" id="filterBtn_unread" class="py-1.5 rounded-lg text-gray-600 hover:text-mstPurple transition truncate flex items-center justify-center gap-1">
+            <span>ไม่อ่าน</span>
+            <span id="count_unread" class="hidden bg-rose-500 text-white text-[9px] px-1.5 rounded-full">0</span>
+          </button>
+          <button type="button" onclick="setInboxFilter('ai')" id="filterBtn_ai" class="py-1.5 rounded-lg text-gray-600 hover:text-mstPurple transition truncate">
+            AI ดูแล
+          </button>
+        </div>
+      </div>
 
-          <!-- แถบปุ่มข้อความตอบกลับด่วน (Canned Replies) -->
-          <div class="flex items-center gap-1.5 overflow-x-auto custom-scroll pb-1">
-            <span class="text-[10px] font-black text-mstPurple shrink-0"><i class="fa-solid fa-bolt text-mstYellow mr-0.5"></i>ตอบด่วน:</span>
-            <div id="cannedRepliesBar" class="flex items-center gap-1.5"></div>
-            <button type="button" onclick="addCannedReplyPrompt()" class="text-[10px] font-bold bg-purple-50 text-mstPurple border border-purple-200 px-2 py-1 rounded-lg shrink-0">+ เพิ่มคำตอบด่วน</button>
+      <!-- Threads Scrollable List -->
+      <div id="threadsListBox" class="flex-1 overflow-y-auto custom-scroll p-2.5 space-y-1.5"></div>
+    </aside>
+
+    <!-- ------------------------------------------------------- -->
+    <!-- RIGHT PANE: ACTIVE CHAT ROOM & FLEX COMPOSER            -->
+    <!-- ------------------------------------------------------- -->
+    <section id="chatRoomPane" class="hidden md:flex flex-1 glass md:rounded-[1.75rem] flex-col h-full overflow-hidden border-0 md:border relative">
+
+      <!-- Empty State (เมื่อยังไม่ได้เลือกห้องแชทบน iPad / PC) -->
+      <div id="emptyChatState" class="my-auto p-6 text-center max-w-md mx-auto space-y-4">
+        <div class="w-20 h-20 rounded-3xl bg-gradient-to-br from-purple-100 to-amber-50 border border-purple-200/60 flex items-center justify-center mx-auto shadow-inner">
+          <i class="fa-regular fa-comments text-4xl text-mstPurple"></i>
+        </div>
+        <div class="space-y-1.5">
+          <h3 class="text-base font-black text-mstDark">เลือกห้องสนทนาเพื่อเริ่มตอบกลับ</h3>
+          <p class="text-xs text-gray-500 leading-relaxed">
+            ระบบรองรับการส่งการ์ด <b>LINE Flex Message</b> แบบปรับแต่งหัวข้อและปุ่มลิงก์ได้อิสระ พร้อมสลับโหมดทำงานร่วมกับ <b>น้องคอนเนค AI</b>
+          </p>
+        </div>
+        <div class="grid grid-cols-2 gap-2 text-left pt-2">
+          <div class="p-3 rounded-2xl bg-purple-50/70 border border-purple-100">
+            <p class="text-[11px] font-black text-mstPurple"><i class="fa-solid fa-bolt text-mstYellow mr-1"></i>Reply Token 0 โควตา</p>
+            <p class="text-[10px] text-gray-500 mt-0.5">ตอบกลับรวดเร็วโดยใช้โควตาข้อความฟรีอัตโนมัติ</p>
+          </div>
+          <div class="p-3 rounded-2xl bg-amber-50/70 border border-amber-100 cursor-pointer hover:bg-amber-100/70 transition" onclick="openInstallAppModal()">
+            <p class="text-[11px] font-black text-amber-900"><i class="fa-solid fa-mobile-screen mr-1"></i>ติดตั้งเป็นแอปได้</p>
+            <p class="text-[10px] text-amber-800/80 mt-0.5">แตะเพื่อดูวิธีเพิ่มลงหน้าจอโฮมมือถือและ iPad</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Active Chat Container -->
+      <div id="activeChatBox" class="hidden flex-col h-full w-full overflow-hidden">
+
+        <!-- 1. Chat Room Header (รองรับปุ่มย้อนกลับบนมือถือ + Safe Area) -->
+        <div class="bg-white/95 backdrop-blur-md px-3 sm:px-4 py-2.5 border-b border-gray-200/80 flex items-center justify-between gap-2 shrink-0 z-20 safe-top">
+          <div class="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+            <!-- Mobile Back Button -->
+            <button type="button" onclick="closeMobileChatPane()" class="md:hidden w-9 h-9 rounded-xl bg-purple-50 active:bg-purple-100 text-mstPurple flex items-center justify-center shrink-0 relative">
+              <i class="fa-solid fa-chevron-left text-sm"></i>
+              <span id="mobileBackUnreadDot" class="hidden w-2.5 h-2.5 rounded-full bg-rose-500 border border-white absolute -top-0.5 -right-0.5"></span>
+            </button>
+
+            <!-- Avatar -->
+            <div class="relative shrink-0 cursor-pointer" onclick="openUserInfoModal()" title="ดูข้อมูลผู้ติดต่อ">
+              <img id="activeUserPic" src="/logo.webp" class="w-10 h-10 rounded-full object-cover border-2 border-mstYellow shadow-2xs" onerror="this.src='/logo.webp'">
+              <span id="activeModeDot" class="w-3 h-3 rounded-full bg-emerald-500 border-2 border-white absolute bottom-0 right-0"></span>
+            </div>
+
+            <!-- User Name & Status -->
+            <div class="min-w-0 flex-1 cursor-pointer" onclick="openUserInfoModal()">
+              <div class="flex items-center gap-1.5">
+                <h4 id="activeUserName" class="text-sm font-black text-gray-900 truncate">-</h4>
+                <i class="fa-solid fa-circle-info text-[11px] text-gray-400 hover:text-mstPurple shrink-0"></i>
+              </div>
+              <p id="activeUserStatus" class="text-[10px] font-bold text-mstPurple truncate">-</p>
+            </div>
           </div>
 
-          <!-- ตั้งค่าหัวการ์ด ยืดหยุ่น 4 ช่อง -->
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
-            <div>
-              <label class="block text-[10px] font-bold text-gray-500 mb-0.5">ป้ายหมวดหมู่บนสุด</label>
-              <input type="text" id="flexServiceLabel" value="STUDENT COUNCIL • OFFICIAL" class="form-input py-1 text-[11px]">
-            </div>
-            <div>
-              <label class="block text-[10px] font-bold text-gray-500 mb-0.5">หัวข้อการ์ด (Card Title)</label>
-              <input type="text" id="flexCardTitle" value="ข้อความจากสภา" class="form-input py-1 text-[11px]">
-            </div>
-            <div>
-              <label class="block text-[10px] font-bold text-gray-500 mb-0.5">ชื่อผู้ตอบในการ์ด</label>
-              <input type="text" id="flexSenderLabel" value="สภานักเรียน" class="form-input py-1 text-[11px]">
-            </div>
-            <div>
-              <label class="block text-[10px] font-bold text-gray-500 mb-0.5">ป้ายสถานะ (Badge)</label>
-              <input type="text" id="flexBadgeText" value="ADMIN" class="form-input py-1 text-[11px]">
-            </div>
+          <!-- Header Action Buttons -->
+          <div class="flex items-center gap-1.5 shrink-0">
+            <button type="button" onclick="toggleThreadMode()" id="btnToggleThreadMode" class="px-2.5 sm:px-3 py-1.5 rounded-xl text-[11px] font-black border transition active:scale-95"></button>
+
+            <button type="button" onclick="copyDirectChatLink()" class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gray-100 hover:bg-purple-50 text-gray-600 hover:text-mstPurple flex items-center justify-center text-xs transition" title="คัดลอกลิงก์ห้องแชทนี้ส่งให้เพื่อนแอดมิน">
+              <i class="fa-solid fa-share-nodes"></i>
+            </button>
           </div>
+        </div>
 
-          <!-- ช่องพิมพ์ข้อความหลัก -->
-          <textarea id="flexReplyText" rows="3" required placeholder="พิมพ์ข้อความตอบกลับ... (ขึ้นต้นบรรทัดด้วย - เพื่อทำรายการจุดสีเหลือง หรือ 1. เพื่อทำหัวข้อตัวหนาอัตโนมัติ)" class="form-input text-xs leading-relaxed"></textarea>
+        <!-- 2. Messages Stream Area -->
+        <div id="messagesContainer" onscroll="handleMessagesScroll()" class="flex-1 overflow-y-auto custom-scroll chat-bg-pattern p-3 sm:p-4 space-y-3 relative"></div>
 
-          <!-- ส่วนจัดการปุ่มแนบท้ายการ์ด (เพิ่ม/ลบปุ่ม หรือพิมพ์ URL เองได้อิสระ) -->
-          <div class="bg-purple-50/60 p-2.5 rounded-xl border border-purple-100 space-y-2">
-            <div class="flex flex-wrap items-center justify-between gap-1">
-              <span class="text-[10px] font-black text-mstPurple"><i class="fa-solid fa-link mr-1"></i>ปุ่มกดท้ายการ์ด (เลือกจากระบบ หรือพิมพ์ชื่อปุ่ม + URL เองได้สูงสุด 4 ปุ่ม)</span>
-              <div class="flex flex-wrap gap-1">
-                <button type="button" onclick="addButtonRow('ศูนย์รวมบริการนักเรียน', 'https://liff.line.me/2008923798-xBa4D5Dv')" class="text-[10px] font-bold bg-white border border-purple-200 text-mstPurple px-2 py-0.5 rounded-md">+ ศูนย์บริการ</button>
-                <button type="button" onclick="addButtonRow('แจ้งเรื่องร้องเรียน', 'https://liff.line.me/2008923798-7EBZdt6r')" class="text-[10px] font-bold bg-white border border-purple-200 text-mstPurple px-2 py-0.5 rounded-md">+ ร้องเรียน</button>
-                <button type="button" onclick="addButtonRow('ระบบขอเพลง Smart Radio', 'https://liff.line.me/2008923798-TRND2m0M')" class="text-[10px] font-bold bg-white border border-purple-200 text-mstPurple px-2 py-0.5 rounded-md">+ ขอเพลง</button>
-                <button type="button" onclick="addButtonRow('เปิดคลัง Portfolio', 'https://liff.line.me/2008923798-LmKWCP2j')" class="text-[10px] font-bold bg-white border border-purple-200 text-mstPurple px-2 py-0.5 rounded-md">+ พอร์ตโฟลิโอ</button>
-                <button type="button" onclick="addButtonRow('', '')" class="text-[10px] font-black bg-mstPurple text-white px-2 py-0.5 rounded-md">+ กำหนดปุ่มเอง</button>
+        <!-- Floating Scroll-to-Bottom Button -->
+        <button type="button" id="btnScrollBottom" onclick="scrollToBottom(true)" class="hidden absolute right-4 bottom-36 z-20 bg-mstPurple text-white shadow-lg px-3 py-1.5 rounded-full text-[11px] font-black items-center gap-1.5 border border-purple-300/40 hover:bg-purple-800 transition">
+          <i class="fa-solid fa-arrow-down animate-bounce"></i>
+          <span>ข้อความล่าสุด</span>
+        </button>
+
+        <!-- 3. Smart Composer & Collapsible Flex Card Studio -->
+        <form onsubmit="sendFlexReply(event)" class="bg-white border-t border-gray-200/90 px-3 sm:px-4 pt-2 safe-pb-composer shrink-0 z-20 space-y-2 shadow-[0_-4px_20px_rgba(0,0,0,0.03)]">
+
+          <!-- 3.1 Collapsible Flex Card Studio Drawer (ซ่อนเป็นค่าเริ่มต้นเพื่อประหยัดพื้นที่หน้าจอมือถือ/iPad) -->
+          <div id="flexStudioDrawer" class="hidden bg-purple-50/70 border border-purple-200/80 rounded-2xl p-3 space-y-3 transition-all max-h-[46vh] overflow-y-auto custom-scroll">
+            <div class="flex items-center justify-between border-b border-purple-200/60 pb-2">
+              <div class="flex items-center gap-1.5">
+                <span class="w-6 h-6 rounded-lg bg-mstPurple text-mstYellow flex items-center justify-center text-xs"><i class="fa-solid fa-wand-magic-sparkles"></i></span>
+                <span class="text-xs font-black text-mstPurple">ตั้งค่าหัวการ์ด LINE Flex & ปุ่มแนบท้าย</span>
+              </div>
+              <div class="flex items-center gap-1">
+                <!-- Quick Card Title Presets -->
+                <select onchange="applyCardPreset(this.value); this.value='';" class="text-[10px] font-bold bg-white border border-purple-200 text-mstPurple rounded-lg px-2 py-1 outline-none">
+                  <option value="">✨ รูปแบบหัวการ์ดด่วน...</option>
+                  <option value="official">📢 ข้อความจากสภานักเรียน</option>
+                  <option value="progress">🛠️ แจ้งความคืบหน้าเรื่องร้องเรียน</option>
+                  <option value="event">🎉 ประชาสัมพันธ์กิจกรรม</option>
+                  <option value="verify">✅ ยืนยันข้อมูลเรียบร้อย</option>
+                </select>
+                <button type="button" onclick="toggleFlexStudioDrawer(false)" class="w-7 h-7 rounded-lg bg-white text-gray-500 hover:text-rose-600 flex items-center justify-center text-xs border border-gray-200">
+                  <i class="fa-solid fa-chevron-down"></i>
+                </button>
               </div>
             </div>
-            <div id="customButtonsContainer" class="space-y-1.5 max-h-24 overflow-y-auto custom-scroll"></div>
+
+            <!-- 4 Card Header Fields -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              <div>
+                <label class="block text-[10px] font-bold text-gray-600 mb-0.5">ป้ายหมวดหมู่บนสุด</label>
+                <input type="text" id="flexServiceLabel" value="STUDENT COUNCIL • OFFICIAL" class="form-input py-1.5 px-2.5 text-[11px]">
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-gray-600 mb-0.5">หัวข้อการ์ด (Card Title)</label>
+                <input type="text" id="flexCardTitle" value="ข้อความจากสภา" oninput="updateStudioSummaryBadge()" class="form-input py-1.5 px-2.5 text-[11px]">
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-gray-600 mb-0.5">ชื่อผู้ตอบในการ์ด</label>
+                <input type="text" id="flexSenderLabel" value="สภานักเรียน" class="form-input py-1.5 px-2.5 text-[11px]">
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-gray-600 mb-0.5">ป้ายสถานะ (Badge)</label>
+                <input type="text" id="flexBadgeText" value="ADMIN" class="form-input py-1.5 px-2.5 text-[11px]">
+              </div>
+            </div>
+
+            <!-- Custom Buttons Builder -->
+            <div class="bg-white/90 p-2.5 rounded-xl border border-purple-100 space-y-2">
+              <div class="flex flex-wrap items-center justify-between gap-1.5">
+                <span class="text-[10px] font-black text-mstPurple">
+                  <i class="fa-solid fa-link mr-1"></i>ปุ่มกดท้ายการ์ด (สูงสุด 4 ปุ่ม)
+                </span>
+                <div class="flex flex-wrap gap-1">
+                  <button type="button" onclick="addButtonRow('ศูนย์รวมบริการนักเรียน', 'https://liff.line.me/2008923798-xBa4D5Dv')" class="text-[10px] font-bold bg-purple-50 hover:bg-purple-100 border border-purple-200 text-mstPurple px-2 py-0.5 rounded-md transition">+ ศูนย์บริการ</button>
+                  <button type="button" onclick="addButtonRow('แจ้งเรื่องร้องเรียน', 'https://liff.line.me/2008923798-7EBZdt6r')" class="text-[10px] font-bold bg-purple-50 hover:bg-purple-100 border border-purple-200 text-mstPurple px-2 py-0.5 rounded-md transition">+ ร้องเรียน</button>
+                  <button type="button" onclick="addButtonRow('ระบบขอเพลง Smart Radio', 'https://liff.line.me/2008923798-TRND2m0M')" class="text-[10px] font-bold bg-purple-50 hover:bg-purple-100 border border-purple-200 text-mstPurple px-2 py-0.5 rounded-md transition">+ ขอเพลง</button>
+                  <button type="button" onclick="addButtonRow('เปิดคลัง Portfolio', 'https://liff.line.me/2008923798-LmKWCP2j')" class="text-[10px] font-bold bg-purple-50 hover:bg-purple-100 border border-purple-200 text-mstPurple px-2 py-0.5 rounded-md transition">+ พอร์ตโฟลิโอ</button>
+                  <button type="button" onclick="addButtonRow('', '')" class="text-[10px] font-black bg-mstPurple text-white px-2 py-0.5 rounded-md shadow-2xs">+ กำหนดปุ่มเอง</button>
+                </div>
+              </div>
+              <div id="customButtonsContainer" class="space-y-1.5"></div>
+            </div>
           </div>
 
-          <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
-            <label class="flex items-center gap-2 text-xs font-bold text-gray-700 cursor-pointer">
-              <input type="checkbox" id="chkCloseHumanMode" class="w-4 h-4 accent-mstPurple rounded">
-              <span>จบการสนทนาหลังส่ง (สลับกลับให้น้องคอนเนค AI ดูแลต่อ)</span>
+          <!-- 3.2 Quick Canned Replies Horizontal Bar -->
+          <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
+            <button type="button" onclick="addCannedReplyPrompt()" class="text-[10px] font-black bg-amber-100/80 hover:bg-amber-200 text-amber-900 px-2.5 py-1 rounded-lg shrink-0 flex items-center gap-1 transition" title="เพิ่มข้อความตอบกลับด่วนใหม่">
+              <i class="fa-solid fa-bolt text-amber-600"></i>
+              <span>+ ตอบด่วน</span>
+            </button>
+            <div id="cannedRepliesBar" class="flex items-center gap-1.5 shrink-0"></div>
+          </div>
+
+          <!-- 3.3 Compact Control Toolbar (Card Customizer Toggle, Format Helpers, Handoff AI Checkbox, Preview) -->
+          <div class="flex items-center justify-between gap-1.5 flex-wrap text-[11px]">
+            <div class="flex items-center gap-1 sm:gap-1.5 flex-wrap">
+              <!-- Toggle Flex Studio Button -->
+              <button type="button" onclick="toggleFlexStudioDrawer()" id="btnToggleStudio" class="px-2.5 py-1 rounded-lg bg-purple-50 hover:bg-purple-100 text-mstPurple border border-purple-200 font-extrabold flex items-center gap-1.5 transition">
+                <i class="fa-solid fa-sliders text-[10px]"></i>
+                <span id="studioSummaryText" class="truncate max-w-[140px] sm:max-w-[200px]">หัวการ์ด & ปุ่ม</span>
+                <span id="studioBtnCountBadge" class="bg-mstPurple text-white text-[9px] font-black px-1.5 py-0.2 rounded-full">1 ปุ่ม</span>
+              </button>
+
+              <!-- Quick Bullet / Numbering Helpers -->
+              <button type="button" onclick="insertTextFormat('- ')" class="px-2 py-1 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-[10px] transition" title="แทรกรายการจุดสีเหลือง">
+                • จุดย่อย
+              </button>
+              <button type="button" onclick="insertTextFormat('1. ')" class="px-2 py-1 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-[10px] transition" title="แทรกหัวข้อตัวหนา">
+                1. หัวข้อ
+              </button>
+
+              <!-- Preview Flex Button -->
+              <button type="button" onclick="openFlexPreviewModal()" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-purple-50 text-gray-700 hover:text-mstPurple font-bold flex items-center gap-1 transition">
+                <i class="fa-regular fa-eye"></i>
+                <span class="hidden sm:inline">พรีวิว</span>
+              </button>
+            </div>
+
+            <!-- Close Human Mode Checkbox -->
+            <label class="flex items-center gap-1.5 text-[11px] font-extrabold text-gray-600 hover:text-mstPurple cursor-pointer bg-gray-50 px-2.5 py-1 rounded-lg border border-gray-200/80">
+              <input type="checkbox" id="chkCloseHumanMode" class="w-3.5 h-3.5 accent-mstPurple rounded">
+              <span>ส่งแล้วสลับให้ AI ดูแลต่อ</span>
             </label>
-            <button type="submit" id="btnSendFlex" class="bg-gradient-to-r from-mstPurple to-purple-800 hover:shadow-lg text-mstYellow font-black px-5 py-2.5 rounded-xl text-xs flex items-center gap-2 transition">
-              <i class="fa-solid fa-paper-plane"></i> ส่งการ์ดตอบกลับเข้า LINE
+          </div>
+
+          <!-- 3.4 Main Chat Input & Send Button (เหมือนแอปแชททั่วไป) -->
+          <div class="flex items-end gap-2">
+            <div class="flex-1 relative">
+              <textarea
+                id="flexReplyText"
+                rows="2"
+                required
+                oninput="autoResizeChatInput(this)"
+                onkeydown="handleChatInputKeydown(event)"
+                placeholder="พิมพ์ข้อความตอบกลับ... (ขึ้นต้นบรรทัดด้วย - เพื่อทำจุดย่อย หรือ 1. เพื่อทำหัวข้อตัวหนา)"
+                class="form-input py-2.5 px-3.5 text-xs sm:text-sm leading-relaxed resize-none max-h-36 overflow-y-auto custom-scroll rounded-2xl bg-slate-50 focus:bg-white"
+              ></textarea>
+            </div>
+
+            <button type="submit" id="btnSendFlex" class="h-11 sm:h-12 px-4 sm:px-5 rounded-2xl bg-gradient-to-r from-mstPurple to-purple-800 hover:from-purple-800 hover:to-mstPurple text-mstYellow font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition active:scale-95 shrink-0">
+              <i class="fa-solid fa-paper-plane"></i>
+              <span class="hidden sm:inline">ส่งการ์ด</span>
             </button>
           </div>
         </form>
+
       </div>
-    </div>
+    </section>
   </main>
 
   <!-- ========================================================= -->
-  <!-- VIEW 2: หน้าตั้งค่าระบบบอท สมอง AI และการแจ้งเตือน -->
+  <!-- VIEW 2: SETTINGS & AI KNOWLEDGE WORKSPACE                 -->
   <!-- ========================================================= -->
-  <section id="settingsWorkspace" class="hidden max-w-4xl mx-auto px-4 pt-5 space-y-5">
-    <div class="glass rounded-[2rem] p-6 space-y-5">
-      <div class="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100 pb-4">
-        <div>
-          <h2 class="text-lg font-black text-mstPurple flex items-center gap-2">
-            <i class="fa-solid fa-robot text-mstYellow"></i> ตั้งค่าระบบน้องคอนเนค AI และการแจ้งเตือน
-          </h2>
-          <p class="text-xs text-gray-500">ปรับแต่งการทำงานของบอทและเพิ่มข้อมูลข่าวสารให้ AI ตอบนักเรียนได้ทันทีโดยไม่ต้องแก้โค้ด</p>
+  <section id="settingsWorkspace" class="hidden flex-1 overflow-y-auto custom-scroll px-3 sm:px-6 py-4 sm:py-6">
+    <div class="max-w-4xl mx-auto space-y-5 pb-20">
+
+      <!-- Card 1: AI & Notification Controls -->
+      <div class="glass rounded-[2rem] p-5 sm:p-7 space-y-5">
+        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100 pb-4">
+          <div>
+            <h2 class="text-base sm:text-lg font-black text-mstPurple flex items-center gap-2">
+              <i class="fa-solid fa-robot text-mstYellow"></i> ตั้งค่าระบบน้องคอนเนค AI และการแจ้งเตือน
+            </h2>
+            <p class="text-xs text-gray-500 mt-0.5">ปรับแต่งการทำงานของบอทและเพิ่มข้อมูลข่าวสารให้ AI ตอบนักเรียนได้ทันทีโดยไม่ต้องแก้โค้ด</p>
+          </div>
+          <button onclick="testTelegramAlert()" class="bg-[#0088cc] hover:bg-[#0077b5] text-white font-bold px-4 py-2.5 rounded-xl text-xs flex items-center gap-1.5 shadow-sm transition active:scale-95">
+            <i class="fa-brands fa-telegram text-sm"></i> ทดสอบแจ้งเตือน Telegram
+          </button>
         </div>
-        <button onclick="testTelegramAlert()" class="bg-[#0088cc] hover:bg-[#0077b5] text-white font-bold px-4 py-2.5 rounded-xl text-xs flex items-center gap-1.5 shadow-sm transition">
-          <i class="fa-brands fa-telegram"></i> ทดสอบแจ้งเตือน Telegram
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          <label class="flex items-center justify-between p-4 rounded-2xl bg-purple-50/70 border border-purple-100 cursor-pointer hover:bg-purple-50 transition">
+            <div class="pr-3">
+              <p class="text-xs font-black text-mstPurple">เปิดใช้งานระบบตอบกลับ AI อัตโนมัติ</p>
+              <p class="text-[11px] text-gray-500 mt-0.5">หากปิด ข้อความทั้งหมดจะถูกส่งเข้ากระดานแชทให้สภาฯ ตอบเอง</p>
+            </div>
+            <input type="checkbox" id="cfgAiEnabled" checked class="w-5 h-5 accent-mstPurple rounded shrink-0">
+          </label>
+
+          <label class="flex items-center justify-between p-4 rounded-2xl bg-blue-50/70 border border-blue-100 cursor-pointer hover:bg-blue-50 transition">
+            <div class="pr-3">
+              <p class="text-xs font-black text-blue-900">แจ้งเตือนเข้ากลุ่ม Telegram เมื่อมีคนเรียก</p>
+              <p class="text-[11px] text-gray-500 mt-0.5">ส่งลิงก์ลัดเข้ากลุ่ม Telegram ทันทีที่มีคนกดคุยกับสภา</p>
+            </div>
+            <input type="checkbox" id="cfgTgEnabled" checked class="w-5 h-5 accent-mstPurple rounded shrink-0">
+          </label>
+        </div>
+
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <label class="block text-xs font-black text-mstPurple">
+              <i class="fa-solid fa-bullhorn text-mstYellow mr-1"></i> ข้อมูลประกาศด่วน / ความรู้เพิ่มเติมให้น้องคอนเนค AI (AI Custom Knowledge)
+            </label>
+          </div>
+          <p class="text-[11px] text-gray-500 mb-2">พิมพ์ข่าวประชาสัมพันธ์ กำหนดการกิจกรรมใหม่ หรือคำถามที่พบบ่อยในช่วงนี้ น้องคอนเนคจะนำข้อมูลในกล่องนี้ไปตอบนักเรียนทันที</p>
+          <textarea id="cfgCustomKnowledge" rows="5" class="form-input text-xs leading-relaxed" placeholder="ตัวอย่าง:&#10;- กิจกรรมเปิดบ้านวิชาการจัดวันที่ 15 พ.ย. 2569&#10;- ช่วงนี้เปิดรับสมัครค่ายอาสาสภานักเรียน สมัครได้ที่ห้องสภานักเรียน"></textarea>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-black text-gray-700 mb-1">ข้อความต้อนรับเมื่อมีคนกดแอดเพื่อนใหม่ (Follow)</label>
+            <textarea id="cfgWelcomeMsg" rows="5" class="form-input text-xs leading-relaxed"></textarea>
+          </div>
+          <div>
+            <label class="block text-xs font-black text-gray-700 mb-1">ข้อความตอบรับเมื่อผู้ใช้กด "คุยกับสภา"</label>
+            <textarea id="cfgHandoffMsg" rows="5" class="form-input text-xs leading-relaxed"></textarea>
+          </div>
+        </div>
+
+        <button onclick="saveBotSettingsFromUI()" class="w-full bg-gradient-to-r from-mstPurple to-purple-800 hover:from-purple-800 hover:to-mstPurple text-mstYellow font-black py-4 rounded-2xl text-sm shadow-md hover:shadow-lg transition flex items-center justify-center gap-2 active:scale-[0.99]">
+          <i class="fa-solid fa-floppy-disk"></i> บันทึกการตั้งค่าระบบบอททั้งหมด
         </button>
       </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <label class="flex items-center justify-between p-4 rounded-2xl bg-purple-50/70 border border-purple-100 cursor-pointer">
+      <!-- Card 2: Canned Replies Manager (จัดการคำตอบด่วน) -->
+      <div class="glass rounded-[2rem] p-5 sm:p-7 space-y-4">
+        <div class="flex items-center justify-between gap-2 border-b border-gray-100 pb-3">
           <div>
-            <p class="text-xs font-black text-mstPurple">เปิดใช้งานระบบตอบกลับ AI อัตโนมัติ</p>
-            <p class="text-[11px] text-gray-500">หากปิด ข้อความทั้งหมดจะถูกส่งเข้ากระดานแชทให้สภาฯ ตอบเอง</p>
+            <h3 class="text-sm sm:text-base font-black text-mstPurple flex items-center gap-2">
+              <i class="fa-solid fa-bolt text-mstYellow"></i> จัดการคลังข้อความตอบกลับด่วน (Canned Replies)
+            </h3>
+            <p class="text-xs text-gray-500">ข้อความที่ใช้บ่อยสำหรับให้แอดมินกดเลือกตอบในห้องแชทได้ในคลิกเดียว</p>
           </div>
-          <input type="checkbox" id="cfgAiEnabled" checked class="w-5 h-5 accent-mstPurple rounded">
-        </label>
-
-        <label class="flex items-center justify-between p-4 rounded-2xl bg-blue-50/70 border border-blue-100 cursor-pointer">
-          <div>
-            <p class="text-xs font-black text-blue-900">แจ้งเตือนเข้ากลุ่ม Telegram เมื่อมีคนเรียก</p>
-            <p class="text-[11px] text-gray-500">ส่งลิงก์ลัดเข้ากลุ่ม Telegram ทันทีที่มีคนกดคุยกับสภา</p>
-          </div>
-          <input type="checkbox" id="cfgTgEnabled" checked class="w-5 h-5 accent-mstPurple rounded">
-        </label>
-      </div>
-
-      <div>
-        <label class="block text-xs font-black text-mstPurple mb-1">
-          <i class="fa-solid fa-bullhorn text-mstYellow mr-1"></i> ข้อมูลประกาศด่วน / ความรู้เพิ่มเติมให้น้องคอนเนค AI (AI Custom Knowledge)
-        </label>
-        <p class="text-[11px] text-gray-500 mb-2">พิมพ์ข่าวประชาสัมพันธ์ กำหนดการกิจกรรมใหม่ หรือคำถามที่พบบ่อยในช่วงนี้ น้องคอนเนคจะนำข้อมูลในกล่องนี้ไปตอบนักเรียนทันที</p>
-        <textarea id="cfgCustomKnowledge" rows="4" class="form-input text-xs leading-relaxed" placeholder="ตัวอย่าง:&#10;- กิจกรรมเปิดบ้านวิชาการจัดวันที่ 15 พ.ย. 2569&#10;- ช่วงนี้เปิดรับสมัครค่ายอาสาสภานักเรียน สมัครได้ที่ห้องสภานักเรียน"></textarea>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label class="block text-xs font-black text-gray-700 mb-1">ข้อความต้อนรับเมื่อมีคนกดแอดเพื่อนใหม่ (Follow)</label>
-          <textarea id="cfgWelcomeMsg" rows="5" class="form-input text-xs leading-relaxed"></textarea>
+          <button type="button" onclick="addCannedReplyPrompt()" class="bg-purple-50 hover:bg-purple-100 text-mstPurple border border-purple-200 font-black px-3.5 py-2 rounded-xl text-xs shrink-0 transition">
+            + เพิ่มข้อความใหม่
+          </button>
         </div>
-        <div>
-          <label class="block text-xs font-black text-gray-700 mb-1">ข้อความตอบรับเมื่อผู้ใช้กด "คุยกับสภา"</label>
-          <textarea id="cfgHandoffMsg" rows="5" class="form-input text-xs leading-relaxed"></textarea>
-        </div>
+        <div id="settingsCannedList" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5"></div>
       </div>
 
-      <button onclick="saveBotSettingsFromUI()" class="w-full bg-gradient-to-r from-mstPurple to-purple-800 text-mstYellow font-black py-4 rounded-2xl text-sm shadow-md hover:shadow-lg transition flex items-center justify-center gap-2">
-        <i class="fa-solid fa-floppy-disk"></i> บันทึกการตั้งค่าระบบบอททั้งหมด
-      </button>
     </div>
   </section>
 
-  <!-- Modal พรีวิวการ์ด Flex Message ก่อนส่งจริง -->
-  <div id="previewFlexModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="max-w-sm w-full space-y-3">
+  <!-- ========================================================= -->
+  <!-- MOBILE BOTTOM NAVIGATION BAR (แสดงเฉพาะบนมือถือเมื่อไม่ได้เปิดห้องแชท) -->
+  <!-- ========================================================= -->
+  <nav id="mobileBottomNav" class="hidden md:hidden glass border-t border-purple-100 safe-bottom shrink-0 z-30">
+    <div class="grid grid-cols-3 h-14 px-2">
+      <button type="button" onclick="switchMainView('chat')" id="mobNavChat" class="flex flex-col items-center justify-center gap-0.5 text-mstPurple font-black relative">
+        <div class="relative">
+          <i class="fa-solid fa-comments text-base"></i>
+          <span id="mobNavUnreadBadge" class="hidden absolute -top-1.5 -right-3 bg-rose-500 text-white text-[9px] font-black px-1.5 rounded-full">0</span>
+        </div>
+        <span class="text-[10px]">ห้องแชท</span>
+      </button>
+
+      <button type="button" onclick="switchMainView('settings')" id="mobNavSettings" class="flex flex-col items-center justify-center gap-0.5 text-gray-400 font-bold">
+        <i class="fa-solid fa-sliders text-base"></i>
+        <span class="text-[10px]">ตั้งค่าบอท</span>
+      </button>
+
+      <button type="button" onclick="openInstallAppModal()" class="flex flex-col items-center justify-center gap-0.5 text-gray-400 font-bold">
+        <i class="fa-solid fa-mobile-screen-button text-base text-amber-500"></i>
+        <span class="text-[10px]">ติดตั้งแอป</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ========================================================= -->
+  <!-- MODAL 1: พรีวิวการ์ด Flex Message ก่อนส่งจริง              -->
+  <!-- ========================================================= -->
+  <div id="previewFlexModal" onclick="if(event.target===this)this.classList.add('hidden')" class="fixed inset-0 bg-slate-900/65 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 overflow-y-auto">
+    <div class="max-w-sm w-full space-y-3 my-auto">
       <div class="flex items-center justify-between text-white px-2">
-        <span class="text-xs font-black"><i class="fa-regular fa-eye mr-1"></i> ตัวอย่างการ์ดที่จะแสดงใน LINE</span>
-        <button onclick="document.getElementById('previewFlexModal').classList.add('hidden')" class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+        <span class="text-xs font-black flex items-center gap-1.5">
+          <i class="fa-brands fa-line text-emerald-400 text-base"></i> ตัวอย่างการ์ดที่จะแสดงใน LINE
+        </span>
+        <button type="button" onclick="document.getElementById('previewFlexModal').classList.add('hidden')" class="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
       </div>
-      <div id="previewFlexCardBody" class="rounded-[28px] p-5 shadow-2xl" style="background: linear-gradient(135deg, #F3E5F5 0%, #FFFDE7 100%);"></div>
+      <div id="previewFlexCardBody" class="rounded-[28px] p-5 shadow-2xl border border-white/60" style="background: linear-gradient(135deg, #F3E5F5 0%, #FFFDE7 100%);"></div>
+    </div>
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- MODAL 2: คู่มือและปุ่มติดตั้งเว็บแอป (PWA Install Helper)  -->
+  <!-- ========================================================= -->
+  <div id="installAppModal" onclick="if(event.target===this)this.classList.add('hidden')" class="fixed inset-0 bg-slate-900/65 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 overflow-y-auto">
+    <div class="glass rounded-[2rem] max-w-md w-full p-6 space-y-4 my-auto border border-white shadow-2xl">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <img src="/logo.webp" class="w-12 h-12 rounded-2xl bg-white p-1 border border-purple-100 shadow-xs object-contain">
+          <div>
+            <h3 class="text-base font-black text-mstDark">ติดตั้งแอป MSTSC Connect</h3>
+            <p class="text-[11px] text-gray-500 font-bold">ใช้งานเต็มจอเหมือนแอปแชททั่วไป</p>
+          </div>
+        </div>
+        <button type="button" onclick="document.getElementById('installAppModal').classList.add('hidden')" class="w-8 h-8 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- ปุ่มติดตั้งอัตโนมัติ (สำหรับ Android / Chrome / Edge / Desktop) -->
+      <div id="nativeInstallPromptBox" class="hidden">
+        <button type="button" onclick="triggerNativePwaInstall()" class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-mstPurple to-purple-800 text-mstYellow font-black text-xs shadow-md flex items-center justify-center gap-2">
+          <i class="fa-solid fa-download"></i> กดติดตั้งแอปลงอุปกรณ์นี้ทันที
+        </button>
+      </div>
+
+      <!-- คำแนะนำสำหรับ iPhone / iPad (iOS / iPadOS) -->
+      <div class="bg-purple-50/70 border border-purple-100 rounded-2xl p-4 space-y-2.5 text-xs">
+        <p class="font-black text-mstPurple flex items-center gap-1.5">
+          <i class="fa-brands fa-apple text-sm"></i> วิธีติดตั้งบน iPhone และ iPad (Safari)
+        </p>
+        <ol class="space-y-2 text-gray-700 font-semibold text-[11px] list-decimal list-inside">
+          <li>แตะปุ่ม <b>แชร์ (Share)</b> <i class="fa-solid fa-arrow-up-from-bracket text-blue-600 mx-0.5"></i> ที่แถบเมนูของ Safari</li>
+          <li>เลื่อนลงมาแล้วเลือก <b>"เพิ่มไปยังหน้าจอโฮม" (Add to Home Screen)</b> <i class="fa-regular fa-square-plus text-mstPurple mx-0.5"></i></li>
+          <li>กด <b>เพิ่ม (Add)</b> มุมขวาบน เพื่อเปิดใช้งานแบบเต็มจอได้ทันที</li>
+        </ol>
+      </div>
+
+      <!-- คำแนะนำสำหรับ Android / คอมพิวเตอร์ -->
+      <div class="bg-amber-50/70 border border-amber-100 rounded-2xl p-4 space-y-2 text-xs">
+        <p class="font-black text-amber-900 flex items-center gap-1.5">
+          <i class="fa-brands fa-chrome text-sm"></i> วิธีติดตั้งบน Android / คอมพิวเตอร์
+        </p>
+        <p class="text-[11px] text-gray-700 font-semibold leading-relaxed">
+          แตะเมนู <b>จุดสามจุด (⋮)</b> มุมขวาบนของเบราว์เซอร์ แล้วเลือก <b>"ติดตั้งแอป" (Install App)</b> หรือ <b>"เพิ่มลงในหน้าจอหลัก"</b>
+        </p>
+      </div>
     </div>
   </div>
 
@@ -347,6 +663,7 @@
     const API_ENDPOINT = "https://ai-line-oa.studentcouncil-f38.workers.dev/?admin_api=1";
     const SESSION_KEY = "mstsc_line_chat_admin_sso_v2";
     const PORTAL_TOKEN_KEY = "mstsc_portal_admin_id_token";
+    const SOUND_PREF_KEY = "mstsc_chat_sound_enabled";
     const initialTargetUid = new URLSearchParams(window.location.search).get('uid') || "";
 
     let adminAuth = null;
@@ -354,9 +671,37 @@
     let currentUserId = initialTargetUid;
     let currentThreadObj = null;
     let botSettings = {};
-    let soundEnabled = true;
+    let soundEnabled = localStorage.getItem(SOUND_PREF_KEY) !== "false";
     let lastKnownUnreadTotal = 0;
+    let currentInboxFilter = "all"; // 'all' | 'human' | 'unread' | 'ai'
+    let currentMainView = "chat";   // 'chat' | 'settings'
+    let mobileChatOpen = false;
+    let isUserScrolledUp = false;
+    let lastRenderedMsgCount = 0;
+    let deferredPwaPrompt = null;
 
+    // ตรวจจับ Event สำหรับติดตั้ง PWA บน Chrome / Android / Desktop
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPwaPrompt = e;
+      const box = document.getElementById('nativeInstallPromptBox');
+      if (box) box.classList.remove('hidden');
+    });
+
+    function openInstallAppModal() {
+      document.getElementById('installAppModal').classList.remove('hidden');
+    }
+
+    async function triggerNativePwaInstall() {
+      if (!deferredPwaPrompt) return;
+      deferredPwaPrompt.prompt();
+      await deferredPwaPrompt.userChoice;
+      deferredPwaPrompt = null;
+      document.getElementById('nativeInstallPromptBox').classList.add('hidden');
+      document.getElementById('installAppModal').classList.add('hidden');
+    }
+
+    // เสียงแจ้งเตือนเมื่อมีข้อความใหม่
     function playNotificationSound() {
       if (!soundEnabled) return;
       try {
@@ -375,26 +720,114 @@
       } catch (e) {}
     }
 
+    function updateSoundButtonUI() {
+      const btn = document.getElementById('btnSoundToggle');
+      if (!btn) return;
+      btn.innerHTML = soundEnabled
+        ? '<i class="fa-solid fa-volume-high"></i>'
+        : '<i class="fa-solid fa-volume-xmark text-gray-400"></i>';
+    }
+
     function toggleSoundAlert() {
       soundEnabled = !soundEnabled;
-      const btn = document.getElementById('btnSoundToggle');
-      btn.innerHTML = soundEnabled ? '<i class="fa-solid fa-volume-high"></i>' : '<i class="fa-solid fa-volume-xmark text-gray-400"></i>';
+      localStorage.setItem(SOUND_PREF_KEY, soundEnabled ? "true" : "false");
+      updateSoundButtonUI();
+      Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon: soundEnabled ? 'success' : 'info',
+        title: soundEnabled ? 'เปิดเสียงแจ้งเตือนแชทแล้ว' : 'ปิดเสียงแจ้งเตือนชั่วคราว',
+        showConfirmButton: false,
+        timer: 1500
+      });
     }
 
     function switchLoginTab(tab) {
       const isG = tab === 'google';
-      document.getElementById('loginTabGoogle').className = isG ? "py-2 rounded-lg bg-mstPurple text-white transition" : "py-2 rounded-lg text-gray-600 transition";
-      document.getElementById('loginTabRegis').className = !isG ? "py-2 rounded-lg bg-mstPurple text-white transition" : "py-2 rounded-lg text-gray-600 transition";
+      document.getElementById('loginTabGoogle').className = isG
+        ? "py-2.5 rounded-xl bg-mstPurple text-white shadow-xs transition"
+        : "py-2.5 rounded-xl text-gray-600 hover:text-mstPurple transition";
+      document.getElementById('loginTabRegis').className = !isG
+        ? "py-2.5 rounded-xl bg-mstPurple text-white shadow-xs transition"
+        : "py-2.5 rounded-xl text-gray-600 hover:text-mstPurple transition";
       document.getElementById('loginBoxGoogle').classList.toggle('hidden', !isG);
       document.getElementById('loginBoxRegis').classList.toggle('hidden', isG);
     }
 
+    // จัดการการแสดงผล Responsive ระหว่าง Mobile และ iPad/Desktop
+    function updateResponsivePanes() {
+      const isMobile = window.innerWidth < 768;
+      const inboxPane = document.getElementById('inboxPane');
+      const chatRoomPane = document.getElementById('chatRoomPane');
+      const topNav = document.getElementById('mainTopNavbar');
+      const mobNav = document.getElementById('mobileBottomNav');
+
+      if (!adminAuth) return;
+
+      if (currentMainView === 'settings') {
+        topNav.classList.remove('hidden');
+        if (isMobile) mobNav.classList.remove('hidden');
+        else mobNav.classList.add('hidden');
+        return;
+      }
+
+      if (isMobile) {
+        if (mobileChatOpen && currentUserId) {
+          // บนมือถือ เมื่อเปิดห้องแชท ให้ซ่อน Inbox, TopNav, BottomNav เพื่อให้ห้องแชทเต็มจอเหมือนแอป LINE
+          inboxPane.classList.add('hidden');
+          chatRoomPane.classList.remove('hidden');
+          chatRoomPane.classList.add('flex');
+          topNav.classList.add('hidden');
+          mobNav.classList.add('hidden');
+        } else {
+          // บนมือถือ เมื่ออยู่หน้ารายชื่อแชท
+          inboxPane.classList.remove('hidden');
+          chatRoomPane.classList.add('hidden');
+          chatRoomPane.classList.remove('flex');
+          topNav.classList.remove('hidden');
+          mobNav.classList.remove('hidden');
+        }
+      } else {
+        // บน iPad และคอมพิวเตอร์ แสดง Split View พร้อมกันทั้งซ้ายและขวาเสมอ
+        inboxPane.classList.remove('hidden');
+        chatRoomPane.classList.remove('hidden');
+        chatRoomPane.classList.add('flex');
+        topNav.classList.remove('hidden');
+        mobNav.classList.add('hidden');
+      }
+    }
+
+    window.addEventListener('resize', updateResponsivePanes);
+
+    function closeMobileChatPane() {
+      mobileChatOpen = false;
+      updateResponsivePanes();
+    }
+
     function switchMainView(view) {
+      currentMainView = view;
       const isChat = view === 'chat';
       document.getElementById('chatWorkspace').classList.toggle('hidden', !isChat);
       document.getElementById('settingsWorkspace').classList.toggle('hidden', isChat);
-      document.getElementById('tabBtnChat').className = isChat ? "px-3 py-1.5 rounded-lg bg-mstPurple text-white transition flex items-center gap-1.5" : "px-3 py-1.5 rounded-lg text-gray-600 hover:text-mstPurple transition flex items-center gap-1.5";
-      document.getElementById('tabBtnSettings').className = !isChat ? "px-3 py-1.5 rounded-lg bg-mstPurple text-white transition flex items-center gap-1.5" : "px-3 py-1.5 rounded-lg text-gray-600 hover:text-mstPurple transition flex items-center gap-1.5";
+
+      // Desktop Tabs
+      document.getElementById('tabBtnChat').className = isChat
+        ? "px-3.5 py-1.5 rounded-lg bg-mstPurple text-white shadow-xs transition flex items-center gap-1.5"
+        : "px-3.5 py-1.5 rounded-lg text-gray-600 hover:text-mstPurple transition flex items-center gap-1.5";
+      document.getElementById('tabBtnSettings').className = !isChat
+        ? "px-3.5 py-1.5 rounded-lg bg-mstPurple text-white shadow-xs transition flex items-center gap-1.5"
+        : "px-3.5 py-1.5 rounded-lg text-gray-600 hover:text-mstPurple transition flex items-center gap-1.5";
+
+      // Mobile Bottom Nav
+      document.getElementById('mobNavChat').className = isChat
+        ? "flex flex-col items-center justify-center gap-0.5 text-mstPurple font-black relative"
+        : "flex flex-col items-center justify-center gap-0.5 text-gray-400 font-bold relative";
+      document.getElementById('mobNavSettings').className = !isChat
+        ? "flex flex-col items-center justify-center gap-0.5 text-mstPurple font-black"
+        : "flex flex-col items-center justify-center gap-0.5 text-gray-400 font-bold";
+
+      if (isChat) mobileChatOpen = false;
+      updateResponsivePanes();
     }
 
     async function callAdminApi(payload) {
@@ -406,9 +839,10 @@
       return await res.json();
     }
 
-    // 1. เข้าสู่ระบบด้วยอีเมลสภานักเรียน (Google Sign-In บน mstsc.pages.dev)
+    // 1. เข้าสู่ระบบด้วยอีเมลสภานักเรียน (Google Sign-In)
     window.handleGoogleCredential = async function(response) {
       sessionStorage.setItem(PORTAL_TOKEN_KEY, response.credential);
+      localStorage.setItem(PORTAL_TOKEN_KEY, response.credential);
       adminAuth = { idToken: response.credential };
       await verifyAndOpenConsole();
     };
@@ -426,145 +860,490 @@
       const btn = document.getElementById('btnLogin');
       if (btn) { btn.disabled = true; btn.innerText = "กำลังตรวจสอบสิทธิ์กับระบบ REGIS..."; }
 
-      const res = await callAdminApi({ action: "getThreads" });
-      if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-shield-check text-mstYellow mr-1"></i> ยืนยันสิทธิ์และเปิดกระดานแชท'; }
+      try {
+        const res = await callAdminApi({ action: "getThreads" });
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fa-solid fa-shield-check text-mstYellow mr-1"></i> ยืนยันสิทธิ์และเปิดกระดานแชท';
+        }
 
-      if (res.status !== "success") {
-        adminAuth = null;
-        sessionStorage.removeItem(SESSION_KEY);
-        return Swal.fire({ icon: "error", title: "ตรวจสอบสิทธิ์ไม่ผ่าน", text: res.message, confirmButtonColor: "#4C1D95" });
+        if (res.status !== "success") {
+          adminAuth = null;
+          sessionStorage.removeItem(SESSION_KEY);
+          localStorage.removeItem(SESSION_KEY);
+          return Swal.fire({ icon: "error", title: "ตรวจสอบสิทธิ์ไม่ผ่าน", text: res.message, confirmButtonColor: "#4C1D95" });
+        }
+
+        // บันทึกเซสชันทั้ง sessionStorage และ localStorage เพื่อให้แอป PWA บนมือถือ/iPad ไม่หลุดล็อกอิน
+        const authJson = JSON.stringify(adminAuth);
+        sessionStorage.setItem(SESSION_KEY, authJson);
+        localStorage.setItem(SESSION_KEY, authJson);
+
+        document.getElementById('loginModal').classList.add('hidden');
+        document.getElementById('chatWorkspace').classList.remove('hidden');
+        const navBox = document.getElementById('navAdminBox');
+        navBox.classList.remove('hidden');
+        navBox.classList.add('flex');
+
+        const nick = (res.adminNickname || '').trim();
+        const shortFirstName = (res.adminName || '').replace(/^(นาย|นางสาว|น\.ส\.|ด\.ช\.|ด\.ญ\.)\s*/, '').split(' ')[0];
+        const displaySender = nick || shortFirstName || 'แอดมิน';
+
+        document.getElementById('showLoggedInAdmin').innerText = `ผู้ดูแล: ${res.adminName}${nick ? ' (' + nick + ')' : ''}`;
+        document.getElementById('flexSenderLabel').value = `สภานักเรียน • ${displaySender}`;
+
+        threads = res.threads || [];
+        botSettings = res.settings || {};
+        updateSoundButtonUI();
+        populateSettingsUI();
+        renderCannedRepliesBar();
+        updateUnreadCounters();
+        renderThreadsList();
+        updateStudioSummaryBadge();
+
+        if (currentUserId) {
+          await selectThread(currentUserId, true);
+        } else {
+          updateResponsivePanes();
+        }
+
+        setInterval(() => { if (!document.hidden) loadThreads(true); }, 7000);
+      } catch (err) {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fa-solid fa-shield-check text-mstYellow mr-1"></i> ยืนยันสิทธิ์และเปิดกระดานแชท';
+        }
+        Swal.fire({ icon: "error", title: "เชื่อมต่อเซิร์ฟเวอร์ไม่สำเร็จ", text: "กรุณาตรวจสอบอินเทอร์เน็ตแล้วลองใหม่อีกครั้ง", confirmButtonColor: "#4C1D95" });
       }
-
-      sessionStorage.setItem(SESSION_KEY, JSON.stringify(adminAuth));
-      document.getElementById('loginModal').classList.add('hidden');
-      document.getElementById('chatWorkspace').classList.remove('hidden');
-      const navBox = document.getElementById('navAdminBox');
-      navBox.classList.remove('hidden');
-      navBox.classList.add('flex');
-
-      const nick = (res.adminNickname || '').trim();
-      const shortFirstName = (res.adminName || '').replace(/^(นาย|นางสาว|น\.ส\.|ด\.ช\.|ด\.ญ\.)\s*/, '').split(' ')[0];
-      const displaySender = nick || shortFirstName || 'แอดมิน';
-
-      document.getElementById('showLoggedInAdmin').innerText = `ผู้ดูแล: ${res.adminName}${nick ? ' (' + nick + ')' : ''}`;
-      document.getElementById('flexSenderLabel').value = `สภานักเรียน • ${displaySender}`;
-
-      threads = res.threads || [];
-      botSettings = res.settings || {};
-      populateSettingsUI();
-      renderCannedRepliesBar();
-      renderThreadsList();
-
-      if (currentUserId) {
-        selectThread(currentUserId, true);
-      }
-
-      setInterval(() => { if (!document.hidden) loadThreads(true); }, 8000);
     }
 
     function logoutChatAdmin() {
-      sessionStorage.removeItem(SESSION_KEY);
-      sessionStorage.removeItem(PORTAL_TOKEN_KEY);
-      location.reload();
+      Swal.fire({
+        title: 'ออกจากระบบแอดมิน?',
+        text: 'คุณต้องการออกจากระบบจัดการแชทสภานักเรียนใช่หรือไม่',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#E11D48',
+        cancelButtonColor: '#64748B',
+        confirmButtonText: 'ออกจากระบบ',
+        cancelButtonText: 'ยกเลิก'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          sessionStorage.removeItem(SESSION_KEY);
+          sessionStorage.removeItem(PORTAL_TOKEN_KEY);
+          localStorage.removeItem(SESSION_KEY);
+          localStorage.removeItem(PORTAL_TOKEN_KEY);
+          location.reload();
+        }
+      });
+    }
+
+    function updateUnreadCounters() {
+      const totalUnread = threads.reduce((sum, t) => sum + (t.unreadCount || 0), 0);
+      const humanCount = threads.filter(t => t.status === "HUMAN_MODE").length;
+      const unreadThreadsCount = threads.filter(t => (t.unreadCount || 0) > 0).length;
+
+      if (totalUnread > lastKnownUnreadTotal && lastKnownUnreadTotal !== 0) {
+        playNotificationSound();
+      }
+      lastKnownUnreadTotal = totalUnread;
+
+      // อัปเดตชื่อแท็บเบราว์เซอร์และ PWA App Badge
+      document.title = totalUnread > 0
+        ? `(${totalUnread}) MSTSC Connect Admin`
+        : `MSTSC Connect Admin - ระบบจัดการแชทและบอทสภานักเรียน`;
+
+      if ('setAppBadge' in navigator) {
+        if (totalUnread > 0) navigator.setAppBadge(totalUnread).catch(() => {});
+        else navigator.clearAppBadge().catch(() => {});
+      }
+
+      // Badges บน Navbar / Mobile Nav / Filter Tabs
+      const navBadge = document.getElementById('navUnreadBadge');
+      const mobBadge = document.getElementById('mobNavUnreadBadge');
+      const mobBackDot = document.getElementById('mobileBackUnreadDot');
+
+      [navBadge, mobBadge].forEach(el => {
+        if (!el) return;
+        if (totalUnread > 0) {
+          el.innerText = totalUnread;
+          el.classList.remove('hidden');
+        } else {
+          el.classList.add('hidden');
+        }
+      });
+
+      if (mobBackDot) {
+        mobBackDot.classList.toggle('hidden', totalUnread === 0);
+      }
+
+      document.getElementById('count_all').innerText = `(${threads.length})`;
+
+      const countHumanEl = document.getElementById('count_human');
+      if (humanCount > 0) {
+        countHumanEl.innerText = humanCount;
+        countHumanEl.classList.remove('hidden');
+      } else {
+        countHumanEl.classList.add('hidden');
+      }
+
+      const countUnreadEl = document.getElementById('count_unread');
+      if (unreadThreadsCount > 0) {
+        countUnreadEl.innerText = unreadThreadsCount;
+        countUnreadEl.classList.remove('hidden');
+      } else {
+        countUnreadEl.classList.add('hidden');
+      }
     }
 
     async function loadThreads(silent = false) {
-      const res = await callAdminApi({ action: "getThreads" });
-      if (res.status === "success") {
-        threads = res.threads || [];
-        const totalUnread = threads.reduce((sum, t) => sum + (t.unreadCount || 0), 0);
-        if (totalUnread > lastKnownUnreadTotal) {
-          playNotificationSound();
+      try {
+        const res = await callAdminApi({ action: "getThreads" });
+        if (res.status === "success") {
+          threads = res.threads || [];
+          updateUnreadCounters();
+          renderThreadsList();
+          if (currentUserId) {
+            await selectThread(currentUserId, true);
+          }
         }
-        lastKnownUnreadTotal = totalUnread;
+      } catch (e) {}
+    }
 
-        const badge = document.getElementById('navUnreadBadge');
-        if (totalUnread > 0) {
-          badge.innerText = totalUnread;
-          badge.classList.remove('hidden');
+    function setInboxFilter(filter) {
+      currentInboxFilter = filter;
+      ['all', 'human', 'unread', 'ai'].forEach(f => {
+        const btn = document.getElementById('filterBtn_' + f);
+        if (!btn) return;
+        if (f === filter) {
+          btn.className = "py-1.5 rounded-lg bg-white text-mstPurple shadow-2xs transition truncate flex items-center justify-center gap-1";
         } else {
-          badge.classList.add('hidden');
+          btn.className = "py-1.5 rounded-lg text-gray-600 hover:text-mstPurple transition truncate flex items-center justify-center gap-1";
         }
+      });
+      renderThreadsList();
+    }
 
-        renderThreadsList();
-        if (currentUserId) selectThread(currentUserId, true);
+    function clearThreadSearch() {
+      const inp = document.getElementById('searchThreadInput');
+      inp.value = '';
+      renderThreadsList();
+      inp.focus();
+    }
+
+    function formatRelativeTime(ts) {
+      if (!ts) return '';
+      const d = new Date(ts);
+      if (isNaN(d.getTime())) return '';
+      const now = new Date();
+      const isToday = d.toDateString() === now.toDateString();
+      if (isToday) {
+        return d.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
       }
+      return d.toLocaleDateString('th-TH', { day: 'numeric', month: 'short' });
     }
 
     function renderThreadsList() {
-      const kw = (document.getElementById('searchThreadInput').value || '').toLowerCase().trim();
-      const filtered = threads.filter(t => !kw || (t.displayName || '').toLowerCase().includes(kw) || (t.lastMessage || '').toLowerCase().includes(kw));
+      const searchInput = document.getElementById('searchThreadInput');
+      const kw = (searchInput.value || '').toLowerCase().trim();
+      const clearBtn = document.getElementById('btnClearSearch');
+      if (clearBtn) {
+        clearBtn.classList.toggle('hidden', !kw);
+        clearBtn.classList.toggle('flex', !!kw);
+      }
+
+      const filtered = threads.filter(t => {
+        const matchKw = !kw ||
+          (t.displayName || '').toLowerCase().includes(kw) ||
+          (t.lastMessage || '').toLowerCase().includes(kw);
+        if (!matchKw) return false;
+
+        if (currentInboxFilter === 'human') return t.status === 'HUMAN_MODE';
+        if (currentInboxFilter === 'unread') return (t.unreadCount || 0) > 0;
+        if (currentInboxFilter === 'ai') return t.status !== 'HUMAN_MODE';
+        return true;
+      });
 
       document.getElementById('threadCountBadge').innerText = filtered.length;
       const box = document.getElementById('threadsListBox');
+
       if (filtered.length === 0) {
-        box.innerHTML = '<p class="text-center text-xs text-gray-400 py-10 font-bold">ไม่พบรายการสนทนา</p>';
+        box.innerHTML = `
+          <div class="text-center py-12 px-4 space-y-2">
+            <div class="w-12 h-12 rounded-2xl bg-gray-100 text-gray-400 flex items-center justify-center mx-auto text-lg">
+              <i class="fa-regular fa-folder-open"></i>
+            </div>
+            <p class="text-xs text-gray-400 font-bold">ไม่พบรายการสนทนาในหมวดนี้</p>
+          </div>
+        `;
         return;
       }
+
       box.innerHTML = filtered.map(t => {
         const isActive = t.userId === currentUserId;
         const isHuman = t.status === "HUMAN_MODE";
+        const hasUnread = (t.unreadCount || 0) > 0;
+        const timeLabel = formatRelativeTime(t.updatedAt || t.lastTimestamp);
+
         return `
-          <div onclick="selectThread('${t.userId}')" class="p-3 rounded-2xl border cursor-pointer transition flex items-center gap-3 ${isActive ? 'bg-purple-50 border-mstPurple shadow-xs' : 'bg-white border-gray-100 hover:border-purple-200'}">
-            <img src="${t.pictureUrl || '/logo.webp'}" class="w-10 h-10 rounded-full object-cover shrink-0 border border-gray-200" onerror="this.src='/logo.webp'">
+          <div onclick="selectThread('${t.userId}', false)" class="p-3 rounded-2xl border cursor-pointer transition-all flex items-center gap-3 select-none active:scale-[0.99] ${
+            isActive
+              ? 'bg-purple-50/95 border-mstPurple shadow-xs ring-1 ring-mstPurple/20'
+              : (hasUnread ? 'bg-white border-purple-200 shadow-2xs' : 'bg-white/80 border-gray-100 hover:bg-white hover:border-purple-200')
+          }">
+            <div class="relative shrink-0">
+              <img src="${t.pictureUrl || '/logo.webp'}" class="w-11 h-11 rounded-full object-cover border ${isHuman ? 'border-amber-400' : 'border-gray-200'}" onerror="this.src='/logo.webp'">
+              <span class="w-3 h-3 rounded-full border-2 border-white absolute -bottom-0.5 -right-0.5 ${isHuman ? 'bg-amber-500' : 'bg-emerald-500'}" title="${isHuman ? 'รอสภานักเรียนตอบ' : 'AI ดูแล'}"></span>
+            </div>
+
             <div class="min-w-0 flex-1">
               <div class="flex items-center justify-between gap-1">
-                <p class="text-xs font-black text-gray-900 truncate">${t.displayName}</p>
-                <span class="text-[9px] font-black px-2 py-0.5 rounded-full ${isHuman ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-700'}">${isHuman ? 'รอสภาฯ' : 'AI Mode'}</span>
+                <p class="text-xs ${hasUnread ? 'font-black text-mstDark' : 'font-extrabold text-gray-800'} truncate">${escapeHtml(t.displayName || 'ผู้ใช้งาน LINE')}</p>
+                <div class="flex items-center gap-1 shrink-0">
+                  ${timeLabel ? `<span class="text-[10px] font-semibold text-gray-400">${timeLabel}</span>` : ''}
+                  <span class="text-[9px] font-black px-2 py-0.5 rounded-full ${
+                    isHuman
+                      ? 'bg-amber-100 text-amber-800 border border-amber-200/60'
+                      : 'bg-emerald-50 text-emerald-700 border border-emerald-200/60'
+                  }">${isHuman ? 'รอสภาฯ' : 'AI'}</span>
+                </div>
               </div>
-              <p class="text-[11px] text-gray-500 truncate mt-0.5">${t.lastMessage || '-'}</p>
+              <div class="flex items-center justify-between gap-2 mt-1">
+                <p class="text-[11px] ${hasUnread ? 'font-bold text-gray-900' : 'text-gray-500'} truncate">${escapeHtml(t.lastMessage || 'เริ่มการสนทนา...')}</p>
+                ${hasUnread ? `<span class="min-w-[20px] h-5 px-1.5 rounded-full bg-rose-500 text-white text-[10px] font-black flex items-center justify-center shrink-0 badge-pulse shadow-2xs">${t.unreadCount}</span>` : ''}
+              </div>
             </div>
-            ${t.unreadCount > 0 ? `<span class="w-5 h-5 rounded-full bg-red-500 text-white text-[10px] font-black flex items-center justify-center shrink-0 animate-bounce">${t.unreadCount}</span>` : ''}
           </div>
         `;
       }).join('');
     }
 
+    function escapeHtml(str) {
+      return String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function handleMessagesScroll() {
+      const msgBox = document.getElementById('messagesContainer');
+      if (!msgBox) return;
+      const distanceFromBottom = msgBox.scrollHeight - msgBox.scrollTop - msgBox.clientHeight;
+      isUserScrolledUp = distanceFromBottom > 120;
+      const btn = document.getElementById('btnScrollBottom');
+      if (btn) {
+        btn.classList.toggle('hidden', !isUserScrolledUp);
+        btn.classList.toggle('flex', isUserScrolledUp);
+      }
+    }
+
+    function scrollToBottom(smooth = false) {
+      const msgBox = document.getElementById('messagesContainer');
+      if (!msgBox) return;
+      msgBox.scrollTo({
+        top: msgBox.scrollHeight,
+        behavior: smooth ? 'smooth' : 'auto'
+      });
+      isUserScrolledUp = false;
+      const btn = document.getElementById('btnScrollBottom');
+      if (btn) btn.classList.add('hidden');
+    }
+
     async function selectThread(userId, silent = false) {
+      const isSwitchingUser = currentUserId !== userId;
       currentUserId = userId;
+      if (!silent) {
+        mobileChatOpen = true;
+        isUserScrolledUp = false;
+      }
       renderThreadsList();
+      updateResponsivePanes();
+
       const res = await callAdminApi({ action: "getThreadDetail", userId });
       if (res.status !== "success" || !res.thread) return;
 
       const th = res.thread;
       currentThreadObj = th;
+
+      // เคลียร์ unreadCount ในรายการฝั่ง Client ทันทีที่เปิดอ่าน
+      const targetInList = threads.find(item => item.userId === userId);
+      if (targetInList && targetInList.unreadCount > 0) {
+        targetInList.unreadCount = 0;
+        updateUnreadCounters();
+        renderThreadsList();
+      }
+
       document.getElementById('emptyChatState').classList.add('hidden');
       const chatBox = document.getElementById('activeChatBox');
       chatBox.classList.remove('hidden');
       chatBox.classList.add('flex');
 
       document.getElementById('activeUserPic').src = th.pictureUrl || '/logo.webp';
-      document.getElementById('activeUserName').innerText = th.displayName;
+      document.getElementById('activeUserName').innerText = th.displayName || 'ผู้ใช้งาน LINE';
 
       const isHuman = th.status === 'HUMAN_MODE';
-      document.getElementById('activeUserStatus').innerText = isHuman
-        ? 'สถานะ: โหมดคุยกับสภานักเรียน (AI หยุดทำงานชั่วคราว)'
-        : 'สถานะ: โหมดน้องคอนเนค AI อัตโนมัติ';
+      document.getElementById('activeModeDot').className = `w-3 h-3 rounded-full border-2 border-white absolute bottom-0 right-0 ${isHuman ? 'bg-amber-500' : 'bg-emerald-500'}`;
+      document.getElementById('activeUserStatus').innerHTML = isHuman
+        ? '<span class="text-amber-700"><i class="fa-solid fa-user-clock mr-1"></i>โหมดคุยกับสภานักเรียน (AI พักชั่วคราว)</span>'
+        : '<span class="text-emerald-700"><i class="fa-solid fa-robot mr-1"></i>โหมดน้องคอนเนค AI ดูแลอัตโนมัติ</span>';
 
       const modeBtn = document.getElementById('btnToggleThreadMode');
       if (isHuman) {
-        modeBtn.className = "px-3 py-1.5 rounded-xl text-[11px] font-black bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 transition";
-        modeBtn.innerHTML = '<i class="fa-solid fa-robot mr-1"></i> สลับให้ AI ดูแลต่อ';
+        modeBtn.className = "px-2.5 sm:px-3 py-1.5 rounded-xl text-[11px] font-black bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 transition";
+        modeBtn.innerHTML = '<i class="fa-solid fa-robot mr-1"></i> <span class="hidden sm:inline">สลับให้</span> AI ดูแล';
       } else {
-        modeBtn.className = "px-3 py-1.5 rounded-xl text-[11px] font-black bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100 transition";
-        modeBtn.innerHTML = '<i class="fa-solid fa-user-shield mr-1"></i> ดึงมาคุยกับสภาฯ';
+        modeBtn.className = "px-2.5 sm:px-3 py-1.5 rounded-xl text-[11px] font-black bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100 transition";
+        modeBtn.innerHTML = '<i class="fa-solid fa-user-shield mr-1"></i> ดึงมาคุยเอง';
       }
 
+      renderMessagesStream(th, isSwitchingUser || !silent);
+    }
+
+    function formatDateHeader(ts) {
+      if (!ts) return '';
+      const d = new Date(ts);
+      if (isNaN(d.getTime())) return '';
+      const today = new Date();
+      const yesterday = new Date();
+      yesterday.setDate(today.getDate() - 1);
+
+      if (d.toDateString() === today.toDateString()) return 'วันนี้';
+      if (d.toDateString() === yesterday.toDateString()) return 'เมื่อวานนี้';
+      return d.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: '2-digit' });
+    }
+
+    function renderMessagesStream(th, forceScrollBottom = false) {
       const msgBox = document.getElementById('messagesContainer');
-      msgBox.innerHTML = (th.messages || []).map(m => {
-        const isAdmin = m.sender === 'admin';
-        const timeStr = new Date(m.timestamp).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
-        const btnsHtml = (m.buttons && m.buttons.length > 0)
-          ? '<div class="mt-2 pt-2 border-t border-white/20 flex flex-wrap gap-1">' + m.buttons.map(b => `<span class="text-[10px] bg-white/20 px-2 py-0.5 rounded-full">🔗 ${b.label}</span>`).join('') + '</div>'
-          : '';
-        return `
-          <div class="flex flex-col ${isAdmin ? 'items-end' : 'items-start'}">
-            <span class="text-[10px] font-bold text-gray-400 mb-1 px-1">${m.name || (isAdmin ? 'สภานักเรียน' : th.displayName)} • ${timeStr}</span>
-            <div class="max-w-[85%] p-3.5 rounded-2xl text-xs leading-relaxed whitespace-pre-wrap break-words ${isAdmin ? 'bg-gradient-to-br from-mstPurple to-purple-800 text-white rounded-tr-none shadow-sm' : 'bg-white border border-gray-200 text-gray-800 rounded-tl-none'}">${m.text}${btnsHtml}</div>
+      const messages = th.messages || [];
+      const hasNewMessage = messages.length !== lastRenderedMsgCount;
+      lastRenderedMsgCount = messages.length;
+
+      if (messages.length === 0) {
+        msgBox.innerHTML = `
+          <div class="text-center py-12 text-xs text-gray-400 font-bold">
+            ยังไม่มีประวัติข้อความในห้องสนทนานี้
           </div>
         `;
-      }).join('');
-      msgBox.scrollTop = msgBox.scrollHeight;
+        return;
+      }
+
+      let lastDateLabel = '';
+      const htmlParts = [];
+
+      messages.forEach((m, idx) => {
+        const dateLabel = formatDateHeader(m.timestamp);
+        if (dateLabel && dateLabel !== lastDateLabel) {
+          lastDateLabel = dateLabel;
+          htmlParts.push(`
+            <div class="flex justify-center my-2">
+              <span class="bg-white/80 backdrop-blur-xs text-gray-500 text-[10px] font-extrabold px-3 py-1 rounded-full border border-purple-100 shadow-2xs">
+                ${dateLabel}
+              </span>
+            </div>
+          `);
+        }
+
+        const isAdmin = m.sender === 'admin' || m.sender === 'bot';
+        const isAiBot = (m.name || '').includes('AI') || (m.name || '').includes('คอนเนค');
+        const timeStr = m.timestamp ? new Date(m.timestamp).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) : '';
+
+        const btnsHtml = (m.buttons && m.buttons.length > 0)
+          ? '<div class="mt-2.5 pt-2 border-t border-white/20 flex flex-wrap gap-1.5">' +
+            m.buttons.map(b => `
+              <a href="${escapeHtml(b.url || '#')}" target="_blank" rel="noopener" class="text-[10px] font-black bg-mstYellow text-mstDark hover:brightness-105 px-2.5 py-1 rounded-full inline-flex items-center gap-1 shadow-2xs transition">
+                <i class="fa-solid fa-arrow-up-right-from-square text-[8px]"></i> ${escapeHtml(b.label)}
+              </a>
+            `).join('') +
+            '</div>'
+          : '';
+
+        const safeText = escapeHtml(m.text || '');
+
+        if (isAdmin) {
+          htmlParts.push(`
+            <div class="flex flex-col items-end group">
+              <div class="flex items-center gap-1.5 mb-1 px-1">
+                <button type="button" onclick="copyMessageText(${idx})" class="opacity-0 group-hover:opacity-100 text-[10px] text-gray-400 hover:text-mstPurple transition" title="คัดลอกข้อความ">
+                  <i class="fa-regular fa-copy"></i>
+                </button>
+                <span class="text-[10px] font-bold text-gray-400">${escapeHtml(m.name || 'สภานักเรียน')} • ${timeStr}</span>
+              </div>
+              <div class="max-w-[86%] sm:max-w-[75%] p-3.5 rounded-2xl rounded-tr-xs text-xs sm:text-[13px] leading-relaxed whitespace-pre-wrap break-words shadow-xs ${
+                isAiBot
+                  ? 'bg-gradient-to-br from-indigo-700 to-purple-800 text-white'
+                  : 'bg-gradient-to-br from-mstPurple to-purple-900 text-white'
+              }">${safeText}${btnsHtml}</div>
+            </div>
+          `);
+        } else {
+          htmlParts.push(`
+            <div class="flex items-end gap-2 group">
+              <img src="${th.pictureUrl || '/logo.webp'}" class="w-7 h-7 rounded-full object-cover border border-gray-200 shrink-0 mb-0.5" onerror="this.src='/logo.webp'">
+              <div class="flex flex-col items-start max-w-[82%] sm:max-w-[72%]">
+                <div class="flex items-center gap-1.5 mb-1 px-1">
+                  <span class="text-[10px] font-bold text-gray-500">${escapeHtml(m.name || th.displayName)} • ${timeStr}</span>
+                  <button type="button" onclick="copyMessageText(${idx})" class="opacity-0 group-hover:opacity-100 text-[10px] text-gray-400 hover:text-mstPurple transition" title="คัดลอกข้อความ">
+                    <i class="fa-regular fa-copy"></i>
+                  </button>
+                </div>
+                <div class="p-3.5 rounded-2xl rounded-tl-xs bg-white border border-gray-200/90 text-gray-800 text-xs sm:text-[13px] leading-relaxed whitespace-pre-wrap break-words shadow-2xs">${safeText}</div>
+              </div>
+            </div>
+          `);
+        }
+      });
+
+      msgBox.innerHTML = htmlParts.join('');
+
+      if (forceScrollBottom || (!isUserScrolledUp && hasNewMessage)) {
+        scrollToBottom(false);
+      }
+    }
+
+    function copyMessageText(idx) {
+      if (!currentThreadObj || !currentThreadObj.messages || !currentThreadObj.messages[idx]) return;
+      const text = currentThreadObj.messages[idx].text || '';
+      navigator.clipboard.writeText(text);
+      Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'คัดลอกข้อความแล้ว', showConfirmButton: false, timer: 1200 });
+    }
+
+    function copyDirectChatLink() {
+      if (!currentUserId) return;
+      const url = `${window.location.origin}${window.location.pathname}?uid=${encodeURIComponent(currentUserId)}`;
+      navigator.clipboard.writeText(url);
+      Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon: 'success',
+        title: 'คัดลอกลิงก์ห้องแชทนี้แล้ว',
+        showConfirmButton: false,
+        timer: 1800
+      });
+    }
+
+    function openUserInfoModal() {
+      if (!currentThreadObj) return;
+      const isHuman = currentThreadObj.status === 'HUMAN_MODE';
+      Swal.fire({
+        title: currentThreadObj.displayName || 'ผู้ใช้งาน LINE',
+        html: `
+          <div class="space-y-3 text-center pt-2">
+            <img src="${currentThreadObj.pictureUrl || '/logo.webp'}" class="w-20 h-20 rounded-full mx-auto object-cover border-4 border-mstYellow shadow-md" onerror="this.src='/logo.webp'">
+            <div>
+              <span class="text-[11px] font-black px-3 py-1 rounded-full ${isHuman ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-700'}">
+                ${isHuman ? 'สถานะ: รอสภานักเรียนตอบกลับ' : 'สถานะ: น้องคอนเนค AI ดูแล'}
+              </span>
+            </div>
+            <div class="bg-gray-50 p-2.5 rounded-xl border border-gray-200 text-left">
+              <p class="text-[10px] font-bold text-gray-400 uppercase">LINE User ID</p>
+              <p class="text-[11px] font-mono font-bold text-gray-700 break-all mt-0.5">${currentThreadObj.userId}</p>
+            </div>
+          </div>
+        `,
+        confirmButtonText: 'ปิดหน้าต่าง',
+        confirmButtonColor: '#4C1D95'
+      });
     }
 
     async function toggleThreadMode() {
@@ -573,6 +1352,64 @@
       await callAdminApi({ action: 'toggleUserMode', userId: currentUserId, mode: nextMode });
       await selectThread(currentUserId, true);
       await loadThreads(true);
+      Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon: 'success',
+        title: nextMode === 'HUMAN_MODE' ? 'ดึงแชทมาคุยกับสภาฯ แล้ว' : 'สลับให้น้องคอนเนค AI ดูแลต่อแล้ว',
+        showConfirmButton: false,
+        timer: 1500
+      });
+    }
+
+    // =========================================================
+    // FLEX CARD STUDIO & COMPOSER HELPERS
+    // =========================================================
+    function toggleFlexStudioDrawer(forceState) {
+      const drawer = document.getElementById('flexStudioDrawer');
+      const isHidden = drawer.classList.contains('hidden');
+      const shouldOpen = typeof forceState === 'boolean' ? forceState : isHidden;
+      drawer.classList.toggle('hidden', !shouldOpen);
+
+      const btn = document.getElementById('btnToggleStudio');
+      if (shouldOpen) {
+        btn.classList.add('ring-2', 'ring-mstPurple/30', 'bg-purple-100');
+      } else {
+        btn.classList.remove('ring-2', 'ring-mstPurple/30', 'bg-purple-100');
+      }
+      updateStudioSummaryBadge();
+    }
+
+    function applyCardPreset(preset) {
+      const serviceInp = document.getElementById('flexServiceLabel');
+      const titleInp = document.getElementById('flexCardTitle');
+      const badgeInp = document.getElementById('flexBadgeText');
+
+      if (preset === 'official') {
+        serviceInp.value = 'STUDENT COUNCIL • OFFICIAL';
+        titleInp.value = 'ข้อความจากสภา';
+        badgeInp.value = 'ADMIN';
+      } else if (preset === 'progress') {
+        serviceInp.value = 'MSTSC CARE • UPDATE';
+        titleInp.value = 'แจ้งความคืบหน้า';
+        badgeInp.value = 'FOLLOW UP';
+      } else if (preset === 'event') {
+        serviceInp.value = 'MSTSC ACTIVITY • PR';
+        titleInp.value = 'ประชาสัมพันธ์กิจกรรม';
+        badgeInp.value = 'EVENT';
+      } else if (preset === 'verify') {
+        serviceInp.value = 'STUDENT COUNCIL • VERIFIED';
+        titleInp.value = 'ยืนยันข้อมูลสำเร็จ';
+        badgeInp.value = 'VERIFIED';
+      }
+      updateStudioSummaryBadge();
+    }
+
+    function updateStudioSummaryBadge() {
+      const title = (document.getElementById('flexCardTitle').value || 'ข้อความจากสภา').trim();
+      const btns = getCustomButtonsFromUI();
+      document.getElementById('studioSummaryText').innerText = title;
+      document.getElementById('studioBtnCountBadge').innerText = `${btns.length} ปุ่ม`;
     }
 
     function addButtonRow(label = '', url = '') {
@@ -583,11 +1420,12 @@
       const div = document.createElement('div');
       div.className = "flex items-center gap-1.5 btn-row-item";
       div.innerHTML = `
-        <input type="text" placeholder="ชื่อปุ่ม (ไม่เกิน 20 ตัวอักษร)" maxlength="20" value="${label}" class="btn-label-inp form-input py-1 text-[11px] w-2/5">
-        <input type="url" placeholder="ลิงก์ https://..." value="${url}" class="btn-url-inp form-input py-1 text-[11px] flex-1">
-        <button type="button" onclick="this.parentElement.remove()" class="w-7 h-7 rounded-lg bg-rose-50 text-rose-600 border border-rose-200 flex items-center justify-center shrink-0 text-xs"><i class="fa-solid fa-trash-can"></i></button>
+        <input type="text" placeholder="ชื่อปุ่ม (ไม่เกิน 20 ตัวอักษร)" maxlength="20" value="${escapeHtml(label)}" oninput="updateStudioSummaryBadge()" class="btn-label-inp form-input py-1.5 px-2.5 text-[11px] w-2/5">
+        <input type="url" placeholder="ลิงก์ https://..." value="${escapeHtml(url)}" oninput="updateStudioSummaryBadge()" class="btn-url-inp form-input py-1.5 px-2.5 text-[11px] flex-1">
+        <button type="button" onclick="this.parentElement.remove(); updateStudioSummaryBadge();" class="w-7 h-7 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 flex items-center justify-center shrink-0 text-xs transition"><i class="fa-solid fa-trash-can"></i></button>
       `;
       container.appendChild(div);
+      updateStudioSummaryBadge();
     }
 
     function getCustomButtonsFromUI() {
@@ -600,6 +1438,31 @@
       return list;
     }
 
+    function autoResizeChatInput(el) {
+      el.style.height = 'auto';
+      el.style.height = Math.min(el.scrollHeight, 140) + 'px';
+    }
+
+    function handleChatInputKeydown(e) {
+      // กด Ctrl+Enter หรือ Cmd+Enter เพื่อส่งการ์ดทันที
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        e.preventDefault();
+        document.getElementById('btnSendFlex').click();
+      }
+    }
+
+    function insertTextFormat(prefix) {
+      const ta = document.getElementById('flexReplyText');
+      const start = ta.selectionStart;
+      const val = ta.value;
+      const needNewline = start > 0 && val[start - 1] !== '\n';
+      const insertStr = (needNewline ? '\n' : '') + prefix;
+      ta.value = val.slice(0, start) + insertStr + val.slice( ta.selectionEnd );
+      ta.focus();
+      ta.selectionStart = ta.selectionEnd = start + insertStr.length;
+      autoResizeChatInput(ta);
+    }
+
     function openFlexPreviewModal() {
       const serviceLabel = document.getElementById('flexServiceLabel').value.trim() || 'STUDENT COUNCIL • OFFICIAL';
       const cardTitle = document.getElementById('flexCardTitle').value.trim() || 'ข้อความจากสภา';
@@ -610,28 +1473,28 @@
 
       const btnsPreviewHtml = btns.length > 0
         ? '<div class="mt-4 space-y-2">' + btns.map((b, i) => `
-            <div class="py-2.5 px-4 rounded-full text-center text-xs font-black ${i === 0 ? 'bg-mstYellow text-mstDark' : 'bg-purple-50 text-mstPurple border border-purple-200'}">${b.label}</div>
+            <div class="py-2.5 px-4 rounded-full text-center text-xs font-black ${i === 0 ? 'bg-mstYellow text-mstDark shadow-xs' : 'bg-purple-50 text-mstPurple border border-purple-200'}">${escapeHtml(b.label)}</div>
           `).join('') + '</div>'
         : '';
 
       document.getElementById('previewFlexCardBody').innerHTML = `
         <div class="flex items-center justify-between gap-3">
           <div>
-            <p class="text-[10px] font-black text-purple-700">${serviceLabel}</p>
-            <h3 class="text-lg font-black text-mstPurple leading-tight mt-0.5">${cardTitle}</h3>
+            <p class="text-[10px] font-black text-purple-700">${escapeHtml(serviceLabel)}</p>
+            <h3 class="text-lg font-black text-mstPurple leading-tight mt-0.5">${escapeHtml(cardTitle)}</h3>
             <div class="w-9 h-1 bg-mstYellow rounded-full mt-1.5"></div>
           </div>
-          <img src="/logo.webp" class="w-14 h-14 rounded-full bg-white p-1 border-2 border-purple-200 object-contain">
+          <img src="/logo.webp" class="w-14 h-14 rounded-full bg-white p-1 border-2 border-purple-200 object-contain shrink-0">
         </div>
         <div class="bg-white rounded-3xl p-4 mt-4 shadow-sm">
           <div class="flex items-center justify-between pb-2.5 border-b border-gray-100">
             <div class="flex items-center gap-2">
               <span class="w-2 h-2 rounded-full bg-mstYellow"></span>
-              <span class="text-xs font-black text-mstPurple">${sender}</span>
+              <span class="text-xs font-black text-mstPurple">${escapeHtml(sender)}</span>
             </div>
-            <span class="text-[10px] font-black bg-purple-100 text-mstPurple px-2.5 py-0.5 rounded-full">${badge}</span>
+            <span class="text-[10px] font-black bg-purple-100 text-mstPurple px-2.5 py-0.5 rounded-full">${escapeHtml(badge)}</span>
           </div>
-          <p class="text-xs text-gray-700 leading-relaxed whitespace-pre-wrap mt-3">${text}</p>
+          <p class="text-xs text-gray-700 leading-relaxed whitespace-pre-wrap mt-3">${escapeHtml(text)}</p>
           ${btnsPreviewHtml}
         </div>
         <p class="text-[10px] font-bold text-center text-purple-800/60 mt-3">คณะกรรมการสภานักเรียนโรงเรียนเมืองสุราษฎร์ธานี</p>
@@ -639,20 +1502,48 @@
       document.getElementById('previewFlexModal').classList.remove('hidden');
     }
 
+    // =========================================================
+    // CANNED REPLIES (ข้อความตอบกลับด่วน)
+    // =========================================================
     function renderCannedRepliesBar() {
       const list = botSettings.cannedReplies || [];
       const bar = document.getElementById('cannedRepliesBar');
-      bar.innerHTML = list.map((item, idx) => `
-        <button type="button" onclick="insertCannedReply(${idx})" class="text-[10px] font-bold bg-white hover:bg-purple-50 text-gray-700 hover:text-mstPurple border border-gray-200 px-2.5 py-1 rounded-lg shrink-0 transition">
-          ${item.title}
-        </button>
-      `).join('');
+      const settingsList = document.getElementById('settingsCannedList');
+
+      if (bar) {
+        bar.innerHTML = list.map((item, idx) => `
+          <button type="button" onclick="insertCannedReply(${idx})" class="text-[10px] font-bold bg-white hover:bg-purple-50 text-gray-700 hover:text-mstPurple border border-gray-200 px-2.5 py-1 rounded-lg shrink-0 transition shadow-2xs">
+            ${escapeHtml(item.title)}
+          </button>
+        `).join('');
+      }
+
+      if (settingsList) {
+        if (list.length === 0) {
+          settingsList.innerHTML = `<p class="text-xs text-gray-400 font-bold col-span-full py-4 text-center">ยังไม่มีข้อความตอบกลับด่วน กดปุ่ม "+ เพิ่มข้อความใหม่" ด้านบนเพื่อสร้าง</p>`;
+        } else {
+          settingsList.innerHTML = list.map((item, idx) => `
+            <div class="p-3.5 rounded-2xl bg-white border border-purple-100 flex items-start justify-between gap-2 shadow-2xs">
+              <div class="min-w-0 flex-1">
+                <p class="text-xs font-black text-mstPurple truncate">${escapeHtml(item.title)}</p>
+                <p class="text-[11px] text-gray-600 line-clamp-2 mt-1 whitespace-pre-wrap">${escapeHtml(item.text)}</p>
+              </div>
+              <button type="button" onclick="deleteCannedReply(${idx})" class="w-7 h-7 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 flex items-center justify-center text-xs shrink-0" title="ลบข้อความนี้">
+                <i class="fa-solid fa-trash-can"></i>
+              </button>
+            </div>
+          `).join('');
+        }
+      }
     }
 
     function insertCannedReply(idx) {
       const item = (botSettings.cannedReplies || [])[idx];
       if (!item) return;
-      document.getElementById('flexReplyText').value = item.text;
+      const ta = document.getElementById('flexReplyText');
+      ta.value = item.text;
+      autoResizeChatInput(ta);
+      ta.focus();
     }
 
     async function addCannedReplyPrompt() {
@@ -680,9 +1571,22 @@
         botSettings.cannedReplies = list;
         renderCannedRepliesBar();
         await callAdminApi({ action: 'saveBotConfig', config: { cannedReplies: list } });
+        Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'บันทึกคำตอบด่วนแล้ว', showConfirmButton: false, timer: 1400 });
       }
     }
 
+    async function deleteCannedReply(idx) {
+      const list = botSettings.cannedReplies || [];
+      if (!list[idx]) return;
+      list.splice(idx, 1);
+      botSettings.cannedReplies = list;
+      renderCannedRepliesBar();
+      await callAdminApi({ action: 'saveBotConfig', config: { cannedReplies: list } });
+    }
+
+    // =========================================================
+    // BOT SETTINGS & SEND FLEX REPLY
+    // =========================================================
     function populateSettingsUI() {
       document.getElementById('cfgAiEnabled').checked = botSettings.aiEnabled !== false;
       document.getElementById('cfgTgEnabled').checked = botSettings.tgNotifyEnabled !== false;
@@ -716,12 +1620,13 @@
     async function sendFlexReply(e) {
       e.preventDefault();
       if (!currentUserId) return;
-      const replyText = document.getElementById('flexReplyText').value.trim();
+      const ta = document.getElementById('flexReplyText');
+      const replyText = ta.value.trim();
       if (!replyText) return;
 
       const btn = document.getElementById('btnSendFlex');
       btn.disabled = true;
-      btn.innerText = "กำลังส่งการ์ด Flex...";
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span class="hidden sm:inline">กำลังส่ง...</span>';
 
       const res = await callAdminApi({
         action: "sendAdminFlexReply",
@@ -736,27 +1641,32 @@
       });
 
       btn.disabled = false;
-      btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> ส่งการ์ดตอบกลับเข้า LINE';
+      btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> <span class="hidden sm:inline">ส่งการ์ด</span>';
 
       if (res.status === "success") {
-        document.getElementById('flexReplyText').value = '';
+        ta.value = '';
+        ta.style.height = 'auto';
         document.getElementById('chkCloseHumanMode').checked = false;
+        toggleFlexStudioDrawer(false);
+
         const methodLabel = res.deliveryMethod === 'reply_token_free'
           ? 'ส่งสำเร็จด้วย Reply Token (ฟรี 0 โควตา)'
           : (res.deliveryMethod === 'push_realtime' ? 'ส่งการ์ด Flex เข้าแชททันทีแล้ว' : 'บันทึกเข้าคิวส่งอัตโนมัติ (0 โควตา)');
         Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: methodLabel, showConfirmButton: false, timer: 2000 });
+        isUserScrolledUp = false;
         await selectThread(currentUserId, true);
         await loadThreads(true);
       } else {
-        Swal.fire({ icon: "error", title: "ส่งไม่สำเร็จ", text: res.message });
+        Swal.fire({ icon: "error", title: "ส่งไม่สำเร็จ", text: res.message, confirmButtonColor: "#4C1D95" });
       }
     }
 
     document.addEventListener('DOMContentLoaded', () => {
       addButtonRow('ศูนย์รวมบริการนักเรียน', 'https://liff.line.me/2008923798-xBa4D5Dv');
+      updateSoundButtonUI();
 
-      // 1. ตรวจสอบเซสชันของหน้านี้
-      const saved = sessionStorage.getItem(SESSION_KEY);
+      // 1. ตรวจสอบเซสชันของหน้านี้ (เช็คทั้ง sessionStorage และ localStorage สำหรับแอป PWA)
+      const saved = sessionStorage.getItem(SESSION_KEY) || localStorage.getItem(SESSION_KEY);
       if (saved) {
         try {
           adminAuth = JSON.parse(saved);
@@ -765,7 +1675,7 @@
       }
 
       // 2. ตรวจสอบ SSO Token จากหน้าแอดมินหลัก (/admin.html หรือ /radio/admin_radio.html)
-      const portalToken = sessionStorage.getItem(PORTAL_TOKEN_KEY);
+      const portalToken = sessionStorage.getItem(PORTAL_TOKEN_KEY) || localStorage.getItem(PORTAL_TOKEN_KEY);
       if (portalToken) {
         adminAuth = { idToken: portalToken };
         verifyAndOpenConsole();
