@@ -1455,8 +1455,8 @@
     }
 
     let isRefreshingThreads = false;
- async function loadThreads(silent = false) {
-   if (isRefreshingThreads) return;
+    async function loadThreads(silent = false, force = false) {
+      if (isRefreshingThreads && !force) return;
    isRefreshingThreads = true;
    const refreshBtn = document.getElementById('btnRefreshThreads');
    if (!silent && refreshBtn) {
@@ -2542,7 +2542,7 @@
           isUserScrolledUp = false;
           lastRenderedMsgSignature = "";
           delete threadDetailCache[currentUserId];
-          await loadThreads(true);
+          await loadThreads(true, true);
         } else {
           Swal.fire({ icon: "error", title: "ส่งไม่สำเร็จ", text: res.message, confirmButtonColor: "#4C1D95" });
         }
