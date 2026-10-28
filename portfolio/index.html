@@ -830,7 +830,7 @@
 
             const roleEl = document.getElementById('viewerRoleText');
             if (roleEl) {
-                roleEl.innerText = `รหัส ${currentViewer.std_id} • ${currentViewer.level || 'นักเรียน'}${currentViewer.plan && currentViewer.plan !== '-' ? ' (' + currentViewer.plan + ')' : ''}`;
+                roleEl.innerText = `${currentViewer.std_id} • ${currentViewer.level || 'นักเรียน'}${currentViewer.plan && currentViewer.plan !== '-' ? ' (' + currentViewer.plan + ')' : ''}`;
             }
 
             const badgeEl = document.getElementById('viewerBadgeRole');

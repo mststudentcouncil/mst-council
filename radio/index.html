@@ -448,7 +448,7 @@
                 headerActions.classList.add('flex');
                 document.getElementById('user-avatar').src = currentUser.linePic || '/logo.webp';
                 document.getElementById('user-fullname').innerText = currentUser.fullName;
-                document.getElementById('user-meta').innerText = `รหัส ${currentUser.std_id} • ชั้น ${currentUser.level}${currentUser.room && currentUser.room !== '-' ? '/' + currentUser.room : ''}`;
+                document.getElementById('user-meta').innerText = `${currentUser.std_id} • ${currentUser.level}${currentUser.room && currentUser.room !== '-' ? '/' + currentUser.room : ''}`;
 
                 renderStationStatus(data.radioStatus);
                 renderTimeline(data.timeline);

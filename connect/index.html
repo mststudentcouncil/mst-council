@@ -510,7 +510,7 @@
 
             document.getElementById('user-avatar').src = currentUser.linePic || 'https://mstsc.pages.dev/logo.webp';
             document.getElementById('user-fullname').innerText = currentUser.fullName;
-            document.getElementById('user-meta').innerText = `รหัส ${currentUser.std_id} • ชั้น ${roomDisplay}`;
+            document.getElementById('user-meta').innerText = `${currentUser.std_id} • ${roomDisplay}`;
 
             document.getElementById('pass-fullname').innerText = currentUser.fullName;
             document.getElementById('pass-sid').innerText = currentUser.std_id;
@@ -646,7 +646,7 @@
                         class="w-full text-left bg-purple-50 hover:bg-purple-100 border border-purple-100 p-3 rounded-xl flex items-center justify-between gap-2 transition mb-2">
                         <div class="min-w-0">
                             <p class="text-xs font-black text-gray-900 truncate">${s.prefix}${s.fname} ${s.lname}</p>
-                            <p class="text-[11px] font-bold text-mstPurple">รหัส ${s.std_id} • ${roomStr}</p>
+                            <p class="text-[11px] font-bold text-mstPurple">${s.std_id} • ${roomStr}</p>
                         </div>
                         <span class="bg-mstPurple text-white text-[10px] font-bold px-2.5 py-1 rounded-lg shrink-0">เลือก</span>
                     </button>
