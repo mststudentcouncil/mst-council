@@ -272,13 +272,13 @@
                             <span class="block text-[11px] font-medium text-gray-500 mt-0.5">พิมพ์อีเมลแล้วกดปุ่ม "+ เพิ่ม" หรือพิมพ์แยกบรรทัดละ 1 อีเมล</span>
                         </label>
                         <div class="flex gap-2">
-                            <input type="email" id="addEmailInput" onkeydown="if(event.key==='Enter'){event.preventDefault();addEmailTag();}" placeholder="พิมพ์อีเมล เช่น 6829903@mst.ac.th" class="form-input text-xs bg-white py-2">
+                            <input type="email" id="addEmailInput" onkeydown="if(event.key==='Enter'){event.preventDefault();addEmailTag();}" placeholder="พิมพ์อีเมล เช่น 7012345@mst.ac.th" class="form-input text-xs bg-white py-2">
                             <button type="button" onclick="addEmailTag()" class="bg-mstPurple text-white font-bold px-4 py-2 rounded-xl text-xs shrink-0 hover:bg-purple-800 transition">
                                 <i class="fa-solid fa-plus mr-1"></i> เพิ่ม
                             </button>
                         </div>
                         <div id="emailTagsContainer" class="flex flex-wrap gap-1.5 pt-1"></div>
-                        <textarea id="cfgDjEmails" rows="3" oninput="syncEmailTagsFromTextarea()" class="form-input text-xs bg-white font-mono leading-relaxed" placeholder="พิมพ์บรรทัดละ 1 อีเมล เช่น&#10;studentcouncil@mst.ac.th&#10;6829903@mst.ac.th"></textarea>
+                        <textarea id="cfgDjEmails" rows="3" oninput="syncEmailTagsFromTextarea()" class="form-input text-xs bg-white font-mono leading-relaxed" placeholder="พิมพ์บรรทัดละ 1 อีเมล เช่น&#10;studentcouncil@mst.ac.th&#10;7012345@mst.ac.th"></textarea>
                     </div>
 
                     <div class="bg-amber-50/50 p-4 rounded-2xl border border-amber-200/70 space-y-2.5">
@@ -287,13 +287,13 @@
                             <span class="block text-[11px] font-medium text-gray-500 mt-0.5">พิมพ์รหัสนักเรียนแล้วกด "+ เพิ่ม" หรือพิมพ์บรรทัดละ 1 รหัส</span>
                         </label>
                         <div class="flex gap-2">
-                            <input type="tel" id="addStdIdInput" maxlength="5" onkeydown="if(event.key==='Enter'){event.preventDefault();addStdIdTag();}" placeholder="รหัสนักเรียน 5 หลัก เช่น 29903" class="form-input text-xs bg-white py-2">
+                            <input type="tel" id="addStdIdInput" maxlength="5" onkeydown="if(event.key==='Enter'){event.preventDefault();addStdIdTag();}" placeholder="รหัสนักเรียน 5 หลัก เช่น 12345" class="form-input text-xs bg-white py-2">
                             <button type="button" onclick="addStdIdTag()" class="bg-amber-500 text-white font-bold px-4 py-2 rounded-xl text-xs shrink-0 hover:bg-amber-600 transition">
                                 <i class="fa-solid fa-plus mr-1"></i> เพิ่ม
                             </button>
                         </div>
                         <div id="stdIdTagsContainer" class="flex flex-wrap gap-1.5 pt-1"></div>
-                        <textarea id="cfgDjIds" rows="2" oninput="syncStdIdTagsFromTextarea()" class="form-input text-xs bg-white font-mono leading-relaxed" placeholder="พิมพ์บรรทัดละ 1 รหัส เช่น&#10;29903"></textarea>
+                        <textarea id="cfgDjIds" rows="2" oninput="syncStdIdTagsFromTextarea()" class="form-input text-xs bg-white font-mono leading-relaxed" placeholder="พิมพ์บรรทัดละ 1 รหัส เช่น&#10;12345"></textarea>
                     </div>
 
                     <button onclick="saveStationConfig()" class="w-full bg-gradient-to-r from-mstPurple to-purple-800 hover:shadow-lg text-white font-bold py-3.5 rounded-2xl text-sm shadow-md transition flex items-center justify-center gap-2">
@@ -561,11 +561,11 @@
 
                     setDaysCheckboxes(s.openDays || '1,2,3,4,5');
 
-                    const emailList = parseMultiLineItems(s.djEmails || 'studentcouncil@mst.ac.th,tassanee@mst.ac.th,6829903@mst.ac.th');
+                    const emailList = parseMultiLineItems(s.djEmails || 'studentcouncil@mst.ac.th,tassanee@mst.ac.th,7012345@mst.ac.th');
                     document.getElementById('cfgDjEmails').value = emailList.join('\n');
                     syncEmailTagsFromTextarea();
 
-                    const stdList = parseMultiLineItems(s.djStdIds || '29903');
+                    const stdList = parseMultiLineItems(s.djStdIds || '12345');
                     document.getElementById('cfgDjIds').value = stdList.join('\n');
                     syncStdIdTagsFromTextarea();
 
