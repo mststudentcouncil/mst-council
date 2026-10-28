@@ -583,7 +583,7 @@
                   id="flexReplyText"
                   rows="1"
                   required
-                  enterkeyhint="send"
+                  enterkeyhint="enter"
                   onfocus="handleComposerFocus()"
                   onblur="handleComposerBlur()"
                   oninput="handleComposerInput(this)"
@@ -1295,6 +1295,10 @@
       const btn = document.getElementById('btnLogin');
       if (btn) { btn.disabled = true; btn.innerText = "กำลังตรวจสอบสิทธิ์กับระบบ REGIS..."; }
 
+      const loader = document.getElementById('systemBootLoader');
+      if (loader) {
+        loader.classList.remove('hidden', 'opacity-0', 'pointer-events-none');
+      }
       setBootProgress(45, 'กำลังเชื่อมต่อฐานข้อมูลและตรวจสอบสิทธิ์...', 'ขั้นตอนที่ 2/4');
 
       try {
@@ -1357,7 +1361,8 @@
         setBootProgress(100, 'โหลดข้อมูลสำเร็จ พร้อมใช้งาน!', 'ขั้นตอนที่ 4/4');
         setTimeout(hideBootLoader, 220);
 
-        setInterval(() => { if (!document.hidden) loadThreads(true); }, 6500);
+        if (window.mstscPollTimer) clearInterval(window.mstscPollTimer);
+        window.mstscPollTimer = setInterval(() => { if (!document.hidden) loadThreads(true); }, 6500);
       } catch (err) {
         if (btn) {
           btn.disabled = false;
@@ -1466,13 +1471,23 @@
           updateUnreadCounters();
           renderThreadsList();
           if (currentUserId) {
-            await selectThread(currentUserId, true);
+            const activeInList = threads.find(t => t.userId === currentUserId);
+            const cached = threadDetailCache[currentUserId];
+            const needRefreshDetail = !cached ||
+              !activeInList ||
+              (activeInList.unreadCount || 0) > 0 ||
+              activeInList.lastMessage !== cached.lastMessage ||
+              activeInList.status !== cached.status;
+            if (!silent || needRefreshDetail) {
+              await selectThread(currentUserId, true);
+            }
           }
         }
       } catch (e) {
-   } finally {
-     isRefreshingThreads = false;
-     if (refreshBtn) {
+        console.error('Error occurred while loading threads:', e);
+      } finally {
+        isRefreshingThreads = false;
+        if (refreshBtn) {
        refreshBtn.disabled = false;
        refreshBtn.innerHTML = '<i class="fa-solid fa-rotate-right"></i>';
      }
@@ -1777,7 +1792,9 @@
         if (!silent) setTopBusyBar(false);
         if (res.status !== "success" || !res.thread) return;
 
-        // ป้องกันกรณีแอดมินสลับไปห้องอื่นก่อนโหลดเสร็จ
+        // บันทึก lastMessage ลงในแคชด้วย เพื่อให้ loadThreads เปรียบเทียบได้อย่างแม่นยำ
+        const currentInList = threads.find(t => t.userId === userId);
+        res.thread.lastMessage = res.thread.lastMessage || (currentInList ? currentInList.lastMessage : '');
         threadDetailCache[userId] = res.thread;
         if (currentUserId !== userId) return;
 
@@ -2246,10 +2263,10 @@
     }
 
     function handleChatInputKeydown(e) {
-      // กดปุ่มสีน้ำเงิน (Return/Send) บนแป้นพิมพ์มือถือ หรือ Ctrl+Enter บนคอม เพื่อส่งข้อความและย่อแป้นพิมพ์ทันที (หากต้องการขึ้นบรรทัดใหม่ให้กด Shift+Enter หรือกดปุ่ม • จุดย่อย)
-      if (e.key === 'Enter' && !e.shiftKey) {
+      if (e.isComposing || e.keyCode === 229) return;
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
         e.preventDefault();
-        e.target.blur(); // ย่อแป้นพิมพ์และแถบสีเทาลงทันที
+        e.target.blur();
         document.getElementById('btnSendFlex').click();
       }
     }
@@ -2473,12 +2490,17 @@
       }
     }
 
+    let isSendingReplyBusy = false;
     async function sendFlexReply(e) {
       e.preventDefault();
-      if (!currentUserId) return;
+      if (!currentUserId || isSendingReplyBusy) return;
       const ta = document.getElementById('flexReplyText');
       const rawReplyText = ta.value.trim();
       if (!rawReplyText) return;
+
+      isSendingReplyBusy = true;
+      setTopBusyBar(true);
+      ta.blur(); // ย่อแป้นพิมพ์ลงทันทีที่กดส่ง
 
       const replyText = currentQuoteText
         ? `💬 อ้างอิง: "${currentQuoteText}"\n──────────────\n${rawReplyText}`
@@ -2519,7 +2541,7 @@
           Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: methodLabel, showConfirmButton: false, timer: 2000 });
           isUserScrolledUp = false;
           lastRenderedMsgSignature = "";
-          await selectThread(currentUserId, true);
+          delete threadDetailCache[currentUserId];
           await loadThreads(true);
         } else {
           Swal.fire({ icon: "error", title: "ส่งไม่สำเร็จ", text: res.message, confirmButtonColor: "#4C1D95" });
@@ -2527,7 +2549,10 @@
       } catch (err) {
         btn.disabled = false;
         btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> <span class="hidden sm:inline">ส่งการ์ด</span>';
-        Swal.fire({ icon: "error", title: "การเชื่อมต่อขัดข้อง", text: "ไม่สามารถส่งข้อความได้ในขณะนี้ กรุณาลองอีกครั้ง", confirmButtonColor: "#4C1D95" });
+        Swal.fire({ icon: "error", title: "เกิดข้อผิดพลาด", text: err.message || err, confirmButtonColor: "#4C1D95" });
+      } finally {
+        isSendingReplyBusy = false;
+        setTopBusyBar(false);
       }
     }
 
