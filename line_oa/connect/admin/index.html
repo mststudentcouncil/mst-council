@@ -7,11 +7,11 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="MSTSC Chat">
+  <meta name="apple-mobile-web-app-title" content="MSTSC CONNECT">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <link rel="manifest" href="https://ai-line-oa.studentcouncil-f38.workers.dev/?manifest=1">
   <link rel="apple-touch-icon" href="/line_oa/MSTSC_CHAT.png">
-  <link rel="icon" type="image/webp" href="/line_oa/MSTSC_CHAT.png">
+  <link rel="icon" type="image/webp" href="/logo.webp">
   <title>MSTSC Connect Admin - ระบบจัดการแชทและบอทสภานักเรียน</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -496,7 +496,7 @@
               <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 <div>
                   <label class="block text-[10px] font-bold text-gray-600 mb-0.5">ป้ายหมวดหมู่บนสุด</label>
-                  <input type="text" id="flexServiceLabel" value="STUDENT COUNCIL • OFFICIAL" class="form-input !py-1.5 !px-2.5 text-[11px]">
+                  <input type="text" id="flexServiceLabel" value="STUDENT COUNCIL • LIVE CHAT" class="form-input !py-1.5 !px-2.5 text-[11px]">
                 </div>
                 <div>
                   <label class="block text-[10px] font-bold text-gray-600 mb-0.5">หัวข้อการ์ด (Card Title)</label>
@@ -530,61 +530,66 @@
               </div>
             </div>
 
-            <!-- 3.2 Quick Canned Replies Horizontal Bar -->
-            <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 pr-2">
-              <button type="button" onclick="addCannedReplyPrompt()" class="text-[10px] font-black bg-amber-100/90 hover:bg-amber-200 text-amber-900 px-2.5 py-1 rounded-lg shrink-0 flex items-center gap-1 transition shadow-sm" title="เพิ่มข้อความตอบกลับด่วนใหม่">
-                <i class="fa-solid fa-bolt text-amber-600"></i>
-                <span>+ ตอบด่วน</span>
-              </button>
-              <div id="cannedRepliesBar" class="flex items-center gap-1.5 shrink-0"></div>
-            </div>
-
-            <!-- 3.3 Single-Line Compact Control Toolbar (ปรับขนาดให้พอดีทุกหน้าจอ ไม่ถูกตัดขอบขวา) -->
-            <div class="flex items-center justify-between gap-1 overflow-x-auto no-scrollbar py-0.5 text-[11px] whitespace-nowrap">
-              <div class="flex items-center gap-1 shrink-0">
-                <!-- Toggle Flex Studio Button -->
-                <button type="button" onclick="toggleFlexStudioDrawer()" id="btnToggleStudio" class="px-2 py-1 rounded-lg bg-purple-50 hover:bg-purple-100 text-mstPurple border border-purple-200 font-extrabold flex items-center gap-1 transition shrink-0">
-                  <i class="fa-solid fa-sliders text-[10px]"></i>
-                  <span id="studioSummaryText" class="truncate max-w-[92px] sm:max-w-[180px]">ข้อความจากสภา</span>
-                  <span id="studioBtnCountBadge" class="bg-mstPurple text-white text-[9px] font-black px-1.5 py-0.5 rounded-full leading-none">1 ปุ่ม</span>
+            <!-- แผงเครื่องมือ (กรอบสีน้ำเงิน) ซ่อนไว้เป็นค่าเริ่มต้นบนมือถือ กดปุ่ม + เพื่อเปิด/ปิดได้ -->
+            <div id="composerToolsPanel" class="hidden md:block space-y-1.5 pb-1 border-b border-gray-100">
+              <!-- 3.2 Quick Canned Replies Horizontal Bar -->
+              <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 pr-2">
+                <button type="button" onclick="addCannedReplyPrompt()" class="text-[10px] font-black bg-amber-100/90 hover:bg-amber-200 text-amber-900 px-2.5 py-1 rounded-lg shrink-0 flex items-center gap-1 transition shadow-sm" title="เพิ่มข้อความตอบกลับด่วนใหม่">
+                  <i class="fa-solid fa-bolt text-amber-600"></i>
+                  <span>+ ตอบด่วน</span>
                 </button>
-
-                <!-- Quick Bullet / Numbering Helpers -->
-                <button type="button" onclick="insertTextFormat('- ')" class="px-2 py-1 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-[10px] transition shrink-0" title="แทรกรายการจุดย่อย">
-                  • จุดย่อย
-                </button>
-                <button type="button" onclick="insertTextFormat('1. ')" class="px-2 py-1 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-[10px] transition shrink-0" title="แทรกหัวข้อลำดับ">
-                  1. หัวข้อ
-                </button>
-
-                <!-- Preview Flex Button -->
-                <button type="button" onclick="openFlexPreviewModal()" class="px-2 py-1 rounded-lg bg-slate-100 hover:bg-purple-50 text-gray-700 hover:text-mstPurple font-bold flex items-center gap-1 transition shrink-0" title="พรีวิวการ์ด Flex">
-                  <i class="fa-regular fa-eye"></i>
-                  <span class="hidden sm:inline">พรีวิว</span>
-                </button>
+                <div id="cannedRepliesBar" class="flex items-center gap-1.5 shrink-0"></div>
               </div>
 
-              <!-- Close Human Mode Checkbox (กระชับไม่ล้นขอบจอ) -->
-              <label class="flex items-center gap-1 text-[10px] sm:text-[11px] font-extrabold text-gray-600 hover:text-mstPurple cursor-pointer bg-gray-50 px-2 py-1 rounded-lg border border-gray-200/80 shrink-0 ml-auto">
-                <input type="checkbox" id="chkCloseHumanMode" class="w-3.5 h-3.5 accent-mstPurple rounded shrink-0">
-                <span class="sm:hidden">ให้ AI ดูแลต่อ</span>
-                <span class="hidden sm:inline">ส่งแล้วให้ AI ดูแลต่อ</span>
-              </label>
+              <!-- 3.3 Single-Line Compact Control Toolbar -->
+              <div class="flex items-center justify-between gap-1 overflow-x-auto no-scrollbar py-0.5 text-[11px] whitespace-nowrap">
+                <div class="flex items-center gap-1 shrink-0">
+                  <button type="button" onclick="toggleFlexStudioDrawer()" id="btnToggleStudio" class="px-2 py-1 rounded-lg bg-purple-50 hover:bg-purple-100 text-mstPurple border border-purple-200 font-extrabold flex items-center gap-1 transition shrink-0">
+                    <i class="fa-solid fa-sliders text-[10px]"></i>
+                    <span id="studioSummaryText" class="truncate max-w-[92px] sm:max-w-[180px]">ข้อความจากสภา</span>
+                    <span id="studioBtnCountBadge" class="bg-mstPurple text-white text-[9px] font-black px-1.5 py-0.5 rounded-full leading-none">0 ปุ่ม</span>
+                  </button>
+
+                  <button type="button" onclick="insertTextFormat('- ')" class="px-2 py-1 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-[10px] transition shrink-0">
+                    • จุดย่อย
+                  </button>
+                  <button type="button" onclick="insertTextFormat('1. ')" class="px-2 py-1 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-[10px] transition shrink-0">
+                    1. หัวข้อ
+                  </button>
+
+                  <button type="button" onclick="openFlexPreviewModal()" class="px-2 py-1 rounded-lg bg-slate-100 hover:bg-purple-50 text-gray-700 hover:text-mstPurple font-bold flex items-center gap-1 transition shrink-0">
+                    <i class="fa-regular fa-eye"></i>
+                    <span class="hidden sm:inline">พรีวิว</span>
+                  </button>
+                </div>
+
+                <label class="flex items-center gap-1 text-[10px] sm:text-[11px] font-extrabold text-gray-600 hover:text-mstPurple cursor-pointer bg-gray-50 px-2 py-1 rounded-lg border border-gray-200/80 shrink-0 ml-auto">
+                  <input type="checkbox" id="chkCloseHumanMode" class="w-3.5 h-3.5 accent-mstPurple rounded shrink-0">
+                  <span class="sm:hidden">ให้ AI ดูแลต่อ</span>
+                  <span class="hidden sm:inline">ส่งแล้วให้ AI ดูแลต่อ</span>
+                </label>
+              </div>
             </div>
 
             <!-- 3.4 Main Chat Input & Send Button -->
-            <div class="flex items-end gap-2 pt-0.5">
+            <div class="flex items-end gap-1.5 sm:gap-2 pt-0.5">
+              <!-- ปุ่มย่อ/ขยายแผงเครื่องมือ (แสดงบนมือถือ) -->
+              <button type="button" onclick="toggleComposerTools()" id="btnToggleComposerTools" class="md:hidden w-[42px] h-[42px] rounded-2xl bg-purple-50 text-mstPurple border border-purple-200 flex items-center justify-center text-sm shrink-0 transition active:scale-95" title="เปิด/ปิดแถบเครื่องมือและคำตอบด่วน">
+                <i class="fa-solid fa-plus transition-transform duration-200" id="iconToggleComposerTools"></i>
+              </button>
+
               <div class="flex-1 relative min-w-0">
                 <textarea
                   id="flexReplyText"
                   rows="1"
                   required
+                  enterkeyhint="send"
                   onfocus="handleComposerFocus()"
                   onblur="handleComposerBlur()"
                   oninput="handleComposerInput(this)"
                   onkeydown="handleChatInputKeydown(event)"
-                  placeholder="พิมพ์ข้อความตอบกลับ... (- จุดย่อย / 1. หัวข้อ)"
-                  class="form-input py-2.5 px-3.5 leading-snug resize-none min-h-[42px] max-h-28 overflow-y-auto custom-scroll rounded-2xl bg-slate-50 focus:bg-white block"
+                  placeholder="พิมพ์ข้อความตอบกลับ..."
+                  class="form-input py-2.5 px-3.5 leading-snug resize-none min-h-[42px] max-h-24 overflow-y-auto custom-scroll rounded-2xl bg-slate-50 focus:bg-white block"
                 ></textarea>
               </div>
 
@@ -1025,9 +1030,25 @@
       }, 150);
     });
 
+    function toggleComposerTools(forceState) {
+      const panel = document.getElementById('composerToolsPanel');
+      const icon = document.getElementById('iconToggleComposerTools');
+      if (!panel) return;
+      const isHidden = panel.classList.contains('hidden');
+      const shouldShow = typeof forceState === 'boolean' ? forceState : isHidden;
+      panel.classList.toggle('hidden', !shouldShow);
+      if (icon) {
+        icon.style.transform = shouldShow ? 'rotate(45deg)' : 'rotate(0deg)';
+      }
+      if (!shouldShow) {
+        toggleFlexStudioDrawer(false);
+      }
+    }
+
     function handleComposerFocus() {
-      // บนมือถือ เมื่อแตะช่องพิมพ์ข้อความ ให้พับลิ้นชักตั้งค่าหัวการ์ดอัตโนมัติเพื่อไม่ให้บังพื้นที่แชท
+      // บนมือถือ เมื่อแตะช่องพิมพ์ข้อความ ให้ย่อแผงเครื่องมือและลิ้นชักตั้งค่าการ์ดอัตโนมัติทันทีเพื่อไม่ให้บังแชท
       if (window.innerWidth < 768) {
+        toggleComposerTools(false);
         toggleFlexStudioDrawer(false);
       }
       setTimeout(() => {
@@ -1938,6 +1959,10 @@
       const isHidden = drawer.classList.contains('hidden');
       const shouldOpen = typeof forceState === 'boolean' ? forceState : isHidden;
       drawer.classList.toggle('hidden', !shouldOpen);
+      // ปิด input ด้านในเมื่อพับเก็บ เพื่อไม่ให้ปุ่มลูกศร ^ v บนแป้นพิมพ์ iOS กระโดดไปโฟกัส
+      drawer.querySelectorAll('input, select, button').forEach(el => {
+        el.disabled = !shouldOpen;
+      });
 
       const btn = document.getElementById('btnToggleStudio');
       if (shouldOpen) {
@@ -1954,7 +1979,7 @@
       const badgeInp = document.getElementById('flexBadgeText');
 
       if (preset === 'official') {
-        serviceInp.value = 'STUDENT COUNCIL • OFFICIAL';
+        serviceInp.value = 'STUDENT COUNCIL • LIVE CHAT';
         titleInp.value = 'ข้อความจากสภา';
         badgeInp.value = 'ADMIN';
       } else if (preset === 'progress') {
@@ -1980,7 +2005,7 @@
     function saveCurrentFlexTemplate() {
       const tpl = {
         id: Date.now(),
-        serviceLabel: document.getElementById('flexServiceLabel').value.trim() || 'STUDENT COUNCIL • OFFICIAL',
+        serviceLabel: document.getElementById('flexServiceLabel').value.trim() || 'STUDENT COUNCIL • LIVE CHAT',
         cardTitle: document.getElementById('flexCardTitle').value.trim() || 'ข้อความจากสภา',
         badgeText: document.getElementById('flexBadgeText').value.trim() || 'ADMIN',
         buttons: getCustomButtonsFromUI()
@@ -2102,7 +2127,7 @@
     }
 
     function openFlexPreviewModal() {
-      const serviceLabel = document.getElementById('flexServiceLabel').value.trim() || 'STUDENT COUNCIL • OFFICIAL';
+      const serviceLabel = document.getElementById('flexServiceLabel').value.trim() || 'STUDENT COUNCIL • LIVE CHAT';
       const cardTitle = document.getElementById('flexCardTitle').value.trim() || 'ข้อความจากสภา';
       const sender = document.getElementById('flexSenderLabel').value.trim() || 'สภานักเรียน';
       const badge = document.getElementById('flexBadgeText').value.trim() || 'ADMIN';
@@ -2364,7 +2389,8 @@
     document.addEventListener('DOMContentLoaded', () => {
       applyStandaloneUIMode();
       syncVisualViewportLayout();
-      addButtonRow('ศูนย์รวมบริการนักเรียน', 'https://liff.line.me/2008923798-xBa4D5Dv');
+      updateStudioSummaryBadge();
+      toggleFlexStudioDrawer(false);
       updateSoundButtonUI();
 
       // 1. ตรวจสอบเซสชันของหน้านี้ (เช็คทั้ง sessionStorage และ localStorage สำหรับแอป PWA)
