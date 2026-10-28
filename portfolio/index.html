@@ -471,10 +471,18 @@
 
     <script>
         const API_PORTFOLIO_URL = "https://admission-backend-592123078141.asia-southeast1.run.app/api/portfolio";
-        const API_RADIO_URL = "https://admission-backend-592123078141.asia-southeast1.run.app/api/radio";
         const MYTCAS_COURSES_URL = "https://my-tcas.s3.ap-southeast-1.amazonaws.com/mytcas/courses.json";
         const LIFF_ID = "2008923798-LmKWCP2j";
         const UNIFIED_CACHE_KEYS = ["mstsc_student_viewer", "mstsc_portfolio_viewer_v3", "mstsc_unified_user"];
+
+        let lineAccessToken = "";
+        let currentViewer = null;
+        let allPortfolios = [];
+        let favOnly = false;
+        let activeTab = "explore";
+
+        let tcasTree = {};
+        let tcasDataLoaded = false;
 
         function getSavedViewer() {
             for (const key of UNIFIED_CACHE_KEYS) {
@@ -519,16 +527,6 @@
             });
             return await res.json();
         }
-
-        let lineAccessToken = "";
-        let currentViewer = null;
-        let allPortfolios = [];
-        let favOnly = false;
-        let activeTab = "explore";
-        let needAlumniManualInput = false;
-
-        let tcasTree = {};
-        let tcasDataLoaded = false;
 
         function setLoader(text) {
             const txtEl = document.getElementById('loaderText');
@@ -721,46 +719,6 @@
             }
         }
 
-        // ดึงข้อมูลผู้ใช้งานที่เคยยืนยันตัวตนแล้วจากทั้งระบบพอร์ตและระบบขอเพลง
-        function getSavedViewer() {
-            const keys = [PORT_USER_CACHE_KEY, UNIFIED_USER_CACHE_KEY];
-            for (const key of keys) {
-                try {
-                    const raw = localStorage.getItem(key);
-                    if (!raw) continue;
-                    const parsed = JSON.parse(raw);
-                    if (parsed && parsed.std_id) return parsed;
-                } catch (e) {}
-            }
-            return null;
-        }
-
-        function saveUnifiedViewer(viewerObj) {
-            if (!viewerObj || !viewerObj.std_id) return;
-            const str = JSON.stringify(viewerObj);
-            localStorage.setItem(PORT_USER_CACHE_KEY, str);
-            localStorage.setItem(UNIFIED_USER_CACHE_KEY, str);
-        }
-
-        function clearUnifiedViewer() {
-            localStorage.removeItem(PORT_USER_CACHE_KEY);
-            localStorage.removeItem(UNIFIED_USER_CACHE_KEY);
-        }
-
-        async function callApi(url, payload) {
-            const savedViewer = getSavedViewer();
-            const res = await fetch(`${url}?t=${Date.now()}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    ...payload,
-                    lineAccessToken,
-                    savedViewer: savedViewer || undefined
-                })
-            });
-            return await res.json();
-        }
-
         function fileToBase64(file) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
@@ -777,7 +735,7 @@
             try {
                 await liff.init({ liffId: LIFF_ID });
                 if (!liff.isLoggedIn()) {
-                    if (liff.isInClient()) {
+                    if (liff.isInClient() || !getSavedViewer()) {
                         liff.login({ redirectUri: window.location.href });
                         return;
                     }
@@ -826,169 +784,12 @@
 
             const roleEl = document.getElementById('viewerRoleText');
             if (roleEl) {
-                roleEl.innerText = `${currentViewer.std_id} • ${currentViewer.level || 'นักเรียน'}${currentViewer.plan && currentViewer.plan !== '-' ? ' (' + currentViewer.plan + ')' : ''}`;
+                roleEl.innerText = `รหัส: ${currentViewer.std_id} • สถานะ: ${currentViewer.level || 'นักเรียน'}${currentViewer.plan && currentViewer.plan !== '-' ? ' (' + currentViewer.plan + ')' : ''}`;
             }
 
             const badgeEl = document.getElementById('viewerBadgeRole');
             if (badgeEl) {
                 badgeEl.innerText = currentViewer.role || (currentViewer.isAdminOrDj ? 'ADMIN' : 'STUDENT');
-            }
-        }
-
-        function onStdIdInput() {
-            if (needAlumniManualInput) {
-                needAlumniManualInput = false;
-                document.getElementById('alumniExtraFields').classList.add('hidden');
-            }
-        }
-
-        async function handleSmartVerify() {
-            const std_id = document.getElementById('bindStdId').value.replace(/\D/g, '').trim();
-            if (std_id.length !== 5) {
-                return Swal.fire({ icon: 'warning', title: 'กรุณากรอกรหัสนักเรียน 5 หลัก', confirmButtonColor: '#4C1D95', customClass: { popup: 'swal-glass' } });
-            }
-
-            let resolvedStudent = null;
-
-            if (!needAlumniManualInput) {
-                setLoader('กำลังตรวจสอบรายชื่อจากฐานข้อมูลโรงเรียน...');
-                const look = await callApi(API_RADIO_URL, { action: 'lookupStudentById', std_id });
-                hideLoader();
-
-                if (look && look.status === 'success' && look.student) {
-                    const s = look.student;
-                    const cf = await Swal.fire({
-                        title: 'ยืนยันข้อมูลผู้ใช้งาน',
-                        html: `
-                            <div class="text-left bg-purple-50 p-4 rounded-2xl border border-purple-100 text-xs space-y-1.5">
-                                <p><b>รหัสประจำตัว:</b> ${s.std_id}</p>
-                                <p><b>ชื่อ-นามสกุล:</b> ${s.prefix}${s.fname} ${s.lname}</p>
-                                <p><b>ระดับชั้น/สถานะ:</b> ${s.level}${s.room && s.room !== '-' ? '/' + s.room : ''}</p>
-                                <p><b>แผนการเรียน:</b> ${s.plan || '-'}</p>
-                            </div>
-                        `,
-                        showCancelButton: true,
-                        confirmButtonText: 'ยืนยันและเข้าใช้งาน',
-                        cancelButtonText: 'ไม่ใช่ฉัน',
-                        confirmButtonColor: '#4C1D95',
-                        customClass: { popup: 'swal-glass' }
-                    });
-                    if (!cf.isConfirmed) return;
-                    resolvedStudent = s;
-                } else {
-                    needAlumniManualInput = true;
-                    document.getElementById('alumniPreviewId').innerText = std_id;
-                    document.getElementById('alumniExtraFields').classList.remove('hidden');
-                    document.getElementById('alumniFname').focus();
-                    return;
-                }
-            } else {
-                const prefix = document.getElementById('alumniPrefix').value;
-                const fname = document.getElementById('alumniFname').value.trim();
-                const lname = document.getElementById('alumniLname').value.trim();
-                const gradYear = document.getElementById('alumniGradYear').value.trim() || '68';
-                if (!fname || !lname) {
-                    return Swal.fire({ icon: 'warning', title: 'กรุณากรอกชื่อและนามสกุลจริง', confirmButtonColor: '#4C1D95', customClass: { popup: 'swal-glass' } });
-                }
-                resolvedStudent = {
-                    std_id,
-                    prefix,
-                    fname,
-                    lname,
-                    level: `ศิษย์เก่า รุ่น ${gradYear}`,
-                    room: '-',
-                    plan: '-'
-                };
-            }
-
-            setLoader('กำลังเข้าสู่ระบบคลังพอร์ตโฟลิโอ...');
-            try {
-                const bindRes = await callApi(API_RADIO_URL, {
-                    action: 'confirmBindLine',
-                    std_id: resolvedStudent.std_id,
-                    isAlumni: needAlumniManualInput,
-                    prefix: resolvedStudent.prefix,
-                    fname: resolvedStudent.fname,
-                    lname: resolvedStudent.lname
-                });
-
-                const viewerObj = (bindRes && bindRes.status === 'success' && bindRes.linkedUser)
-                    ? bindRes.linkedUser
-                    : {
-                        std_id: resolvedStudent.std_id,
-                        prefix: resolvedStudent.prefix,
-                        fname: resolvedStudent.fname,
-                        lname: resolvedStudent.lname,
-                        fullName: `${resolvedStudent.prefix}${resolvedStudent.fname} ${resolvedStudent.lname}`.trim(),
-                        level: resolvedStudent.level || 'นักเรียน',
-                        room: resolvedStudent.room || '-',
-                        plan: resolvedStudent.plan || '-',
-                        isAdminOrDj: resolvedStudent.std_id === '29903'
-                    };
-
-                currentViewer = viewerObj;
-                saveUnifiedViewer(viewerObj);
-                hideLoader();
-                await loadPortfolioData();
-            } catch (err) {
-                hideLoader();
-                Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: err.message, customClass: { popup: 'swal-glass' } });
-            }
-        }
-
-        async function searchPortStudentByName() {
-            const { value: kw } = await Swal.fire({
-                title: 'ค้นหารหัสนักเรียนจากชื่อ',
-                input: 'text',
-                inputPlaceholder: 'พิมพ์ชื่อจริง หรือ นามสกุล',
-                showCancelButton: true,
-                confirmButtonText: 'ค้นหา',
-                cancelButtonText: 'ยกเลิก',
-                confirmButtonColor: '#4C1D95',
-                customClass: { popup: 'swal-glass' }
-            });
-            if (!kw) return;
-            setLoader('กำลังค้นหารายชื่อ...');
-            const res = await callApi(API_RADIO_URL, { action: 'searchStudentByName', keyword: kw });
-            hideLoader();
-            if (!res.matches || res.matches.length === 0) {
-                return Swal.fire({ icon: 'info', title: 'ไม่พบรายชื่อในระบบปีปัจจุบัน', text: 'หากคุณเป็นรุ่นพี่ศิษย์เก่า สามารถพิมพ์รหัสนักเรียน 5 หลักแล้วกรอกชื่อ-นามสกุลได้เลยครับ', customClass: { popup: 'swal-glass' } });
-            }
-            const first = res.matches[0];
-            document.getElementById('bindStdId').value = first.std_id;
-            onStdIdInput();
-            Swal.fire({
-                icon: 'success',
-                title: `พบรหัส ${first.std_id}`,
-                text: `${first.prefix}${first.fname} ${first.lname} (${first.level}) กดปุ่มตรวจสอบและเข้าใช้งานได้เลย`,
-                confirmButtonColor: '#4C1D95',
-                customClass: { popup: 'swal-glass' }
-            });
-        }
-
-        async function promptUnlinkPort() {
-            const confirm = await Swal.fire({
-                title: currentViewer ? currentViewer.fullName : 'ข้อมูลผู้ใช้งาน',
-                html: `<p class="text-xs text-gray-500">รหัสประจำตัว: <b>${currentViewer ? currentViewer.std_id : '-'}</b> (${currentViewer ? currentViewer.level : '-'})<br>ต้องการสลับบัญชีรหัสนักเรียนหรือไม่?</p>`,
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonText: 'สลับบัญชีรหัสนักเรียน',
-                cancelButtonText: 'ปิดหน้าต่าง',
-                confirmButtonColor: '#EF4444',
-                customClass: { popup: 'swal-glass' }
-            });
-            if (confirm.isConfirmed) {
-                clearUnifiedViewer();
-                currentViewer = null;
-                needAlumniManualInput = false;
-                const btnUnlink = document.getElementById('btnUnlinkPort');
-                if (btnUnlink) {
-                    btnUnlink.classList.add('hidden');
-                    btnUnlink.classList.remove('flex');
-                }
-                document.getElementById('bindStdId').value = '';
-                document.getElementById('alumniExtraFields').classList.add('hidden');
-                showScreen('link-screen');
             }
         }
 

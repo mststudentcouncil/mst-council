@@ -317,7 +317,7 @@
                         <span id="pass-sid" class="font-black text-mstYellow text-sm">-</span>
                     </div>
                     <div>
-                        <span class="text-[10px] text-purple-200 font-semibold block">ระดับชั้น / รุ่น</span>
+                        <span class="text-[10px] text-purple-200 font-semibold block">สถานะ</span>
                         <span id="pass-class" class="font-black text-white text-sm">-</span>
                     </div>
                     <div class="min-w-0">
@@ -590,7 +590,7 @@
 
             document.getElementById('user-avatar').src = currentUser.linePic || 'https://mstsc.pages.dev/logo.webp';
             document.getElementById('user-fullname').innerText = currentUser.fullName;
-            document.getElementById('user-meta').innerText = `${currentUser.std_id} • ${roomDisplay}`;
+            document.getElementById('user-meta').innerText = `รหัส: ${currentUser.std_id} • สถานะ: ${roomDisplay}`;
 
             document.getElementById('pass-fullname').innerText = currentUser.fullName;
             document.getElementById('pass-sid').innerText = currentUser.std_id;
