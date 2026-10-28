@@ -326,8 +326,7 @@
     <script>
         const API_BASE_URL = "https://admission-backend-592123078141.asia-southeast1.run.app/api/radio";
         const LIFF_ID = "2008923798-TRND2m0M";
-        const PORT_USER_CACHE_KEY = "mstsc_portfolio_viewer_v3";
-        const UNIFIED_USER_CACHE_KEY = "mstsc_unified_user";
+        const UNIFIED_CACHE_KEYS = ["mstsc_student_viewer", "mstsc_portfolio_viewer_v3", "mstsc_unified_user"];
 
         let lineAccessToken = "";
         let currentUser = null;
@@ -348,8 +347,7 @@
         }
 
         function getSavedUnifiedViewer() {
-            const keys = [PORT_USER_CACHE_KEY, UNIFIED_USER_CACHE_KEY];
-            for (const key of keys) {
+            for (const key of UNIFIED_CACHE_KEYS) {
                 try {
                     const raw = localStorage.getItem(key);
                     if (!raw) continue;
@@ -363,8 +361,15 @@
         function saveUnifiedViewer(userObj) {
             if (!userObj || !userObj.std_id) return;
             const str = JSON.stringify(userObj);
-            localStorage.setItem(PORT_USER_CACHE_KEY, str);
-            localStorage.setItem(UNIFIED_USER_CACHE_KEY, str);
+            UNIFIED_CACHE_KEYS.forEach(k => {
+                try { localStorage.setItem(k, str); } catch (e) {}
+            });
+        }
+
+        function clearUnifiedViewer() {
+            UNIFIED_CACHE_KEYS.forEach(k => {
+                try { localStorage.removeItem(k); } catch (e) {}
+            });
         }
 
         function showScreen(screenId) {
@@ -382,6 +387,10 @@
         }
 
         async function apiCall(payload) {
+            if (window.liff && liff.isLoggedIn()) {
+                const latestToken = liff.getAccessToken();
+                if (latestToken) lineAccessToken = latestToken;
+            }
             const savedViewer = getSavedUnifiedViewer();
             const res = await fetch(`${API_BASE_URL}?t=${Date.now()}`, {
                 method: 'POST',
@@ -413,7 +422,7 @@
             await refreshRadioData(true);
             hideLoader();
             setInterval(() => {
-                if (!document.hidden) refreshRadioData(false);
+                if (!document.hidden && currentUser) refreshRadioData(false);
             }, 10000);
         }
 
@@ -427,7 +436,9 @@
         async function refreshRadioData(isInitial = false) {
             try {
                 const data = await apiCall({ action: 'initRadio', isPcAdminLogin: false });
-                if (data.status !== 'success' || !data.linkedUser) {
+                if (data.status !== 'success' || !data.linkedUser || !data.linkedUser.std_id) {
+                    currentUser = null;
+                    clearUnifiedViewer();
                     if (currentScreenId !== 'link-screen') showScreen('link-screen');
                     return;
                 }
@@ -451,100 +462,6 @@
             }
         }
 
-        async function verifyAndBindStudent() {
-            const std_id = document.getElementById('input-sid').value.trim();
-            if (std_id.length !== 5) {
-                return Swal.fire({ icon: 'warning', title: 'กรุณากรอกรหัสนักเรียน 5 หลัก', customClass: { popup: 'swal-glass' } });
-            }
-            setLoader('กำลังตรวจสอบรายชื่อนักเรียน...');
-            const res = await apiCall({ action: 'lookupStudentById', std_id });
-            hideLoader();
-
-            if (res.status !== 'success') {
-                return Swal.fire({ icon: 'error', title: 'ไม่พบรหัสนักเรียน', text: res.message, customClass: { popup: 'swal-glass' } });
-            }
-
-            const stu = res.student;
-            const confirm = await Swal.fire({
-                title: 'ยืนยันข้อมูลนักเรียน',
-                html: `
-                    <div class="text-left bg-purple-50 p-4 rounded-2xl border border-purple-100 text-xs space-y-1.5">
-                        <p><b>รหัสประจำตัว:</b> ${stu.std_id}</p>
-                        <p><b>ชื่อ-นามสกุล:</b> ${stu.prefix}${stu.fname} ${stu.lname}</p>
-                        <p><b>ระดับชั้น:</b> ${stu.level}${stu.room && stu.room !== '-' ? '/' + stu.room : ''}</p>
-                        <p><b>แผนการเรียน:</b> ${stu.plan || '-'}</p>
-                    </div>
-                `,
-                showCancelButton: true,
-                confirmButtonText: 'ยืนยันและเข้าสู่ระบบ',
-                cancelButtonText: 'ยกเลิก',
-                confirmButtonColor: '#4C1D95',
-                customClass: { popup: 'swal-glass' }
-            });
-
-            if (confirm.isConfirmed) {
-                setLoader('กำลังเข้าสู่ระบบ...');
-                const bindRes = await apiCall({ action: 'confirmBindLine', std_id: stu.std_id });
-                if (bindRes.status === 'success') {
-                    if (bindRes.linkedUser) saveUnifiedViewer(bindRes.linkedUser);
-                    await refreshRadioData(true);
-                    hideLoader();
-                } else {
-                    hideLoader();
-                    Swal.fire({ icon: 'error', title: 'ผูกบัญชีไม่สำเร็จ', text: bindRes.message, customClass: { popup: 'swal-glass' } });
-                }
-            }
-        }
-
-        async function searchStudentByNameModal() {
-            const { value: kw } = await Swal.fire({
-                title: 'ค้นหารหัสนักเรียนจากชื่อ',
-                input: 'text',
-                inputPlaceholder: 'พิมพ์ชื่อจริง หรือ นามสกุล',
-                showCancelButton: true,
-                confirmButtonText: 'ค้นหา',
-                cancelButtonText: 'ยกเลิก',
-                confirmButtonColor: '#4C1D95',
-                customClass: { popup: 'swal-glass' }
-            });
-            if (!kw) return;
-            setLoader('กำลังค้นหารายชื่อ...');
-            const res = await apiCall({ action: 'searchStudentByName', keyword: kw });
-            hideLoader();
-            if (!res.matches || res.matches.length === 0) {
-                return Swal.fire({ icon: 'info', title: 'ไม่พบรายชื่อที่ค้นหา', customClass: { popup: 'swal-glass' } });
-            }
-            const first = res.matches[0];
-            document.getElementById('input-sid').value = first.std_id;
-            Swal.fire({
-                icon: 'success',
-                title: `พบรหัส ${first.std_id}`,
-                text: `${first.prefix}${first.fname} ${first.lname} (${first.level}${first.room && first.room !== '-' ? '/' + first.room : ''}) กดปุ่มตรวจสอบข้อมูลได้เลย`,
-                confirmButtonColor: '#4C1D95',
-                customClass: { popup: 'swal-glass' }
-            });
-        }
-
-        async function promptUnlink() {
-            const confirm = await Swal.fire({
-                icon: 'warning',
-                title: 'สลับบัญชีรหัสนักเรียน?',
-                text: 'ต้องการยกเลิกการผูกบัญชีกับรหัสนักเรียนปัจจุบันหรือไม่',
-                showCancelButton: true,
-                confirmButtonText: 'ยืนยันยกเลิก',
-                cancelButtonText: 'ปิด',
-                confirmButtonColor: '#EF4444',
-                customClass: { popup: 'swal-glass' }
-            });
-            if (confirm.isConfirmed) {
-                setLoader('กำลังยกเลิกการผูกบัญชี...');
-                localStorage.removeItem(PORT_USER_CACHE_KEY);
-                localStorage.removeItem(UNIFIED_USER_CACHE_KEY);
-                await apiCall({ action: 'unlinkLineAccount' });
-                location.reload();
-            }
-        }
-
         function renderStationStatus(st) {
             if (!st) return;
             const badge = document.getElementById('stationStatusBadge');
@@ -555,16 +472,28 @@
             const pct = Math.min(100, Math.round(((st.currentCount || 0) / (st.dailyQuota || 20)) * 100));
             document.getElementById('quotaProgressBar').style.width = `${pct}%`;
 
+            const isAlumniRole = Boolean(currentUser && (currentUser.canRequestSong === false || currentUser.role === 'Alumni' || currentUser.role === 'SC_Alumni'));
+
             if (st.isOpen) {
                 badge.className = "px-3 py-1.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-700 border border-emerald-200 shrink-0 flex items-center gap-1.5";
                 badge.innerHTML = `<i class="fa-solid fa-circle text-[7px] animate-ping"></i> เปิดรับเพลง`;
-                btn.disabled = false;
-                btn.classList.remove('opacity-40', 'cursor-not-allowed');
             } else {
                 badge.className = "px-3 py-1.5 rounded-full text-[10px] font-black bg-rose-100 text-rose-600 border border-rose-200 shrink-0 flex items-center gap-1.5";
                 badge.innerHTML = `<i class="fa-solid fa-lock text-[8px]"></i> ปิดรับเพลง`;
+            }
+
+            if (isAlumniRole) {
+                btn.disabled = false;
+                btn.className = "bg-white/20 text-white font-bold px-3.5 py-3 rounded-2xl text-[11px] shrink-0 flex items-center gap-1.5 border border-white/20 transition";
+                btn.innerHTML = `<i class="fa-solid fa-user-graduate text-mstYellow"></i> โหมดศิษย์เก่า`;
+            } else if (st.isOpen) {
+                btn.disabled = false;
+                btn.className = "bg-mstYellow hover:bg-amber-400 text-mstDark font-black px-4 py-3.5 rounded-2xl text-xs shrink-0 flex items-center gap-1.5 shadow-lg transition active:scale-95";
+                btn.innerHTML = `<i class="fa-solid fa-plus-circle text-sm"></i> ขอเพลง`;
+            } else {
                 btn.disabled = true;
-                btn.classList.add('opacity-40', 'cursor-not-allowed');
+                btn.className = "bg-mstYellow text-mstDark font-black px-4 py-3.5 rounded-2xl text-xs shrink-0 flex items-center gap-1.5 opacity-40 cursor-not-allowed";
+                btn.innerHTML = `<i class="fa-solid fa-plus-circle text-sm"></i> ขอเพลง`;
             }
         }
 
@@ -706,12 +635,11 @@
         }
 
         function openRequestScreen() {
-            // ตรวจสอบสิทธิ์: ศิษย์เก่า (Alumni / SC_Alumni) เข้าดูคิวเพลงได้ แต่ขอเพลงไม่ได้
             if (currentUser && (currentUser.canRequestSong === false || currentUser.role === 'Alumni' || currentUser.role === 'SC_Alumni')) {
                 return Swal.fire({
                     icon: 'info',
-                    title: 'สงวนสิทธิ์เฉพาะนักเรียนปัจจุบัน',
-                    text: 'รุ่นพี่ศิษย์เก่าสามารถเข้าชมคิวเพลงและชาร์ตเพลงฮิตได้ แต่การขอเพลงเสียงตามสายสงวนสิทธิ์เฉพาะนักเรียนปัจจุบัน (ม.1 - ม.6) ครับ',
+                    title: 'โหมดรับชมสำหรับศิษย์เก่า',
+                    text: 'รุ่นพี่ศิษย์เก่าสามารถรับชมคิวเพลงและชาร์ตเพลงฮิตได้ แต่การส่งคำขอเพลงเสียงตามสายสงวนสิทธิ์เฉพาะนักเรียนปัจจุบัน (ม.1 - ม.6) ครับ',
                     confirmButtonColor: '#4C1D95',
                     customClass: { popup: 'swal-glass' }
                 });

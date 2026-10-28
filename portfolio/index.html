@@ -474,8 +474,51 @@
         const API_RADIO_URL = "https://admission-backend-592123078141.asia-southeast1.run.app/api/radio";
         const MYTCAS_COURSES_URL = "https://my-tcas.s3.ap-southeast-1.amazonaws.com/mytcas/courses.json";
         const LIFF_ID = "2008923798-LmKWCP2j";
-        const PORT_USER_CACHE_KEY = "mstsc_portfolio_viewer_v3";
-        const UNIFIED_USER_CACHE_KEY = "mstsc_unified_user";
+        const UNIFIED_CACHE_KEYS = ["mstsc_student_viewer", "mstsc_portfolio_viewer_v3", "mstsc_unified_user"];
+
+        function getSavedViewer() {
+            for (const key of UNIFIED_CACHE_KEYS) {
+                try {
+                    const raw = localStorage.getItem(key);
+                    if (!raw) continue;
+                    const parsed = JSON.parse(raw);
+                    if (parsed && parsed.std_id) return parsed;
+                } catch (e) {}
+            }
+            return null;
+        }
+
+        function saveUnifiedViewer(viewerObj) {
+            if (!viewerObj || !viewerObj.std_id) return;
+            const str = JSON.stringify(viewerObj);
+            UNIFIED_CACHE_KEYS.forEach(k => {
+                try { localStorage.setItem(k, str); } catch (e) {}
+            });
+        }
+
+        function clearUnifiedViewer() {
+            UNIFIED_CACHE_KEYS.forEach(k => {
+                try { localStorage.removeItem(k); } catch (e) {}
+            });
+        }
+
+        async function callApi(url, payload) {
+            if (window.liff && liff.isLoggedIn()) {
+                const latestToken = liff.getAccessToken();
+                if (latestToken) lineAccessToken = latestToken;
+            }
+            const savedViewer = getSavedViewer();
+            const res = await fetch(`${url}?t=${Date.now()}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    ...payload,
+                    lineAccessToken,
+                    savedViewer: savedViewer || undefined
+                })
+            });
+            return await res.json();
+        }
 
         let lineAccessToken = "";
         let currentViewer = null;

@@ -442,8 +442,12 @@
       navBox.classList.remove('hidden');
       navBox.classList.add('flex');
 
-      document.getElementById('showLoggedInAdmin').innerText = `ผู้ดูแล: ${res.adminName}`;
-      document.getElementById('flexSenderLabel').value = `สภานักเรียน • ${res.adminName.split(' ')[0]}`;
+      const nick = (res.adminNickname || '').trim();
+      const shortFirstName = (res.adminName || '').replace(/^(นาย|นางสาว|น\.ส\.|ด\.ช\.|ด\.ญ\.)\s*/, '').split(' ')[0];
+      const displaySender = nick || shortFirstName || 'แอดมิน';
+
+      document.getElementById('showLoggedInAdmin').innerText = `ผู้ดูแล: ${res.adminName}${nick ? ' (' + nick + ')' : ''}`;
+      document.getElementById('flexSenderLabel').value = `สภานักเรียน • ${displaySender}`;
 
       threads = res.threads || [];
       botSettings = res.settings || {};
