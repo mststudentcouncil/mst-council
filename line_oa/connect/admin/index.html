@@ -114,6 +114,15 @@
         <p class="text-xs text-gray-500 mt-0.5">ใช้อีเมลสภานักเรียน (@mst.ac.th) ที่ลงทะเบียนในระบบ REGIS</p>
       </div>
 
+      <div class="grid grid-cols-2 gap-1.5 bg-gray-100 p-1 rounded-xl text-xs font-bold">
+        <button type="button" id="loginTabGoogle" onclick="switchLoginTab('google')" class="py-2 rounded-lg bg-mstPurple text-white transition">
+          <i class="fa-brands fa-google mr-1"></i> อีเมลสภานักเรียน
+        </button>
+        <button type="button" id="loginTabRegis" onclick="switchLoginTab('regis')" class="py-2 rounded-lg text-gray-600 transition">
+          <i class="fa-solid fa-id-card mr-1"></i> รหัสนักเรียน REGIS
+        </button>
+      </div>
+
       <!-- แท็บที่ 1: Google Sign-In -->
       <div id="loginBoxGoogle" class="space-y-3 py-2">
         <div class="flex justify-center">
@@ -124,9 +133,26 @@
           <div class="g_id_signin" data-type="standard" data-shape="pill" data-theme="filled_blue" data-text="signin_with" data-size="large" data-logo_alignment="left"></div>
         </div>
         <p class="text-[11px] text-gray-500 leading-relaxed">
-          รองรับอีเมลกรรมการสภานักเรียน <b class="text-mstPurple">@mst.ac.th</b> ทุกท่าน
+          รองรับอีเมลกรรมการสภา <b class="text-mstPurple">@mst.ac.th</b> ทุกท่าน และ <b class="text-mstPurple">studentcouncil@mst.ac.th</b>
         </p>
       </div>
+
+      <!-- แท็บที่ 2: REGIS 2FA -->
+      <form id="loginBoxRegis" onsubmit="handleRegisLogin(event)" class="hidden space-y-3 text-left">
+        <div>
+          <label class="block text-xs font-bold text-gray-700 mb-1">รหัสประจำตัวนักเรียน (5 หลัก)</label>
+          <input type="tel" id="admStdId" maxlength="5" placeholder="เช่น 29903" class="form-input text-center text-base font-black tracking-widest">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-gray-700 mb-1">เลขประจำตัวประชาชน 13 หลัก (ใน REGIS)</label>
+          <input type="password" id="admIdCard" maxlength="13" inputmode="numeric" placeholder="เลขบัตรประชาชน 13 หลัก" class="form-input text-center text-sm font-bold tracking-widest">
+        </div>
+        <button type="submit" id="btnLogin" class="w-full bg-gradient-to-r from-mstPurple to-purple-800 text-white font-bold py-3.5 rounded-xl text-xs shadow-md">
+          <i class="fa-solid fa-shield-check text-mstYellow mr-1"></i> ยืนยันสิทธิ์และเปิดกระดานแชท
+        </button>
+      </form>
+    </div>
+  </div>
 
   <!-- ========================================================= -->
   <!-- VIEW 1: กระดานแชทและตัวสร้างการ์ด Flex Message ยืดหยุ่น -->
