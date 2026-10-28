@@ -677,14 +677,16 @@
                     <div class="text-left space-y-2.5 text-xs mt-2">
                         <div>
                             <label class="font-bold text-gray-600 block mb-1">รหัสประจำตัวนักเรียน 5 หลัก *</label>
-                            <input id="sw-alumni-sid" type="tel" maxlength="5" class="glass-input text-sm py-2.5" placeholder="เช่น 65123">
+                            <input id="sw-alumni-sid" type="tel" maxlength="5" class="glass-input text-sm py-2.5" placeholder="เช่น 12345"
+                                oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 5)">
                         </div>
                         <div class="grid grid-cols-3 gap-2">
                             <div>
                                 <label class="font-bold text-gray-600 block mb-1">คำนำหน้า</label>
                                 <select id="sw-alumni-prefix" class="glass-input text-sm py-2.5 px-2">
+                                    <option value="---เลือก">---เลือก---</option>
                                     <option value="นาย">นาย</option>
-                                    <option value="นางสาว">นางสาว</option>
+                                    <option value="น.ส.">น.ส.</option>
                                 </select>
                             </div>
                             <div class="col-span-2">
@@ -697,8 +699,9 @@
                             <input id="sw-alumni-lname" type="text" class="glass-input text-sm py-2.5" placeholder="นามสกุล">
                         </div>
                         <div>
-                            <label class="font-bold text-gray-600 block mb-1">แผนการเรียน / รุ่นปีการศึกษา *</label>
+                            <label class="font-bold text-gray-600 block mb-1">แผนการเรียน *</label>
                             <select id="sw-alumni-plan" class="glass-input text-sm py-2.5">
+                                <option value="---เลือก">---เลือก---</option>
                                 <option value="ห้องเรียนพิเศษ: S.M.">ห้องเรียนพิเศษ: วิทยาศาสตร์ - คณิตศาสตร์</option>
                                 <option value="ห้องเรียนพิเศษ: S.M.T.">ห้องเรียนพิเศษ: วิทยาศาสตร์ - คณิตศาสตร์ - เทคโนโลยี</option>
                                 <option value="ห้องเรียนพิเศษ: S.M.E.">ห้องเรียนพิเศษ: วิทยาศาสตร์ - คณิตศาสตร์ - ภาษาอังกฤษ</option>
@@ -710,7 +713,7 @@
                         </div>
                         <div>
                             <label class="font-bold text-gray-600 block mb-1">ระบุรุ่นปีการศึกษา (พ.ศ.)</label>
-                            <input id="sw-alumni-year" type="text" class="glass-input text-sm py-2.5" placeholder="เช่น 2567">
+                            <input id="sw-alumni-year" type="text" class="glass-input text-sm py-2.5" placeholder="เช่น 2568">
                         </div>
                     </div>
                 `,
