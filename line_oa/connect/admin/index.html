@@ -3,15 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <meta name="theme-color" content="#4C1D95">
+  <meta name="theme-color" content="#FFFFFF">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="MSTSC Chat">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <link rel="manifest" href="https://ai-line-oa.studentcouncil-f38.workers.dev/?manifest=1">
-  <link rel="apple-touch-icon" href="/logo.webp">
-  <link rel="icon" type="image/webp" href="/logo.webp">
+  <link rel="apple-touch-icon" href="/line_oa/MSTSC_CHAT.png">
+  <link rel="icon" type="image/webp" href="/line_oa/MSTSC_CHAT.png">
   <title>MSTSC Connect Admin - ระบบจัดการแชทและบอทสภานักเรียน</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -38,28 +38,37 @@
     }
   </script>
   <style>
-    .hidden { display: none !important; }
-    * { -webkit-tap-highlight-color: transparent; }
+    * {
+      -webkit-tap-highlight-color: transparent;
+      box-sizing: border-box;
+    }
 
     html, body {
-      font-family: 'Anuphan', sans-serif;
+      font-family: 'Anuphan', -apple-system, BlinkMacSystemFont, sans-serif;
       background: linear-gradient(135deg, #f3e5f5 0%, #f8fafc 50%, #fffde7 100%);
       color: #1E293B;
       margin: 0;
       padding: 0;
-      height: 100%;
+      width: 100%;
       height: 100dvh;
       overflow: hidden;
       overscroll-behavior: none;
+      -webkit-font-smoothing: antialiased;
     }
 
-    /* Safe Area Support for iPhone / iPad Standalone PWA */
-    .safe-top { padding-top: env(safe-area-inset-top, 0px); }
-    .safe-bottom { padding-bottom: env(safe-area-inset-bottom, 0px); }
-    .safe-pb-composer { padding-bottom: max(0.65rem, env(safe-area-inset-bottom, 0.65rem)); }
+    /* Safe Area Support สำหรับ iPhone / iPad (บังคับ !important ไม่ให้ Tailwind ทับ) */
+    .safe-top {
+      padding-top: env(safe-area-inset-top, 0px) !important;
+    }
+    .safe-bottom {
+      padding-bottom: env(safe-area-inset-bottom, 0px) !important;
+    }
+    .safe-pb-composer {
+      padding-bottom: calc(0.5rem + env(safe-area-inset-bottom, 0px)) !important;
+    }
 
     .glass {
-      background: rgba(255, 255, 255, 0.92);
+      background: rgba(255, 255, 255, 0.94);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
       border: 1px solid rgba(255, 255, 255, 0.95);
@@ -88,6 +97,9 @@
       box-shadow: 0 0 0 3px rgba(76, 29, 149, 0.12);
     }
 
+    .custom-scroll {
+      -webkit-overflow-scrolling: touch;
+    }
     .custom-scroll::-webkit-scrollbar { width: 5px; height: 5px; }
     .custom-scroll::-webkit-scrollbar-track { background: transparent; }
     .custom-scroll::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 999px; }
@@ -102,7 +114,7 @@
     .badge-pulse { animation: pulseSubtle 2s infinite ease-in-out; }
   </style>
 </head>
-<body class="flex flex-col h-full w-full select-none sm:select-auto">
+<body class="flex flex-col w-full select-none sm:select-auto">
 
   <!-- ========================================================= -->
   <!-- TOP NAVBAR (ซ่อนอัตโนมัติบนมือถือเมื่ออยู่ในห้องแชทเพื่อให้ได้พื้นที่เต็มจอ) -->
@@ -112,15 +124,15 @@
       <!-- Brand -->
       <div class="flex items-center gap-2.5 min-w-0">
         <div class="relative shrink-0">
-          <img src="/logo.webp" class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl object-contain bg-white p-0.5 shadow-xs border border-purple-100" alt="MSTSC">
+          <img src="/line_oa/MSTSC_CHAT.png" class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl object-contain bg-white p-0.5 shadow-sm border border-purple-100" alt="MSTSC">
           <span id="liveSyncDot" class="w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-white absolute -bottom-0.5 -right-0.5" title="เชื่อมต่อระบบเรียลไทม์"></span>
         </div>
         <div class="min-w-0">
           <div class="flex items-center gap-1.5">
             <h1 class="font-black text-mstPurple text-sm sm:text-base tracking-tight truncate">MSTSC CONNECT</h1>
-            <span class="bg-mstYellow text-mstDark text-[9px] font-black px-2 py-0.5 rounded-full shrink-0 shadow-2xs">OA ADMIN</span>
+            <span class="bg-mstYellow text-mstDark text-[9px] font-black px-2 py-0.5 rounded-full shrink-0 shadow-sm">OA ADMIN</span>
           </div>
-          <p class="text-[10px] text-gray-500 font-bold truncate" id="showLoggedInAdmin">ระบบแชทและบอทสภานักเรียน</p>
+          <p class="text-[11px] text-gray-500 font-bold truncate" id="showLoggedInAdmin">ระบบแชทและบอทสภานักเรียน</p>
         </div>
       </div>
 
@@ -128,10 +140,10 @@
       <div id="navAdminBox" class="hidden items-center gap-1.5 sm:gap-2 shrink-0">
         <!-- Desktop / Tablet View Switcher -->
         <div class="hidden md:flex bg-purple-950/5 p-1 rounded-xl text-xs font-bold border border-purple-100/60">
-          <button onclick="switchMainView('chat')" id="tabBtnChat" class="px-3.5 py-1.5 rounded-lg bg-mstPurple text-white shadow-xs transition flex items-center gap-1.5">
+          <button onclick="switchMainView('chat')" id="tabBtnChat" class="px-3.5 py-1.5 rounded-lg bg-mstPurple text-white shadow-sm transition flex items-center gap-1.5">
             <i class="fa-solid fa-comments"></i>
             <span>ห้องแชท</span>
-            <span id="navUnreadBadge" class="hidden bg-red-500 text-white text-[10px] font-black px-1.5 py-0.2 rounded-full">0</span>
+            <span id="navUnreadBadge" class="hidden bg-red-500 text-white text-[10px] font-black px-1.5 py-0.5 rounded-full leading-none">0</span>
           </button>
           <button onclick="switchMainView('settings')" id="tabBtnSettings" class="px-3.5 py-1.5 rounded-lg text-gray-600 hover:text-mstPurple transition flex items-center gap-1.5">
             <i class="fa-solid fa-sliders"></i>
@@ -169,7 +181,7 @@
   <div id="loginModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-50 flex items-center justify-center p-4 overflow-y-auto">
     <div class="glass p-6 sm:p-8 rounded-[2.25rem] w-full max-w-md text-center space-y-4 my-auto border border-white shadow-2xl">
       <div class="relative inline-block">
-        <img src="/logo.webp" class="w-16 h-16 mx-auto object-contain drop-shadow-sm bg-white rounded-2xl p-1.5 border border-purple-100" alt="MSTSC">
+        <img src="/line_oa/MSTSC_CHAT.png" class="w-16 h-16 mx-auto object-contain drop-shadow-sm bg-white rounded-2xl p-1.5 border border-purple-100" alt="MSTSC">
         <span class="absolute -bottom-1 -right-1 bg-mstYellow text-mstDark text-[9px] font-black px-2 py-0.5 rounded-full border border-white">SSO</span>
       </div>
 
@@ -180,7 +192,7 @@
       </div>
 
       <div class="grid grid-cols-2 gap-1.5 bg-gray-100/90 p-1 rounded-2xl text-xs font-bold">
-        <button type="button" id="loginTabGoogle" onclick="switchLoginTab('google')" class="py-2.5 rounded-xl bg-mstPurple text-white shadow-xs transition">
+        <button type="button" id="loginTabGoogle" onclick="switchLoginTab('google')" class="py-2.5 rounded-xl bg-mstPurple text-white shadow-sm transition">
           <i class="fa-brands fa-google mr-1"></i> อีเมลสภานักเรียน
         </button>
         <button type="button" id="loginTabRegis" onclick="switchLoginTab('regis')" class="py-2.5 rounded-xl text-gray-600 hover:text-mstPurple transition">
@@ -227,12 +239,12 @@
   <!-- ========================================================= -->
   <!-- VIEW 1: CHAT WORKSPACE (APP-SHELL SPLIT VIEW / MOBILE SLIDE) -->
   <!-- ========================================================= -->
-  <main id="chatWorkspace" class="hidden flex-1 flex overflow-hidden max-w-[1600px] w-full mx-auto md:px-4 md:py-3 md:gap-4 relative">
+  <main id="chatWorkspace" class="hidden flex-1 min-h-0 flex overflow-hidden max-w-[1600px] w-full mx-auto md:px-4 md:py-3 md:gap-4 relative">
 
     <!-- ------------------------------------------------------- -->
     <!-- LEFT PANE: INBOX THREAD LIST (เต็มจอบนมือถือ / Sidebar บน iPad & PC) -->
     <!-- ------------------------------------------------------- -->
-    <aside id="inboxPane" class="w-full md:w-80 lg:w-96 shrink-0 glass md:rounded-[1.75rem] flex flex-col h-full overflow-hidden border-0 md:border">
+    <aside id="inboxPane" class="w-full md:w-80 lg:w-96 shrink-0 glass md:rounded-[1.75rem] flex flex-col h-full min-h-0 overflow-hidden border-0 md:border">
       <!-- Inbox Header & Search -->
       <div class="p-3.5 sm:p-4 border-b border-gray-100 space-y-2.5 shrink-0 bg-white/60">
         <div class="flex items-center justify-between">
@@ -260,8 +272,8 @@
 
         <!-- Filter Tabs (All / Waiting Human / Unread / AI) -->
         <div class="grid grid-cols-4 gap-1 bg-slate-100 p-1 rounded-xl text-[11px] font-extrabold">
-          <button type="button" onclick="setInboxFilter('all')" id="filterBtn_all" class="py-1.5 rounded-lg bg-white text-mstPurple shadow-2xs transition truncate">
-            ทั้งหมด <span id="count_all" class="text-[9px] opacity-75"></span>
+          <button type="button" onclick="setInboxFilter('all')" id="filterBtn_all" class="py-1.5 rounded-lg bg-white text-mstPurple shadow-sm transition truncate flex items-center justify-center gap-1">
+            <span>ทั้งหมด</span> <span id="count_all" class="text-[9px] opacity-75"></span>
           </button>
           <button type="button" onclick="setInboxFilter('human')" id="filterBtn_human" class="py-1.5 rounded-lg text-gray-600 hover:text-mstPurple transition truncate flex items-center justify-center gap-1">
             <span>รอสภาฯ</span>
@@ -271,20 +283,20 @@
             <span>ไม่อ่าน</span>
             <span id="count_unread" class="hidden bg-rose-500 text-white text-[9px] px-1.5 rounded-full">0</span>
           </button>
-          <button type="button" onclick="setInboxFilter('ai')" id="filterBtn_ai" class="py-1.5 rounded-lg text-gray-600 hover:text-mstPurple transition truncate">
-            AI ดูแล
+          <button type="button" onclick="setInboxFilter('ai')" id="filterBtn_ai" class="py-1.5 rounded-lg text-gray-600 hover:text-mstPurple transition truncate flex items-center justify-center gap-1">
+            <span>AI ดูแล</span>
           </button>
         </div>
       </div>
 
       <!-- Threads Scrollable List -->
-      <div id="threadsListBox" class="flex-1 overflow-y-auto custom-scroll p-2.5 space-y-1.5"></div>
+      <div id="threadsListBox" class="flex-1 min-h-0 overflow-y-auto custom-scroll p-2.5 space-y-1.5"></div>
     </aside>
 
     <!-- ------------------------------------------------------- -->
     <!-- RIGHT PANE: ACTIVE CHAT ROOM & FLEX COMPOSER            -->
     <!-- ------------------------------------------------------- -->
-    <section id="chatRoomPane" class="hidden md:flex flex-1 glass md:rounded-[1.75rem] flex-col h-full overflow-hidden border-0 md:border relative">
+    <section id="chatRoomPane" class="hidden md:flex flex-1 min-h-0 glass md:rounded-[1.75rem] flex-col h-full overflow-hidden border-0 md:border relative">
 
       <!-- Empty State (เมื่อยังไม่ได้เลือกห้องแชทบน iPad / PC) -->
       <div id="emptyChatState" class="my-auto p-6 text-center max-w-md mx-auto space-y-4">
@@ -310,48 +322,50 @@
       </div>
 
       <!-- Active Chat Container -->
-      <div id="activeChatBox" class="hidden flex-col h-full w-full overflow-hidden">
+      <div id="activeChatBox" class="hidden flex-col h-full min-h-0 w-full overflow-hidden">
 
-        <!-- 1. Chat Room Header (รองรับปุ่มย้อนกลับบนมือถือ + Safe Area) -->
-        <div class="bg-white/95 backdrop-blur-md px-3 sm:px-4 py-2.5 border-b border-gray-200/80 flex items-center justify-between gap-2 shrink-0 z-20 safe-top">
-          <div class="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-            <!-- Mobile Back Button -->
-            <button type="button" onclick="closeMobileChatPane()" class="md:hidden w-9 h-9 rounded-xl bg-purple-50 active:bg-purple-100 text-mstPurple flex items-center justify-center shrink-0 relative">
-              <i class="fa-solid fa-chevron-left text-sm"></i>
-              <span id="mobileBackUnreadDot" class="hidden w-2.5 h-2.5 rounded-full bg-rose-500 border border-white absolute -top-0.5 -right-0.5"></span>
-            </button>
+        <!-- 1. Chat Room Header (แยกชั้น safe-top ออกจาก h-14 เพื่อไม่ให้จมใต้แถบเวลา iOS) -->
+        <div id="chatRoomHeader" class="bg-white/95 backdrop-blur-md border-b border-gray-200/80 shrink-0 z-20 safe-top">
+          <div class="px-3 sm:px-4 h-14 sm:h-16 flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+              <!-- Mobile Back Button -->
+              <button type="button" onclick="closeMobileChatPane()" class="md:hidden w-9 h-9 rounded-xl bg-purple-50 active:bg-purple-100 text-mstPurple flex items-center justify-center shrink-0 relative border border-purple-100/80">
+                <i class="fa-solid fa-chevron-left text-sm"></i>
+                <span id="mobileBackUnreadDot" class="hidden w-2.5 h-2.5 rounded-full bg-rose-500 border border-white absolute -top-0.5 -right-0.5"></span>
+              </button>
 
-            <!-- Avatar -->
-            <div class="relative shrink-0 cursor-pointer" onclick="openUserInfoModal()" title="ดูข้อมูลผู้ติดต่อ">
-              <img id="activeUserPic" src="/logo.webp" class="w-10 h-10 rounded-full object-cover border-2 border-mstYellow shadow-2xs" onerror="this.src='/logo.webp'">
-              <span id="activeModeDot" class="w-3 h-3 rounded-full bg-emerald-500 border-2 border-white absolute bottom-0 right-0"></span>
-            </div>
-
-            <!-- User Name & Status -->
-            <div class="min-w-0 flex-1 cursor-pointer" onclick="openUserInfoModal()">
-              <div class="flex items-center gap-1.5">
-                <h4 id="activeUserName" class="text-sm font-black text-gray-900 truncate">-</h4>
-                <i class="fa-solid fa-circle-info text-[11px] text-gray-400 hover:text-mstPurple shrink-0"></i>
+              <!-- Avatar -->
+              <div class="relative shrink-0 cursor-pointer" onclick="openUserInfoModal()" title="ดูข้อมูลผู้ติดต่อ">
+                <img id="activeUserPic" src="/line_oa/MSTSC_CHAT.png" class="w-10 h-10 rounded-full object-cover border-2 border-mstYellow shadow-sm" onerror="this.src='/line_oa/MSTSC_CHAT.png'">
+                <span id="activeModeDot" class="w-3 h-3 rounded-full bg-emerald-500 border-2 border-white absolute bottom-0 right-0"></span>
               </div>
-              <p id="activeUserStatus" class="text-[10px] font-bold text-mstPurple truncate">-</p>
+
+              <!-- User Name & Status -->
+              <div class="min-w-0 flex-1 cursor-pointer" onclick="openUserInfoModal()">
+                <div class="flex items-center gap-1.5">
+                  <h4 id="activeUserName" class="text-sm font-black text-gray-900 truncate">-</h4>
+                  <i class="fa-solid fa-circle-info text-[11px] text-gray-400 hover:text-mstPurple shrink-0"></i>
+                </div>
+                <p id="activeUserStatus" class="text-[10px] font-bold text-mstPurple truncate">-</p>
+              </div>
             </div>
-          </div>
 
-          <!-- Header Action Buttons -->
-          <div class="flex items-center gap-1.5 shrink-0">
-            <button type="button" onclick="toggleThreadMode()" id="btnToggleThreadMode" class="px-2.5 sm:px-3 py-1.5 rounded-xl text-[11px] font-black border transition active:scale-95"></button>
+            <!-- Header Action Buttons -->
+            <div class="flex items-center gap-1.5 shrink-0">
+              <button type="button" onclick="toggleThreadMode()" id="btnToggleThreadMode" class="px-2.5 sm:px-3 py-1.5 rounded-xl text-[11px] font-black border transition active:scale-95"></button>
 
-            <button type="button" onclick="copyDirectChatLink()" class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gray-100 hover:bg-purple-50 text-gray-600 hover:text-mstPurple flex items-center justify-center text-xs transition" title="คัดลอกลิงก์ห้องแชทนี้ส่งให้เพื่อนแอดมิน">
-              <i class="fa-solid fa-share-nodes"></i>
-            </button>
+              <button type="button" onclick="copyDirectChatLink()" class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gray-100 hover:bg-purple-50 text-gray-600 hover:text-mstPurple flex items-center justify-center text-xs transition" title="คัดลอกลิงก์ห้องแชทนี้ส่งให้เพื่อนแอดมิน">
+                <i class="fa-solid fa-share-nodes"></i>
+              </button>
+            </div>
           </div>
         </div>
 
         <!-- 2. Messages Stream Area -->
-        <div id="messagesContainer" onscroll="handleMessagesScroll()" class="flex-1 overflow-y-auto custom-scroll chat-bg-pattern p-3 sm:p-4 space-y-3 relative"></div>
+        <div id="messagesContainer" onscroll="handleMessagesScroll()" class="flex-1 min-h-0 overflow-y-auto custom-scroll chat-bg-pattern p-3 sm:p-4 space-y-3.5 relative"></div>
 
         <!-- Floating Scroll-to-Bottom Button -->
-        <button type="button" id="btnScrollBottom" onclick="scrollToBottom(true)" class="hidden absolute right-4 bottom-36 z-20 bg-mstPurple text-white shadow-lg px-3 py-1.5 rounded-full text-[11px] font-black items-center gap-1.5 border border-purple-300/40 hover:bg-purple-800 transition">
+        <button type="button" id="btnScrollBottom" onclick="scrollToBottom(true)" class="hidden absolute right-4 bottom-32 z-20 bg-mstPurple text-white shadow-lg px-3.5 py-1.5 rounded-full text-[11px] font-black items-center gap-1.5 border border-purple-300/40 hover:bg-purple-800 transition">
           <i class="fa-solid fa-arrow-down animate-bounce"></i>
           <span>ข้อความล่าสุด</span>
         </button>
@@ -359,14 +373,14 @@
         <!-- 3. Smart Composer & Collapsible Flex Card Studio -->
         <form onsubmit="sendFlexReply(event)" class="bg-white border-t border-gray-200/90 px-3 sm:px-4 pt-2 safe-pb-composer shrink-0 z-20 space-y-2 shadow-[0_-4px_20px_rgba(0,0,0,0.03)]">
 
-          <!-- 3.1 Collapsible Flex Card Studio Drawer (ซ่อนเป็นค่าเริ่มต้นเพื่อประหยัดพื้นที่หน้าจอมือถือ/iPad) -->
-          <div id="flexStudioDrawer" class="hidden bg-purple-50/70 border border-purple-200/80 rounded-2xl p-3 space-y-3 transition-all max-h-[46vh] overflow-y-auto custom-scroll">
-            <div class="flex items-center justify-between border-b border-purple-200/60 pb-2">
-              <div class="flex items-center gap-1.5">
-                <span class="w-6 h-6 rounded-lg bg-mstPurple text-mstYellow flex items-center justify-center text-xs"><i class="fa-solid fa-wand-magic-sparkles"></i></span>
-                <span class="text-xs font-black text-mstPurple">ตั้งค่าหัวการ์ด LINE Flex & ปุ่มแนบท้าย</span>
+          <!-- 3.1 Collapsible Flex Card Studio Drawer -->
+          <div id="flexStudioDrawer" class="hidden bg-purple-50/70 border border-purple-200/80 rounded-2xl p-3 space-y-3 transition-all max-h-[42vh] overflow-y-auto custom-scroll">
+            <div class="flex items-center justify-between border-b border-purple-200/60 pb-2 gap-2">
+              <div class="flex items-center gap-1.5 min-w-0">
+                <span class="w-6 h-6 rounded-lg bg-mstPurple text-mstYellow flex items-center justify-center text-xs shrink-0"><i class="fa-solid fa-wand-magic-sparkles"></i></span>
+                <span class="text-xs font-black text-mstPurple truncate">ตั้งค่าหัวการ์ด LINE Flex & ปุ่มแนบท้าย</span>
               </div>
-              <div class="flex items-center gap-1">
+              <div class="flex items-center gap-1 shrink-0">
                 <!-- Quick Card Title Presets -->
                 <select onchange="applyCardPreset(this.value); this.value='';" class="text-[10px] font-bold bg-white border border-purple-200 text-mstPurple rounded-lg px-2 py-1 outline-none">
                   <option value="">✨ รูปแบบหัวการ์ดด่วน...</option>
@@ -412,7 +426,7 @@
                   <button type="button" onclick="addButtonRow('แจ้งเรื่องร้องเรียน', 'https://liff.line.me/2008923798-7EBZdt6r')" class="text-[10px] font-bold bg-purple-50 hover:bg-purple-100 border border-purple-200 text-mstPurple px-2 py-0.5 rounded-md transition">+ ร้องเรียน</button>
                   <button type="button" onclick="addButtonRow('ระบบขอเพลง Smart Radio', 'https://liff.line.me/2008923798-TRND2m0M')" class="text-[10px] font-bold bg-purple-50 hover:bg-purple-100 border border-purple-200 text-mstPurple px-2 py-0.5 rounded-md transition">+ ขอเพลง</button>
                   <button type="button" onclick="addButtonRow('เปิดคลัง Portfolio', 'https://liff.line.me/2008923798-LmKWCP2j')" class="text-[10px] font-bold bg-purple-50 hover:bg-purple-100 border border-purple-200 text-mstPurple px-2 py-0.5 rounded-md transition">+ พอร์ตโฟลิโอ</button>
-                  <button type="button" onclick="addButtonRow('', '')" class="text-[10px] font-black bg-mstPurple text-white px-2 py-0.5 rounded-md shadow-2xs">+ กำหนดปุ่มเอง</button>
+                  <button type="button" onclick="addButtonRow('', '')" class="text-[10px] font-black bg-mstPurple text-white px-2 py-0.5 rounded-md shadow-sm">+ กำหนดปุ่มเอง</button>
                 </div>
               </div>
               <div id="customButtonsContainer" class="space-y-1.5"></div>
@@ -421,60 +435,60 @@
 
           <!-- 3.2 Quick Canned Replies Horizontal Bar -->
           <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
-            <button type="button" onclick="addCannedReplyPrompt()" class="text-[10px] font-black bg-amber-100/80 hover:bg-amber-200 text-amber-900 px-2.5 py-1 rounded-lg shrink-0 flex items-center gap-1 transition" title="เพิ่มข้อความตอบกลับด่วนใหม่">
+            <button type="button" onclick="addCannedReplyPrompt()" class="text-[10px] font-black bg-amber-100/90 hover:bg-amber-200 text-amber-900 px-2.5 py-1 rounded-lg shrink-0 flex items-center gap-1 transition" title="เพิ่มข้อความตอบกลับด่วนใหม่">
               <i class="fa-solid fa-bolt text-amber-600"></i>
               <span>+ ตอบด่วน</span>
             </button>
             <div id="cannedRepliesBar" class="flex items-center gap-1.5 shrink-0"></div>
           </div>
 
-          <!-- 3.3 Compact Control Toolbar (Card Customizer Toggle, Format Helpers, Handoff AI Checkbox, Preview) -->
-          <div class="flex items-center justify-between gap-1.5 flex-wrap text-[11px]">
-            <div class="flex items-center gap-1 sm:gap-1.5 flex-wrap">
+          <!-- 3.3 Single-Line Compact Control Toolbar (ไม่ตกบรรทัดซ้อนกันบนมือถือ) -->
+          <div class="flex items-center justify-between gap-1.5 overflow-x-auto no-scrollbar py-0.5 text-[11px] whitespace-nowrap">
+            <div class="flex items-center gap-1.5 shrink-0">
               <!-- Toggle Flex Studio Button -->
-              <button type="button" onclick="toggleFlexStudioDrawer()" id="btnToggleStudio" class="px-2.5 py-1 rounded-lg bg-purple-50 hover:bg-purple-100 text-mstPurple border border-purple-200 font-extrabold flex items-center gap-1.5 transition">
+              <button type="button" onclick="toggleFlexStudioDrawer()" id="btnToggleStudio" class="px-2.5 py-1 rounded-lg bg-purple-50 hover:bg-purple-100 text-mstPurple border border-purple-200 font-extrabold flex items-center gap-1.5 transition shrink-0">
                 <i class="fa-solid fa-sliders text-[10px]"></i>
-                <span id="studioSummaryText" class="truncate max-w-[140px] sm:max-w-[200px]">หัวการ์ด & ปุ่ม</span>
-                <span id="studioBtnCountBadge" class="bg-mstPurple text-white text-[9px] font-black px-1.5 py-0.2 rounded-full">1 ปุ่ม</span>
+                <span id="studioSummaryText" class="truncate max-w-[115px] sm:max-w-[180px]">ข้อความจากสภา</span>
+                <span id="studioBtnCountBadge" class="bg-mstPurple text-white text-[9px] font-black px-1.5 py-0.5 rounded-full leading-none">1 ปุ่ม</span>
               </button>
 
               <!-- Quick Bullet / Numbering Helpers -->
-              <button type="button" onclick="insertTextFormat('- ')" class="px-2 py-1 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-[10px] transition" title="แทรกรายการจุดสีเหลือง">
+              <button type="button" onclick="insertTextFormat('- ')" class="px-2 py-1 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-[10px] transition shrink-0" title="แทรกรายการจุดสีเหลือง">
                 • จุดย่อย
               </button>
-              <button type="button" onclick="insertTextFormat('1. ')" class="px-2 py-1 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-[10px] transition" title="แทรกหัวข้อตัวหนา">
+              <button type="button" onclick="insertTextFormat('1. ')" class="px-2 py-1 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-[10px] transition shrink-0" title="แทรกหัวข้อตัวหนา">
                 1. หัวข้อ
               </button>
 
               <!-- Preview Flex Button -->
-              <button type="button" onclick="openFlexPreviewModal()" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-purple-50 text-gray-700 hover:text-mstPurple font-bold flex items-center gap-1 transition">
+              <button type="button" onclick="openFlexPreviewModal()" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-purple-50 text-gray-700 hover:text-mstPurple font-bold flex items-center gap-1 transition shrink-0">
                 <i class="fa-regular fa-eye"></i>
                 <span class="hidden sm:inline">พรีวิว</span>
               </button>
             </div>
 
             <!-- Close Human Mode Checkbox -->
-            <label class="flex items-center gap-1.5 text-[11px] font-extrabold text-gray-600 hover:text-mstPurple cursor-pointer bg-gray-50 px-2.5 py-1 rounded-lg border border-gray-200/80">
+            <label class="flex items-center gap-1.5 text-[10px] sm:text-[11px] font-extrabold text-gray-600 hover:text-mstPurple cursor-pointer bg-gray-50 px-2.5 py-1 rounded-lg border border-gray-200/80 shrink-0">
               <input type="checkbox" id="chkCloseHumanMode" class="w-3.5 h-3.5 accent-mstPurple rounded">
-              <span>ส่งแล้วสลับให้ AI ดูแลต่อ</span>
+              <span>ส่งแล้วให้ AI ดูแลต่อ</span>
             </label>
           </div>
 
-          <!-- 3.4 Main Chat Input & Send Button (เหมือนแอปแชททั่วไป) -->
+          <!-- 3.4 Main Chat Input & Send Button -->
           <div class="flex items-end gap-2">
-            <div class="flex-1 relative">
+            <div class="flex-1 relative min-w-0">
               <textarea
                 id="flexReplyText"
-                rows="2"
+                rows="1"
                 required
                 oninput="autoResizeChatInput(this)"
                 onkeydown="handleChatInputKeydown(event)"
-                placeholder="พิมพ์ข้อความตอบกลับ... (ขึ้นต้นบรรทัดด้วย - เพื่อทำจุดย่อย หรือ 1. เพื่อทำหัวข้อตัวหนา)"
-                class="form-input py-2.5 px-3.5 text-xs sm:text-sm leading-relaxed resize-none max-h-36 overflow-y-auto custom-scroll rounded-2xl bg-slate-50 focus:bg-white"
+                placeholder="พิมพ์ข้อความตอบกลับ... (- จุดย่อย / 1. หัวข้อ)"
+                class="form-input py-2.5 px-3.5 text-xs sm:text-sm leading-relaxed resize-none min-h-[42px] max-h-32 overflow-y-auto custom-scroll rounded-2xl bg-slate-50 focus:bg-white block"
               ></textarea>
             </div>
 
-            <button type="submit" id="btnSendFlex" class="h-11 sm:h-12 px-4 sm:px-5 rounded-2xl bg-gradient-to-r from-mstPurple to-purple-800 hover:from-purple-800 hover:to-mstPurple text-mstYellow font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition active:scale-95 shrink-0">
+            <button type="submit" id="btnSendFlex" class="h-[42px] sm:h-11 px-4 sm:px-5 rounded-2xl bg-gradient-to-r from-mstPurple to-purple-800 hover:from-purple-800 hover:to-mstPurple text-mstYellow font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition active:scale-95 shrink-0">
               <i class="fa-solid fa-paper-plane"></i>
               <span class="hidden sm:inline">ส่งการ์ด</span>
             </button>
@@ -488,8 +502,8 @@
   <!-- ========================================================= -->
   <!-- VIEW 2: SETTINGS & AI KNOWLEDGE WORKSPACE                 -->
   <!-- ========================================================= -->
-  <section id="settingsWorkspace" class="hidden flex-1 overflow-y-auto custom-scroll px-3 sm:px-6 py-4 sm:py-6">
-    <div class="max-w-4xl mx-auto space-y-5 pb-20">
+  <section id="settingsWorkspace" class="hidden flex-1 min-h-0 overflow-y-auto custom-scroll px-3 sm:px-6 py-4 sm:py-6">
+    <div class="max-w-4xl mx-auto space-y-5 pb-24">
 
       <!-- Card 1: AI & Notification Controls -->
       <div class="glass rounded-[2rem] p-5 sm:p-7 space-y-5">
@@ -506,18 +520,18 @@
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-          <label class="flex items-center justify-between p-4 rounded-2xl bg-purple-50/70 border border-purple-100 cursor-pointer hover:bg-purple-50 transition">
-            <div class="pr-3">
+          <label class="flex items-center justify-between p-4 rounded-2xl bg-purple-50/70 border border-purple-100 cursor-pointer hover:bg-purple-50 transition gap-3">
+            <div class="min-w-0">
               <p class="text-xs font-black text-mstPurple">เปิดใช้งานระบบตอบกลับ AI อัตโนมัติ</p>
-              <p class="text-[11px] text-gray-500 mt-0.5">หากปิด ข้อความทั้งหมดจะถูกส่งเข้ากระดานแชทให้สภาฯ ตอบเอง</p>
+              <p class="text-[11px] text-gray-500 mt-0.5 leading-relaxed">หากปิด ข้อความทั้งหมดจะถูกส่งเข้ากระดานแชทให้สภาฯ ตอบเอง</p>
             </div>
             <input type="checkbox" id="cfgAiEnabled" checked class="w-5 h-5 accent-mstPurple rounded shrink-0">
           </label>
 
-          <label class="flex items-center justify-between p-4 rounded-2xl bg-blue-50/70 border border-blue-100 cursor-pointer hover:bg-blue-50 transition">
-            <div class="pr-3">
+          <label class="flex items-center justify-between p-4 rounded-2xl bg-blue-50/70 border border-blue-100 cursor-pointer hover:bg-blue-50 transition gap-3">
+            <div class="min-w-0">
               <p class="text-xs font-black text-blue-900">แจ้งเตือนเข้ากลุ่ม Telegram เมื่อมีคนเรียก</p>
-              <p class="text-[11px] text-gray-500 mt-0.5">ส่งลิงก์ลัดเข้ากลุ่ม Telegram ทันทีที่มีคนกดคุยกับสภา</p>
+              <p class="text-[11px] text-gray-500 mt-0.5 leading-relaxed">ส่งลิงก์ลัดเข้ากลุ่ม Telegram ทันทีที่มีคนกดคุยกับสภา</p>
             </div>
             <input type="checkbox" id="cfgTgEnabled" checked class="w-5 h-5 accent-mstPurple rounded shrink-0">
           </label>
@@ -529,18 +543,18 @@
               <i class="fa-solid fa-bullhorn text-mstYellow mr-1"></i> ข้อมูลประกาศด่วน / ความรู้เพิ่มเติมให้น้องคอนเนค AI (AI Custom Knowledge)
             </label>
           </div>
-          <p class="text-[11px] text-gray-500 mb-2">พิมพ์ข่าวประชาสัมพันธ์ กำหนดการกิจกรรมใหม่ หรือคำถามที่พบบ่อยในช่วงนี้ น้องคอนเนคจะนำข้อมูลในกล่องนี้ไปตอบนักเรียนทันที</p>
-          <textarea id="cfgCustomKnowledge" rows="5" class="form-input text-xs leading-relaxed" placeholder="ตัวอย่าง:&#10;- กิจกรรมเปิดบ้านวิชาการจัดวันที่ 15 พ.ย. 2569&#10;- ช่วงนี้เปิดรับสมัครค่ายอาสาสภานักเรียน สมัครได้ที่ห้องสภานักเรียน"></textarea>
+          <p class="text-[11px] text-gray-500 mb-2 leading-relaxed">พิมพ์ข่าวประชาสัมพันธ์ กำหนดการกิจกรรมใหม่ หรือคำถามที่พบบ่อยในช่วงนี้ น้องคอนเนคจะนำข้อมูลในกล่องนี้ไปตอบนักเรียนทันที</p>
+          <textarea id="cfgCustomKnowledge" rows="5" class="form-input text-xs leading-relaxed p-3" placeholder="ตัวอย่าง:&#10;- กิจกรรมเปิดบ้านวิชาการจัดวันที่ 15 พ.ย. 2569&#10;- ช่วงนี้เปิดรับสมัครค่ายอาสาสภานักเรียน สมัครได้ที่ห้องสภานักเรียน"></textarea>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label class="block text-xs font-black text-gray-700 mb-1">ข้อความต้อนรับเมื่อมีคนกดแอดเพื่อนใหม่ (Follow)</label>
-            <textarea id="cfgWelcomeMsg" rows="5" class="form-input text-xs leading-relaxed"></textarea>
+            <label class="block text-xs font-black text-gray-700 mb-1.5">ข้อความต้อนรับเมื่อมีคนกดแอดเพื่อนใหม่ (Follow)</label>
+            <textarea id="cfgWelcomeMsg" rows="5" class="form-input text-xs leading-relaxed p-3"></textarea>
           </div>
           <div>
-            <label class="block text-xs font-black text-gray-700 mb-1">ข้อความตอบรับเมื่อผู้ใช้กด "คุยกับสภา"</label>
-            <textarea id="cfgHandoffMsg" rows="5" class="form-input text-xs leading-relaxed"></textarea>
+            <label class="block text-xs font-black text-gray-700 mb-1.5">ข้อความตอบรับเมื่อผู้ใช้กด "คุยกับสภา"</label>
+            <textarea id="cfgHandoffMsg" rows="5" class="form-input text-xs leading-relaxed p-3"></textarea>
           </div>
         </div>
 
@@ -617,7 +631,7 @@
     <div class="glass rounded-[2rem] max-w-md w-full p-6 space-y-4 my-auto border border-white shadow-2xl">
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-3">
-          <img src="/logo.webp" class="w-12 h-12 rounded-2xl bg-white p-1 border border-purple-100 shadow-xs object-contain">
+          <img src="/line_oa/MSTSC_CHAT.png" class="w-12 h-12 rounded-2xl bg-white p-1 border border-purple-100 shadow-sm object-contain">
           <div>
             <h3 class="text-base font-black text-mstDark">ติดตั้งแอป MSTSC Connect</h3>
             <p class="text-[11px] text-gray-500 font-bold">ใช้งานเต็มจอเหมือนแอปแชททั่วไป</p>
@@ -679,6 +693,12 @@
     let isUserScrolledUp = false;
     let lastRenderedMsgCount = 0;
     let deferredPwaPrompt = null;
+
+    // ฟังก์ชันทำความสะอาดชื่อผู้ดูแลไม่ให้ซ้ำซ้อน เช่น "นายวิริทธิ์พล (นายวิริทธิ์พล สุบรรณ์)"
+    function cleanSenderDisplayName(rawName) {
+      if (!rawName) return 'สภานักเรียน';
+      return String(rawName).replace(/([^\s()]+)\s*\(\1[^)]*\)/g, '$1').trim();
+    }
 
     // ตรวจจับ Event สำหรับติดตั้ง PWA บน Chrome / Android / Desktop
     window.addEventListener('beforeinstallprompt', (e) => {
@@ -745,10 +765,10 @@
     function switchLoginTab(tab) {
       const isG = tab === 'google';
       document.getElementById('loginTabGoogle').className = isG
-        ? "py-2.5 rounded-xl bg-mstPurple text-white shadow-xs transition"
+        ? "py-2.5 rounded-xl bg-mstPurple text-white shadow-sm transition"
         : "py-2.5 rounded-xl text-gray-600 hover:text-mstPurple transition";
       document.getElementById('loginTabRegis').className = !isG
-        ? "py-2.5 rounded-xl bg-mstPurple text-white shadow-xs transition"
+        ? "py-2.5 rounded-xl bg-mstPurple text-white shadow-sm transition"
         : "py-2.5 rounded-xl text-gray-600 hover:text-mstPurple transition";
       document.getElementById('loginBoxGoogle').classList.toggle('hidden', !isG);
       document.getElementById('loginBoxRegis').classList.toggle('hidden', isG);
@@ -761,6 +781,7 @@
       const chatRoomPane = document.getElementById('chatRoomPane');
       const topNav = document.getElementById('mainTopNavbar');
       const mobNav = document.getElementById('mobileBottomNav');
+      const chatRoomHeader = document.getElementById('chatRoomHeader');
 
       if (!adminAuth) return;
 
@@ -779,6 +800,7 @@
           chatRoomPane.classList.add('flex');
           topNav.classList.add('hidden');
           mobNav.classList.add('hidden');
+          if (chatRoomHeader) chatRoomHeader.classList.add('safe-top');
         } else {
           // บนมือถือ เมื่ออยู่หน้ารายชื่อแชท
           inboxPane.classList.remove('hidden');
@@ -794,6 +816,7 @@
         chatRoomPane.classList.add('flex');
         topNav.classList.remove('hidden');
         mobNav.classList.add('hidden');
+        if (chatRoomHeader) chatRoomHeader.classList.remove('safe-top');
       }
     }
 
@@ -812,10 +835,10 @@
 
       // Desktop Tabs
       document.getElementById('tabBtnChat').className = isChat
-        ? "px-3.5 py-1.5 rounded-lg bg-mstPurple text-white shadow-xs transition flex items-center gap-1.5"
+        ? "px-3.5 py-1.5 rounded-lg bg-mstPurple text-white shadow-sm transition flex items-center gap-1.5"
         : "px-3.5 py-1.5 rounded-lg text-gray-600 hover:text-mstPurple transition flex items-center gap-1.5";
       document.getElementById('tabBtnSettings').className = !isChat
-        ? "px-3.5 py-1.5 rounded-lg bg-mstPurple text-white shadow-xs transition flex items-center gap-1.5"
+        ? "px-3.5 py-1.5 rounded-lg bg-mstPurple text-white shadow-sm transition flex items-center gap-1.5"
         : "px-3.5 py-1.5 rounded-lg text-gray-600 hover:text-mstPurple transition flex items-center gap-1.5";
 
       // Mobile Bottom Nav
@@ -885,11 +908,15 @@
         navBox.classList.remove('hidden');
         navBox.classList.add('flex');
 
-        const nick = (res.adminNickname || '').trim();
-        const shortFirstName = (res.adminName || '').replace(/^(นาย|นางสาว|น\.ส\.|ด\.ช\.|ด\.ญ\.)\s*/, '').split(' ')[0];
-        const displaySender = nick || shortFirstName || 'แอดมิน';
+        const fullName = (res.adminName || '').trim();
+        const rawNick = (res.adminNickname || '').trim();
+        const isRedundantNick = !rawNick || rawNick === fullName || fullName.includes(rawNick) || rawNick.includes(fullName);
+        const cleanNick = isRedundantNick ? '' : rawNick;
 
-        document.getElementById('showLoggedInAdmin').innerText = `ผู้ดูแล: ${res.adminName}${nick ? ' (' + nick + ')' : ''}`;
+        const shortFirstName = fullName.replace(/^(นาย|นางสาว|น\.ส\.|ด\.ช\.|ด\.ญ\.)\s*/, '').split(' ')[0];
+        const displaySender = cleanNick || shortFirstName || 'แอดมิน';
+
+        document.getElementById('showLoggedInAdmin').innerText = `ผู้ดูแล: ${fullName}${cleanNick ? ' (' + cleanNick + ')' : ''}`;
         document.getElementById('flexSenderLabel').value = `สภานักเรียน • ${displaySender}`;
 
         threads = res.threads || [];
@@ -1016,7 +1043,7 @@
         const btn = document.getElementById('filterBtn_' + f);
         if (!btn) return;
         if (f === filter) {
-          btn.className = "py-1.5 rounded-lg bg-white text-mstPurple shadow-2xs transition truncate flex items-center justify-center gap-1";
+          btn.className = "py-1.5 rounded-lg bg-white text-mstPurple shadow-sm transition truncate flex items-center justify-center gap-1";
         } else {
           btn.className = "py-1.5 rounded-lg text-gray-600 hover:text-mstPurple transition truncate flex items-center justify-center gap-1";
         }
@@ -1088,8 +1115,8 @@
         return `
           <div onclick="selectThread('${t.userId}', false)" class="p-3 rounded-2xl border cursor-pointer transition-all flex items-center gap-3 select-none active:scale-[0.99] ${
             isActive
-              ? 'bg-purple-50/95 border-mstPurple shadow-xs ring-1 ring-mstPurple/20'
-              : (hasUnread ? 'bg-white border-purple-200 shadow-2xs' : 'bg-white/80 border-gray-100 hover:bg-white hover:border-purple-200')
+              ? 'bg-purple-50/95 border-mstPurple shadow-sm ring-1 ring-mstPurple/20'
+              : (hasUnread ? 'bg-white border-purple-200 shadow-sm' : 'bg-white/80 border-gray-100 hover:bg-white hover:border-purple-200')
           }">
             <div class="relative shrink-0">
               <img src="${t.pictureUrl || '/logo.webp'}" class="w-11 h-11 rounded-full object-cover border ${isHuman ? 'border-amber-400' : 'border-gray-200'}" onerror="this.src='/logo.webp'">
@@ -1110,7 +1137,7 @@
               </div>
               <div class="flex items-center justify-between gap-2 mt-1">
                 <p class="text-[11px] ${hasUnread ? 'font-bold text-gray-900' : 'text-gray-500'} truncate">${escapeHtml(t.lastMessage || 'เริ่มการสนทนา...')}</p>
-                ${hasUnread ? `<span class="min-w-[20px] h-5 px-1.5 rounded-full bg-rose-500 text-white text-[10px] font-black flex items-center justify-center shrink-0 badge-pulse shadow-2xs">${t.unreadCount}</span>` : ''}
+                ${hasUnread ? `<span class="min-w-[20px] h-5 px-1.5 rounded-full bg-rose-500 text-white text-[10px] font-black flex items-center justify-center shrink-0 badge-pulse shadow-sm">${t.unreadCount}</span>` : ''}
               </div>
             </div>
           </div>
@@ -1237,7 +1264,7 @@
           lastDateLabel = dateLabel;
           htmlParts.push(`
             <div class="flex justify-center my-2">
-              <span class="bg-white/80 backdrop-blur-xs text-gray-500 text-[10px] font-extrabold px-3 py-1 rounded-full border border-purple-100 shadow-2xs">
+              <span class="bg-white/85 backdrop-blur-sm text-gray-500 text-[10px] font-extrabold px-3 py-1 rounded-full border border-purple-100 shadow-sm">
                 ${dateLabel}
               </span>
             </div>
@@ -1247,14 +1274,12 @@
         const isAdmin = m.sender === 'admin' || m.sender === 'bot';
         const isAiBot = (m.name || '').includes('AI') || (m.name || '').includes('คอนเนค');
         const timeStr = m.timestamp ? new Date(m.timestamp).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) : '';
+        const senderDisplay = cleanSenderDisplayName(m.name || (isAdmin ? 'สภานักเรียน' : th.displayName));
 
+        // แยก whitespace-normal ให้ปุ่มกดเพื่อไม่ให้สืบทอด whitespace-pre-wrap จนปุ่มบวมหรือไอคอนตกบรรทัด
         const btnsHtml = (m.buttons && m.buttons.length > 0)
-          ? '<div class="mt-2.5 pt-2 border-t border-white/20 flex flex-wrap gap-1.5">' +
-            m.buttons.map(b => `
-              <a href="${escapeHtml(b.url || '#')}" target="_blank" rel="noopener" class="text-[10px] font-black bg-mstYellow text-mstDark hover:brightness-105 px-2.5 py-1 rounded-full inline-flex items-center gap-1 shadow-2xs transition">
-                <i class="fa-solid fa-arrow-up-right-from-square text-[8px]"></i> ${escapeHtml(b.label)}
-              </a>
-            `).join('') +
+          ? '<div class="mt-2.5 pt-2.5 border-t border-white/20 flex flex-wrap gap-1.5 whitespace-normal">' +
+            m.buttons.map(b => `<a href="${escapeHtml(b.url || '#')}" target="_blank" rel="noopener" class="text-[11px] font-black bg-mstYellow text-mstDark hover:brightness-105 px-3 py-1.5 rounded-full inline-flex items-center justify-center gap-1.5 shadow-sm transition whitespace-nowrap leading-none"><i class="fa-solid fa-arrow-up-right-from-square text-[9px] shrink-0"></i><span>${escapeHtml(b.label)}</span></a>`).join('') +
             '</div>'
           : '';
 
@@ -1267,13 +1292,15 @@
                 <button type="button" onclick="copyMessageText(${idx})" class="opacity-0 group-hover:opacity-100 text-[10px] text-gray-400 hover:text-mstPurple transition" title="คัดลอกข้อความ">
                   <i class="fa-regular fa-copy"></i>
                 </button>
-                <span class="text-[10px] font-bold text-gray-400">${escapeHtml(m.name || 'สภานักเรียน')} • ${timeStr}</span>
+                <span class="text-[10px] font-bold text-gray-400">${escapeHtml(senderDisplay)} • ${timeStr}</span>
               </div>
-              <div class="max-w-[86%] sm:max-w-[75%] p-3.5 rounded-2xl rounded-tr-xs text-xs sm:text-[13px] leading-relaxed whitespace-pre-wrap break-words shadow-xs ${
+              <div class="max-w-[86%] sm:max-w-[75%] p-3.5 rounded-2xl rounded-tr-sm text-xs sm:text-[13px] shadow-sm ${
                 isAiBot
                   ? 'bg-gradient-to-br from-indigo-700 to-purple-800 text-white'
                   : 'bg-gradient-to-br from-mstPurple to-purple-900 text-white'
-              }">${safeText}${btnsHtml}</div>
+              }">
+                <div class="whitespace-pre-wrap break-words leading-relaxed">${safeText}</div>${btnsHtml}
+              </div>
             </div>
           `);
         } else {
@@ -1282,12 +1309,14 @@
               <img src="${th.pictureUrl || '/logo.webp'}" class="w-7 h-7 rounded-full object-cover border border-gray-200 shrink-0 mb-0.5" onerror="this.src='/logo.webp'">
               <div class="flex flex-col items-start max-w-[82%] sm:max-w-[72%]">
                 <div class="flex items-center gap-1.5 mb-1 px-1">
-                  <span class="text-[10px] font-bold text-gray-500">${escapeHtml(m.name || th.displayName)} • ${timeStr}</span>
+                  <span class="text-[10px] font-bold text-gray-500">${escapeHtml(senderDisplay)} • ${timeStr}</span>
                   <button type="button" onclick="copyMessageText(${idx})" class="opacity-0 group-hover:opacity-100 text-[10px] text-gray-400 hover:text-mstPurple transition" title="คัดลอกข้อความ">
                     <i class="fa-regular fa-copy"></i>
                   </button>
                 </div>
-                <div class="p-3.5 rounded-2xl rounded-tl-xs bg-white border border-gray-200/90 text-gray-800 text-xs sm:text-[13px] leading-relaxed whitespace-pre-wrap break-words shadow-2xs">${safeText}</div>
+                <div class="p-3.5 rounded-2xl rounded-tl-sm bg-white border border-gray-200/90 text-gray-800 text-xs sm:text-[13px] shadow-sm">
+                  <div class="whitespace-pre-wrap break-words leading-relaxed">${safeText}</div>
+                </div>
               </div>
             </div>
           `);
@@ -1440,7 +1469,7 @@
 
     function autoResizeChatInput(el) {
       el.style.height = 'auto';
-      el.style.height = Math.min(el.scrollHeight, 140) + 'px';
+      el.style.height = Math.min(el.scrollHeight, 128) + 'px';
     }
 
     function handleChatInputKeydown(e) {
@@ -1457,7 +1486,7 @@
       const val = ta.value;
       const needNewline = start > 0 && val[start - 1] !== '\n';
       const insertStr = (needNewline ? '\n' : '') + prefix;
-      ta.value = val.slice(0, start) + insertStr + val.slice( ta.selectionEnd );
+      ta.value = val.slice(0, start) + insertStr + val.slice(ta.selectionEnd);
       ta.focus();
       ta.selectionStart = ta.selectionEnd = start + insertStr.length;
       autoResizeChatInput(ta);
@@ -1473,7 +1502,7 @@
 
       const btnsPreviewHtml = btns.length > 0
         ? '<div class="mt-4 space-y-2">' + btns.map((b, i) => `
-            <div class="py-2.5 px-4 rounded-full text-center text-xs font-black ${i === 0 ? 'bg-mstYellow text-mstDark shadow-xs' : 'bg-purple-50 text-mstPurple border border-purple-200'}">${escapeHtml(b.label)}</div>
+            <div class="py-2.5 px-4 rounded-full text-center text-xs font-black ${i === 0 ? 'bg-mstYellow text-mstDark shadow-sm' : 'bg-purple-50 text-mstPurple border border-purple-200'}">${escapeHtml(b.label)}</div>
           `).join('') + '</div>'
         : '';
 
@@ -1494,7 +1523,7 @@
             </div>
             <span class="text-[10px] font-black bg-purple-100 text-mstPurple px-2.5 py-0.5 rounded-full">${escapeHtml(badge)}</span>
           </div>
-          <p class="text-xs text-gray-700 leading-relaxed whitespace-pre-wrap mt-3">${escapeHtml(text)}</p>
+          <p class="text-xs text-gray-700 leading-relaxed whitespace-pre-wrap break-words mt-3">${escapeHtml(text)}</p>
           ${btnsPreviewHtml}
         </div>
         <p class="text-[10px] font-bold text-center text-purple-800/60 mt-3">คณะกรรมการสภานักเรียนโรงเรียนเมืองสุราษฎร์ธานี</p>
@@ -1512,7 +1541,7 @@
 
       if (bar) {
         bar.innerHTML = list.map((item, idx) => `
-          <button type="button" onclick="insertCannedReply(${idx})" class="text-[10px] font-bold bg-white hover:bg-purple-50 text-gray-700 hover:text-mstPurple border border-gray-200 px-2.5 py-1 rounded-lg shrink-0 transition shadow-2xs">
+          <button type="button" onclick="insertCannedReply(${idx})" class="text-[10px] font-bold bg-white hover:bg-purple-50 text-gray-700 hover:text-mstPurple border border-gray-200 px-2.5 py-1 rounded-lg shrink-0 transition shadow-sm whitespace-nowrap">
             ${escapeHtml(item.title)}
           </button>
         `).join('');
@@ -1523,7 +1552,7 @@
           settingsList.innerHTML = `<p class="text-xs text-gray-400 font-bold col-span-full py-4 text-center">ยังไม่มีข้อความตอบกลับด่วน กดปุ่ม "+ เพิ่มข้อความใหม่" ด้านบนเพื่อสร้าง</p>`;
         } else {
           settingsList.innerHTML = list.map((item, idx) => `
-            <div class="p-3.5 rounded-2xl bg-white border border-purple-100 flex items-start justify-between gap-2 shadow-2xs">
+            <div class="p-3.5 rounded-2xl bg-white border border-purple-100 flex items-start justify-between gap-2 shadow-sm">
               <div class="min-w-0 flex-1">
                 <p class="text-xs font-black text-mstPurple truncate">${escapeHtml(item.title)}</p>
                 <p class="text-[11px] text-gray-600 line-clamp-2 mt-1 whitespace-pre-wrap">${escapeHtml(item.text)}</p>
