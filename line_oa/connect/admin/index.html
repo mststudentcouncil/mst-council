@@ -18,6 +18,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://unpkg.com/mqtt@5.3.5/dist/mqtt.min.js"></script>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 
   <script>
@@ -53,7 +54,6 @@
       box-sizing: border-box;
     }
 
-    /* ล็อก Document Root ไม่ให้เกิดการเลื่อนหน้าจอหลัก (ป้องกัน iOS Status Bar เบลอและป้องกันหน้าเว็บกระโดดเมื่อแป้นพิมพ์ขึ้น) */
     html, body {
       font-family: 'Anuphan', -apple-system, BlinkMacSystemFont, sans-serif;
       background-color: #FFFFFF;
@@ -70,7 +70,6 @@
       -webkit-text-size-adjust: 100%;
     }
 
-    /* โครงสร้างหลักของแอปที่ยืดหยุ่นตาม VisualViewport เป๊ะๆ ทุกเฟรม */
     #appShell {
       position: fixed;
       left: 0;
@@ -86,7 +85,6 @@
       padding-right: var(--safe-right);
     }
 
-    /* แถบป้องกันด้านบนเบลอ: ใช้พื้นหลังสีขาวทึบ 100% ไร้ backdrop-filter ซ้อนทับกับ Status Bar ของ iOS */
     .solid-header-surface {
       background-color: #FFFFFF !important;
       backdrop-filter: none !important;
@@ -95,12 +93,10 @@
       box-shadow: 0 2px 12px rgba(76, 29, 149, 0.04);
     }
 
-    /* ระยะปลอดภัยด้านบนสำหรับ iPhone / iPad (เพิ่มระยะกันชนกับ Status Bar ของ iOS) */
     .safe-top-bar {
       padding-top: var(--safe-top, 0px) !important;
     }
 
-    /* เมื่อแป้นพิมพ์เปิดบนมือถือ หากหน้าจอถูกดันหรือย่อ ให้รักษาความสะอาดของ Header */
     .safe-bottom-bar {
       padding-bottom: var(--safe-bottom, 0px) !important;
     }
@@ -110,7 +106,6 @@
       transition: padding-bottom 0.12s ease-out;
     }
 
-    /* เมื่อแป้นพิมพ์เด้งขึ้นมา ให้ตัด safe-area-inset-bottom ออกทันทีเพื่อไม่ให้มีช่องว่างสีขาวเหนือแป้นพิมพ์ */
     body.is-keyboard-open .safe-pb-composer {
       padding-bottom: 0.4rem !important;
     }
@@ -119,7 +114,6 @@
       display: none !important;
     }
 
-    /* ซ่อนปุ่มติดตั้งแอปอัตโนมัติทันทีเมื่อรันในโหมดติดตั้งแล้ว (PWA Standalone / Fullscreen) */
     @media all and (display-mode: standalone), all and (display-mode: fullscreen), all and (display-mode: minimal-ui) {
       .pwa-install-trigger {
         display: none !important;
@@ -129,7 +123,6 @@
       display: none !important;
     }
 
-    /* การ์ดแบบ Glass สำหรับเดสก์ท็อปและโมดอล (ไม่ใช้กับ Header บนสุดเพื่อป้องกันบั๊กเบลอบน iOS) */
     .glass-pane {
       background: rgba(255, 255, 255, 0.96);
       border: 1px solid rgba(255, 255, 255, 0.98);
@@ -150,7 +143,6 @@
       background-size: 20px 20px;
     }
 
-    /* ฟอร์มอินพุตมาตรฐาน */
     .form-input {
       background: #FFFFFF;
       border: 1px solid #CBD5E1;
@@ -167,7 +159,6 @@
       box-shadow: 0 0 0 3px rgba(76, 29, 149, 0.12);
     }
 
-    /* สำคัญมาก: บังคับ font-size 16px บนมือถือสำหรับทุก Input/Textarea/Select เพื่อไม่ให้ iOS ซูมหรือเลื่อนหน้าจอพังตอนแป้นพิมพ์ขึ้น */
     @media (max-width: 767px) {
       input.form-input,
       textarea.form-input,
@@ -180,7 +171,6 @@
       }
     }
 
-    /* ระบบ Scrollbar และการแยกการเลื่อนไม่ให้ซ้อนทับกัน (Scroll Containment) */
     .custom-scroll {
       -webkit-overflow-scrolling: touch;
       overscroll-behavior: contain;
@@ -206,7 +196,6 @@
     }
     .badge-pulse { animation: pulseSubtle 2s infinite ease-in-out; }
 
-    /* ไฮไลต์คำค้นหาในห้องแชท */
     mark.chat-highlight {
       background-color: #FDE047;
       color: #1E1B4B;
@@ -218,17 +207,11 @@
 </head>
 <body class="select-none sm:select-auto">
 
-  <!-- ========================================================= -->
-  <!-- ROOT FIXED APP SHELL (ควบคุมด้วย VisualViewport API)      -->
-  <!-- ========================================================= -->
   <div id="appShell">
 
-    <!-- ========================================================= -->
-    <!-- TOP NAVBAR (พื้นหลังขาวทึบ 100% ไม่เบลอทับ Status Bar)    -->
-    <!-- ========================================================= -->
+    <!-- TOP NAVBAR -->
     <header id="mainTopNavbar" class="solid-header-surface safe-top-bar z-30 shrink-0">
       <div class="max-w-[1600px] mx-auto px-3 sm:px-5 h-14 sm:h-16 flex items-center justify-between gap-2">
-        <!-- Brand -->
         <div class="flex items-center gap-2.5 min-w-0">
           <div class="relative shrink-0">
             <img src="/line_oa/MSTSC_CHAT.png" class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl object-contain bg-white p-0.5 shadow-sm border border-purple-100" alt="MSTSC" onerror="this.src='/logo.webp'">
@@ -237,15 +220,13 @@
           <div class="min-w-0">
             <div class="flex items-center gap-1.5">
               <h1 class="font-black text-mstPurple text-sm sm:text-base tracking-tight truncate">MSTSC CONNECT</h1>
-              <span class="bg-mstYellow text-mstDark text-[9px] font-black px-2 py-0.5 rounded-full shrink-0 shadow-sm">OA ADMIN</span>
+              <span class="bg-mstYellow text-mstDark text-[9px] font-black px-2 py-0.5 rounded-full shrink-0 shadow-sm">LINE OA</span>
             </div>
             <p class="text-[11px] text-gray-500 font-bold truncate" id="showLoggedInAdmin">ระบบแชทและบอทสภานักเรียน</p>
           </div>
         </div>
 
-        <!-- Right Controls -->
         <div id="navAdminBox" class="hidden items-center gap-1.5 sm:gap-2 shrink-0">
-          <!-- Desktop / Tablet View Switcher -->
           <div class="hidden md:flex bg-purple-950/5 p-1 rounded-xl text-xs font-bold border border-purple-100/60">
             <button type="button" onclick="switchMainView('chat')" id="tabBtnChat" class="px-3.5 py-1.5 rounded-lg bg-mstPurple text-white shadow-sm transition flex items-center gap-1.5">
               <i class="fa-solid fa-comments"></i>
@@ -258,23 +239,15 @@
             </button>
           </div>
 
-          <!-- Install App Button (PWA) - ซ่อนอัตโนมัติเมื่อติดตั้งเป็นแอปแล้ว -->
           <button type="button" onclick="openInstallAppModal()" id="btnInstallPwaTop" class="pwa-install-trigger px-2.5 py-1.5 h-9 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200/80 flex items-center gap-1.5 text-xs font-black transition" title="ติดตั้งเป็นแอปลงมือถือ / iPad / คอม">
             <i class="fa-solid fa-mobile-screen-button text-amber-600"></i>
             <span class="hidden lg:inline">ติดตั้งแอป</span>
           </button>
 
-          <!-- Sound Alert Toggle -->
           <button type="button" onclick="toggleSoundAlert()" id="btnSoundToggle" class="w-9 h-9 rounded-xl bg-purple-50 hover:bg-purple-100 text-mstPurple border border-purple-100 flex items-center justify-center text-xs transition" title="เปิด/ปิดเสียงแจ้งเตือน">
             <i class="fa-solid fa-volume-high"></i>
           </button>
 
-          <!-- Back to Main Admin Portal -->
-          <a href="/admin.html" class="hidden sm:flex w-9 h-9 rounded-xl bg-white hover:bg-gray-50 text-mstPurple border border-purple-100 items-center justify-center text-xs transition" title="กลับหน้าแอดมินหลัก">
-            <i class="fa-solid fa-shield-halved"></i>
-          </a>
-
-          <!-- Logout -->
           <button type="button" onclick="logoutChatAdmin()" class="w-9 h-9 rounded-xl bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-600 flex items-center justify-center text-xs transition" title="ออกจากระบบ">
             <i class="fa-solid fa-power-off"></i>
           </button>
@@ -282,16 +255,11 @@
       </div>
     </header>
 
-    <!-- ========================================================= -->
-    <!-- VIEW 1: CHAT WORKSPACE (SPLIT VIEW / MOBILE FULLSCREEN)   -->
-    <!-- ========================================================= -->
+    <!-- VIEW 1: CHAT WORKSPACE -->
     <main id="chatWorkspace" class="hidden flex-1 min-h-0 flex overflow-hidden max-w-[1600px] w-full mx-auto md:px-4 md:py-3 md:gap-4 relative">
 
-      <!-- ------------------------------------------------------- -->
-      <!-- LEFT PANE: INBOX THREAD LIST                            -->
-      <!-- ------------------------------------------------------- -->
+      <!-- LEFT PANE: INBOX THREAD LIST -->
       <aside id="inboxPane" class="w-full md:w-80 lg:w-96 shrink-0 glass-pane md:rounded-[1.75rem] flex flex-col h-full min-h-0 overflow-hidden border-0 md:border">
-        <!-- Inbox Header & Search -->
         <div class="p-3.5 sm:p-4 border-b border-gray-100 space-y-2.5 shrink-0 bg-white">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-2">
@@ -302,15 +270,14 @@
             </div>
             <div class="flex items-center gap-1.5">
               <span id="syncStatusLabel" class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/60 flex items-center gap-1">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> ออนไลน์
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> เรียลไทม์
               </span>
-              <button type="button" onclick="loadThreads(false)" id="btnRefreshThreads" class="w-8 h-8 rounded-xl bg-gray-100 hover:bg-purple-100 text-mstPurple text-xs flex items-center justify-center transition active:rotate-180" title="รีเฟรชข้อมูลล่าสุด">
+              <button type="button" onclick="loadThreads(false, true, 0)" id="btnRefreshThreads" class="w-8 h-8 rounded-xl bg-gray-100 hover:bg-purple-100 text-mstPurple text-xs flex items-center justify-center transition active:rotate-180" title="ซิงค์ข้อมูลทันที">
                 <i class="fa-solid fa-rotate-right"></i>
               </button>
             </div>
           </div>
 
-          <!-- Search Input -->
           <div class="relative">
             <i class="fa-solid fa-magnifying-glass text-gray-400 text-xs absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
             <input type="text" id="searchThreadInput" oninput="renderThreadsList()" placeholder="ค้นหาชื่อนักเรียน หรือข้อความ..." class="form-input pl-9 pr-8 py-2 text-xs bg-slate-50/90 focus:bg-white rounded-xl">
@@ -319,7 +286,6 @@
             </button>
           </div>
 
-          <!-- Filter Tabs (All / Waiting Human / Unread / AI) -->
           <div class="grid grid-cols-4 gap-1 bg-slate-100 p-1 rounded-xl text-[11px] font-extrabold">
             <button type="button" onclick="setInboxFilter('all')" id="filterBtn_all" class="py-1.5 rounded-lg bg-white text-mstPurple shadow-sm transition truncate flex items-center justify-center gap-1">
               <span>ทั้งหมด</span> <span id="count_all" class="text-[9px] opacity-75"></span>
@@ -338,16 +304,12 @@
           </div>
         </div>
 
-        <!-- Threads Scrollable List -->
         <div id="threadsListBox" class="flex-1 min-h-0 overflow-y-auto custom-scroll p-2.5 space-y-1.5 bg-white/50"></div>
       </aside>
 
-      <!-- ------------------------------------------------------- -->
-      <!-- RIGHT PANE: ACTIVE CHAT ROOM & FLEX COMPOSER            -->
-      <!-- ------------------------------------------------------- -->
+      <!-- RIGHT PANE: ACTIVE CHAT ROOM & FLEX COMPOSER -->
       <section id="chatRoomPane" class="hidden md:flex flex-1 min-h-0 glass-pane md:rounded-[1.75rem] flex-col h-full overflow-hidden border-0 md:border relative">
 
-        <!-- Empty State (เมื่อยังไม่ได้เลือกห้องแชทบน iPad / PC) -->
         <div id="emptyChatState" class="my-auto p-6 text-center max-w-md mx-auto space-y-4">
           <div class="w-20 h-20 rounded-3xl bg-gradient-to-br from-purple-100 to-amber-50 border border-purple-200/60 flex items-center justify-center mx-auto shadow-inner">
             <i class="fa-regular fa-comments text-4xl text-mstPurple"></i>
@@ -355,7 +317,7 @@
           <div class="space-y-1.5">
             <h3 class="text-base font-black text-mstDark">เลือกห้องสนทนาเพื่อเริ่มตอบกลับ</h3>
             <p class="text-xs text-gray-500 leading-relaxed">
-              ระบบรองรับการส่งการ์ด <b>LINE Flex Message</b> แบบปรับแต่งหัวข้อและปุ่มลิงก์ได้อิสระ พร้อมสลับโหมดทำงานร่วมกับ <b>น้องคอนเนค AI</b>
+              ระบบรองรับการส่งการ์ด <b>LINE Flex Message</b> แบบปรับแต่งหัวข้อและปุ่มลิงก์ได้อิสระ พร้อมสลับโหมดทำงานร่วมกับ <b>น้องคอนเนค AI</b> แบบเรียลไทม์
             </p>
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-left pt-2">
@@ -363,38 +325,33 @@
               <p class="text-[11px] font-black text-mstPurple"><i class="fa-solid fa-bolt text-mstYellow mr-1"></i>Reply Token 0 โควตา</p>
               <p class="text-[10px] text-gray-500 mt-0.5">ตอบกลับรวดเร็วโดยใช้โควตาข้อความฟรีอัตโนมัติ</p>
             </div>
-            <!-- ซ่อนการ์ดติดตั้งแอปเมื่ออยู่ในโหมดติดตั้งแล้ว และแสดงการ์ดฟีเจอร์แทน -->
             <div class="pwa-install-trigger p-3 rounded-2xl bg-amber-50/70 border border-amber-100 cursor-pointer hover:bg-amber-100/70 transition" onclick="openInstallAppModal()">
               <p class="text-[11px] font-black text-amber-900"><i class="fa-solid fa-mobile-screen mr-1"></i>ติดตั้งเป็นแอปได้</p>
               <p class="text-[10px] text-amber-800/80 mt-0.5">แตะเพื่อดูวิธีเพิ่มลงหน้าจอโฮมมือถือและ iPad</p>
             </div>
             <div class="p-3 rounded-2xl bg-emerald-50/70 border border-emerald-100">
-              <p class="text-[11px] font-black text-emerald-900"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i>บันทึกข้อความร่างอัตโนมัติ</p>
-              <p class="text-[10px] text-emerald-800/80 mt-0.5">สลับห้องแชทได้ทันทีโดยไม่สูญเสียข้อความที่พิมพ์ค้างไว้</p>
+              <p class="text-[11px] font-black text-emerald-900"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i>ซิงค์ข้อความเรียลไทม์</p>
+              <p class="text-[10px] text-emerald-800/80 mt-0.5">รับและส่งข้อความขึ้นหน้าจอทันทีด้วย Dual WebSocket + SSE</p>
             </div>
           </div>
         </div>
 
-        <!-- Active Chat Container -->
         <div id="activeChatBox" class="hidden flex-col h-full min-h-0 w-full overflow-hidden">
 
-          <!-- 1. Chat Room Header (พื้นหลังสีขาวทึบ 100% ตรึงอยู่ด้านบนเสมอแม้แป้นพิมพ์เด้งขึ้น) -->
+          <!-- 1. Chat Room Header -->
           <div id="chatRoomHeader" class="solid-header-surface shrink-0 z-20 safe-top-bar">
             <div class="px-2.5 sm:px-4 h-14 sm:h-16 flex items-center justify-between gap-1.5 sm:gap-2">
               <div class="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-                <!-- Mobile Back Button -->
                 <button type="button" onclick="closeMobileChatPane()" class="md:hidden w-9 h-9 rounded-xl bg-purple-50 active:bg-purple-100 text-mstPurple flex items-center justify-center shrink-0 relative border border-purple-100/80">
                   <i class="fa-solid fa-chevron-left text-sm"></i>
                   <span id="mobileBackUnreadDot" class="hidden w-2.5 h-2.5 rounded-full bg-rose-500 border border-white absolute -top-0.5 -right-0.5"></span>
                 </button>
 
-                <!-- Avatar -->
                 <div class="relative shrink-0 cursor-pointer" onclick="openUserInfoModal()" title="ดูข้อมูลผู้ติดต่อ">
                   <img id="activeUserPic" src="/line_oa/MSTSC_CHAT.png" class="w-9 h-9 sm:w-10 sm:h-10 rounded-full object-cover border-2 border-mstYellow shadow-sm bg-white" onerror="this.src='/logo.webp'">
                   <span id="activeModeDot" class="w-3 h-3 rounded-full bg-emerald-500 border-2 border-white absolute bottom-0 right-0"></span>
                 </div>
 
-                <!-- User Name & Status -->
                 <div class="min-w-0 flex-1 cursor-pointer" onclick="openUserInfoModal()">
                   <div class="flex items-center gap-1.5">
                     <h4 id="activeUserName" class="text-xs sm:text-sm font-black text-gray-900 truncate">-</h4>
@@ -404,28 +361,23 @@
                 </div>
               </div>
 
-              <!-- Header Action Buttons -->
               <div class="flex items-center gap-1 sm:gap-1.5 shrink-0">
                 <button type="button" onclick="toggleThreadMode()" id="btnToggleThreadMode" class="px-2.5 sm:px-3 py-1.5 rounded-xl text-[11px] font-black border transition active:scale-95 whitespace-nowrap"></button>
 
-                <!-- ปุ่มค้นหาข้อความในห้องแชท -->
                 <button type="button" onclick="toggleInChatSearch()" id="btnToggleInChatSearch" class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gray-100 hover:bg-purple-50 text-gray-600 hover:text-mstPurple flex items-center justify-center text-xs transition" title="ค้นหาข้อความในห้องแชทนี้">
                   <i class="fa-solid fa-magnifying-glass"></i>
                 </button>
 
-                <!-- ปุ่มปักหมุดแชท -->
                 <button type="button" onclick="togglePinCurrentThread()" id="btnPinThread" class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gray-100 hover:bg-amber-50 text-gray-500 hover:text-amber-600 flex items-center justify-center text-xs transition" title="ปักหมุดแชทนี้ไว้ด้านบน">
                   <i class="fa-solid fa-thumbtack"></i>
                 </button>
 
-                <!-- ปุ่มคัดลอกลิงก์ห้องแชท -->
                 <button type="button" onclick="copyDirectChatLink()" class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gray-100 hover:bg-purple-50 text-gray-600 hover:text-mstPurple flex items-center justify-center text-xs transition" title="คัดลอกลิงก์ห้องแชทนี้ส่งให้เพื่อนแอดมิน">
                   <i class="fa-solid fa-share-nodes"></i>
                 </button>
               </div>
             </div>
 
-            <!-- แถบค้นหาข้อความภายในห้องแชท (ซ่อนอยู่เป็นค่าเริ่มต้น) -->
             <div id="inChatSearchBar" class="hidden px-3 py-2 bg-purple-50/90 border-t border-purple-100 flex items-center gap-2">
               <i class="fa-solid fa-magnifying-glass text-mstPurple text-xs"></i>
               <input type="text" id="inChatSearchInput" oninput="handleInChatSearch(this.value)" placeholder="ค้นหาคำในประวัติสนทนานี้..." class="form-input py-1 px-2.5 text-xs flex-1 bg-white">
@@ -436,11 +388,10 @@
             </div>
           </div>
 
-          <!-- 2. Messages Stream Wrapper (แยกเลเยอร์เพื่อให้ปุ่มลอย "ข้อความล่าสุด" ไม่ทับแถบพิมพ์ข้อความเด็ดขาด) -->
+          <!-- 2. Messages Stream Wrapper -->
           <div class="flex-1 min-h-0 relative flex flex-col overflow-hidden">
             <div id="messagesContainer" onscroll="handleMessagesScroll()" class="flex-1 min-h-0 overflow-y-auto custom-scroll chat-bg-pattern p-3 sm:p-4 space-y-3.5"></div>
 
-            <!-- Floating Scroll-to-Bottom Button (ลอยอยู่ในขอบเขตของกล่องข้อความเท่านั้น ไม่ทับแถบพิมพ์) -->
             <button type="button" id="btnScrollBottom" onclick="scrollToBottom(true)" class="hidden absolute right-3.5 bottom-3 z-20 bg-mstPurple/95 text-white shadow-lg px-3.5 py-1.5 rounded-full text-[11px] font-black items-center gap-1.5 border border-purple-300/40 hover:bg-purple-800 transition active:scale-95">
               <i class="fa-solid fa-arrow-down animate-bounce text-mstYellow"></i>
               <span>ข้อความล่าสุด</span>
@@ -450,7 +401,6 @@
           <!-- 3. Smart Composer & Collapsible Flex Card Studio -->
           <form onsubmit="sendFlexReply(event)" id="chatComposerForm" class="bg-white border-t border-gray-200/95 px-2.5 sm:px-4 pt-2 safe-pb-composer shrink-0 z-20 space-y-1.5 shadow-[0_-4px_20px_rgba(0,0,0,0.03)]">
 
-            <!-- แถบแสดงข้อความที่กำลังอ้างอิง (Quote Reply Banner) -->
             <div id="quoteReplyBanner" class="hidden bg-purple-50 border-l-4 border-mstPurple rounded-r-xl px-3 py-1.5 items-center justify-between gap-2">
               <div class="min-w-0 flex-1">
                 <p class="text-[10px] font-black text-mstPurple flex items-center gap-1">
@@ -463,7 +413,6 @@
               </button>
             </div>
 
-            <!-- 3.1 Collapsible Flex Card Studio Drawer -->
             <div id="flexStudioDrawer" class="hidden bg-purple-50/90 border border-purple-200/90 rounded-2xl p-3 space-y-2.5 transition-all max-h-[38vh] overflow-y-auto custom-scroll">
               <div class="flex flex-wrap items-center justify-between border-b border-purple-200/60 pb-2 gap-1.5">
                 <div class="flex items-center gap-1.5 min-w-0">
@@ -471,7 +420,6 @@
                   <span class="text-xs font-black text-mstPurple truncate">ตั้งค่าหัวการ์ด LINE Flex & ปุ่มแนบท้าย</span>
                 </div>
                 <div class="flex items-center gap-1 shrink-0">
-                  <!-- Quick Card Title Presets -->
                   <select onchange="applyCardPreset(this.value); this.value='';" class="form-input !w-auto text-[11px] font-bold bg-white border border-purple-200 text-mstPurple rounded-lg !px-2 !py-1 outline-none">
                     <option value="">✨ รูปแบบหัวการ์ดด่วน...</option>
                     <option value="official">📢 ข้อความจากสภานักเรียน</option>
@@ -489,10 +437,8 @@
                 </div>
               </div>
 
-              <!-- Saved Flex Templates Bar -->
               <div id="savedTemplatesRow" class="hidden items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5"></div>
 
-              <!-- 4 Card Header Fields -->
               <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 <div>
                   <label class="block text-[10px] font-bold text-gray-600 mb-0.5">ป้ายหมวดหมู่บนสุด</label>
@@ -512,7 +458,6 @@
                 </div>
               </div>
 
-              <!-- Custom Buttons Builder -->
               <div class="bg-white/95 p-2.5 rounded-xl border border-purple-100 space-y-2">
                 <div class="flex flex-wrap items-center justify-between gap-1.5">
                   <span class="text-[10px] font-black text-mstPurple">
@@ -530,9 +475,7 @@
               </div>
             </div>
 
-            <!-- แผงเครื่องมือ (กรอบสีน้ำเงิน) ซ่อนไว้เป็นค่าเริ่มต้นบนมือถือ กดปุ่ม + เพื่อเปิด/ปิดได้ -->
             <div id="composerToolsPanel" class="hidden md:block space-y-1.5 pb-1 border-b border-gray-100">
-              <!-- 3.2 Quick Canned Replies Horizontal Bar -->
               <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 pr-2">
                 <button type="button" onclick="addCannedReplyPrompt()" class="text-[10px] font-black bg-amber-100/90 hover:bg-amber-200 text-amber-900 px-2.5 py-1 rounded-lg shrink-0 flex items-center gap-1 transition shadow-sm" title="เพิ่มข้อความตอบกลับด่วนใหม่">
                   <i class="fa-solid fa-bolt text-amber-600"></i>
@@ -541,7 +484,6 @@
                 <div id="cannedRepliesBar" class="flex items-center gap-1.5 shrink-0"></div>
               </div>
 
-              <!-- 3.3 Single-Line Compact Control Toolbar -->
               <div class="flex items-center justify-between gap-1 overflow-x-auto no-scrollbar py-0.5 text-[11px] whitespace-nowrap">
                 <div class="flex items-center gap-1 shrink-0">
                   <button type="button" onclick="toggleFlexStudioDrawer()" id="btnToggleStudio" class="px-2 py-1 rounded-lg bg-purple-50 hover:bg-purple-100 text-mstPurple border border-purple-200 font-extrabold flex items-center gap-1 transition shrink-0">
@@ -571,9 +513,7 @@
               </div>
             </div>
 
-            <!-- 3.4 Main Chat Input & Send Button -->
             <div class="flex items-end gap-1.5 sm:gap-2 pt-0.5">
-              <!-- ปุ่มย่อ/ขยายแผงเครื่องมือ (แสดงบนมือถือ) -->
               <button type="button" onclick="toggleComposerTools()" id="btnToggleComposerTools" class="md:hidden w-[42px] h-[42px] rounded-2xl bg-purple-50 text-mstPurple border border-purple-200 flex items-center justify-center text-sm shrink-0 transition active:scale-95" title="เปิด/ปิดแถบเครื่องมือและคำตอบด่วน">
                 <i class="fa-solid fa-plus transition-transform duration-200" id="iconToggleComposerTools"></i>
               </button>
@@ -604,13 +544,10 @@
       </section>
     </main>
 
-    <!-- ========================================================= -->
-    <!-- VIEW 2: SETTINGS & AI KNOWLEDGE WORKSPACE                 -->
-    <!-- ========================================================= -->
+    <!-- VIEW 2: SETTINGS & AI KNOWLEDGE WORKSPACE -->
     <section id="settingsWorkspace" class="hidden flex-1 min-h-0 overflow-y-auto custom-scroll px-3 sm:px-6 py-4 sm:py-6">
       <div class="max-w-4xl mx-auto space-y-5 pb-20">
 
-        <!-- Card 1: AI & Notification Controls -->
         <div class="glass-pane rounded-[2rem] p-5 sm:p-7 space-y-5">
           <div class="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100 pb-4">
             <div>
@@ -671,7 +608,6 @@
           </button>
         </div>
 
-        <!-- Card 2: Canned Replies Manager (จัดการคำตอบด่วน) -->
         <div class="glass-pane rounded-[2rem] p-5 sm:p-7 space-y-4">
           <div class="flex flex-wrap items-center justify-between gap-2 border-b border-gray-100 pb-3">
             <div>
@@ -690,9 +626,7 @@
       </div>
     </section>
 
-    <!-- ========================================================= -->
-    <!-- MOBILE BOTTOM NAVIGATION BAR                              -->
-    <!-- ========================================================= -->
+    <!-- MOBILE BOTTOM NAVIGATION BAR -->
     <nav id="mobileBottomNav" class="hidden md:hidden solid-header-surface border-t border-purple-100 safe-bottom-bar shrink-0 z-30">
       <div id="mobileBottomNavGrid" class="grid grid-cols-3 h-14 px-2">
         <button type="button" onclick="switchMainView('chat')" id="mobNavChat" class="flex flex-col items-center justify-center gap-0.5 text-mstPurple font-black relative">
@@ -708,7 +642,6 @@
           <span class="text-[10px]">ตั้งค่าบอท</span>
         </button>
 
-        <!-- ปุ่มติดตั้งแอปบนแถบล่าง: ซ่อนอัตโนมัติและปรับ Grid เป็น 2 ช่องเมื่อติดตั้งเป็นแอปแล้ว -->
         <button type="button" onclick="openInstallAppModal()" id="mobNavInstall" class="pwa-install-trigger flex flex-col items-center justify-center gap-0.5 text-gray-400 font-bold">
           <i class="fa-solid fa-mobile-screen-button text-base text-amber-500"></i>
           <span class="text-[10px]">ติดตั้งแอป</span>
@@ -718,16 +651,12 @@
 
   </div>
 
-  <!-- ========================================================= -->
-  <!-- TOP ACTION BAR (แถบวิ่งด้านบนสุดเวลากดปุ่มทำงานป้องกันการกดซ้ำ) -->
-  <!-- ========================================================= -->
+  <!-- TOP ACTION BAR -->
   <div id="topBusyBar" class="hidden fixed top-0 left-0 right-0 h-1 z-[70] bg-purple-100 overflow-hidden">
     <div class="h-full bg-gradient-to-r from-mstPurple via-mstYellow to-mstPurple animate-pulse w-full"></div>
   </div>
 
-  <!-- ========================================================= -->
-  <!-- SYSTEM BOOT LOADER (หน้าโหลดข้อมูลระบบพร้อม % และแถบสถานะ) -->
-  <!-- ========================================================= -->
+  <!-- SYSTEM BOOT LOADER -->
   <div id="systemBootLoader" class="fixed inset-0 z-[60] flex flex-col items-center justify-center p-6 transition-opacity duration-300" style="background: linear-gradient(135deg, #f3e5f5 0%, #f8fafc 50%, #fffde7 100%);">
     <div class="glass-pane bg-white p-7 sm:p-8 rounded-[2.25rem] w-full max-w-sm text-center space-y-5 border border-purple-100 shadow-2xl">
       <div class="relative inline-block">
@@ -741,7 +670,6 @@
         <p id="bootStatusText" class="text-xs text-gray-500 font-bold">กำลังเตรียมความพร้อมของแอปพลิเคชัน...</p>
       </div>
 
-      <!-- แถบสถานะ Progress Bar & เปอร์เซ็นต์ -->
       <div class="space-y-2 text-left">
         <div class="flex items-center justify-between text-xs font-black">
           <span id="bootStepBadge" class="text-mstPurple text-[11px]">ขั้นตอนที่ 1/4</span>
@@ -756,9 +684,7 @@
     </div>
   </div>
 
-  <!-- ========================================================= -->
-  <!-- LOGIN MODAL (ซ่อนไว้เป็นค่าเริ่มต้น จะเปิดเฉพาะตอนยังไม่ได้ล็อกอิน) -->
-  <!-- ========================================================= -->
+  <!-- LOGIN MODAL -->
   <div id="loginModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-md z-50 flex items-center justify-center p-4 overflow-y-auto custom-scroll">
     <div class="glass-pane p-6 sm:p-8 rounded-[2.25rem] w-full max-w-md text-center space-y-4 my-auto border border-white shadow-2xl bg-white">
       <div class="relative inline-block">
@@ -781,7 +707,6 @@
         </button>
       </div>
 
-      <!-- แท็บที่ 1: Google Sign-In -->
       <div id="loginBoxGoogle" class="space-y-3 py-3">
         <div class="flex justify-center min-h-[44px]">
           <div id="g_id_onload"
@@ -795,7 +720,6 @@
         </p>
       </div>
 
-      <!-- แท็บที่ 2: REGIS 2FA -->
       <form id="loginBoxRegis" onsubmit="handleRegisLogin(event)" class="hidden space-y-3 text-left pt-1">
         <div>
           <label class="block text-xs font-bold text-gray-700 mb-1">รหัสประจำตัวนักเรียน (5 หลัก)</label>
@@ -817,9 +741,7 @@
     </div>
   </div>
 
-  <!-- ========================================================= -->
-  <!-- MODAL 1: พรีวิวการ์ด Flex Message ก่อนส่งจริง              -->
-  <!-- ========================================================= -->
+  <!-- MODAL 1: พรีวิวการ์ด Flex Message -->
   <div id="previewFlexModal" onclick="if(event.target===this)this.classList.add('hidden')" class="fixed inset-0 bg-slate-900/65 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 overflow-y-auto custom-scroll">
     <div class="max-w-sm w-full space-y-3 my-auto">
       <div class="flex items-center justify-between text-white px-2">
@@ -834,9 +756,7 @@
     </div>
   </div>
 
-  <!-- ========================================================= -->
-  <!-- MODAL 2: คู่มือและปุ่มติดตั้งเว็บแอป (PWA Install Helper)  -->
-  <!-- ========================================================= -->
+  <!-- MODAL 2: คู่มือติดตั้งเว็บแอป (PWA Install Helper) -->
   <div id="installAppModal" onclick="if(event.target===this)this.classList.add('hidden')" class="fixed inset-0 bg-slate-900/65 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 overflow-y-auto custom-scroll">
     <div class="glass-pane bg-white rounded-[2rem] max-w-md w-full p-6 space-y-4 my-auto border border-white shadow-2xl">
       <div class="flex items-center justify-between">
@@ -852,14 +772,12 @@
         </button>
       </div>
 
-      <!-- ปุ่มติดตั้งอัตโนมัติ (สำหรับ Android / Chrome / Edge / Desktop) -->
       <div id="nativeInstallPromptBox" class="hidden">
         <button type="button" onclick="triggerNativePwaInstall()" class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-mstPurple to-purple-800 text-mstYellow font-black text-xs shadow-md flex items-center justify-center gap-2">
           <i class="fa-solid fa-download"></i> กดติดตั้งแอปลงอุปกรณ์นี้ทันที
         </button>
       </div>
 
-      <!-- คำแนะนำสำหรับ iPhone / iPad (iOS / iPadOS) -->
       <div class="bg-purple-50/70 border border-purple-100 rounded-2xl p-4 space-y-2.5 text-xs">
         <p class="font-black text-mstPurple flex items-center gap-1.5">
           <i class="fa-brands fa-apple text-sm"></i> วิธีติดตั้งบน iPhone และ iPad (Safari)
@@ -871,7 +789,6 @@
         </ol>
       </div>
 
-      <!-- คำแนะนำสำหรับ Android / คอมพิวเตอร์ -->
       <div class="bg-amber-50/70 border border-amber-100 rounded-2xl p-4 space-y-2 text-xs">
         <p class="font-black text-amber-900 flex items-center gap-1.5">
           <i class="fa-brands fa-chrome text-sm"></i> วิธีติดตั้งบน Android / คอมพิวเตอร์
@@ -885,9 +802,10 @@
 
   <script>
     // =========================================================
-    // CONSTANTS & STATE MANAGEMENT
+    // CONSTANTS & REAL-TIME STATE MANAGEMENT (V4)
     // =========================================================
     const API_ENDPOINT = "https://ai-line-oa.studentcouncil-f38.workers.dev/?admin_api=1";
+    const DEFAULT_REALTIME_TOPIC = "mstsc_rt_bus_8157595804_5249656819_v4";
     const SESSION_KEY = "mstsc_line_chat_admin_sso_v2";
     const PORTAL_TOKEN_KEY = "mstsc_portal_admin_id_token";
     const SOUND_PREF_KEY = "mstsc_chat_sound_enabled";
@@ -895,17 +813,20 @@
     const DRAFTS_STORAGE_KEY = "mstsc_chat_drafts_v1";
     const FLEX_TEMPLATES_KEY = "mstsc_flex_templates_v1";
     const USER_NOTES_KEY = "mstsc_user_notes_v1";
+    const RT_RECENT_CACHE_KEY = "mstsc_rt_recent_threads_v4";
     const initialTargetUid = new URLSearchParams(window.location.search).get('uid') || "";
 
     let adminAuth = null;
+    let adminFullName = "สภานักเรียน";
     let threads = [];
     let currentUserId = initialTargetUid;
     let currentThreadObj = null;
     let botSettings = {};
     let soundEnabled = localStorage.getItem(SOUND_PREF_KEY) !== "false";
     let lastKnownUnreadTotal = 0;
-    let currentInboxFilter = "all"; // 'all' | 'human' | 'unread' | 'ai'
-    let currentMainView = "chat";   // 'chat' | 'settings'
+    let lastKnownActiveStudentMsgId = "";
+    let currentInboxFilter = "all";
+    let currentMainView = "chat";
     let mobileChatOpen = false;
     let isUserScrolledUp = false;
     let lastRenderedMsgSignature = "";
@@ -913,7 +834,16 @@
     let inChatSearchQuery = "";
     let currentQuoteText = "";
 
-    // โหลดข้อมูลเสริมฝั่งแอดมิน (พินแชท, ข้อความร่าง, แม่แบบการ์ด, โน้ตประจำตัวนักเรียน)
+    // ตัวแปรควบคุม Dual Real-Time Push (WebSocket Port 443 + Compact SSE)
+    let currentServerVersion = 0;
+    let realtimeLoopRunning = false;
+    let activePollAbortCtrl = null;
+    let realtimeEventSource = null;
+    let mqttClients = [];
+    let activeRealtimeTopic = DEFAULT_REALTIME_TOPIC;
+    const processedEventSignatures = new Set();
+    const threadDetailCache = loadJsonFromSession(RT_RECENT_CACHE_KEY, {});
+
     let pinnedUids = loadJsonFromStorage(PINNED_THREADS_KEY, []);
     let chatDrafts = loadJsonFromStorage(DRAFTS_STORAGE_KEY, {});
     let savedFlexTemplates = loadJsonFromStorage(FLEX_TEMPLATES_KEY, []);
@@ -934,8 +864,254 @@
       } catch (e) {}
     }
 
+    function loadJsonFromSession(key, fallback) {
+      try {
+        const raw = sessionStorage.getItem(key);
+        return raw ? JSON.parse(raw) : fallback;
+      } catch (e) {
+        return fallback;
+      }
+    }
+
+    function persistRealtimeCacheToSession() {
+      try {
+        sessionStorage.setItem(RT_RECENT_CACHE_KEY, JSON.stringify(threadDetailCache));
+      } catch (e) {}
+    }
+
+    function mergeClientMessages(msgsA = [], msgsB = []) {
+      const map = new Map();
+      const addList = (list) => {
+        if (!Array.isArray(list)) return;
+        for (const m of list) {
+          if (!m || !m.text) continue;
+          const key = m.id || `${m.sender}_${m.timestamp}_${m.text}`;
+          map.set(key, m);
+        }
+      };
+      addList(msgsA);
+      addList(msgsB);
+      const combined = Array.from(map.values());
+      combined.sort((a, b) => {
+        const ta = new Date(a.timestamp || 0).getTime();
+        const tb = new Date(b.timestamp || 0).getTime();
+        return ta - tb;
+      });
+      return combined.slice(-80);
+    }
+
+    // ผสานข้อมูลห้องแชทโดยยึดตามเวลา updatedAt ล่าสุดเสมอ (ป้องกัน KV เก่า 60 วินาทีเขียนทับข้อความใหม่)
+    function mergeThreadObjByTime(thA, thB) {
+      if (!thA) return thB;
+      if (!thB) return thA;
+      const timeA = new Date(thA.updatedAt || 0).getTime();
+      const timeB = new Date(thB.updatedAt || 0).getTime();
+      const newer = timeB >= timeA ? thB : thA;
+      const older = timeB >= timeA ? thA : thB;
+      const mergedMsgs = mergeClientMessages(older.messages || [], newer.messages || []);
+      const lastMsgObj = mergedMsgs[mergedMsgs.length - 1];
+
+      const newerToken = (thB.replyTokenTimestamp || 0) >= (thA.replyTokenTimestamp || 0)
+        ? thB.replyToken
+        : thA.replyToken;
+
+      return {
+        ...older,
+        ...newer,
+        replyToken: newerToken || "",
+        replyTokenTimestamp: Math.max(thA.replyTokenTimestamp || 0, thB.replyTokenTimestamp || 0),
+        messages: mergedMsgs,
+        messageCount: mergedMsgs.length,
+        lastMessage: newer.lastMessage || (lastMsgObj ? lastMsgObj.text : older.lastMessage || "")
+      };
+    }
+
+    function hydrateCacheFromThreads(threadList = []) {
+      if (!Array.isArray(threadList)) return;
+      threadList.forEach(item => {
+        if (!item || !item.userId) return;
+        const existing = threadDetailCache[item.userId];
+        threadDetailCache[item.userId] = mergeThreadObjByTime(existing, item);
+      });
+      persistRealtimeCacheToSession();
+    }
+
     // =========================================================
-    // 1. STANDALONE / INSTALLED APP DETECTOR (ซ่อนปุ่มติดตั้งแอปอัตโนมัติ)
+    // DUAL REAL-TIME PUSH ENGINE (WebSocket Port 443 + SSE)
+    // =========================================================
+    function connectRealtimePushStream(topic = DEFAULT_REALTIME_TOPIC) {
+      if (!topic) return;
+      activeRealtimeTopic = topic;
+
+      // 1. เชื่อมต่อ WebSocket MQTT Port 443 (ความเร็ว ~30ms ไม่ติดบล็อกไฟร์วอลล์)
+      mqttClients.forEach(c => { try { c.end(true); } catch (e) {} });
+      mqttClients = [];
+
+      if (typeof mqtt !== 'undefined') {
+        const wsBrokers = [
+          "wss://mqtt.eclipseprojects.io:443/mqtt",
+          "wss://broker.emqx.io:8084/mqtt"
+        ];
+        wsBrokers.forEach((brokerUrl) => {
+          try {
+            const client = mqtt.connect(brokerUrl, {
+              clientId: `mstsc_adm_${Math.random().toString(36).slice(2, 10)}`,
+              clean: true,
+              connectTimeout: 4000,
+              reconnectPeriod: 2500
+            });
+            client.on('connect', () => {
+              client.subscribe(`${topic}/live`, { qos: 0 });
+            });
+            client.on('message', (t, payloadBuf) => {
+              try {
+                const rawStr = new TextDecoder().decode(payloadBuf);
+                const ev = JSON.parse(rawStr);
+                if (ev && ev.userId) {
+                  applyIncomingRealtimeEvent(ev);
+                }
+              } catch (e) {}
+            });
+            mqttClients.push(client);
+          } catch (e) {}
+        });
+      }
+
+      // 2. เชื่อมต่อ Compact SSE คู่ขนาน
+      if (realtimeEventSource) {
+        try { realtimeEventSource.close(); } catch (e) {}
+        realtimeEventSource = null;
+      }
+
+      try {
+        const es = new EventSource(`https://ntfy.sh/${encodeURIComponent(topic)}/sse`);
+        realtimeEventSource = es;
+
+        es.onmessage = (event) => {
+          if (!event || !event.data) return;
+          try {
+            const outer = JSON.parse(event.data);
+            if (!outer || outer.event !== "message" || !outer.message) return;
+            const ev = JSON.parse(outer.message);
+            if (ev && ev.userId) {
+              applyIncomingRealtimeEvent(ev);
+            }
+          } catch (err) {}
+        };
+
+        es.onerror = () => {
+          try { es.close(); } catch (e) {}
+          realtimeEventSource = null;
+          setTimeout(() => {
+            if (adminAuth) connectRealtimePushStream(activeRealtimeTopic);
+          }, 3000);
+        };
+      } catch (e) {}
+    }
+
+    function applyIncomingRealtimeEvent(ev) {
+      if (!ev || !ev.userId) return;
+      const uid = ev.userId;
+      const msgKey = ev.message ? (ev.message.id || `${ev.message.timestamp}_${ev.message.text}`) : `${ev.type}_${ev.updatedAt}`;
+      const sig = `${uid}_${msgKey}`;
+      if (processedEventSignatures.has(sig)) return;
+      processedEventSignatures.add(sig);
+
+      const incomingMsgs = Array.isArray(ev.messages)
+        ? ev.messages
+        : (ev.message ? [ev.message] : []);
+
+      if (ev.v) {
+        currentServerVersion = Math.max(currentServerVersion, Number(ev.v) || 0);
+      }
+
+      const existingTh = threadDetailCache[uid] || threads.find(t => t.userId === uid) || {
+        userId: uid,
+        displayName: ev.displayName || `ผู้ใช้งาน (${uid.slice(-6)})`,
+        pictureUrl: ev.pictureUrl || '/logo.webp',
+        status: ev.status || 'HUMAN_MODE',
+        unreadCount: 0,
+        replyToken: "",
+        replyTokenTimestamp: 0,
+        messages: []
+      };
+
+      const prevMsgsLen = (existingTh.messages || []).length;
+      const mergedMsgs = mergeClientMessages(existingTh.messages || [], incomingMsgs);
+      const isNewMessageAdded = mergedMsgs.length > prevMsgsLen;
+      const lastMsgText = ev.lastMessage || (mergedMsgs.length > 0 ? mergedMsgs[mergedMsgs.length - 1].text : existingTh.lastMessage || '');
+      const updatedIso = ev.updatedAt || new Date().toISOString();
+
+      const isCurrentlyOpen = (uid === currentUserId);
+      let nextUnread = existingTh.unreadCount || 0;
+      if (isCurrentlyOpen) {
+        nextUnread = 0;
+      } else if (ev.type === 'STUDENT_MSG' && isNewMessageAdded) {
+        nextUnread = nextUnread + 1;
+      } else if (typeof ev.unreadCount === 'number') {
+        nextUnread = ev.unreadCount;
+      }
+
+      const updatedThreadObj = {
+        ...existingTh,
+        userId: uid,
+        displayName: ev.displayName || existingTh.displayName || 'ผู้ใช้งาน LINE',
+        pictureUrl: ev.pictureUrl || existingTh.pictureUrl || '/logo.webp',
+        status: ev.status || existingTh.status || 'HUMAN_MODE',
+        unreadCount: nextUnread,
+        replyToken: ev.replyToken || existingTh.replyToken || "",
+        replyTokenTimestamp: Math.max(ev.replyTokenTimestamp || 0, existingTh.replyTokenTimestamp || 0),
+        updatedAt: updatedIso,
+        lastMessage: lastMsgText,
+        messages: mergedMsgs,
+        messageCount: mergedMsgs.length
+      };
+
+      threadDetailCache[uid] = updatedThreadObj;
+      persistRealtimeCacheToSession();
+
+      // เลื่อนห้องแชทนี้ขึ้นบนสุดของแถบซ้ายทันที
+      const existingIdx = threads.findIndex(t => t.userId === uid);
+      if (existingIdx >= 0) {
+        threads.splice(existingIdx, 1);
+      }
+      threads.unshift({
+        ...updatedThreadObj,
+        messages: mergedMsgs.slice(-50)
+      });
+
+      // หากแอดมินกำลังเปิดห้องนี้อยู่ วาดข้อความขึ้นหน้าจอทันทีใน 0ms!
+      if (isCurrentlyOpen) {
+        currentThreadObj = updatedThreadObj;
+        document.getElementById('activeUserPic').src = updatedThreadObj.pictureUrl || '/logo.webp';
+        document.getElementById('activeUserName').innerText = updatedThreadObj.displayName || 'ผู้ใช้งาน LINE';
+        updateRoomHeaderStatusUI(updatedThreadObj.status === 'HUMAN_MODE');
+        renderMessagesStream(updatedThreadObj, false, true);
+
+        if (ev.type === 'STUDENT_MSG' && isNewMessageAdded) {
+          const lastStudent = [...mergedMsgs].reverse().find(m => m.sender === 'user');
+          if (lastStudent) {
+            lastKnownActiveStudentMsgId = lastStudent.id || `${lastStudent.timestamp}_${lastStudent.text}`;
+          }
+          playNotificationSound();
+        }
+      } else if (ev.type === 'STUDENT_MSG' && isNewMessageAdded) {
+        playNotificationSound();
+      }
+
+      updateUnreadCounters();
+      renderThreadsList();
+
+      // ซิงค์ข้อความและ replyToken เข้าสู่ RAM ของโหนด Worker ฝั่งไทยทันทีเบื้องหลัง
+      callAdminApi({
+        action: "syncRealtimeEvent",
+        activeUserId: currentUserId || "",
+        event: ev
+      }).catch(() => {});
+    }
+
+    // =========================================================
+    // 1. STANDALONE / INSTALLED APP DETECTOR
     // =========================================================
     function isRunningStandaloneApp() {
       return (
@@ -951,7 +1127,6 @@
       const isApp = isRunningStandaloneApp();
       document.body.classList.toggle('is-standalone-app', isApp);
 
-      // ซ่อนปุ่มติดตั้งแอปทุกจุดหากเปิดในแอปแล้ว
       document.querySelectorAll('.pwa-install-trigger').forEach(el => {
         if (isApp) {
           el.classList.add('hidden');
@@ -961,7 +1136,6 @@
         }
       });
 
-      // ปรับ Grid ของแถบเมนูด้านล่างบนมือถือจาก 3 ช่องเป็น 2 ช่องเมื่อเอาปุ่มติดตั้งแอปออก
       const mobGrid = document.getElementById('mobileBottomNavGrid');
       if (mobGrid) {
         if (isApp) {
@@ -974,7 +1148,6 @@
       }
     }
 
-    // ตรวจจับการเปลี่ยนแปลงโหมดแสดงผลและการติดตั้ง PWA
     try {
       window.matchMedia('(display-mode: standalone)').addEventListener('change', applyStandaloneUIMode);
     } catch (e) {}
@@ -1010,7 +1183,7 @@
     }
 
     // =========================================================
-    // 2. VISUAL VIEWPORT & KEYBOARD ENGINE (แก้ปัญหาแป้นพิมพ์ขึ้นแล้วพัง 100%)
+    // 2. VISUAL VIEWPORT & KEYBOARD ENGINE
     // =========================================================
     let maxWindowHeight = window.innerHeight;
     let viewportRafId = null;
@@ -1027,7 +1200,6 @@
         const currentHeight = vv ? vv.height : window.innerHeight;
         const currentOffsetTop = vv ? Math.max(0, vv.offsetTop) : 0;
 
-        // บังคับไม่ให้ Document เลื่อนขึ้นไปใต้ Status Bar
         if (window.scrollY !== 0 || window.scrollX !== 0) {
           window.scrollTo(0, 0);
         }
@@ -1035,18 +1207,14 @@
         document.documentElement.style.setProperty('--vvh', `${currentHeight}px`);
         document.documentElement.style.setProperty('--vvt', `${currentOffsetTop}px`);
 
-        // ตรวจสอบว่าแป้นพิมพ์เสมือนกำลังเปิดอยู่หรือไม่ (ความสูงลดลงเกิน 115px)
         const keyboardDiff = fullHeight - currentHeight;
         const isKeyboardOpen = keyboardDiff > 115;
         const wasKeyboardOpen = document.body.classList.contains('is-keyboard-open');
 
         if (isKeyboardOpen !== wasKeyboardOpen) {
           document.body.classList.toggle('is-keyboard-open', isKeyboardOpen);
-          if (isKeyboardOpen) {
-            // เมื่อแป้นพิมพ์เปิดและไม่ได้เลื่อนอ่านข้อความเก่าอยู่ ให้เลื่อนลงล่างสุดทันที
-            if (!isUserScrolledUp) {
-              setTimeout(() => scrollToBottom(false), 40);
-            }
+          if (isKeyboardOpen && !isUserScrolledUp) {
+            setTimeout(() => scrollToBottom(false), 40);
           }
         }
       });
@@ -1084,7 +1252,6 @@
     }
 
     function handleComposerFocus() {
-      // บนมือถือ เมื่อแตะช่องพิมพ์ข้อความ ให้ย่อแผงเครื่องมือและลิ้นชักตั้งค่าการ์ดอัตโนมัติทันทีเพื่อไม่ให้บังแชท
       if (window.innerWidth < 768) {
         toggleComposerTools(false);
         toggleFlexStudioDrawer(false);
@@ -1164,7 +1331,7 @@
     }
 
     // =========================================================
-    // 4. RESPONSIVE PANE MANAGEMENT (MOBILE / TABLET / DESKTOP)
+    // 4. RESPONSIVE PANE MANAGEMENT
     // =========================================================
     function updateResponsivePanes() {
       const isMobile = window.innerWidth < 768;
@@ -1185,7 +1352,6 @@
 
       if (isMobile) {
         if (mobileChatOpen && currentUserId) {
-          // บนมือถือ เมื่อเปิดห้องแชท ให้ซ่อน Inbox, TopNav, BottomNav เพื่อให้ห้องแชทเต็มจอและไม่โดนดัน
           inboxPane.classList.add('hidden');
           chatRoomPane.classList.remove('hidden');
           chatRoomPane.classList.add('flex');
@@ -1193,7 +1359,6 @@
           mobNav.classList.add('hidden');
           if (chatRoomHeader) chatRoomHeader.classList.add('safe-top-bar');
         } else {
-          // บนมือถือ เมื่ออยู่หน้ารายชื่อแชท
           inboxPane.classList.remove('hidden');
           chatRoomPane.classList.add('hidden');
           chatRoomPane.classList.remove('flex');
@@ -1202,7 +1367,6 @@
           if (chatRoomHeader) chatRoomHeader.classList.remove('safe-top-bar');
         }
       } else {
-        // บน iPad และคอมพิวเตอร์ แสดง Split View พร้อมกันทั้งซ้ายและขวาเสมอ
         inboxPane.classList.remove('hidden');
         chatRoomPane.classList.remove('hidden');
         chatRoomPane.classList.add('flex');
@@ -1213,7 +1377,6 @@
     }
 
     function closeMobileChatPane() {
-      // ปิดแป้นพิมพ์ก่อนสลับหน้าบนมือถือ
       const ta = document.getElementById('flexReplyText');
       if (ta) ta.blur();
       mobileChatOpen = false;
@@ -1227,7 +1390,6 @@
       document.getElementById('chatWorkspace').classList.toggle('hidden', !isChat);
       document.getElementById('settingsWorkspace').classList.toggle('hidden', isChat);
 
-      // Desktop Tabs
       document.getElementById('tabBtnChat').className = isChat
         ? "px-3.5 py-1.5 rounded-lg bg-mstPurple text-white shadow-sm transition flex items-center gap-1.5"
         : "px-3.5 py-1.5 rounded-lg text-gray-600 hover:text-mstPurple transition flex items-center gap-1.5";
@@ -1235,7 +1397,6 @@
         ? "px-3.5 py-1.5 rounded-lg bg-mstPurple text-white shadow-sm transition flex items-center gap-1.5"
         : "px-3.5 py-1.5 rounded-lg text-gray-600 hover:text-mstPurple transition flex items-center gap-1.5";
 
-      // Mobile Bottom Nav
       document.getElementById('mobNavChat').className = isChat
         ? "flex flex-col items-center justify-center gap-0.5 text-mstPurple font-black relative"
         : "flex flex-col items-center justify-center gap-0.5 text-gray-400 font-bold relative";
@@ -1248,25 +1409,33 @@
     }
 
     // =========================================================
-    // 5. API & AUTHENTICATION
+    // 5. API & AUTHENTICATION + DUAL REAL-TIME ENGINE
     // =========================================================
-    async function callAdminApi(payload) {
+    async function callAdminApi(payload, signal = null) {
       const syncDot = document.getElementById('liveSyncDot');
       const syncLbl = document.getElementById('syncStatusLabel');
       try {
-        const res = await fetch(API_ENDPOINT, {
+        const fetchOpts = {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ...payload, ...(adminAuth || {}) })
-        });
+          body: JSON.stringify({ ...payload, ...(adminAuth || {}) }),
+          cache: "no-store"
+        };
+        if (signal) fetchOpts.signal = signal;
+
+        const res = await fetch(API_ENDPOINT, fetchOpts);
         const data = await res.json();
+        if (data && data.serverVersion) {
+          currentServerVersion = Math.max(currentServerVersion, Number(data.serverVersion) || 0);
+        }
         if (syncDot) syncDot.className = "w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-white absolute -bottom-0.5 -right-0.5";
         if (syncLbl) {
           syncLbl.className = "text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/60 flex items-center gap-1";
-          syncLbl.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> ออนไลน์';
+          syncLbl.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> เรียลไทม์';
         }
         return data;
       } catch (err) {
+        if (err && err.name === 'AbortError') throw err;
         if (syncDot) syncDot.className = "w-2.5 h-2.5 rounded-full bg-rose-500 border-2 border-white absolute -bottom-0.5 -right-0.5";
         if (syncLbl) {
           syncLbl.className = "text-[10px] font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-full border border-rose-200/60 flex items-center gap-1";
@@ -1302,7 +1471,12 @@
       setBootProgress(45, 'กำลังเชื่อมต่อฐานข้อมูลและตรวจสอบสิทธิ์...', 'ขั้นตอนที่ 2/4');
 
       try {
-        const res = await callAdminApi({ action: "getThreads" });
+        const res = await callAdminApi({
+          action: "getThreads",
+          activeUserId: currentUserId || "",
+          clientVersion: 0,
+          waitMs: 0
+        });
         if (btn) {
           btn.disabled = false;
           btn.innerHTML = '<i class="fa-solid fa-shield-check text-mstYellow mr-1"></i> ยืนยันสิทธิ์และเปิดกระดานแชท';
@@ -1317,7 +1491,7 @@
           return Swal.fire({ icon: "error", title: "ตรวจสอบสิทธิ์ไม่ผ่าน", text: res.message, confirmButtonColor: "#4C1D95" });
         }
 
-        setBootProgress(80, 'กำลังซิงค์รายการแชทและสมองกลน้องคอนเนค AI...', 'ขั้นตอนที่ 3/4');
+        setBootProgress(80, 'กำลังเปิดท่อรับส่งข้อความแบบเรียลไทม์...', 'ขั้นตอนที่ 3/4');
 
         const authJson = JSON.stringify(adminAuth);
         sessionStorage.setItem(SESSION_KEY, authJson);
@@ -1330,6 +1504,7 @@
         navBox.classList.add('flex');
 
         const fullName = (res.adminName || '').trim();
+        adminFullName = fullName || "สภานักเรียน";
         const rawNick = (res.adminNickname || '').trim();
         const isRedundantNick = !rawNick || rawNick === fullName || fullName.includes(rawNick) || rawNick.includes(fullName);
         const cleanNick = isRedundantNick ? '' : rawNick;
@@ -1341,6 +1516,13 @@
         document.getElementById('flexSenderLabel').value = `สภานักเรียน • ${displaySender}`;
 
         threads = res.threads || [];
+        hydrateCacheFromThreads(threads);
+        if (res.activeThread && res.activeThread.userId) {
+          threadDetailCache[res.activeThread.userId] = mergeThreadObjByTime(
+            threadDetailCache[res.activeThread.userId],
+            res.activeThread
+          );
+        }
         botSettings = res.settings || {};
 
         applyStandaloneUIMode();
@@ -1358,11 +1540,14 @@
           updateResponsivePanes();
         }
 
-        setBootProgress(100, 'โหลดข้อมูลสำเร็จ พร้อมใช้งาน!', 'ขั้นตอนที่ 4/4');
-        setTimeout(hideBootLoader, 220);
+        setBootProgress(100, 'เชื่อมต่อระบบเรียลไทม์สำเร็จ!', 'ขั้นตอนที่ 4/4');
+        setTimeout(hideBootLoader, 200);
 
-        if (window.mstscPollTimer) clearInterval(window.mstscPollTimer);
-        window.mstscPollTimer = setInterval(() => { if (!document.hidden) loadThreads(true); }, 6500);
+        // 1. เปิดท่อ Dual WebSocket (Port 443) + Compact SSE
+        connectRealtimePushStream(res.realtimeTopic || DEFAULT_REALTIME_TOPIC);
+
+        // 2. เดินเครื่องระบบ Sync สำรองแบบต่อเนื่อง
+        startRealtimeSyncLoop();
       } catch (err) {
         if (btn) {
           btn.disabled = false;
@@ -1373,6 +1558,35 @@
         Swal.fire({ icon: "error", title: "เชื่อมต่อเซิร์ฟเวอร์ไม่สำเร็จ", text: "กรุณาตรวจสอบอินเทอร์เน็ตแล้วลองใหม่อีกครั้ง", confirmButtonColor: "#4C1D95" });
       }
     }
+
+    async function startRealtimeSyncLoop() {
+      if (realtimeLoopRunning) return;
+      realtimeLoopRunning = true;
+
+      while (realtimeLoopRunning && adminAuth) {
+        if (document.hidden) {
+          await new Promise(r => setTimeout(r, 2500));
+          continue;
+        }
+        try {
+          await loadThreads(true, false, 800);
+          await new Promise(r => setTimeout(r, 350));
+        } catch (e) {
+          await new Promise(r => setTimeout(r, 1200));
+        }
+      }
+    }
+
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden && adminAuth) {
+        loadThreads(true, true, 0);
+      }
+    });
+    window.addEventListener('focus', () => {
+      if (adminAuth) {
+        loadThreads(true, true, 0);
+      }
+    });
 
     function logoutChatAdmin() {
       Swal.fire({
@@ -1386,6 +1600,11 @@
         cancelButtonText: 'ยกเลิก'
       }).then((result) => {
         if (result.isConfirmed) {
+          realtimeLoopRunning = false;
+          mqttClients.forEach(c => { try { c.end(true); } catch (e) {} });
+          if (realtimeEventSource) {
+            try { realtimeEventSource.close(); } catch (e) {}
+          }
           sessionStorage.removeItem(SESSION_KEY);
           sessionStorage.removeItem(PORTAL_TOKEN_KEY);
           localStorage.removeItem(SESSION_KEY);
@@ -1455,43 +1674,102 @@
     }
 
     let isRefreshingThreads = false;
-    async function loadThreads(silent = false, force = false) {
+    async function loadThreads(silent = false, force = false, waitMs = 0) {
       if (isRefreshingThreads && !force) return;
+      if (force && activePollAbortCtrl) {
+        try { activePollAbortCtrl.abort(); } catch (e) {}
+      }
+
       isRefreshingThreads = true;
+      const pollCtrl = new AbortController();
+      activePollAbortCtrl = pollCtrl;
+
       const refreshBtn = document.getElementById('btnRefreshThreads');
       if (!silent && refreshBtn) {
         refreshBtn.disabled = true;
         refreshBtn.innerHTML = '<i class="fa-solid fa-rotate-right fa-spin"></i>';
         setTopBusyBar(true);
       }
+
       try {
-        // ส่ง activeUserId ไปพร้อมกับ getThreads เพื่อดึงข้อความล่าสุดของห้องที่เปิดอยู่มาในรอบเดียว
         const res = await callAdminApi({
           action: "getThreads",
-          activeUserId: currentUserId || ""
-        });
-        if (res.status === "success") {
-          threads = res.threads || [];
+          activeUserId: currentUserId || "",
+          clientVersion: force ? 0 : currentServerVersion,
+          waitMs: force ? 0 : waitMs
+        }, pollCtrl.signal);
+
+        if (res && res.status === "success") {
+          const incomingList = res.threads || [];
+          hydrateCacheFromThreads(incomingList);
+
+          // รวมรายการห้องแชทจากทั้ง API และที่รับมาจาก WebSocket สดๆ โดยยึดเวลา updatedAt ล่าสุดเสมอ
+          const mergedMap = new Map();
+          incomingList.forEach(item => {
+            const cached = threadDetailCache[item.userId];
+            const merged = mergeThreadObjByTime(item, cached);
+            mergedMap.set(item.userId, {
+              ...merged,
+              unreadCount: item.userId === currentUserId ? 0 : merged.unreadCount,
+              messages: (merged.messages || []).slice(-50)
+            });
+          });
+          Object.values(threadDetailCache).forEach(cached => {
+            if (cached && cached.userId && !mergedMap.has(cached.userId)) {
+              mergedMap.set(cached.userId, {
+                ...cached,
+                unreadCount: cached.userId === currentUserId ? 0 : (cached.unreadCount || 0),
+                messages: (cached.messages || []).slice(-50)
+              });
+            }
+          });
+
+          threads = Array.from(mergedMap.values()).sort((a, b) => {
+            return new Date(b.updatedAt || 0).getTime() - new Date(a.updatedAt || 0).getTime();
+          });
+
           updateUnreadCounters();
           renderThreadsList();
 
           if (currentUserId) {
-            if (res.activeThread && res.activeThread.userId === currentUserId) {
-              threadDetailCache[currentUserId] = res.activeThread;
-              currentThreadObj = res.activeThread;
-              document.getElementById('activeUserPic').src = res.activeThread.pictureUrl || '/logo.webp';
-              document.getElementById('activeUserName').innerText = res.activeThread.displayName || 'ผู้ใช้งาน LINE';
-              updateRoomHeaderStatusUI(res.activeThread.status === 'HUMAN_MODE');
-              renderMessagesStream(res.activeThread, false, false);
-            } else {
-              await selectThread(currentUserId, true);
+            const serverActive = (res.activeThread && res.activeThread.userId === currentUserId)
+              ? res.activeThread
+              : null;
+            const existingCached = threadDetailCache[currentUserId];
+            const activeTh = mergeThreadObjByTime(serverActive, existingCached);
+
+            if (activeTh) {
+              activeTh.unreadCount = 0;
+              const mergedMsgs = activeTh.messages || [];
+
+              const lastStudentMsg = [...mergedMsgs].reverse().find(m => m.sender === 'user');
+              const latestStudentKey = lastStudentMsg ? (lastStudentMsg.id || `${lastStudentMsg.timestamp}_${lastStudentMsg.text}`) : "";
+              if (latestStudentKey && lastKnownActiveStudentMsgId && latestStudentKey !== lastKnownActiveStudentMsgId) {
+                playNotificationSound();
+              }
+              if (latestStudentKey) {
+                lastKnownActiveStudentMsgId = latestStudentKey;
+              }
+
+              threadDetailCache[currentUserId] = activeTh;
+              persistRealtimeCacheToSession();
+              currentThreadObj = activeTh;
+              document.getElementById('activeUserPic').src = activeTh.pictureUrl || '/logo.webp';
+              document.getElementById('activeUserName').innerText = activeTh.displayName || 'ผู้ใช้งาน LINE';
+              updateRoomHeaderStatusUI(activeTh.status === 'HUMAN_MODE');
+              renderMessagesStream(activeTh, false, false);
             }
           }
         }
       } catch (e) {
-        console.error('Error occurred while loading threads:', e);
+        if (!e || e.name !== 'AbortError') {
+          console.error('Realtime sync warning:', e);
+        }
       } finally {
-        isRefreshingThreads = false;
+        if (activePollAbortCtrl === pollCtrl) {
+          activePollAbortCtrl = null;
+          isRefreshingThreads = false;
+        }
         if (refreshBtn) {
           refreshBtn.disabled = false;
           refreshBtn.innerHTML = '<i class="fa-solid fa-rotate-right"></i>';
@@ -1585,12 +1863,11 @@
         return true;
       });
 
-      // จัดเรียงให้แชทที่ปักหมุดอยู่ด้านบนสุดเสมอ
       filtered.sort((a, b) => {
         const pinA = pinnedUids.includes(a.userId) ? 1 : 0;
         const pinB = pinnedUids.includes(b.userId) ? 1 : 0;
         if (pinA !== pinB) return pinB - pinA;
-        return 0;
+        return new Date(b.updatedAt || 0).getTime() - new Date(a.updatedAt || 0).getTime();
       });
 
       document.getElementById('threadCountBadge').innerText = filtered.length;
@@ -1724,8 +2001,6 @@
       }
     }
 
-    // แคชข้อมูลห้องแชทและตัวล็อกป้องกันการกดปุ่มซ้ำรัวๆ
-    const threadDetailCache = {};
     let isSwitchingModeBusy = false;
     let isSavingConfigBusy = false;
 
@@ -1744,8 +2019,10 @@
       }
 
       const previewInList = threads.find(item => item.userId === userId);
+      if (previewInList && !threadDetailCache[userId] && Array.isArray(previewInList.messages)) {
+        threadDetailCache[userId] = { ...previewInList, messages: [...previewInList.messages] };
+      }
 
-      // 1. แสดงผลหน้าห้องแชททันทีใน 0ms โดยไม่ต้องรอ API โหลดเสร็จ (ป้องกันแอดมินกดย้ำรัวๆ)
       document.getElementById('emptyChatState').classList.add('hidden');
       const chatBox = document.getElementById('activeChatBox');
       chatBox.classList.remove('hidden');
@@ -1760,16 +2037,16 @@
           autoResizeChatInput(ta);
         }
 
-        // อัปเดตชื่อและรูปโปรไฟล์จากรายการแชททันที
         if (previewInList) {
           document.getElementById('activeUserPic').src = previewInList.pictureUrl || '/logo.webp';
           document.getElementById('activeUserName').innerText = previewInList.displayName || 'ผู้ใช้งาน LINE';
           updateRoomHeaderStatusUI(previewInList.status === 'HUMAN_MODE');
         }
 
-        // ถ้าเคยเปิดห้องนี้แล้ว ให้แสดงข้อความจากแคชทันที ถ้ายังไม่เคยให้ขึ้น Skeleton กำลังโหลด
         if (threadDetailCache[userId]) {
           currentThreadObj = threadDetailCache[userId];
+          const lastStudentMsg = [...(currentThreadObj.messages || [])].reverse().find(m => m.sender === 'user');
+          lastKnownActiveStudentMsgId = lastStudentMsg ? (lastStudentMsg.id || `${lastStudentMsg.timestamp}_${lastStudentMsg.text}`) : "";
           renderMessagesStream(currentThreadObj, true, true);
         } else {
           document.getElementById('messagesContainer').innerHTML = `
@@ -1790,34 +2067,38 @@
       renderThreadsList();
       updateResponsivePanes();
 
-      // 2. ดึงข้อมูลล่าสุดจาก API เบื้องหลัง
-      if (!silent) setTopBusyBar(true);
       try {
         const res = await callAdminApi({ action: "getThreadDetail", userId });
-        if (!silent) setTopBusyBar(false);
         if (res.status !== "success" || !res.thread) return;
 
-        threadDetailCache[userId] = res.thread;
+        const existingCached = threadDetailCache[userId];
+        const mergedTh = mergeThreadObjByTime(res.thread, existingCached);
+        mergedTh.unreadCount = 0;
+
+        threadDetailCache[userId] = mergedTh;
+        persistRealtimeCacheToSession();
         if (currentUserId !== userId) return;
 
-        const th = res.thread;
-        currentThreadObj = th;
+        currentThreadObj = mergedTh;
 
-        document.getElementById('activeUserPic').src = th.pictureUrl || '/logo.webp';
-        document.getElementById('activeUserName').innerText = th.displayName || 'ผู้ใช้งาน LINE';
-        updateRoomHeaderStatusUI(th.status === 'HUMAN_MODE');
+        const lastStudentMsg = [...(mergedTh.messages || [])].reverse().find(m => m.sender === 'user');
+        if (lastStudentMsg) {
+          lastKnownActiveStudentMsgId = lastStudentMsg.id || `${lastStudentMsg.timestamp}_${lastStudentMsg.text}`;
+        }
 
-        renderMessagesStream(th, isSwitchingUser || !silent, false);
-      } catch (e) {
-        if (!silent) setTopBusyBar(false);
-      }
+        document.getElementById('activeUserPic').src = mergedTh.pictureUrl || '/logo.webp';
+        document.getElementById('activeUserName').innerText = mergedTh.displayName || 'ผู้ใช้งาน LINE';
+        updateRoomHeaderStatusUI(mergedTh.status === 'HUMAN_MODE');
+
+        renderMessagesStream(mergedTh, isSwitchingUser || !silent, false);
+      } catch (e) {}
     }
 
     function updateRoomHeaderStatusUI(isHuman) {
       document.getElementById('activeModeDot').className = `w-3 h-3 rounded-full border-2 border-white absolute bottom-0 right-0 ${isHuman ? 'bg-amber-500' : 'bg-emerald-500'}`;
       document.getElementById('activeUserStatus').innerHTML = isHuman
-        ? '<span class="text-amber-700"><i class="fa-solid fa-user-clock mr-1"></i>โหมดคุยกับสภานักเรียน (AI พักชั่วคราว)</span>'
-        : '<span class="text-emerald-700"><i class="fa-solid fa-robot mr-1"></i>โหมดน้องคอนเนค AI ดูแลอัตโนมัติ</span>';
+        ? '<span class="text-amber-700"><i class="fa-solid fa-user-clock mr-1"></i>คุยกับสภานักเรียนอยู่ (AI พักชั่วคราว)</span>'
+        : '<span class="text-emerald-700"><i class="fa-solid fa-robot mr-1"></i>AI ดูแลอยู่</span>';
 
       const modeBtn = document.getElementById('btnToggleThreadMode');
       if (!modeBtn) return;
@@ -1837,11 +2118,20 @@
       const modeBtn = document.getElementById('btnToggleThreadMode');
       const prevStatus = currentThreadObj.status;
       const nextMode = prevStatus === 'HUMAN_MODE' ? 'AI_MODE' : 'HUMAN_MODE';
+      const nowIso = new Date().toISOString();
 
-      // เปลี่ยนสถานะบนหน้าจอทันที (Optimistic UI) และล็อกปุ่มไม่ให้กดย้ำ
       currentThreadObj.status = nextMode;
+      currentThreadObj.updatedAt = nowIso;
+      if (threadDetailCache[currentUserId]) {
+        threadDetailCache[currentUserId].status = nextMode;
+        threadDetailCache[currentUserId].updatedAt = nowIso;
+        persistRealtimeCacheToSession();
+      }
       const targetInList = threads.find(t => t.userId === currentUserId);
-      if (targetInList) targetInList.status = nextMode;
+      if (targetInList) {
+        targetInList.status = nextMode;
+        targetInList.updatedAt = nowIso;
+      }
       updateRoomHeaderStatusUI(nextMode === 'HUMAN_MODE');
       renderThreadsList();
       updateUnreadCounters();
@@ -1850,7 +2140,6 @@
         modeBtn.disabled = true;
         modeBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> กำลังสลับ...';
       }
-      setTopBusyBar(true);
 
       try {
         await callAdminApi({ action: 'toggleUserMode', userId: currentUserId, mode: nextMode });
@@ -1863,14 +2152,12 @@
           timer: 1400
         });
       } catch (e) {
-        // หากไม่สำเร็จให้คืนค่าเดิม
         currentThreadObj.status = prevStatus;
         if (targetInList) targetInList.status = prevStatus;
       } finally {
         isSwitchingModeBusy = false;
         if (modeBtn) modeBtn.disabled = false;
         updateRoomHeaderStatusUI(currentThreadObj.status === 'HUMAN_MODE');
-        setTopBusyBar(false);
       }
     }
 
@@ -1891,9 +2178,8 @@
       const msgBox = document.getElementById('messagesContainer');
       const messages = th.messages || [];
       const lastMsg = messages[messages.length - 1];
-      const signature = `${th.userId}_${messages.length}_${lastMsg ? lastMsg.timestamp : ''}_${inChatSearchQuery}`;
+      const signature = `${th.userId}_${messages.length}_${lastMsg ? (lastMsg.id || lastMsg.timestamp) : ''}_${lastMsg ? lastMsg.deliveryMethod : ''}_${inChatSearchQuery}`;
 
-      // ป้องกันการเขียนทับ DOM ซ้ำเมื่อข้อความไม่ได้เปลี่ยน (ช่วยให้การเลื่อนหน้าจอลื่นไหลไม่กระตุก)
       if (!forceReRender && !forceScrollBottom && signature === lastRenderedMsgSignature) {
         return;
       }
@@ -1933,6 +2219,7 @@
 
         const isAdmin = m.sender === 'admin' || m.sender === 'bot';
         const isAiBot = (m.name || '').includes('AI') || (m.name || '').includes('คอนเนค');
+        const isSendingPending = m.deliveryMethod === 'sending_optimistic';
         const timeStr = m.timestamp ? new Date(m.timestamp).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) : '';
         const senderDisplay = cleanSenderDisplayName(m.name || (isAdmin ? 'สภานักเรียน' : th.displayName));
 
@@ -1946,12 +2233,15 @@
 
         if (isAdmin) {
           htmlParts.push(`
-            <div class="flex flex-col items-end group">
+            <div class="flex flex-col items-end group ${isSendingPending ? 'opacity-85' : ''}">
               <div class="flex items-center gap-1.5 mb-1 px-1">
                 <button type="button" onclick="copyMessageText(${idx})" class="text-[10px] text-gray-400 hover:text-mstPurple transition" title="คัดลอกข้อความ">
                   <i class="fa-regular fa-copy"></i>
                 </button>
-                <span class="text-[10px] font-bold text-gray-400">${escapeHtml(senderDisplay)} • ${timeStr}</span>
+                <span class="text-[10px] font-bold text-gray-400">
+                  ${escapeHtml(senderDisplay)} • ${timeStr}
+                  ${isSendingPending ? '<i class="fa-solid fa-circle-notch fa-spin text-mstPurple ml-1" title="กำลังส่งเข้า LINE..."></i>' : '<i class="fa-solid fa-check-double text-emerald-500 ml-0.5" title="ส่งแล้ว"></i>'}
+                </span>
               </div>
               <div class="max-w-[86%] sm:max-w-[75%] p-3.5 rounded-2xl rounded-tr-sm text-xs sm:text-[13px] shadow-sm ${
                 isAiBot
@@ -2116,7 +2406,6 @@
       const isHidden = drawer.classList.contains('hidden');
       const shouldOpen = typeof forceState === 'boolean' ? forceState : isHidden;
       drawer.classList.toggle('hidden', !shouldOpen);
-      // ปิด input ด้านในเมื่อพับเก็บ เพื่อไม่ให้ปุ่มลูกศร ^ v บนแป้นพิมพ์ iOS กระโดดไปโฟกัส
       drawer.querySelectorAll('input, select, button').forEach(el => {
         el.disabled = !shouldOpen;
       });
@@ -2268,7 +2557,6 @@
       if (e.isComposing || e.keyCode === 229) return;
       if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
         e.preventDefault();
-        e.target.blur();
         document.getElementById('btnSendFlex').click();
       }
     }
@@ -2326,7 +2614,7 @@
     }
 
     // =========================================================
-    // 9. CANNED REPLIES (เพิ่ม / แก้ไข / ลบ คำตอบด่วน)
+    // 9. CANNED REPLIES
     // =========================================================
     function renderCannedRepliesBar() {
       const list = botSettings.cannedReplies || [];
@@ -2445,7 +2733,7 @@
     }
 
     // =========================================================
-    // 10. BOT SETTINGS & SEND FLEX REPLY
+    // 10. BOT SETTINGS & 0ms OPTIMISTIC SEND FLEX REPLY
     // =========================================================
     function insertKnowledgeTemplate() {
       const ta = document.getElementById('cfgCustomKnowledge');
@@ -2463,10 +2751,10 @@
     }
 
     async function saveBotSettingsFromUI() {
-   if (isSavingConfigBusy) return;
-   isSavingConfigBusy = true;
-   setTopBusyBar(true);
-   const newCfg = {
+      if (isSavingConfigBusy) return;
+      isSavingConfigBusy = true;
+      setTopBusyBar(true);
+      const newCfg = {
         aiEnabled: document.getElementById('cfgAiEnabled').checked,
         tgNotifyEnabled: document.getElementById('cfgTgEnabled').checked,
         customKnowledge: document.getElementById('cfgCustomKnowledge').value.trim(),
@@ -2474,15 +2762,15 @@
         handoffMessage: document.getElementById('cfgHandoffMsg').value.trim()
       };
       try {
-     const res = await callAdminApi({ action: 'saveBotConfig', config: newCfg });
-     if (res.status === 'success') {
-       botSettings = res.settings;
-       Swal.fire({ icon: 'success', title: 'บันทึกการตั้งค่าบอทเรียบร้อย', confirmButtonColor: '#4C1D95', timer: 1500, showConfirmButton: false });
-     }
-   } finally {
-     isSavingConfigBusy = false;
-     setTopBusyBar(false);
-   }
+        const res = await callAdminApi({ action: 'saveBotConfig', config: newCfg });
+        if (res.status === 'success') {
+          botSettings = res.settings;
+          Swal.fire({ icon: 'success', title: 'บันทึกการตั้งค่าบอทเรียบร้อย', confirmButtonColor: '#4C1D95', timer: 1500, showConfirmButton: false });
+        }
+      } finally {
+        isSavingConfigBusy = false;
+        setTopBusyBar(false);
+      }
     }
 
     async function testTelegramAlert() {
@@ -2492,73 +2780,139 @@
       }
     }
 
-    let isSendingReplyBusy = false;
     async function sendFlexReply(e) {
       e.preventDefault();
-      if (!currentUserId || isSendingReplyBusy) return;
+      if (!currentUserId) return;
       const ta = document.getElementById('flexReplyText');
       const rawReplyText = ta.value.trim();
       if (!rawReplyText) return;
 
-      isSendingReplyBusy = true;
-      setTopBusyBar(true);
-      ta.blur(); // ย่อแป้นพิมพ์ลงทันทีที่กดส่ง
+      const targetUid = currentUserId;
+      const serviceLabel = document.getElementById('flexServiceLabel').value.trim();
+      const cardTitle = document.getElementById('flexCardTitle').value.trim();
+      const senderLabel = document.getElementById('flexSenderLabel').value.trim();
+      const badgeText = document.getElementById('flexBadgeText').value.trim();
+      const closeHumanMode = document.getElementById('chkCloseHumanMode').checked;
+      const customButtons = getCustomButtonsFromUI();
 
       const replyText = currentQuoteText
         ? `💬 อ้างอิง: "${currentQuoteText}"\n──────────────\n${rawReplyText}`
         : rawReplyText;
 
-      const btn = document.getElementById('btnSendFlex');
-      btn.disabled = true;
-      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span class="hidden sm:inline">กำลังส่ง...</span>';
+      const clientMsgId = `msg_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+      const nowIso = new Date().toISOString();
+
+      ta.value = '';
+      ta.style.height = 'auto';
+      delete chatDrafts[targetUid];
+      saveJsonToStorage(DRAFTS_STORAGE_KEY, chatDrafts);
+      clearQuoteReply();
+      document.getElementById('chkCloseHumanMode').checked = false;
+      toggleFlexStudioDrawer(false);
+
+      const optimisticMsg = {
+        id: clientMsgId,
+        sender: "admin",
+        name: `${senderLabel} (${adminFullName})`,
+        text: replyText,
+        cardTitle,
+        buttons: customButtons,
+        deliveryMethod: "sending_optimistic",
+        timestamp: nowIso
+      };
+
+      if (!currentThreadObj || currentThreadObj.userId !== targetUid) {
+        currentThreadObj = threadDetailCache[targetUid] || {
+          userId: targetUid,
+          displayName: "ผู้ใช้งาน",
+          pictureUrl: "/logo.webp",
+          status: closeHumanMode ? "AI_MODE" : "HUMAN_MODE",
+          replyToken: "",
+          replyTokenTimestamp: 0,
+          messages: []
+        };
+      }
+
+      const cachedReplyToken = currentThreadObj.replyToken || "";
+      const cachedReplyTokenTs = currentThreadObj.replyTokenTimestamp || 0;
+
+      currentThreadObj.messages = mergeClientMessages(currentThreadObj.messages || [], [optimisticMsg]);
+      currentThreadObj.status = closeHumanMode ? "AI_MODE" : "HUMAN_MODE";
+      currentThreadObj.updatedAt = nowIso;
+      currentThreadObj.lastMessage = `[ตอบแล้ว] ${replyText}`;
+      threadDetailCache[targetUid] = currentThreadObj;
+      persistRealtimeCacheToSession();
+
+      const idxInList = threads.findIndex(t => t.userId === targetUid);
+      if (idxInList >= 0) {
+        const updatedItem = {
+          ...threads[idxInList],
+          lastMessage: `[ตอบแล้ว] ${replyText}`,
+          status: currentThreadObj.status,
+          unreadCount: 0,
+          updatedAt: nowIso,
+          messages: currentThreadObj.messages.slice(-50)
+        };
+        threads.splice(idxInList, 1);
+        threads.unshift(updatedItem);
+      }
+
+      isUserScrolledUp = false;
+      updateRoomHeaderStatusUI(currentThreadObj.status === 'HUMAN_MODE');
+      renderMessagesStream(currentThreadObj, true, true);
+      renderThreadsList();
 
       try {
         const res = await callAdminApi({
           action: "sendAdminFlexReply",
-          userId: currentUserId,
-          serviceLabel: document.getElementById('flexServiceLabel').value.trim(),
-          cardTitle: document.getElementById('flexCardTitle').value.trim(),
-          senderLabel: document.getElementById('flexSenderLabel').value.trim(),
-          badgeText: document.getElementById('flexBadgeText').value.trim(),
+          userId: targetUid,
+          clientMsgId,
+          clientReplyToken: cachedReplyToken,
+          clientReplyTokenTs: cachedReplyTokenTs,
+          clientRecentMessages: (currentThreadObj.messages || []).slice(-12),
+          serviceLabel,
+          cardTitle,
+          senderLabel,
+          badgeText,
           replyText,
-          closeHumanMode: document.getElementById('chkCloseHumanMode').checked,
-          buttons: getCustomButtonsFromUI()
+          closeHumanMode,
+          buttons: customButtons
         });
 
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> <span class="hidden sm:inline">ส่งการ์ด</span>';
-
         if (res.status === "success") {
-          ta.value = '';
-          ta.style.height = 'auto';
-          delete chatDrafts[currentUserId];
-          saveJsonToStorage(DRAFTS_STORAGE_KEY, chatDrafts);
-          clearQuoteReply();
-          document.getElementById('chkCloseHumanMode').checked = false;
-          toggleFlexStudioDrawer(false);
+          if (res.thread) {
+            const mergedAfterSend = mergeThreadObjByTime(threadDetailCache[targetUid], res.thread);
+            mergedAfterSend.messages = (mergedAfterSend.messages || []).map(m =>
+              m.id === clientMsgId ? { ...m, deliveryMethod: res.deliveryMethod } : m
+            );
+            if (res.deliveryMethod === 'reply_token_free') {
+              mergedAfterSend.replyToken = "";
+              mergedAfterSend.replyTokenTimestamp = 0;
+            }
+            threadDetailCache[targetUid] = mergedAfterSend;
+            persistRealtimeCacheToSession();
+            if (currentUserId === targetUid) {
+              currentThreadObj = mergedAfterSend;
+              renderMessagesStream(currentThreadObj, false, true);
+            }
+          }
+          if (Array.isArray(res.threads)) {
+            hydrateCacheFromThreads(res.threads);
+            renderThreadsList();
+          }
 
           const methodLabel = res.deliveryMethod === 'reply_token_free'
             ? 'ส่งสำเร็จด้วย Reply Token (ฟรี 0 โควตา)'
             : (res.deliveryMethod === 'push_realtime' ? 'ส่งการ์ด Flex เข้าแชททันทีแล้ว' : 'บันทึกเข้าคิวส่งอัตโนมัติ (0 โควตา)');
-          Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: methodLabel, showConfirmButton: false, timer: 2000 });
-          isUserScrolledUp = false;
-          lastRenderedMsgSignature = "";
-          delete threadDetailCache[currentUserId];
-          await loadThreads(true, true);
+          Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: methodLabel, showConfirmButton: false, timer: 1600 });
         } else {
           Swal.fire({ icon: "error", title: "ส่งไม่สำเร็จ", text: res.message, confirmButtonColor: "#4C1D95" });
         }
       } catch (err) {
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> <span class="hidden sm:inline">ส่งการ์ด</span>';
-        Swal.fire({ icon: "error", title: "เกิดข้อผิดพลาด", text: err.message || err, confirmButtonColor: "#4C1D95" });
-      } finally {
-        isSendingReplyBusy = false;
-        setTopBusyBar(false);
+        Swal.fire({ icon: "error", title: "เกิดข้อผิดพลาดในการส่ง", text: err.message || err, confirmButtonColor: "#4C1D95" });
       }
     }
 
-    // ฟังก์ชันอัปเดตเปอร์เซ็นต์และแถบสถานะตอนเปิดแอป
     function setBootProgress(percent, statusText, stepText = '') {
       const bar = document.getElementById('bootProgressBar');
       const pct = document.getElementById('bootPercentText');
@@ -2589,7 +2943,6 @@
 
       setBootProgress(20, 'กำลังตรวจสอบเซสชันผู้ดูแลระบบ...', 'ขั้นตอนที่ 1/4');
 
-      // 1. ตรวจสอบเซสชันของหน้านี้
       const saved = sessionStorage.getItem(SESSION_KEY) || localStorage.getItem(SESSION_KEY);
       if (saved) {
         try {
@@ -2601,7 +2954,6 @@
         } catch (e) {}
       }
 
-      // 2. ตรวจสอบ SSO Token จากหน้าแอดมินหลัก
       const portalToken = sessionStorage.getItem(PORTAL_TOKEN_KEY) || localStorage.getItem(PORTAL_TOKEN_KEY);
       if (portalToken) {
         adminAuth = { idToken: portalToken };
@@ -2609,7 +2961,6 @@
         return;
       }
 
-      // 3. หากยังไม่ได้เข้าสู่ระบบเลย ให้ปิดหน้าโหลดแล้วเปิดหน้าล็อกอิน
       hideBootLoader();
       document.getElementById('loginModal').classList.remove('hidden');
     });
