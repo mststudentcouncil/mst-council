@@ -534,7 +534,7 @@ function renderGatewayPage(clientIP, allowedDomain, returnTo = "/", errorMessage
                         </svg>
                     </div>
                     <div>
-                        <p class="text-xs font-bold text-gray-800">เชื่อมต่อผ่านเครือข่ายภายในโรงเรียน<br>Wi-Fi : Student@MST , Teacher@MST , Office@MST</p>
+                        <p class="text-xs font-bold text-gray-800">เชื่อมต่อผ่านเครือข่าย Wi-Fi ภายในโรงเรียน<br>Student@MST , Teacher@MST , Office@MST</p>
                         <p class="text-[11px] text-gray-500">เข้าใช้งานทุกระบบได้โดยอัตโนมัติเมื่ออยู่ในพื้นที่ และเชื่อมต่ออยู่กับเครือข่าย</p>
                     </div>
                 </div>
