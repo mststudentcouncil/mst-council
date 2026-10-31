@@ -12,6 +12,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 
     <script>
         if (typeof tailwind !== 'undefined') {
@@ -71,6 +72,21 @@
             outline: none;
             box-shadow: 0 0 0 3px rgba(76, 29, 149, 0.15);
         }
+        .btn-main {
+            background: linear-gradient(135deg, #4C1D95 0%, #6D28D9 100%);
+            color: white;
+            font-weight: 700;
+            padding: 0.85rem 1.2rem;
+            border-radius: 1rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 14px;
+            box-shadow: 0 6px 16px rgba(76, 29, 149, 0.22);
+            transition: all 0.15s;
+        }
+        .btn-main:active { transform: scale(0.97); }
         .loader-overlay {
             position: fixed;
             inset: 0;
@@ -96,7 +112,7 @@
     <!-- Global Loader Overlay -->
     <div id="globalLoader" class="loader-overlay px-6 text-center">
         <i class="fas fa-circle-notch fa-spin text-5xl text-mstPurple mb-4 drop-shadow-md"></i>
-        <p class="text-base font-bold text-mstPurple" id="loaderText">กำลังซิงค์ตารางเรียนจากเว็บโรงเรียน...</p>
+        <p class="text-base font-bold text-mstPurple" id="loaderText">กำลังตรวจสอบสิทธิ์และซิงค์ตารางเรียน...</p>
     </div>
 
     <div class="w-full max-w-lg mx-auto min-h-screen flex flex-col px-4">
@@ -104,18 +120,18 @@
         <!-- Sticky Top Header -->
         <header class="sticky top-0 z-30 pt-3 pb-2">
             <div class="glass rounded-2xl px-4 py-3 flex items-center justify-between gap-2">
-                <div class="flex items-center gap-3 min-w-0 cursor-pointer" onclick="switchBottomTab('student')">
+                <div class="flex items-center gap-3 min-w-0 cursor-pointer" onclick="if(currentViewer) switchBottomTab('student')">
                     <img src="/logo.webp" style="width: 40px; height: 40px;" class="w-10 h-10 object-contain drop-shadow-sm shrink-0" alt="MSTSC Logo" onerror="this.style.opacity='0'">
                     <div class="min-w-0">
                         <div class="flex items-center gap-1.5">
                             <h1 class="text-sm font-black text-mstPurple truncate">TIMETABLE</h1>
-                            <span class="bg-mstYellow text-mstDark text-[9px] font-black px-2 py-0.5 rounded-full shrink-0" id="semesterBadge">กำลังซิงค์...</span>
+                            <span class="bg-mstYellow text-mstDark text-[9px] font-black px-2 py-0.5 rounded-full shrink-0" id="semesterBadge">SC x ACADEMIC</span>
                         </div>
                         <p class="text-[10px] font-bold text-gray-500 truncate">ระบบตารางเรียน-ตารางสอน</p>
                     </div>
                 </div>
                 <div class="flex items-center gap-1.5 shrink-0">
-                    <button onclick="syncDriveCatalog(true)" class="w-9 h-9 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 flex items-center justify-center text-xs transition" title="ดึงข้อมูลล่าสุดจากเว็บโรงเรียน">
+                    <button id="btnSyncHeader" onclick="syncDriveCatalog(true)" class="hidden w-9 h-9 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 items-center justify-center text-xs transition" title="ดึงข้อมูลล่าสุดจากเว็บโรงเรียน">
                         <i class="fa-solid fa-rotate" id="syncIcon"></i>
                     </button>
                     <a href="/line_liff/system/all/richmenuline/" class="w-9 h-9 rounded-xl bg-purple-50 hover:bg-purple-100 text-mstPurple border border-purple-100 flex items-center justify-center text-xs transition" title="ศูนย์รวมบริการนักเรียน">
@@ -125,113 +141,138 @@
             </div>
         </header>
 
-        <!-- แบนเนอร์ข้อมูลผู้ใช้ & คาบเรียนปัจจุบัน -->
-        <div class="bg-gradient-to-r from-mstDark to-mstPurple rounded-2xl p-4 text-white shadow-md space-y-3 mt-1">
-            <div class="flex items-center justify-between gap-2">
-                <div class="min-w-0 flex-1">
-                    <div class="flex items-center gap-1.5">
-                        <span class="bg-mstYellow text-mstDark text-[9px] font-black px-2 py-0.5 rounded-full uppercase" id="viewerBadgeRole">NOT CONNECTED</span>
-                        <p id="viewerNameText" class="text-xs sm:text-sm font-black truncate">ไม่ได้เชื่อมต่อ LINE</p>
-                    </div>
-                    <p id="activeScheduleHeader" class="text-[11px] text-purple-200 font-medium mt-0.5 truncate">-</p>
+        <!-- 1. หน้าบังคับเชื่อมต่อผ่านหน้า Connect เท่านั้น (เหมือน Radio / Portfolio) -->
+        <div id="link-screen" class="hidden fade-in flex-col my-auto py-6">
+            <div class="glass rounded-[2rem] p-7 text-center space-y-4 shadow-lg">
+                <div class="w-16 h-16 mx-auto bg-purple-50 rounded-2xl flex items-center justify-center text-mstPurple border border-purple-100 shadow-inner">
+                    <i class="fa-solid fa-calendar-days text-3xl"></i>
                 </div>
-                <button onclick="pinCurrentTarget()" class="bg-white/15 hover:bg-white/25 border border-white/25 text-white font-bold px-3 py-2 rounded-xl text-[11px] shrink-0 flex items-center gap-1.5 transition active:scale-95">
-                    <i class="fa-solid fa-thumbtack text-mstYellow"></i> <span id="pinBtnText">ปักหมุดตารางนี้</span>
-                </button>
-            </div>
-
-            <!-- สถานะคาบเรียนปัจจุบัน -->
-            <div class="bg-white/10 backdrop-blur-md rounded-xl p-3 border border-white/15 flex items-center justify-between gap-3">
-                <div class="min-w-0 flex-1">
-                    <div class="flex items-center gap-1.5">
-                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-                        <span class="text-[10px] font-black text-mstYellow uppercase tracking-wider" id="livePeriodLabel">กำลังตรวจสอบคาบเรียน...</span>
-                    </div>
-                    <p class="text-xs sm:text-sm font-black text-white mt-0.5 truncate" id="liveSubjectTitle">-</p>
-                    <p class="text-[11px] text-purple-200 font-medium truncate" id="liveSubDetail">-</p>
+                <div>
+                    <span class="bg-purple-50 text-mstPurple text-[10px] font-black px-3 py-1 rounded-full border border-purple-100 uppercase tracking-wider">MSTSC Student Connect</span>
+                    <h2 class="text-lg font-black text-mstDark mt-2">กรุณาเชื่อมข้อมูลก่อนเข้าใช้งานตารางเรียน</h2>
+                    <p class="text-xs text-gray-500 font-medium mt-1 leading-relaxed">รองรับทั้งนักเรียนปัจจุบัน (ม.1-ม.6) ศิษย์เก่า และครู/บุคลากร กรุณาผูกบัญชีที่หน้าระบบเชื่อมต่อกลางเพื่อเข้าใช้งาน</p>
                 </div>
-                <div class="text-right shrink-0">
-                    <span class="bg-mstYellow text-mstDark text-[10px] font-black px-2.5 py-1 rounded-lg block" id="liveClockBadge">08:30</span>
-                </div>
+                <a href="https://liff.line.me/2008923798-pVEtog9o" class="btn-main w-full py-4 text-sm">
+                    <i class="fa-solid fa-id-card mr-1"></i> ไปหน้าเชื่อมต่อข้อมูลนักเรียน
+                </a>
+                <a href="/line_liff/system/all/richmenuline/" class="block w-full py-3 rounded-xl bg-white border border-gray-200 text-xs font-bold text-gray-600 hover:border-mstPurple transition">
+                    กลับสู่ศูนย์รวมบริการนักเรียน
+                </a>
             </div>
         </div>
 
-        <!-- กล่องเลือกตาราง -->
-        <div class="glass rounded-2xl p-3.5 space-y-2.5 mt-3">
-            <div id="studentSelectorBox" class="grid grid-cols-2 gap-2">
-                <div>
-                    <label class="block text-[10px] font-bold text-gray-500 mb-1"><i class="fa-solid fa-layer-group text-mstPurple mr-1"></i>ระดับชั้น</label>
-                    <select id="selGradeFolder" onchange="onGradeFolderChange()" class="glass-input py-2 px-2.5 text-xs"></select>
-                </div>
-                <div>
-                    <label class="block text-[10px] font-bold text-gray-500 mb-1"><i class="fa-solid fa-door-open text-mstPurple mr-1"></i>ห้องเรียน</label>
-                    <select id="selClassFile" onchange="onSelectScheduleFile()" class="glass-input py-2 px-2.5 text-xs"></select>
-                </div>
-            </div>
+        <!-- 2. หน้าหลักระบบตารางเรียน (แสดงเฉพาะเมื่อผ่านการยืนยันตัวตน Connect แล้ว) -->
+        <div id="home-screen" class="hidden fade-in flex-col">
 
-            <div id="teacherSelectorBox" class="hidden grid-cols-2 gap-2">
-                <div>
-                    <label class="block text-[10px] font-bold text-gray-500 mb-1"><i class="fa-solid fa-book text-mstPurple mr-1"></i>กลุ่มสาระการเรียนรู้</label>
-                    <select id="selDeptFolder" onchange="onDeptFolderChange()" class="glass-input py-2 px-2.5 text-xs"></select>
-                </div>
-                <div>
-                    <label class="block text-[10px] font-bold text-gray-500 mb-1"><i class="fa-solid fa-chalkboard-user text-mstPurple mr-1"></i>ชื่อครูผู้สอน</label>
-                    <select id="selTeacherFile" onchange="onSelectScheduleFile()" class="glass-input py-2 px-2.5 text-xs"></select>
-                </div>
-            </div>
-
-            <!-- ค้นหาด่วน -->
-            <div class="relative">
-                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
-                <input type="text" id="inpQuickFilter" oninput="renderInteractiveSchedule()" class="glass-input pl-9 pr-8 py-2 text-xs" placeholder="ค้นหารหัสวิชา, กิจกรรม, ชื่อครูผู้สอน, ห้องเรียน...">
-                <button onclick="document.getElementById('inpQuickFilter').value=''; renderInteractiveSchedule();" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-500 text-xs">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-
-            <!-- ปุ่มเลือกวัน จันทร์ - ศุกร์ หรือดูรวมทั้งสัปดาห์ -->
-            <div id="dayPillsBar" class="grid grid-cols-6 gap-1.5 pt-0.5">
-                <button onclick="selectDay(1)" id="dayBtn_1" class="py-2 rounded-xl text-[11px] font-black border border-gray-200 bg-white text-gray-600 transition">จ.</button>
-                <button onclick="selectDay(2)" id="dayBtn_2" class="py-2 rounded-xl text-[11px] font-black border border-gray-200 bg-white text-gray-600 transition">อ.</button>
-                <button onclick="selectDay(3)" id="dayBtn_3" class="py-2 rounded-xl text-[11px] font-black border border-gray-200 bg-white text-gray-600 transition">พ.</button>
-                <button onclick="selectDay(4)" id="dayBtn_4" class="py-2 rounded-xl text-[11px] font-black border border-gray-200 bg-white text-gray-600 transition">พฤ.</button>
-                <button onclick="selectDay(5)" id="dayBtn_5" class="py-2 rounded-xl text-[11px] font-black border border-gray-200 bg-white text-gray-600 transition">ศ.</button>
-                <button onclick="selectDay(0)" id="dayBtn_0" class="py-2 rounded-xl text-[11px] font-black border border-gray-200 bg-white text-gray-600 transition">รวม</button>
-            </div>
-        </div>
-
-        <!-- มุมมองที่ 1: การ์ดตารางเรียนอัจฉริยะ (Interactive Cards) -->
-        <div id="interactiveViewBox" class="space-y-2.5 pt-3 fade-in"></div>
-
-        <!-- มุมมองที่ 2: แสดงตาราง PDF ต้นฉบับด้วย Canvas คมชัดสูง (ไม่มี Error unload จาก iframe) -->
-        <div id="pdfOriginalViewBox" class="hidden flex-col space-y-3 pt-3 fade-in">
-            <div class="glass p-3.5 rounded-2xl space-y-3">
+            <!-- แบนเนอร์ข้อมูลผู้ใช้ & คาบเรียนปัจจุบัน -->
+            <div class="bg-gradient-to-r from-mstDark to-mstPurple rounded-2xl p-4 text-white shadow-md space-y-3 mt-1">
                 <div class="flex items-center justify-between gap-2">
-                    <div class="min-w-0">
-                        <h3 class="text-xs font-black text-mstPurple truncate" id="pdfViewerTitle">ไฟล์ PDF ต้นฉบับจากงานวิชาการ</h3>
-                        <p class="text-[10px] text-gray-500 font-bold truncate">เลื่อนซ้าย-ขวาเพื่อดูตารางขนาดเต็ม หรือกดดาวน์โหลดเก็บไว้ในเครื่อง</p>
+                    <div class="min-w-0 flex-1">
+                        <div class="flex items-center gap-1.5">
+                            <span class="bg-mstYellow text-mstDark text-[9px] font-black px-2 py-0.5 rounded-full uppercase" id="viewerBadgeRole">STUDENT</span>
+                            <p id="viewerNameText" class="text-xs sm:text-sm font-black truncate">-</p>
+                        </div>
+                        <p id="activeScheduleHeader" class="text-[11px] text-purple-200 font-medium mt-0.5 truncate">-</p>
                     </div>
-                    <div class="flex items-center gap-1.5 shrink-0">
-                        <a id="btnOpenDriveFolder" href="#" target="_blank" rel="noopener noreferrer" class="bg-purple-50 text-mstPurple border border-purple-200 text-[10px] font-black px-2.5 py-1.5 rounded-xl">
-                            <i class="fa-brands fa-google-drive mr-0.5"></i> โฟลเดอร์รวม
-                        </a>
-                        <a id="btnDownloadPdf" href="#" target="_blank" rel="noopener noreferrer" class="bg-mstYellow text-mstDark text-[10px] font-black px-3 py-1.5 rounded-xl shadow-2xs">
-                            <i class="fa-solid fa-download mr-0.5"></i> โหลด PDF
-                        </a>
+                    <button onclick="pinCurrentTarget()" class="bg-white/15 hover:bg-white/25 border border-white/25 text-white font-bold px-3 py-2 rounded-xl text-[11px] shrink-0 flex items-center gap-1.5 transition active:scale-95">
+                        <i class="fa-solid fa-thumbtack text-mstYellow"></i> <span id="pinBtnText">ปักหมุดตารางนี้</span>
+                    </button>
+                </div>
+
+                <!-- สถานะคาบเรียนปัจจุบัน -->
+                <div class="bg-white/10 backdrop-blur-md rounded-xl p-3 border border-white/15 flex items-center justify-between gap-3">
+                    <div class="min-w-0 flex-1">
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                            <span class="text-[10px] font-black text-mstYellow uppercase tracking-wider" id="livePeriodLabel">กำลังตรวจสอบคาบเรียน...</span>
+                        </div>
+                        <p class="text-xs sm:text-sm font-black text-white mt-0.5 truncate" id="liveSubjectTitle">-</p>
+                        <p class="text-[11px] text-purple-200 font-medium truncate" id="liveSubDetail">-</p>
+                    </div>
+                    <div class="text-right shrink-0">
+                        <span class="bg-mstYellow text-mstDark text-[10px] font-black px-2.5 py-1 rounded-lg block" id="liveClockBadge">08:30</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- กล่องเลือกตาราง -->
+            <div class="glass rounded-2xl p-3.5 space-y-2.5 mt-3">
+                <div id="studentSelectorBox" class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-500 mb-1"><i class="fa-solid fa-layer-group text-mstPurple mr-1"></i>ระดับชั้น</label>
+                        <select id="selGradeFolder" onchange="onGradeFolderChange()" class="glass-input py-2 px-2.5 text-xs"></select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-500 mb-1"><i class="fa-solid fa-door-open text-mstPurple mr-1"></i>ห้องเรียน</label>
+                        <select id="selClassFile" onchange="onSelectScheduleFile()" class="glass-input py-2 px-2.5 text-xs"></select>
                     </div>
                 </div>
 
-                <!-- แสดงหน้า PDF ต้นฉบับด้วย PDF.js Canvas (เลื่อนซูมได้ลื่นไหล ไม่ติดบล็อก) -->
-                <div class="w-full overflow-x-auto bg-slate-800 rounded-xl p-2 border border-gray-300 shadow-inner">
-                    <canvas id="pdfRenderCanvas" class="mx-auto rounded-lg shadow bg-white max-w-none"></canvas>
+                <div id="teacherSelectorBox" class="hidden grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-500 mb-1"><i class="fa-solid fa-book text-mstPurple mr-1"></i>กลุ่มสาระการเรียนรู้</label>
+                        <select id="selDeptFolder" onchange="onDeptFolderChange()" class="glass-input py-2 px-2.5 text-xs"></select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-500 mb-1"><i class="fa-solid fa-chalkboard-user text-mstPurple mr-1"></i>ชื่อครูผู้สอน</label>
+                        <select id="selTeacherFile" onchange="onSelectScheduleFile()" class="glass-input py-2 px-2.5 text-xs"></select>
+                    </div>
+                </div>
+
+                <!-- ค้นหาด่วน -->
+                <div class="relative">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+                    <input type="text" id="inpQuickFilter" oninput="renderInteractiveSchedule()" class="glass-input pl-9 pr-8 py-2 text-xs" placeholder="ค้นหารหัสวิชา, กิจกรรม, ชื่อครูผู้สอน, ห้องเรียน...">
+                    <button onclick="document.getElementById('inpQuickFilter').value=''; renderInteractiveSchedule();" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-500 text-xs">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+
+                <!-- ปุ่มเลือกวัน จันทร์ - ศุกร์ หรือดูรวมทั้งสัปดาห์ -->
+                <div id="dayPillsBar" class="grid grid-cols-6 gap-1.5 pt-0.5">
+                    <button onclick="selectDay(1)" id="dayBtn_1" class="py-2 rounded-xl text-[11px] font-black border border-gray-200 bg-white text-gray-600 transition">จ.</button>
+                    <button onclick="selectDay(2)" id="dayBtn_2" class="py-2 rounded-xl text-[11px] font-black border border-gray-200 bg-white text-gray-600 transition">อ.</button>
+                    <button onclick="selectDay(3)" id="dayBtn_3" class="py-2 rounded-xl text-[11px] font-black border border-gray-200 bg-white text-gray-600 transition">พ.</button>
+                    <button onclick="selectDay(4)" id="dayBtn_4" class="py-2 rounded-xl text-[11px] font-black border border-gray-200 bg-white text-gray-600 transition">พฤ.</button>
+                    <button onclick="selectDay(5)" id="dayBtn_5" class="py-2 rounded-xl text-[11px] font-black border border-gray-200 bg-white text-gray-600 transition">ศ.</button>
+                    <button onclick="selectDay(0)" id="dayBtn_0" class="py-2 rounded-xl text-[11px] font-black border border-gray-200 bg-white text-gray-600 transition">รวม</button>
                 </div>
             </div>
+
+            <!-- มุมมองที่ 1: การ์ดตารางเรียนอัจฉริยะ (Interactive Cards) -->
+            <div id="interactiveViewBox" class="space-y-2.5 pt-3 fade-in"></div>
+
+            <!-- มุมมองที่ 2: แสดงตาราง PDF ต้นฉบับด้วย Canvas คมชัดสูง -->
+            <div id="pdfOriginalViewBox" class="hidden flex-col space-y-3 pt-3 fade-in">
+                <div class="glass p-3.5 rounded-2xl space-y-3">
+                    <div class="flex items-center justify-between gap-2">
+                        <div class="min-w-0">
+                            <h3 class="text-xs font-black text-mstPurple truncate" id="pdfViewerTitle">ไฟล์ PDF ต้นฉบับจากงานวิชาการ</h3>
+                            <p class="text-[10px] text-gray-500 font-bold truncate">เลื่อนซ้าย-ขวาเพื่อดูตารางขนาดเต็ม หรือกดดาวน์โหลดเก็บไว้ในเครื่อง</p>
+                        </div>
+                        <div class="flex items-center gap-1.5 shrink-0">
+                            <a id="btnOpenDriveFolder" href="#" target="_blank" rel="noopener noreferrer" class="bg-purple-50 text-mstPurple border border-purple-200 text-[10px] font-black px-2.5 py-1.5 rounded-xl">
+                                <i class="fa-brands fa-google-drive mr-0.5"></i> โฟลเดอร์รวม
+                            </a>
+                            <a id="btnDownloadPdf" href="#" target="_blank" rel="noopener noreferrer" class="bg-mstYellow text-mstDark text-[10px] font-black px-3 py-1.5 rounded-xl shadow-2xs">
+                                <i class="fa-solid fa-download mr-0.5"></i> โหลด PDF
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- แสดงหน้า PDF ต้นฉบับด้วย PDF.js Canvas -->
+                    <div class="w-full overflow-x-auto bg-slate-800 rounded-xl p-2 border border-gray-300 shadow-inner">
+                        <canvas id="pdfRenderCanvas" class="mx-auto rounded-lg shadow bg-white max-w-none"></canvas>
+                    </div>
+                </div>
+            </div>
+
         </div>
 
     </div>
 
-    <!-- Bottom Navigation Bar -->
-    <nav class="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-gray-200 px-4 py-1.5 pb-[calc(env(safe-area-inset-bottom)+0.35rem)] shadow-lg">
+    <!-- Bottom Navigation Bar (แสดงเฉพาะเมื่อเชื่อมต่อ Connect แล้ว) -->
+    <nav id="bottomNavBar" class="hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-gray-200 px-4 py-1.5 pb-[calc(env(safe-area-inset-bottom)+0.35rem)] shadow-lg">
         <div class="max-w-md mx-auto grid grid-cols-3 gap-2">
             <button onclick="switchBottomTab('student')" id="bNav_student" class="flex flex-col items-center justify-center py-1 text-gray-500 transition nav-item-active">
                 <div class="nav-icon-box w-10 h-7 rounded-xl flex items-center justify-center text-sm transition-all">
@@ -258,13 +299,18 @@
 
     <script>
         // =========================================================================
-        // ใส่ URL ของ Cloudflare Worker ของคุณตรงนี้
+        // ใส่ URL ของ Cloudflare Worker และ API ยืนยันตัวตน Connect
         // =========================================================================
         const WORKER_API_URL = "https://timetableupdate.studentcouncil-f38.workers.dev";
+        const CONNECT_API_URL = "https://admission-backend-592123078141.asia-southeast1.run.app/api/radio";
+        const CONNECT_LIFF_ID = "2008923798-pVEtog9o";
 
         const UNIFIED_CACHE_KEYS = ["mstsc_student_viewer", "mstsc_portfolio_viewer_v3", "mstsc_unified_user"];
         const PINNED_KEY = "mstsc_pinned_schedule_v3";
         const NOTES_KEY = "mstsc_schedule_notes_v3";
+
+        let currentViewer = null;
+        let lineAccessToken = "";
 
         // ตารางเวลาเรียนคาบ 0 - 10 ตามไฟล์ PDF จริงของโรงเรียนเมืองสุราษฎร์ธานี
         const MST_PERIODS = [
@@ -284,8 +330,115 @@
         const DAY_NAMES = { 1: "วันจันทร์", 2: "วันอังคาร", 3: "วันพุธ", 4: "วันพฤหัสบดี", 5: "วันศุกร์" };
 
         // =========================================================================
+        // ระบบจัดการสถานะผู้ใช้งานจาก MSTSC Connect
+        // =========================================================================
+        function getSavedViewer() {
+            for (const key of UNIFIED_CACHE_KEYS) {
+                try {
+                    const raw = localStorage.getItem(key);
+                    if (!raw) continue;
+                    const parsed = JSON.parse(raw);
+                    if (parsed && parsed.std_id) return parsed;
+                } catch (e) {}
+            }
+            return null;
+        }
+
+        function saveUnifiedViewer(viewerObj) {
+            if (!viewerObj || !viewerObj.std_id) return;
+            const str = JSON.stringify(viewerObj);
+            UNIFIED_CACHE_KEYS.forEach(k => {
+                try { localStorage.setItem(k, str); } catch (e) {}
+            });
+        }
+
+        function clearUnifiedViewer() {
+            UNIFIED_CACHE_KEYS.forEach(k => {
+                try { localStorage.removeItem(k); } catch (e) {}
+            });
+        }
+
+        function showScreen(screenId) {
+            ['link-screen', 'home-screen'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.classList.add('hidden');
+                    el.classList.remove('flex');
+                }
+            });
+            const target = document.getElementById(screenId);
+            if (target) {
+                target.classList.remove('hidden');
+                target.classList.add('flex');
+            }
+
+            const bottomNav = document.getElementById('bottomNavBar');
+            const syncBtn = document.getElementById('btnSyncHeader');
+            if (currentViewer && screenId === 'home-screen') {
+                if (bottomNav) bottomNav.classList.remove('hidden');
+                if (syncBtn) {
+                    syncBtn.classList.remove('hidden');
+                    syncBtn.classList.add('flex');
+                }
+            } else {
+                if (bottomNav) bottomNav.classList.add('hidden');
+                if (syncBtn) {
+                    syncBtn.classList.add('hidden');
+                    syncBtn.classList.remove('flex');
+                }
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        async function verifyConnectAuth() {
+            // 1. ตรวจสอบจากแคชกลางที่บันทึกไว้เมื่อผ่านการยืนยันตัวตนจากหน้า Connect
+            let viewer = getSavedViewer();
+
+            // 2. หากเปิดในสภาพแวดล้อมที่มีเซสชัน LINE LIFF ให้ซิงค์สถานะล่าสุดจากเซิร์ฟเวอร์ Connect ด้วย
+            try {
+                if (window.liff) {
+                    await liff.init({ liffId: CONNECT_LIFF_ID });
+                    if (liff.isLoggedIn()) {
+                        lineAccessToken = liff.getAccessToken() || "";
+                        if (lineAccessToken) {
+                            const res = await fetch(`${CONNECT_API_URL}?t=${Date.now()}`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    action: 'initRadio',
+                                    isPcAdminLogin: false,
+                                    lineAccessToken
+                                })
+                            });
+                            const data = await res.json();
+                            if (data && data.status === 'success') {
+                                if (data.linkedUser && data.linkedUser.std_id) {
+                                    viewer = data.linkedUser;
+                                    saveUnifiedViewer(viewer);
+                                } else {
+                                    viewer = null;
+                                    clearUnifiedViewer();
+                                }
+                            }
+                        }
+                    }
+                }
+            } catch (err) {
+                console.warn("LIFF / Connect check fallback:", err.message);
+            }
+
+            if (!viewer || !viewer.std_id) {
+                currentViewer = null;
+                return false;
+            }
+
+            currentViewer = viewer;
+            saveUnifiedViewer(currentViewer);
+            return true;
+        }
+
+        // =========================================================================
         // 1. ฟังก์ชันแปลงรหัสอักขระพิเศษ (Thai PUA \uF700-\uF71F) ในไฟล์ PDF ให้เป็นภาษาไทยมาตรฐาน
-        // แก้ปัญหาคำว่า "จันทร์", "ศุกร์", "ครูธัญญรัตน์", "นาฏศิลป์" มีเครื่องหมายสี่เหลี่ยมเพี้ยน
         // =========================================================================
         function normalizeThaiPdfText(rawStr) {
             if (!rawStr) return "";
@@ -327,10 +480,6 @@
 
         // =========================================================================
         // 2. ฟังก์ชันจำแนกข้อมูลในช่องตารางเรียนตามข้อสังเกตของโรงเรียน
-        // - ชื่อครูมีคำว่า "ครู" นำหน้าเสมอ
-        // - ห้องเรียนเป็นตัวเลข หรือ สนาม4, เทนนิส, อาหาร 1, นาฏศิลป์ 2 ฯลฯ
-        // - กิจกรรม 1-3 บรรทัด (อบรมระดับ ม.1, กิจกรรมในเครื่องแบบ, รักการอ่าน, สอนเสริม, ชุมนุม, โฮมรูม)
-        // - รหัสวิชา + ที่ปรึกษา ม.1 = พบครูที่ปรึกษาของตนเอง
         // =========================================================================
         function classifyCellLines(rawLines, isTeacherMode) {
             const lines = rawLines
@@ -355,7 +504,7 @@
                 };
             }
 
-            // 2. ตรวจสอบกิจกรรมพิเศษที่เขียนแยก 1-3 บรรทัด (เป็นชื่อวิชา/กิจกรรมทั้งหมด)
+            // 2. ตรวจสอบกิจกรรมพิเศษที่เขียนแยก 1-3 บรรทัด
             if (joinedNoSpace.includes("กิจกรรมในเครื่องแบบ")) {
                 return { isBreak: false, isActivity: true, title: "กิจกรรมในเครื่องแบบ", subTitle: "กิจกรรมพัฒนาผู้เรียน", canJump: false, jumpTarget: "", room: "" };
             }
@@ -395,12 +544,12 @@
             const isTeacherName = (str) => /^ครู/.test(str);
             const isClassTarget = (str) => /^(ม\.)?\d+\/\d+$/.test(str);
             const isRoomLocation = (str) => {
-                if (/^\d{3}[A-Za-z]?$/.test(str)) return true; // เช่น 141, 141A, 323, 231, 436
+                if (/^\d{3}[A-Za-z]?$/.test(str)) return true;
                 if (/^(สนาม|เทนนิส|อาหาร|นาฏศิลป|ดนตรี|ศิลปะ|คอม|แล็บ|LAB|หอประชุม|โรงยิม|สระว่ายน้ำ|ห้องสมุด|เกษตร|อุตสาหกรรม|คหกรรม|พละ|ฟุตบอล|บาส)/i.test(str)) return true;
                 return false;
             };
 
-            // 3. ตรวจสอบวิชาที่มีคำว่า "ที่ปรึกษา" (เช่น ส21202 ที่ปรึกษา ม.1 หรือ ส22202 ที่ปรึกษา ม.2/10)
+            // 3. ตรวจสอบวิชาที่มีคำว่า "ที่ปรึกษา"
             if (joinedNoSpace.includes("ที่ปรึกษา")) {
                 const subjLine = lines.find(l => isSubjectCode(l)) || lines[0];
                 const roomLine = lines.find(l => l !== subjLine && /^\d{3}[A-Za-z]?$/.test(l)) || "";
@@ -442,12 +591,10 @@
                 } else if (isTeacherMode && isClassTarget(line)) {
                     classTarget = line.replace(/^ม\./, '');
                 } else if (isSubjectCode(line) && subjectParts.length === 0) {
-                    // แปลงกรณีฟอนต์ PDF เพี้ยนรหัสวิชา ง21102 หรือ I22202 เป็น 121102 / 122202
                     subjectParts.push(line);
                 } else if (isRoomLocation(line)) {
                     roomName = roomName ? `${roomName} ${line}` : line;
                 } else {
-                    // หากอยู่บรรทัดสุดท้ายหลังชื่อครูหรือชั้นเรียน มักเป็นชื่อห้องเรียนพิเศษอื่นๆ
                     if ((teacherName || classTarget) && idx === lines.length - 1 && !roomName) {
                         roomName = line;
                     } else {
@@ -482,7 +629,7 @@
         }
 
         // =========================================================================
-        // 3. สกัดตารางเรียนจากไฟล์ PDF ของโรงเรียนด้วยพิกัดตารางแม่นยำสูง (ครบทั้ง 5 วัน และคาบ 0-10)
+        // 3. สกัดตารางเรียนจากไฟล์ PDF ของโรงเรียนด้วยพิกัดตารางแม่นยำสูง
         // =========================================================================
         let lastPdfDoc = null;
 
@@ -495,7 +642,6 @@
             const page = await pdf.getPage(1);
             const textContent = await page.getTextContent();
 
-            // แปลงข้อความทั้งหมดผ่าน normalizeThaiPdfText และคำนวณพิกัดกลาง
             const rawItems = textContent.items.map(it => {
                 const str = normalizeThaiPdfText(it.str);
                 const x = it.transform[4];
@@ -504,14 +650,14 @@
                 return { str, x, y, w, centerX: x + w / 2 };
             }).filter(it => it.str.length > 0);
 
-            // 1. ดึงข้อความหัวตาราง (เช่น ชั้น ม. 1/1 ห้องเรียนประจำ 141...)
+            // 1. ดึงข้อความหัวตาราง
             const headerLines = rawItems
                 .filter(it => it.y > 475)
                 .sort((a, b) => a.x - b.x)
                 .map(it => it.str);
             const rawHeaderText = headerLines.join(" ").replace(/\s+/g, " ");
 
-            // อัปเดตเลขภาคเรียนจากภายในไฟล์ PDF อัตโนมัติ (เช่น 2/2569)
+            // อัปเดตเลขภาคเรียนจากภายในไฟล์ PDF อัตโนมัติ
             const semMatch = rawHeaderText.match(/ภาคเรียนที่\s*(\d+\/\d+)/);
             if (semMatch && semMatch[1]) {
                 catalogData.semester = semMatch[1];
@@ -538,7 +684,7 @@
                 ? `ตารางสอน ${getTeacherDisplayName(scheduleName)}`
                 : `ตารางเรียน ม.${String(scheduleName).replace('-', '/')}`;
 
-            // 2. ค้นหาพิกัดแกน X ของคาบเรียนที่ 0 ถึง 10 จากแถวเวลาเรียน (08.15-08.30 ถึง 16.00-16.50)
+            // 2. ค้นหาพิกัดแกน X ของคาบเรียนที่ 0 ถึง 10
             const detectedPeriodX = {};
             const timeRegex = /(\d{2}\.\d{2}-\d{2}\.\d{2})/g;
 
@@ -548,14 +694,12 @@
                     const rangeStr = match[1];
                     const pObj = MST_PERIODS.find(p => p.range === rangeStr);
                     if (pObj) {
-                        // คำนวณจุดกึ่งกลางของแต่ละช่วงเวลา แม้ PDF.js จะรวม 2 ช่วงเวลาไว้ในสตริงเดียวกัน
                         const ratioCenter = (match.index + rangeStr.length / 2) / it.str.length;
                         detectedPeriodX[pObj.period] = it.x + it.w * ratioCenter;
                     }
                 }
             });
 
-            // หากบางคอลัมน์ถูกซ่อน ให้คำนวณระยะห่างคอลัมน์มาตรฐาน (Linear Interpolation) ให้ครบคาบ 0-10
             const knownPeriods = Object.keys(detectedPeriodX).map(Number).sort((a, b) => a - b);
             const periodXCenters = [];
             if (knownPeriods.length >= 2) {
@@ -569,13 +713,12 @@
                     periodXCenters.push({ period: p, cx });
                 }
             } else {
-                // พิกัดมาตรฐานของตาราง A4 แนวนอนของโรงเรียน
                 for (let p = 0; p <= 10; p++) {
                     periodXCenters.push({ period: p, cx: 95 + p * 60 });
                 }
             }
 
-            // 3. ค้นหาพิกัดแกน Y ของทั้ง 5 วัน (จันทร์, อังคาร, พุธ, พฤหัสฯ, ศุกร์) หลังแปลง PUA แล้ว
+            // 3. ค้นหาพิกัดแกน Y ของทั้ง 5 วัน
             const dayPatterns = [
                 { day: 1, regex: /จันทร|^จ\.?$/ },
                 { day: 2, regex: /อังคาร|^อ\.?$/ },
@@ -585,20 +728,18 @@
             ];
 
             const detectedDayY = {};
-            // ค้นหาเฉพาะคอลัมน์ซ้ายสุดของตาราง (x < 95)
             const leftColItems = rawItems.filter(it => it.x < 95 && it.y < 470 && it.y > 70);
             dayPatterns.forEach(dp => {
                 const found = leftColItems.find(it => dp.regex.test(it.str));
                 if (found) detectedDayY[dp.day] = found.y;
             });
 
-            // คำนวณพิกัด Y ให้ครบทั้ง 5 วันเสมอ (แม้บางวันสระหรือตัวอักษรแยกชิ้น)
             const knownDays = Object.keys(detectedDayY).map(Number).sort((a, b) => a - b);
             const dayYCenters = [];
             if (knownDays.length >= 2) {
                 const firstD = knownDays[0];
                 const lastD = knownDays[knownDays.length - 1];
-                const avgStepY = (detectedDayY[firstD] - detectedDayY[lastD]) / (lastD - firstD); // แกน Y ใน PDF เรียงจากบนลงล่าง (มากไปน้อย)
+                const avgStepY = (detectedDayY[firstD] - detectedDayY[lastD]) / (lastD - firstD);
                 for (let d = 1; d <= 5; d++) {
                     const cy = detectedDayY[d] !== undefined
                         ? detectedDayY[d]
@@ -611,7 +752,6 @@
                 }
             }
 
-            // คำนวณขอบเขตบน-ล่างของแต่ละวัน (Row Midpoints) และขอบเขตซ้าย-ขวาของแต่ละคาบ (Column Midpoints)
             const colStep = periodXCenters.length > 1 ? Math.abs(periodXCenters[1].cx - periodXCenters[0].cx) : 60;
             const rowStep = dayYCenters.length > 1 ? Math.abs(dayYCenters[0].cy - dayYCenters[1].cy) : 68;
 
@@ -623,13 +763,11 @@
             // 4. จัดกลุ่มข้อความในตารางลงตามช่อง (day, period)
             const cellBuckets = {};
             rawItems.forEach(it => {
-                // ข้ามข้อความที่อยู่นอกตาราง หรือเป็นหัวตาราง/ลายเซ็น
                 if (it.centerX < minTableX || it.centerX > maxTableX) return;
                 if (it.y > maxTableY || it.y < minTableY) return;
                 if (/\d{2}\.\d{2}-\d{2}\.\d{2}/.test(it.str)) return;
                 if (/^(คาบ|เวลา|ลงชื่อ|รองฯ|ผู้อำนวยการ)/.test(it.str)) return;
 
-                // หาวันที่ใกล้ที่สุดตามแกน Y
                 let bestDay = null;
                 let minDy = rowStep * 0.58;
                 dayYCenters.forEach(dm => {
@@ -640,7 +778,6 @@
                     }
                 });
 
-                // หาคาบที่ใกล้ที่สุดตามแกน X
                 let bestPeriod = null;
                 let minDx = colStep * 0.55;
                 periodXCenters.forEach(pm => {
@@ -658,13 +795,12 @@
                 }
             });
 
-            // 5. รวมข้อความที่อยู่ในบรรทัดเดียวกัน (Y ใกล้กันมาก) แล้วส่งเข้า classifyCellLines
+            // 5. รวมข้อความที่อยู่ในบรรทัดเดียวกัน แล้วส่งเข้า classifyCellLines
             const entries = [];
             Object.keys(cellBuckets).forEach(key => {
                 const [dStr, pStr] = key.split("_");
                 const rawCellItems = cellBuckets[key].sort((a, b) => b.y - a.y || a.x - b.x);
 
-                // รวมคำที่อยู่บรรทัดเดียวกันในช่องเดียวกัน (เช่น "อาหาร" + "1" หรือ "นาฏศิลป์" + "2")
                 const mergedLines = [];
                 rawCellItems.forEach(item => {
                     const last = mergedLines[mergedLines.length - 1];
@@ -696,7 +832,7 @@
             };
         }
 
-        // วาดไฟล์ PDF ต้นฉบับลงบน <canvas> เมื่อผู้ใช้เปิดแท็บ "ไฟล์ PDF ต้นฉบับ"
+        // วาดไฟล์ PDF ต้นฉบับลงบน <canvas>
         async function renderOriginalPdfCanvas() {
             const canvas = document.getElementById('pdfRenderCanvas');
             if (!canvas || !lastPdfDoc) return;
@@ -712,7 +848,6 @@
             }
         }
 
-        // ข้อมูลตั้งต้นจากไฟล์จริง 1-1.pdf และ กาญจนาภรณ์.pdf
         let catalogData = {
             semester: "",
             studentDriveUrl: "http://www.mst.ac.th/index.php",
@@ -723,22 +858,10 @@
 
         let activeTab = "student";
         let currentMode = "student";
-        let selectedDay = 0; // ค่าเริ่มต้นให้แสดงมุมมอง "รวม" ทั้งสัปดาห์ จันทร์-ศุกร์
+        let selectedDay = 0;
         let currentScheduleData = { header: "-", type: "student", entries: [] };
         let currentFileMeta = null;
         let simulatedTime = null;
-
-        function getSavedViewer() {
-            for (const key of UNIFIED_CACHE_KEYS) {
-                try {
-                    const raw = localStorage.getItem(key);
-                    if (!raw) continue;
-                    const parsed = JSON.parse(raw);
-                    if (parsed && parsed.std_id) return parsed;
-                } catch (e) {}
-            }
-            return null;
-        }
 
         function hideLoader() {
             const loader = document.getElementById('globalLoader');
@@ -749,6 +872,7 @@
         }
 
         async function syncDriveCatalog(showToast = false) {
+            if (!currentViewer) return;
             const syncIcon = document.getElementById('syncIcon');
             if (syncIcon) syncIcon.classList.add('fa-spin');
 
@@ -790,19 +914,16 @@
         const TEACHER_NAME_CACHE_KEY = "mstsc_teacher_fullnames_v1";
         let teacherFullNameMap = JSON.parse(localStorage.getItem(TEACHER_NAME_CACHE_KEY) || "{}");
 
-        // ตัดเลขและขีดหน้ากลุ่มสาระ เช่น "1-ภาษาไทย" -> "ภาษาไทย"
         function cleanDeptName(rawName) {
             return String(rawName || "").replace(/^\d+\s*-\s*/, "").trim();
         }
 
-        // แปลงชื่อครูให้เป็น "ครูชื่อ นามสกุล"
         function getTeacherDisplayName(shortName) {
             const cleanShort = normalizeThaiPdfText(shortName).replace(/^ครู/, "").trim();
             const full = teacherFullNameMap[cleanShort];
             return full ? `ครู${full}` : `ครู${cleanShort}`;
         }
 
-        // แปลงรหัสห้อง/ชื่อไฟล์เป็นข้อความแสดงผล เช่น "3-4" -> "ม.3/4"
         function getTargetDisplayLabel(meta) {
             if (!meta || !meta.fileName) return "-";
             if (meta.mode === "teacher") {
@@ -838,6 +959,23 @@
                         document.getElementById('selTeacherFile').value = pinned.fileName;
                     }
                 }
+            } else if (currentViewer) {
+                // หากยังไม่ได้ปักหมุด ให้เลือกตารางตามข้อมูลผู้ใช้ที่เชื่อมกับระบบ Connect อัตโนมัติ
+                const levelMatch = String(currentViewer.level || "").match(/(\d+)/);
+                const roomNum = String(currentViewer.room || "").trim();
+                if (levelMatch && roomNum && roomNum !== "-") {
+                    const gradeNum = levelMatch[1];
+                    const targetCode = `${gradeNum}-${roomNum}`;
+                    const gIdx = catalogData.studentGroups.findIndex(g => g.folderName.includes(gradeNum));
+                    if (gIdx !== -1) {
+                        gradeSel.value = gIdx;
+                        onGradeFolderChange(false);
+                        const hasRoom = (catalogData.studentGroups[gIdx].files || []).some(f => f.name === targetCode);
+                        if (hasRoom) {
+                            document.getElementById('selClassFile').value = targetCode;
+                        }
+                    }
+                }
             }
         }
 
@@ -845,7 +983,6 @@
             const gIdx = parseInt(document.getElementById('selGradeFolder').value, 10) || 0;
             const group = catalogData.studentGroups[gIdx] || { files: [] };
             const fileSel = document.getElementById('selClassFile');
-            // แสดงเฉพาะ "ห้อง 1", "ห้อง 2" โดยตัดระดับชั้นและ (.pdf) ออก
             fileSel.innerHTML = group.files.map(f => {
                 const roomOnly = f.name.includes('-') ? f.name.split('-')[1] : f.name;
                 return `<option value="${f.name}">ห้อง ${roomOnly}</option>`;
@@ -858,12 +995,10 @@
             const group = catalogData.teacherGroups[dIdx] || { files: [] };
             const fileSel = document.getElementById('selTeacherFile');
             fileSel.innerHTML = group.files.map(f => `<option value="${f.name}">${getTeacherDisplayName(f.name)}</option>`).join('');
-            // ดึงชื่อ-นามสกุลเต็มของครูในหมวดนี้มาอัปเดตตัวเลือกในพื้นหลังอัตโนมัติ
             prefetchTeacherFullNamesInGroup(group);
             if (triggerLoad) onSelectScheduleFile();
         }
 
-        // กวาดอ่านชื่อ-นามสกุลจริงจากหัวไฟล์ PDF ของครูในกลุ่มสาระมาเก็บใน Cache อัตโนมัติ
         async function prefetchTeacherFullNamesInGroup(group) {
             if (!group || !group.files) return;
             let updated = false;
@@ -902,7 +1037,6 @@
             }
         }
 
-        // สกัดชื่อ-นามสกุลครูจากประโยคหัวตาราง เช่น "ตารางสอน 105 นางสาวกาญจนาภรณ์ ทองแพรว ภาคเรียนที่ 2/2569"
         function extractTeacherFullName(headerStr) {
             const m = String(headerStr || "").match(/ตารางสอน\s*(?:\d+\s*)?(.+?)\s*(?:ภาคเรียน|โรงเรียน|$)/);
             if (!m || !m[1]) return "";
@@ -913,6 +1047,7 @@
         }
 
         async function onSelectScheduleFile() {
+            if (!currentViewer) return;
             const isTeacher = currentMode === "teacher";
             const groupIdx = parseInt(document.getElementById(isTeacher ? 'selDeptFolder' : 'selGradeFolder').value, 10) || 0;
             const groups = isTeacher ? catalogData.teacherGroups : catalogData.studentGroups;
@@ -939,12 +1074,16 @@
                 }
             }
 
+            const targetLabel = getTargetDisplayLabel(currentFileMeta);
+            const viewerMetaStr = currentViewer
+                ? `รหัส ${currentViewer.std_id} • `
+                : "";
             document.getElementById('activeScheduleHeader').innerText = isTeacher
-                ? `ตารางสอน ${getTargetDisplayLabel(currentFileMeta)}`
-                : `ตารางเรียน ${getTargetDisplayLabel(currentFileMeta)}`;
+                ? `${viewerMetaStr}กำลังดูตารางสอน ${targetLabel}`
+                : `${viewerMetaStr}กำลังดูตารางเรียน ${targetLabel}`;
             document.getElementById('pdfViewerTitle').innerText = isTeacher
-                ? `ไฟล์ตารางสอน: ${getTargetDisplayLabel(currentFileMeta)} (${cleanDeptName(currentFileMeta.folderName)})`
-                : `ไฟล์ตารางเรียน: ${getTargetDisplayLabel(currentFileMeta)}`;
+                ? `ไฟล์ตารางสอน: ${targetLabel} (${cleanDeptName(currentFileMeta.folderName)})`
+                : `ไฟล์ตารางเรียน: ${targetLabel}`;
             document.getElementById('btnOpenDriveFolder').href = isTeacher ? catalogData.teacherDriveUrl : catalogData.studentDriveUrl;
             document.getElementById('btnDownloadPdf').href = currentFileMeta.downloadUrl || (isTeacher ? catalogData.teacherDriveUrl : catalogData.studentDriveUrl);
 
@@ -958,6 +1097,10 @@
         }
 
         async function switchBottomTab(tabName) {
+            if (!currentViewer) {
+                showScreen('link-screen');
+                return;
+            }
             activeTab = tabName;
             ['student', 'teacher', 'pdf'].forEach(t => {
                 const btn = document.getElementById('bNav_' + t);
@@ -999,7 +1142,6 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // กดชื่อครูในตารางนักเรียน เพื่อสลับไปเปิดตารางสอนครูท่านนั้น
         function jumpToTeacherByName(rawTeacherName) {
             const cleanName = normalizeThaiPdfText(rawTeacherName).replace(/^ครู/, '').replace(/\./g, '').trim();
             if (!cleanName) return;
@@ -1028,7 +1170,6 @@
             });
         }
 
-        // กดเลขห้องในตารางสอนครู เพื่อสลับไปเปิดตารางเรียนของห้องนั้น
         function jumpToClassByCode(rawClassCode) {
             const normalized = String(rawClassCode).replace(/^ม\./, '').replace('/', '-').trim();
             const gradePrefix = normalized.split('-')[0];
@@ -1066,6 +1207,7 @@
         }
 
         function updateLiveBanner() {
+            if (!currentViewer) return;
             const timeStr = getCurrentTimeStr();
             document.getElementById('liveClockBadge').innerText = `${timeStr} น.${simulatedTime ? ' (จำลอง)' : ''}`;
 
@@ -1096,36 +1238,6 @@
             } else {
                 document.getElementById('liveSubjectTitle').innerText = `คาบว่าง / ไม่มีตารางในคาบนี้`;
                 document.getElementById('liveSubDetail').innerText = `ช่วงเวลา ${activeSlot.start} - ${activeSlot.end} น.`;
-            }
-        }
-
-        async function openTimeSimulator() {
-            const { value: chosen } = await Swal.fire({
-                title: 'จำลองเวลาเรียน ม.ส.ธ.',
-                input: 'select',
-                inputOptions: {
-                    'REAL': 'ใช้เวลาจริงปัจจุบัน',
-                    '08:20': '08:20 น. (คาบ 0 โฮมรูม)',
-                    '08:45': '08:45 น. (คาบที่ 1)',
-                    '09:35': '09:35 น. (คาบที่ 2)',
-                    '10:25': '10:25 น. (คาบที่ 3)',
-                    '11:15': '11:15 น. (คาบที่ 4)',
-                    '12:05': '12:05 น. (คาบที่ 5)',
-                    '13:00': '13:00 น. (คาบที่ 6)',
-                    '13:45': '13:45 น. (คาบที่ 7)',
-                    '14:30': '14:30 น. (คาบที่ 8)'
-                },
-                inputValue: simulatedTime || 'REAL',
-                showCancelButton: true,
-                confirmButtonText: 'ตกลง',
-                cancelButtonText: 'ยกเลิก',
-                confirmButtonColor: '#4C1D95',
-                customClass: { popup: 'swal-glass' }
-            });
-            if (chosen) {
-                simulatedTime = chosen === 'REAL' ? null : chosen;
-                updateLiveBanner();
-                renderInteractiveSchedule();
             }
         }
 
@@ -1176,6 +1288,7 @@
         }
 
         function renderInteractiveSchedule() {
+            if (!currentViewer) return;
             const container = document.getElementById('interactiveViewBox');
             const kw = document.getElementById('inpQuickFilter').value.trim().toLowerCase();
             const isTeacherMode = currentScheduleData.type === "teacher";
@@ -1185,7 +1298,6 @@
 
             let html = "";
 
-            // หากพิมพ์ค้นหาชื่อหรือนามสกุลครู ให้แสดงปุ่มลัดเปิดตารางสอนครูท่านนั้นด้านบนสุดด้วย
             if (kw.length >= 2) {
                 const matchedTeachers = [];
                 catalogData.teacherGroups.forEach((grp, dIdx) => {
@@ -1245,7 +1357,6 @@
                     const isNow = isTimeBetween(timeStr, slot.start, slot.end);
                     const noteText = notes[item.title] || "";
 
-                    // แสดงแถบพักกลางวันแบบสะอาดตา
                     if (item.isBreak) {
                         html += `
                             <div class="bg-amber-50/90 border border-amber-200 px-4 py-2.5 rounded-2xl flex items-center justify-between text-xs font-bold text-amber-900">
@@ -1256,14 +1367,12 @@
                         return;
                     }
 
-                    // แสดงป้ายห้องเรียนเฉพาะคาบที่มีห้องเรียนหรือสถานที่เรียนจริง (ไม่แสดง "ห้อง -")
                     const roomBadgeHtml = item.room
                         ? `<span class="bg-amber-50 text-amber-900 border border-amber-200 font-black px-2.5 py-1 rounded-lg">
                                <i class="fa-solid fa-location-dot mr-0.5"></i> ${/^\d/.test(item.room) ? 'ห้อง ' + item.room : item.room}
                            </span>`
                         : `<span class="bg-gray-100 text-gray-500 font-bold px-2.5 py-1 rounded-lg">กิจกรรม/วิชาการ</span>`;
 
-                    // แสดงบรรทัดที่ 2: ถ้ามีชื่อครูหรือชั้นเรียนให้กดเชื่อมโยงได้ แต่ถ้าเป็นกิจกรรมหรือพบที่ปรึกษาให้แสดงข้อความปกติ
                     let subLineHtml = "";
                     if (item.canJump && item.jumpTarget) {
                         if (isTeacherMode) {
@@ -1318,14 +1427,22 @@
         }
 
         function initUserBanner() {
-            const viewer = getSavedViewer();
-            if (!viewer) return;
-            document.getElementById('viewerNameText').innerText = `${viewer.fullName || 'นักเรียน'} (รหัส ${viewer.std_id})`;
-            document.getElementById('viewerBadgeRole').innerText = viewer.role || 'STUDENT';
+            if (!currentViewer) return;
+            document.getElementById('viewerNameText').innerText = currentViewer.fullName || 'ผู้ใช้งาน';
+            document.getElementById('viewerBadgeRole').innerText = currentViewer.role || 'STUDENT';
         }
 
         window.onload = async function() {
+            const isConnected = await verifyConnectAuth();
+
+            if (!isConnected) {
+                showScreen('link-screen');
+                hideLoader();
+                return;
+            }
+
             initUserBanner();
+            showScreen('home-screen');
             selectDay(selectedDay);
             await syncDriveCatalog(false);
 
@@ -1333,6 +1450,8 @@
             const reqMode = urlParams.get('mode') || urlParams.get('schedule');
             if (reqMode === 'teacher' || reqMode === 'student' || reqMode === 'pdf') {
                 await switchBottomTab(reqMode);
+            } else if (currentViewer && (currentViewer.role === 'TEACHER' || currentViewer.level === 'ครู/บุคลากร') && !localStorage.getItem(PINNED_KEY)) {
+                await switchBottomTab('teacher');
             }
 
             hideLoader();
