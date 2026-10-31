@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#4C1D95">
+    <title>Senior Portfolio Hub</title>
+    <link rel="icon" type="image/webp" href="/logo.webp">
+
+    <link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+
+    <script>
+        if (typeof tailwind !== 'undefined') {
+            tailwind.config = {
+                theme: {
+                    extend: {
+                        fontFamily: { sans: ['Anuphan', 'sans-serif'] },
+                        colors: {
+                            mstPurple: '#4C1D95',
+                            mstPurpleLight: '#EDE9FE',
+                            mstYellow: '#FBBF24',
+                            mstCream: '#FEFCF5',
+                            mstDark: '#1E1B4B'
+                        }
+                    }
+                }
+            };
+        }
+    </script>
+
+    <style>
+        .hidden { display: none !important; }
+        body {
+            font-family: 'Anuphan', sans-serif;
+            background: linear-gradient(135deg, #f3e5f5 0%, #fffde7 100%);
+            color: #1E293B;
+            min-height: 100vh;
+            margin: 0;
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: calc(env(safe-area-inset-bottom) + 5.5rem);
+        }
+        .no-select {
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        .glass {
+            background: rgba(255, 255, 255, 0.88);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.95);
+            box-shadow: 0 10px 30px rgba(76, 29, 149, 0.06);
+        }
+        .glass-input {
+            background: #FFFFFF;
+            border: 1px solid #CBD5E1;
+            border-radius: 0.9rem;
+            padding: 0.75rem 1rem;
+            font-size: 15px;
+            width: 100%;
+            color: #1E293B;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .glass-input:focus {
+            border-color: #4C1D95;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(76, 29, 149, 0.15);
+        }
+        .glass-input:disabled {
+            background: #F1F5F9;
+            color: #94A3B8;
+            cursor: not-allowed;
+        }
+        .btn-main {
+            background: linear-gradient(135deg, #4C1D95 0%, #6D28D9 100%);
+            color: white;
+            font-weight: 700;
+            padding: 0.85rem 1.2rem;
+            border-radius: 1rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 14px;
+            box-shadow: 0 6px 16px rgba(76, 29, 149, 0.22);
+            transition: all 0.15s;
+        }
+        .btn-main:active { transform: scale(0.97); }
+        .loader-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .fade-in { animation: fadeIn 0.25s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .swal-glass { background: #FFFFFF !important; border-radius: 1.75rem !important; font-family: 'Anuphan', sans-serif !important; }
+        .nav-item-active { color: #4C1D95 !important; font-weight: 800 !important; }
+        .nav-item-active .nav-icon-box { background: #EDE9FE; color: #4C1D95; transform: translateY(-2px); }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Global Loader Overlay -->
+    <div id="globalLoader" class="loader-overlay px-6 text-center">
+        <i class="fas fa-circle-notch fa-spin text-5xl text-mstPurple mb-4 drop-shadow-md"></i>
+        <p class="text-base font-bold text-mstPurple" id="loaderText">กำลังเชื่อมต่อคลังพอร์ตโฟลิโอ...</p>
+    </div>
+
+    <div class="w-full max-w-lg mx-auto min-h-screen flex flex-col px-4">
+
+        <!-- Sticky Top Header -->
+        <header class="sticky top-0 z-30 pt-3 pb-2">
+            <div class="glass rounded-2xl px-4 py-3 flex items-center justify-between gap-2">
+                <div class="flex items-center gap-3 min-w-0 cursor-pointer" onclick="if(currentViewer) switchBottomTab('explore')">
+                    <img src="/logo.webp" style="width: 40px; height: 40px;" class="w-10 h-10 object-contain drop-shadow-sm shrink-0" alt="MSTSC Logo" onerror="this.style.opacity='0'">
+                    <div class="min-w-0">
+                        <div class="flex items-center gap-1.5">
+                            <h1 class="text-sm font-black text-mstPurple truncate">PORTFOLIO</h1>
+                            <span class="bg-mstYellow text-mstDark text-[9px] font-black px-2 py-0.5 rounded-full shrink-0">SC x GUIDANCE</span>
+                        </div>
+                        <p class="text-[10px] font-bold text-gray-500 truncate" id="headerSubTitle">คลังพอร์ตโฟลิโอและแนะแนวศึกษาต่อ</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-1.5 shrink-0">
+                    <a href="/richmenuline" class="w-9 h-9 rounded-xl bg-purple-50 hover:bg-purple-100 text-mstPurple border border-purple-100 flex items-center justify-center text-xs transition" title="เมนูบริการนักเรียน">
+                        <i class="fa-solid fa-grip"></i>
+                    </a>
+                </div>
+            </div>
+        </header>
+
+        <!-- 2. บังคับเชื่อมต่อผ่านหน้า Connect เท่านั้น -->
+        <div id="link-screen" class="hidden fade-in flex-col my-auto py-6">
+            <div class="glass rounded-[2rem] p-7 text-center space-y-4 shadow-lg">
+                <div class="w-16 h-16 mx-auto bg-purple-50 rounded-2xl flex items-center justify-center text-mstPurple border border-purple-100 shadow-inner">
+                    <i class="fa-solid fa-graduation-cap text-3xl"></i>
+                </div>
+                <div>
+                    <span class="bg-purple-50 text-mstPurple text-[10px] font-black px-3 py-1 rounded-full border border-purple-100 uppercase tracking-wider">MSTSC Student Connect</span>
+                    <h2 class="text-lg font-black text-mstDark mt-2">กรุณาเชื่อมข้อมูลก่อนเข้าคลังพอร์ตโฟลิโอ</h2>
+                    <p class="text-xs text-gray-500 font-medium mt-1 leading-relaxed">รองรับทั้งนักเรียนปัจจุบัน (ม.1-ม.6) และศิษย์เก่า กรุณาผูกบัญชีที่หน้าระบบเชื่อมต่อกลางเพื่อเข้าใช้งาน</p>
+                </div>
+                <a href="https://liff.line.me/2008923798-pVEtog9o" class="btn-main w-full py-4 text-sm">
+                    <i class="fa-solid fa-id-card mr-1"></i> ไปหน้าเชื่อมต่อข้อมูลนักเรียน
+                </a>
+                <a href="/richmenuline" class="block w-full py-3 rounded-xl bg-white border border-gray-200 text-xs font-bold text-gray-600 hover:border-mstPurple transition">
+                    กลับสู่ศูนย์รวมบริการนักเรียน
+                </a>
+            </div>
+        </div>
+
+        <!-- 3. หน้าหลักคลัง Portfolio (Tab 1: Explore & Tab 2: Saved) -->
+        <div id="home-screen" class="hidden fade-in flex-col space-y-3.5 pt-1">
+
+            <!-- แบนเนอร์ผู้ใช้งาน + ปุ่มลัดส่งพอร์ต -->
+            <div class="bg-gradient-to-r from-mstDark to-mstPurple rounded-2xl p-4 text-white shadow-md flex items-center justify-between gap-3">
+                <div class="min-w-0 flex-1">
+                    <div class="flex items-center gap-1.5">
+                        <span class="bg-mstYellow text-mstDark text-[9px] font-black px-2 py-0.5 rounded-full uppercase" id="viewerBadgeRole">STUDENT</span>
+                        <p id="viewerNameText" class="text-xs sm:text-sm font-black truncate">-</p>
+                    </div>
+                    <p id="viewerRoleText" class="text-[11px] text-purple-200 font-medium mt-1 truncate">-</p>
+                </div>
+                <button onclick="openUploadModal()" class="bg-mstYellow hover:bg-amber-400 text-mstDark font-black px-3.5 py-2.5 rounded-xl text-xs shrink-0 flex items-center gap-1.5 shadow-sm transition active:scale-95">
+                    <i class="fa-solid fa-plus-circle"></i> ส่งพอร์ต
+                </button>
+            </div>
+
+            <!-- กล่องค้นหาและตัวกรองละเอียด -->
+            <div class="glass rounded-2xl p-3.5 space-y-2.5">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-black text-mstPurple flex items-center gap-1.5" id="exploreSectionTitle">
+                        <i class="fa-solid fa-compass text-mstYellow"></i> ค้นหาพอร์ตโฟลิโอรุ่นพี่
+                    </span>
+                    <span id="portCountBadge" class="text-[10px] font-black bg-purple-50 text-mstPurple px-2.5 py-0.5 rounded-full border border-purple-100">0 เล่ม</span>
+                </div>
+
+                <div class="relative">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+                    <input type="text" id="fltKeyword" oninput="renderPortfolios()" class="glass-input pl-9 pr-8 py-2.5 text-xs" placeholder="พิมพ์ชื่อมหาลัย, คณะ, สาขา, ชื่อรุ่นพี่...">
+                    <button onclick="resetFilters()" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-500 text-xs" title="ล้างคำค้นหา">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-3 gap-2">
+                    <select id="fltRound" onchange="renderPortfolios()" class="glass-input py-2 px-2 text-[11px]">
+                        <option value="">ทุกรอบ TCAS</option>
+                        <option value="รอบ 1 Portfolio">รอบ 1 Portfolio</option>
+                        <option value="รอบ 2 Quota">รอบ 2 Quota</option>
+                        <option value="รอบ 3 Admission">รอบ 3 Admission</option>
+                        <option value="โครงการพิเศษ">โครงการพิเศษ</option>
+                    </select>
+                    <select id="fltTrack" onchange="renderPortfolios()" class="glass-input py-2 px-2 text-[11px]">
+                        <option value="">ทุกแผนการเรียน</option>
+                        <option value="ห้องเรียนพิเศษ วิทยาศาสตร์ - คณิตศาสตร์ (S.M.)">S.M. (วิทย์-คณิต)</option>
+                        <option value="ห้องเรียนพิเศษ วิทยาศาสตร์ - คณิตศาสตร์ - เทคโนโลยี (S.M.T.)">S.M.T. (เทคโนโลยี)</option>
+                        <option value="ห้องเรียนพิเศษ วิทยาศาสตร์ - คณิตศาสตร์ - ภาษาอังกฤษ (S.M.E.)">S.M.E. (อังกฤษ)</option>
+                        <option value="วิทยาศาสตร์ - คณิตศาสตร์">วิทย์ - คณิต</option>
+                        <option value="คณิตศาสตร์ - ภาษาอังกฤษ">คณิต - อังกฤษ</option>
+                        <option value="ศิลป์ภาษาจีน">ศิลป์ภาษาจีน</option>
+                        <option value="ภาษาไทย - สังคมศึกษา">ไทย - สังคม</option>
+                    </select>
+                    <select id="fltStyle" onchange="renderPortfolios()" class="glass-input py-2 px-2 text-[11px]">
+                        <option value="">ทุกสไตล์</option>
+                        <option value="Minimal">Minimal</option>
+                        <option value="Infographic">Infographic</option>
+                        <option value="Creative">Creative</option>
+                        <option value="Academic">Academic (วิชาการ)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- รายการการ์ด Portfolio -->
+            <div id="portfolioListContainer" class="space-y-3"></div>
+        </div>
+
+        <!-- 4. หน้าพอร์ตของฉัน & ส่งพอร์ต (Tab 3: My Portfolios) -->
+        <div id="my-port-screen" class="hidden fade-in flex-col space-y-4 pt-1">
+            <div class="glass rounded-2xl p-4 flex items-center justify-between gap-3">
+                <div>
+                    <h2 class="text-sm font-black text-mstPurple flex items-center gap-1.5">
+                        <i class="fa-solid fa-folder-user text-mstYellow"></i> พอร์ตโฟลิโอของฉัน
+                    </h2>
+                    <p class="text-[11px] text-gray-500 font-medium mt-0.5">จัดการพอร์ตที่คุณแบ่งปัน หรือสลับสถานะรับให้คำปรึกษาน้องๆ</p>
+                </div>
+                <button onclick="openUploadModal()" class="btn-main py-2.5 px-3.5 text-xs shrink-0">
+                    <i class="fa-solid fa-cloud-arrow-up"></i> ส่งพอร์ตใหม่
+                </button>
+            </div>
+
+            <div id="myPortfolioListContainer" class="space-y-3"></div>
+        </div>
+
+        <!-- 5. หน้าส่งพอร์ต / แก้ไขพอร์ต (Upload & Edit Screen) -->
+        <div id="upload-screen" class="hidden fade-in flex-col space-y-4 pt-1">
+            <div class="glass rounded-2xl p-3.5 flex items-center justify-between gap-3">
+                <div class="flex items-center gap-3">
+                    <button onclick="switchBottomTab('myport')" class="w-9 h-9 bg-purple-50 hover:bg-purple-100 rounded-xl flex items-center justify-center text-mstPurple border border-purple-100 shrink-0 transition">
+                        <i class="fa-solid fa-arrow-left text-xs"></i>
+                    </button>
+                    <div>
+                        <h2 class="text-sm font-black text-mstPurple leading-tight" id="uploadFormTitle">แบ่งปัน Portfolio รุ่นพี่</h2>
+                        <p class="text-[11px] font-medium text-gray-500">ข้อมูลจะได้รับการตรวจสอบโดยงานแนะแนวและสภานักเรียน</p>
+                    </div>
+                </div>
+            </div>
+
+            <input type="hidden" id="edit_portfolio_id" value="">
+
+            <div class="glass p-4 rounded-[1.75rem] space-y-3">
+                <div>
+                    <label class="block text-[11px] font-black text-mstPurple mb-1.5">
+                        <i class="fa-solid fa-building-columns mr-1"></i> ระบบสถาบันอุดมศึกษา *
+                    </label>
+                    <select id="systemType" onchange="toggleSystemType()" class="glass-input text-xs px-3">
+                        <option value="TCAS" selected>มหาวิทยาลัยในระบบ TCAS (ดึงข้อมูลจาก MyTCAS)</option>
+                        <option value="NON_TCAS">มหาวิทยาลัยนอกระบบ / พิมพ์ชื่อมหาวิทยาลัยเอง</option>
+                    </select>
+                </div>
+
+                <!-- ส่วนดึงข้อมูลจาก MyTCAS -->
+                <div id="tcas-inputs" class="bg-purple-50/60 p-3.5 rounded-2xl border border-purple-100 space-y-2.5">
+                    <div id="tcas-loading-text" class="text-[11px] text-mstPurple font-bold animate-pulse flex items-center gap-1.5">
+                        <i class="fas fa-circle-notch fa-spin"></i> กำลังซิงค์รายชื่อมหาวิทยาลัยจาก MyTCAS...
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-700 mb-1">มหาวิทยาลัย *</label>
+                        <select id="tcas-uni" onchange="populateCampuses()" class="glass-input text-xs px-3" disabled>
+                            <option value="">-- เลือกมหาวิทยาลัย --</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-700 mb-1">วิทยาเขต *</label>
+                        <select id="tcas-campus" onchange="populateFaculties()" class="glass-input text-xs px-3" disabled>
+                            <option value="">-- เลือกวิทยาเขต --</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-700 mb-1">คณะ / หลักสูตร *</label>
+                        <select id="tcas-faculty" onchange="populateMajors()" class="glass-input text-xs px-3" disabled>
+                            <option value="">-- เลือกคณะ --</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-700 mb-1">สาขาวิชา *</label>
+                        <select id="tcas-major" class="glass-input text-xs px-3" disabled>
+                            <option value="">-- เลือกสาขาวิชา --</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- ส่วนพิมพ์เอง -->
+                <div id="manual-inputs" class="hidden bg-gray-50/80 p-3.5 rounded-2xl border border-gray-200 space-y-2.5">
+                    <input type="text" id="p_uni" class="glass-input text-xs" placeholder="ชื่อสถาบัน / มหาวิทยาลัย (เช่น จุฬาลงกรณ์มหาวิทยาลัย) *">
+                    <input type="text" id="p_fac" class="glass-input text-xs" placeholder="ชื่อคณะ / หลักสูตร (เช่น คณะวิทยาศาสตร์) *">
+                    <input type="text" id="p_major" class="glass-input text-xs" placeholder="สาขาวิชา (เช่น วิทยาการคอมพิวเตอร์)">
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-500 mb-1">รอบที่ยื่นติด *</label>
+                        <select id="p_round" class="glass-input text-xs px-2">
+                            <option value="รอบ 1 Portfolio">รอบ 1 Portfolio</option>
+                            <option value="รอบ 2 Quota">รอบ 2 Quota</option>
+                            <option value="รอบ 3 Admission">รอบ 3 Admission</option>
+                            <option value="โครงการพิเศษ">โครงการพิเศษ</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-500 mb-1">รุ่นปีการศึกษา (TCAS) *</label>
+                        <input type="text" id="p_year" class="glass-input text-xs text-center" placeholder="เช่น 2569" value="2569">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-500 mb-1">ชื่อโครงการที่ใช้ยื่น</label>
+                    <input type="text" id="p_project" class="glass-input text-xs" placeholder="เช่น โครงการผู้มีความสามารถพิเศษทางวิทยาศาสตร์">
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-500 mb-1">สายการเรียนตอน ม.ปลาย *</label>
+                        <select id="p_track" class="glass-input text-xs px-2">
+                            <option value="ห้องเรียนพิเศษ วิทยาศาสตร์ - คณิตศาสตร์ (S.M.)">S.M. (วิทย์-คณิต)</option>
+                            <option value="ห้องเรียนพิเศษ วิทยาศาสตร์ - คณิตศาสตร์ - เทคโนโลยี (S.M.T.)">S.M.T. (เทคโนโลยี)</option>
+                            <option value="ห้องเรียนพิเศษ วิทยาศาสตร์ - คณิตศาสตร์ - ภาษาอังกฤษ (S.M.E.)">S.M.E. (อังกฤษ)</option>
+                            <option value="วิทยาศาสตร์ - คณิตศาสตร์">วิทยาศาสตร์ - คณิตศาสตร์</option>
+                            <option value="คณิตศาสตร์ - ภาษาอังกฤษ">คณิตศาสตร์ - ภาษาอังกฤษ</option>
+                            <option value="ศิลป์ภาษาจีน">ศิลป์ภาษาจีน</option>
+                            <option value="ภาษาไทย - สังคมศึกษา">ภาษาไทย - สังคมศึกษา</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-500 mb-1">เกรดเฉลี่ยสะสม (GPAX)</label>
+                        <input type="text" id="p_gpax" class="glass-input text-xs" placeholder="เช่น 3.75 หรือ 3.50-3.80">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-500 mb-1">สไตล์การจัดหน้าพอร์ต</label>
+                        <select id="p_style" class="glass-input text-xs px-2">
+                            <option value="Minimal">Minimal (เรียบง่าย)</option>
+                            <option value="Infographic">Infographic (สรุปข้อมูล)</option>
+                            <option value="Creative">Creative (สร้างสรรค์)</option>
+                            <option value="Academic">Academic (วิชาการ)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-500 mb-1">โทนสีของเล่มพอร์ต</label>
+                        <input type="text" id="p_color" class="glass-input text-xs" placeholder="เช่น ม่วง-เหลือง, น้ำเงิน-ขาว">
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass p-4 rounded-[1.75rem] space-y-3">
+                <div>
+                    <label class="block text-[11px] font-bold text-gray-700 mb-1"><i class="fa-solid fa-award text-mstPurple mr-1"></i> ผลงานเด่นที่ใส่ในเล่มพอร์ต (Highlights)</label>
+                    <textarea id="p_highlights" rows="2" class="glass-input text-xs" placeholder="เช่น โครงงานวิทยาศาสตร์ระดับภาค, สอวน. คอมพิวเตอร์, ประธานสภานักเรียน..."></textarea>
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-gray-700 mb-1"><i class="fa-solid fa-comments text-mstPurple mr-1"></i> รีวิวคำถามสัมภาษณ์ & คำแนะนำให้น้องๆ</label>
+                    <textarea id="p_tips" rows="3" class="glass-input text-xs" placeholder="อาจารย์ถามอะไรบ้าง? บรรยากาศเป็นอย่างไร? ต้องเตรียมตัวอย่างไร?..."></textarea>
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-gray-700 mb-1"><i class="fa-brands fa-instagram text-pink-600 mr-1"></i> ช่องทางให้น้องทักปรึกษา (ซ่อนได้ตลอดเวลา)</label>
+                    <input type="text" id="p_ig" class="glass-input text-xs" placeholder="เช่น IG: @username หรือ LINE ID">
+                </div>
+
+                <div class="bg-purple-50/70 p-3.5 rounded-2xl border border-purple-100 space-y-2.5">
+                    <label class="block text-xs font-black text-mstPurple">
+                        <i class="fa-solid fa-file-pdf mr-1"></i> ไฟล์เล่ม Portfolio (เลือกอัปโหลดไฟล์ PDF หรือวางลิงก์ Google Drive) *
+                    </label>
+                    <input type="file" id="p_pdf_file" accept="application/pdf" class="block w-full text-xs text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-mstPurple file:text-white cursor-pointer bg-white p-2 rounded-xl border border-gray-200">
+                    <input type="url" id="p_pdf_url" class="glass-input text-xs bg-white" placeholder="หรือวางลิงก์ไฟล์ PDF บน Google Drive (ตั้งค่าเปิดอ่านทุกคน)">
+                </div>
+            </div>
+
+            <div class="bg-amber-50 border border-amber-200 p-4 rounded-2xl space-y-2">
+                <p class="text-xs font-black text-amber-800"><i class="fa-solid fa-shield-halved mr-1"></i> รายการตรวจสอบความปลอดภัยข้อมูลส่วนบุคคล (PDPA)</p>
+                <label class="flex items-start gap-2 text-xs text-gray-700 cursor-pointer">
+                    <input type="checkbox" id="chk_pdpa_1" class="mt-0.5 rounded accent-mstPurple shrink-0">
+                    <span>ฉันได้ปิดหรือเบลอ <b>เลขบัตรประชาชน 13 หลัก, ที่อยู่บ้าน และเบอร์โทรศัพท์ส่วนตัว</b> ออกจากไฟล์พอร์ตแล้ว</span>
+                </label>
+                <label class="flex items-start gap-2 text-xs text-gray-700 cursor-pointer">
+                    <input type="checkbox" id="chk_pdpa_2" class="mt-0.5 rounded accent-mstPurple shrink-0">
+                    <span>ยินยอมให้เผยแพร่ในคลังพอร์ตโฟลิโอสภานักเรียนและงานแนะแนวพร้อมลายน้ำป้องกันการคัดลอก</span>
+                </label>
+            </div>
+
+            <button onclick="submitPortfolio()" class="btn-main w-full py-4 text-sm">
+                <i class="fa-solid fa-paper-plane mr-1"></i> บันทึกและส่ง Portfolio เข้าระบบ
+            </button>
+        </div>
+
+        <!-- 6. หน้าเปิดอ่านไฟล์พร้อมลายน้ำไดนามิก (Viewer Screen) -->
+        <div id="viewer-screen" class="hidden fade-in flex-col space-y-3 pt-1 no-select" oncontextmenu="return false;">
+            <div class="glass rounded-2xl p-3.5 flex items-center justify-between gap-2">
+                <button onclick="closeViewer()" class="w-9 h-9 bg-purple-50 rounded-xl flex items-center justify-center text-mstPurple border border-purple-100 shrink-0">
+                    <i class="fa-solid fa-arrow-left text-xs"></i>
+                </button>
+                <div class="flex-1 px-2 min-w-0">
+                    <h3 id="v_uni_title" class="text-xs font-black text-mstPurple truncate"></h3>
+                    <p id="v_senior_sub" class="text-[10px] font-bold text-gray-500 truncate"></p>
+                </div>
+                <a id="v_external_btn" href="#" target="_blank" rel="noopener noreferrer" class="bg-mstYellow text-mstDark text-[10px] font-black px-3 py-1.5 rounded-xl shadow-2xs shrink-0 flex items-center gap-1">
+                    <i class="fa-solid fa-up-right-from-square"></i> เปิดเต็มจอ
+                </a>
+            </div>
+
+            <div class="relative w-full h-[440px] bg-mstDark rounded-2xl overflow-hidden border border-gray-300 shadow-inner">
+                <iframe id="v_pdf_frame" src="" class="w-full h-full border-0" allow="autoplay"></iframe>
+                <div id="v_watermark_layer" class="pointer-events-none absolute inset-0 overflow-hidden flex flex-wrap content-around justify-around opacity-25 p-3"></div>
+            </div>
+
+            <div class="glass p-4 rounded-2xl space-y-3 text-xs">
+                <div class="flex flex-wrap gap-1.5 pb-2 border-b border-gray-100" id="v_tags_row"></div>
+                <div>
+                    <p class="font-black text-mstPurple mb-1"><i class="fa-solid fa-award mr-1"></i> ผลงานเด่นในเล่ม (Highlights)</p>
+                    <p id="v_highlights" class="text-gray-700 bg-white p-3 rounded-xl border border-gray-100 whitespace-pre-line leading-relaxed break-words"></p>
+                </div>
+                <div>
+                    <p class="font-black text-mstPurple mb-1"><i class="fa-solid fa-comments mr-1"></i> รีวิวคำถามสัมภาษณ์ & เทคนิคการเตรียมตัว</p>
+                    <p id="v_tips" class="text-gray-700 bg-white p-3 rounded-xl border border-gray-100 whitespace-pre-line leading-relaxed break-words"></p>
+                </div>
+                <div id="v_contact_card" class="p-3 rounded-xl bg-purple-50 border border-purple-100"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Bottom Navigation Bar -->
+    <nav id="bottomNavBar" class="hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-gray-200 px-4 py-1.5 pb-[calc(env(safe-area-inset-bottom)+0.35rem)] shadow-lg">
+        <div class="max-w-md mx-auto grid grid-cols-3 gap-2">
+            <button onclick="switchBottomTab('explore')" id="bNav_explore" class="flex flex-col items-center justify-center py-1 text-gray-500 transition nav-item-active">
+                <div class="nav-icon-box w-10 h-7 rounded-xl flex items-center justify-center text-sm transition-all">
+                    <i class="fa-solid fa-book-open"></i>
+                </div>
+                <span class="text-[11px] mt-0.5">คลังพอร์ต</span>
+            </button>
+
+            <button onclick="switchBottomTab('saved')" id="bNav_saved" class="flex flex-col items-center justify-center py-1 text-gray-500 transition">
+                <div class="nav-icon-box w-10 h-7 rounded-xl flex items-center justify-center text-sm transition-all">
+                    <i class="fa-solid fa-bookmark"></i>
+                </div>
+                <span class="text-[11px] mt-0.5">ที่บันทึกไว้</span>
+            </button>
+
+            <button onclick="switchBottomTab('myport')" id="bNav_myport" class="flex flex-col items-center justify-center py-1 text-gray-500 transition">
+                <div class="nav-icon-box w-10 h-7 rounded-xl flex items-center justify-center text-sm transition-all">
+                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                </div>
+                <span class="text-[11px] mt-0.5">พอร์ตของฉัน</span>
+            </button>
+        </div>
+    </nav>
+
+    <script>
+        const API_PORTFOLIO_URL = "https://admission-backend-592123078141.asia-southeast1.run.app/api/portfolio";
+        const MYTCAS_COURSES_URL = "https://my-tcas.s3.ap-southeast-1.amazonaws.com/mytcas/courses.json";
+        const LIFF_ID = "2008923798-LmKWCP2j";
+        const UNIFIED_CACHE_KEYS = ["mstsc_student_viewer", "mstsc_portfolio_viewer_v3", "mstsc_unified_user"];
+
+        let lineAccessToken = "";
+        let currentViewer = null;
+        let allPortfolios = [];
+        let favOnly = false;
+        let activeTab = "explore";
+
+        let tcasTree = {};
+        let tcasDataLoaded = false;
+
+        function getSavedViewer() {
+            for (const key of UNIFIED_CACHE_KEYS) {
+                try {
+                    const raw = localStorage.getItem(key);
+                    if (!raw) continue;
+                    const parsed = JSON.parse(raw);
+                    if (parsed && parsed.std_id) return parsed;
+                } catch (e) {}
+            }
+            return null;
+        }
+
+        function saveUnifiedViewer(viewerObj) {
+            if (!viewerObj || !viewerObj.std_id) return;
+            const str = JSON.stringify(viewerObj);
+            UNIFIED_CACHE_KEYS.forEach(k => {
+                try { localStorage.setItem(k, str); } catch (e) {}
+            });
+        }
+
+        function clearUnifiedViewer() {
+            UNIFIED_CACHE_KEYS.forEach(k => {
+                try { localStorage.removeItem(k); } catch (e) {}
+            });
+        }
+
+        async function callApi(url, payload) {
+            if (window.liff && liff.isLoggedIn()) {
+                const latestToken = liff.getAccessToken();
+                if (latestToken) lineAccessToken = latestToken;
+            }
+            const savedViewer = getSavedViewer();
+            const res = await fetch(`${url}?t=${Date.now()}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    ...payload,
+                    lineAccessToken,
+                    savedViewer: savedViewer || undefined
+                })
+            });
+            return await res.json();
+        }
+
+        function setLoader(text) {
+            const txtEl = document.getElementById('loaderText');
+            if (txtEl) txtEl.innerText = text || 'กำลังตรวจสอบข้อมูล...';
+            const loader = document.getElementById('globalLoader');
+            if (loader) {
+                loader.classList.remove('hidden');
+                loader.style.display = 'flex';
+            }
+        }
+
+        function hideLoader() {
+            const loader = document.getElementById('globalLoader');
+            if (loader) {
+                loader.classList.add('hidden');
+                loader.style.display = 'none';
+            }
+        }
+
+        function showScreen(screenId) {
+            ['loading-screen', 'link-screen', 'home-screen', 'my-port-screen', 'upload-screen', 'viewer-screen'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) { el.classList.add('hidden'); el.classList.remove('flex'); }
+            });
+            const target = document.getElementById(screenId);
+            if (target) { target.classList.remove('hidden'); target.classList.add('flex'); }
+
+            const bottomNav = document.getElementById('bottomNavBar');
+            if (bottomNav) {
+                if (currentViewer && ['home-screen', 'my-port-screen', 'upload-screen'].includes(screenId)) {
+                    bottomNav.classList.remove('hidden');
+                } else {
+                    bottomNav.classList.add('hidden');
+                }
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function switchBottomTab(tabName) {
+            activeTab = tabName;
+            ['explore', 'saved', 'myport'].forEach(t => {
+                const btn = document.getElementById('bNav_' + t);
+                if (btn) btn.classList.toggle('nav-item-active', t === tabName);
+            });
+
+            if (tabName === 'explore') {
+                favOnly = false;
+                document.getElementById('exploreSectionTitle').innerHTML = '<i class="fa-solid fa-compass text-mstYellow"></i> ค้นหาพอร์ตโฟลิโอรุ่นพี่';
+                renderPortfolios();
+                showScreen('home-screen');
+            } else if (tabName === 'saved') {
+                favOnly = true;
+                document.getElementById('exploreSectionTitle').innerHTML = '<i class="fa-solid fa-bookmark text-mstYellow"></i> พอร์ตโฟลิโอที่บันทึกไว้';
+                renderPortfolios();
+                showScreen('home-screen');
+            } else if (tabName === 'myport') {
+                renderMyPortfolios();
+                showScreen('my-port-screen');
+            }
+        }
+
+        function resetFilters() {
+            document.getElementById('fltKeyword').value = '';
+            document.getElementById('fltRound').value = '';
+            document.getElementById('fltTrack').value = '';
+            document.getElementById('fltStyle').value = '';
+            renderPortfolios();
+        }
+
+        function fetchTcasData() {
+            if (tcasDataLoaded) return;
+            const loadingText = document.getElementById('tcas-loading-text');
+            const uniSelect = document.getElementById('tcas-uni');
+
+            fetch(MYTCAS_COURSES_URL)
+                .then(res => res.json())
+                .then(data => {
+                    tcasTree = {};
+                    data.forEach(item => {
+                        const uni = item.university_name_th;
+                        const campus = item.campus_name_th || 'วิทยาเขตหลัก';
+                        const fac = item.faculty_name_th;
+                        const major = item.major_name_th || item.program_name_th || 'สาขาวิชาหลัก';
+                        if (!uni || !fac) return;
+                        if (!tcasTree[uni]) tcasTree[uni] = {};
+                        if (!tcasTree[uni][campus]) tcasTree[uni][campus] = {};
+                        if (!tcasTree[uni][campus][fac]) tcasTree[uni][campus][fac] = new Set();
+                        tcasTree[uni][campus][fac].add(major);
+                    });
+
+                    let optionsHtml = '<option value="">-- เลือกมหาวิทยาลัย --</option>';
+                    Object.keys(tcasTree).sort((a, b) => a.localeCompare(b, 'th')).forEach(uni => {
+                        optionsHtml += `<option value="${uni}">${uni}</option>`;
+                    });
+                    uniSelect.innerHTML = optionsHtml;
+                    uniSelect.disabled = false;
+                    loadingText.classList.add('hidden');
+                    tcasDataLoaded = true;
+                })
+                .catch(err => {
+                    console.error("MyTCAS sync error:", err);
+                    loadingText.innerHTML = '<i class="fa-solid fa-triangle-exclamation mr-1"></i> ซิงค์ MyTCAS ไม่สำเร็จ ระบบสลับเป็นโหมดพิมพ์ชื่อมหาวิทยาลัยเองอัตโนมัติ';
+                    document.getElementById('systemType').value = 'NON_TCAS';
+                    toggleSystemType();
+                });
+        }
+
+        function populateCampuses() {
+            const uni = document.getElementById('tcas-uni').value;
+            const campusSelect = document.getElementById('tcas-campus');
+            const facSelect = document.getElementById('tcas-faculty');
+            const majorSelect = document.getElementById('tcas-major');
+
+            campusSelect.innerHTML = '<option value="">-- เลือกวิทยาเขต --</option>';
+            facSelect.innerHTML = '<option value="">-- เลือกคณะ --</option>';
+            majorSelect.innerHTML = '<option value="">-- เลือกสาขาวิชา --</option>';
+            campusSelect.disabled = true;
+            facSelect.disabled = true;
+            majorSelect.disabled = true;
+
+            if (uni && tcasTree[uni]) {
+                const campuses = Object.keys(tcasTree[uni]).sort((a, b) => a.localeCompare(b, 'th'));
+                campuses.forEach(campus => {
+                    campusSelect.innerHTML += `<option value="${campus}">${campus}</option>`;
+                });
+                campusSelect.disabled = false;
+                if (campuses.length === 1) {
+                    campusSelect.value = campuses[0];
+                    populateFaculties();
+                }
+            }
+        }
+
+        function populateFaculties() {
+            const uni = document.getElementById('tcas-uni').value;
+            const campus = document.getElementById('tcas-campus').value;
+            const facSelect = document.getElementById('tcas-faculty');
+            const majorSelect = document.getElementById('tcas-major');
+
+            facSelect.innerHTML = '<option value="">-- เลือกคณะ --</option>';
+            majorSelect.innerHTML = '<option value="">-- เลือกสาขาวิชา --</option>';
+            facSelect.disabled = true;
+            majorSelect.disabled = true;
+
+            if (uni && campus && tcasTree[uni] && tcasTree[uni][campus]) {
+                const faculties = Object.keys(tcasTree[uni][campus]).sort((a, b) => a.localeCompare(b, 'th'));
+                faculties.forEach(fac => {
+                    facSelect.innerHTML += `<option value="${fac}">${fac}</option>`;
+                });
+                facSelect.disabled = false;
+                if (faculties.length === 1) {
+                    facSelect.value = faculties[0];
+                    populateMajors();
+                }
+            }
+        }
+
+        function populateMajors() {
+            const uni = document.getElementById('tcas-uni').value;
+            const campus = document.getElementById('tcas-campus').value;
+            const fac = document.getElementById('tcas-faculty').value;
+            const majorSelect = document.getElementById('tcas-major');
+
+            majorSelect.innerHTML = '<option value="">-- เลือกสาขาวิชา --</option>';
+            majorSelect.disabled = true;
+
+            if (uni && campus && fac && tcasTree[uni] && tcasTree[uni][campus] && tcasTree[uni][campus][fac]) {
+                let majors = Array.from(tcasTree[uni][campus][fac]).filter(Boolean).sort((a, b) => a.localeCompare(b, 'th'));
+                if (majors.length === 0) majors = [fac];
+                majors.forEach(major => {
+                    majorSelect.innerHTML += `<option value="${major}">${major}</option>`;
+                });
+                majorSelect.disabled = false;
+                if (majors.length === 1) {
+                    majorSelect.value = majors[0];
+                }
+            }
+        }
+
+        function toggleSystemType() {
+            const type = document.getElementById('systemType').value;
+            const tcasDiv = document.getElementById('tcas-inputs');
+            const manualDiv = document.getElementById('manual-inputs');
+            if (type === 'TCAS') {
+                tcasDiv.classList.remove('hidden');
+                manualDiv.classList.add('hidden');
+            } else {
+                tcasDiv.classList.add('hidden');
+                manualDiv.classList.remove('hidden');
+            }
+        }
+
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = err => reject(err);
+            });
+        }
+
+        async function initApp() {
+            setLoader('กำลังเชื่อมต่อคลังพอร์ตโฟลิโอ...');
+            fetchTcasData();
+
+            try {
+                await liff.init({ liffId: LIFF_ID });
+                if (!liff.isLoggedIn()) {
+                    if (liff.isInClient() || !getSavedViewer()) {
+                        liff.login({ redirectUri: window.location.href });
+                        return;
+                    }
+                } else {
+                    lineAccessToken = liff.getAccessToken() || "";
+                }
+            } catch (liffErr) {
+                console.warn("LIFF init fallback:", liffErr.message);
+            }
+
+            await loadPortfolioData();
+            hideLoader();
+        }
+
+        async function loadPortfolioData() {
+            try {
+                const data = await callApi(API_PORTFOLIO_URL, { action: 'getPortfolios' });
+                if (!data || data.status !== 'success' || !data.viewer || !data.viewer.std_id) {
+                    currentViewer = null;
+                    clearUnifiedViewer();
+                    showScreen('link-screen');
+                    return;
+                }
+
+                currentViewer = data.viewer;
+                saveUnifiedViewer(currentViewer);
+                allPortfolios = data.portfolios || [];
+                updateHeaderViewerUI();
+                renderPortfolios();
+                if (activeTab === 'myport') {
+                    renderMyPortfolios();
+                    showScreen('my-port-screen');
+                } else {
+                    showScreen('home-screen');
+                }
+            } catch (e) {
+                console.error("Load portfolio error:", e);
+                showScreen('link-screen');
+            }
+        }
+
+        function updateHeaderViewerUI() {
+            if (!currentViewer) return;
+            const nameEl = document.getElementById('viewerNameText');
+            if (nameEl) nameEl.innerText = currentViewer.fullName || '-';
+
+            const roleEl = document.getElementById('viewerRoleText');
+            if (roleEl) {
+                roleEl.innerText = `รหัส: ${currentViewer.std_id} • สถานะ: ${currentViewer.level || 'นักเรียน'}${currentViewer.plan && currentViewer.plan !== '-' ? ' (' + currentViewer.plan + ')' : ''}`;
+            }
+
+            const badgeEl = document.getElementById('viewerBadgeRole');
+            if (badgeEl) {
+                badgeEl.innerText = currentViewer.role || (currentViewer.isAdminOrDj ? 'ADMIN' : 'STUDENT');
+            }
+        }
+
+        function renderPortfolios() {
+            const kw = document.getElementById('fltKeyword').value.trim().toLowerCase();
+            const round = document.getElementById('fltRound').value;
+            const track = document.getElementById('fltTrack').value;
+            const style = document.getElementById('fltStyle').value;
+
+            const filtered = allPortfolios.filter(p => {
+                if (p.status === 'REJECTED') return false;
+                if (favOnly && !p.isBookmarked) return false;
+                if (round && p.tcasRound !== round) return false;
+                if (track && p.track !== track) return false;
+                if (style && p.designTag !== style) return false;
+                if (kw) {
+                    const hay = `${p.university} ${p.faculty} ${p.major || ''} ${p.projectName} ${p.seniorName} ${p.colorTag} ${p.highlights}`.toLowerCase();
+                    if (!hay.includes(kw)) return false;
+                }
+                return true;
+            });
+
+            document.getElementById('portCountBadge').innerText = `${filtered.length} เล่ม`;
+            const container = document.getElementById('portfolioListContainer');
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="glass p-10 rounded-[1.75rem] text-center text-xs font-bold text-gray-400">
+                        <i class="fa-solid fa-folder-open text-3xl mb-2.5 block opacity-40 text-mstPurple"></i>
+                        ${favOnly ? 'คุณยังไม่ได้กดคั่นหน้า (Bookmark) พอร์ตโฟลิโอไว้' : 'ไม่พบรายการ Portfolio ที่ตรงกับเงื่อนไข'}
+                    </div>`;
+                return;
+            }
+
+            container.innerHTML = filtered.map(p => buildPortfolioCardHtml(p, false)).join('');
+        }
+
+        function renderMyPortfolios() {
+            const myList = allPortfolios.filter(p => p.isOwner);
+            const container = document.getElementById('myPortfolioListContainer');
+
+            if (myList.length === 0) {
+                container.innerHTML = `
+                    <div class="glass p-10 rounded-[1.75rem] text-center space-y-3">
+                        <div class="w-14 h-14 rounded-2xl bg-purple-50 text-mstPurple flex items-center justify-center mx-auto text-2xl">
+                            <i class="fa-solid fa-book-medical"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-black text-gray-800">คุณยังไม่ได้ส่ง Portfolio เข้าระบบ</p>
+                            <p class="text-xs text-gray-500 mt-1">มาร่วมแบ่งปันพอร์ตโฟลิโอและประสบการณ์สอบสัมภาษณ์ให้น้องๆ ม.ส.ธ. กันเถอะ!</p>
+                        </div>
+                        <button onclick="openUploadModal()" class="btn-main mx-auto w-fit px-6 py-3 text-xs">
+                            <i class="fa-solid fa-cloud-arrow-up"></i> ส่ง Portfolio เล่มแรกของคุณ
+                        </button>
+                    </div>`;
+                return;
+            }
+
+            container.innerHTML = myList.map(p => buildPortfolioCardHtml(p, true)).join('');
+        }
+
+        function buildPortfolioCardHtml(p, isMyPortTab) {
+            const encodedPort = encodeURIComponent(JSON.stringify(p));
+            const facDisplay = (p.major && !String(p.faculty || '').includes(p.major))
+                ? `${p.faculty} • ${p.major}`
+                : p.faculty;
+
+            let statusBadge = '';
+            if (p.status === 'VERIFIED') {
+                statusBadge = `<span class="text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md font-bold text-[10px]"><i class="fa-solid fa-circle-check mr-0.5"></i> อนุมัติแล้ว (Verified)</span>`;
+            } else if (p.status === 'REJECTED') {
+                statusBadge = `<span class="text-rose-700 bg-rose-50 border border-rose-200 px-2 py-0.5 rounded-md font-bold text-[10px]"><i class="fa-solid fa-circle-exclamation mr-0.5"></i> ส่งกลับแก้ไข</span>`;
+            } else {
+                statusBadge = `<span class="text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-md font-bold text-[10px]"><i class="fa-solid fa-clock mr-0.5"></i> รอครูแนะแนว/สภาฯ ตรวจสอบ</span>`;
+            }
+
+            return `
+                <div class="glass p-4 rounded-2xl space-y-2.5 border border-white hover:border-purple-200 transition">
+                    <div class="flex items-center justify-between gap-2 text-[10px]">
+                        <span class="bg-purple-50 text-mstPurple font-black px-2.5 py-1 rounded-lg border border-purple-100">${p.tcasRound} • รุ่น ${p.academicYear || '2569'}</span>
+                        <div class="flex items-center gap-2">
+                            ${statusBadge}
+                            <button onclick="toggleBookmark('${p.id}')" class="w-7 h-7 rounded-lg bg-white border border-gray-200 flex items-center justify-center text-sm ${p.isBookmarked ? 'text-mstYellow' : 'text-gray-300'}" title="บันทึกพอร์ตนี้">
+                                <i class="fa-solid fa-bookmark"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    ${(p.status === 'REJECTED' && p.rejectReason) ? `
+                    <div class="bg-rose-50 border border-rose-200 p-2.5 rounded-xl text-[11px] text-rose-700 font-semibold">
+                        <i class="fa-solid fa-comment-medical mr-1"></i> <b>ข้อเสนอแนะจากผู้ตรวจ:</b> ${p.rejectReason}
+                    </div>` : ''}
+
+                    <div onclick="openViewer('${encodedPort}')" class="cursor-pointer">
+                        <h3 class="text-sm font-black text-gray-900 leading-snug break-words">${p.university}</h3>
+                        <p class="text-xs font-bold text-mstPurple mt-0.5 break-words">${facDisplay}</p>
+                        <p class="text-[11px] text-gray-500 mt-0.5">โครงการ: ${p.projectName || '-'}</p>
+                    </div>
+
+                    <div class="flex flex-wrap gap-1.5 text-[10px] font-bold">
+                        <span class="bg-white px-2 py-0.5 rounded-md border border-gray-200">GPAX: ${p.gpaxRange || '-'}</span>
+                        <span class="bg-white px-2 py-0.5 rounded-md border border-gray-200 truncate max-w-[180px]">${p.track || '-'}</span>
+                        <span class="bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200 text-amber-800">${p.designTag} (${p.colorTag || '-'})</span>
+                    </div>
+
+                    <div class="pt-2 border-t border-gray-100 flex items-center justify-between text-[11px] gap-2">
+                        <span class="font-bold text-gray-700 truncate"><i class="fa-solid fa-user-graduate text-mstPurple mr-1"></i>${p.seniorName}</span>
+                        <div class="flex items-center gap-2 shrink-0 text-[10px] font-bold">
+                            <span class="text-gray-400"><i class="fa-regular fa-eye mr-0.5"></i>${p.viewsCount || 0}</span>
+                            <span class="${p.mentorshipOpen ? 'text-emerald-600' : 'text-gray-400'}">
+                                <i class="fa-solid ${p.mentorshipOpen ? 'fa-comments' : 'fa-eye-slash'} mr-0.5"></i>${p.mentorshipOpen ? 'รับปรึกษา' : 'งดรับปรึกษา'}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-wrap gap-2 pt-1">
+                        <button onclick="openViewer('${encodedPort}')" class="flex-1 btn-main py-2.5 rounded-xl text-xs">
+                            <i class="fa-solid fa-book-open mr-1"></i> เปิดอ่านเล่มพอร์ต & รีวิว
+                        </button>
+                        ${(p.isOwner || isMyPortTab) ? `
+                        <button onclick="toggleMentorship('${p.id}')" class="px-3 py-2.5 rounded-xl bg-white border border-gray-200 text-gray-700 text-xs font-bold hover:border-mstPurple" title="สลับสถานะเปิด/ปิดรับคำปรึกษา">
+                            <i class="fa-solid fa-user-clock"></i>
+                        </button>
+                        <button onclick="deleteMyPortfolio('${p.id}')" class="px-3 py-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-600 text-xs font-bold hover:bg-rose-500 hover:text-white transition" title="ลบพอร์ตนี้">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>` : ''}
+                    </div>
+                </div>
+            `;
+        }
+
+        function openUploadModal() {
+            document.getElementById('edit_portfolio_id').value = '';
+            document.getElementById('uploadFormTitle').innerText = 'แบ่งปัน Portfolio รุ่นพี่';
+            document.getElementById('p_project').value = '';
+            document.getElementById('p_gpax').value = '';
+            document.getElementById('p_color').value = '';
+            document.getElementById('p_highlights').value = '';
+            document.getElementById('p_tips').value = '';
+            document.getElementById('p_ig').value = '';
+            document.getElementById('p_pdf_url').value = '';
+            document.getElementById('p_pdf_file').value = '';
+            document.getElementById('chk_pdpa_1').checked = false;
+            document.getElementById('chk_pdpa_2').checked = false;
+            if (!tcasDataLoaded) fetchTcasData();
+            showScreen('upload-screen');
+        }
+
+        function openViewer(pOrEncoded) {
+            const p = typeof pOrEncoded === 'string' ? JSON.parse(decodeURIComponent(pOrEncoded)) : pOrEncoded;
+            const facDisplay = (p.major && !String(p.faculty || '').includes(p.major))
+                ? `${p.faculty} • ${p.major}`
+                : p.faculty;
+            document.getElementById('v_uni_title').innerText = `${p.university} • ${facDisplay}`;
+            document.getElementById('v_senior_sub').innerText = `โดย ${p.seniorName} (${p.tcasRound} • รุ่น ${p.academicYear || '2569'})`;
+            document.getElementById('v_highlights').innerText = p.highlights || '-';
+            document.getElementById('v_tips').innerText = p.interviewTips || '-';
+
+            document.getElementById('v_tags_row').innerHTML = `
+                <span class="bg-purple-50 text-mstPurple px-2.5 py-1 rounded-lg font-bold text-[10px]">โครงการ: ${p.projectName || '-'}</span>
+                <span class="bg-gray-100 text-gray-700 px-2.5 py-1 rounded-lg font-bold text-[10px]">GPAX: ${p.gpaxRange || '-'}</span>
+                <span class="bg-amber-50 text-amber-800 px-2.5 py-1 rounded-lg font-bold text-[10px]">สไตล์: ${p.designTag} (${p.colorTag || '-'})</span>
+            `;
+
+            const contactEl = document.getElementById('v_contact_card');
+            if (p.mentorshipOpen && p.contactIg) {
+                contactEl.innerHTML = `<p class="font-black text-emerald-700"><i class="fa-solid fa-comments mr-1"></i> ช่องทางปรึกษารุ่นพี่: <span class="text-gray-900 select-all">${p.contactIg}</span></p>`;
+            } else {
+                contactEl.innerHTML = `<p class="font-bold text-gray-500"><i class="fa-solid fa-eye-slash mr-1"></i> ขณะนี้รุ่นพี่ปิดรับคำปรึกษาชั่วคราว (ซ่อนช่องทางติดต่อ)</p>`;
+            }
+
+            let rawUrl = p.pdfUrl || '';
+            let embedUrl = rawUrl;
+            const match = rawUrl.match(/(?:\/d\/|id=)([a-zA-Z0-9_-]{20,})/);
+            if (match && match[1]) {
+                embedUrl = `https://drive.google.com/file/d/${match[1]}/preview`;
+            }
+            document.getElementById('v_pdf_frame').src = embedUrl;
+            document.getElementById('v_external_btn').href = rawUrl || embedUrl;
+
+            const wmText = `MSTSC • ${currentViewer.std_id} ${currentViewer.fullName} • ห้ามคัดลอก`;
+            document.getElementById('v_watermark_layer').innerHTML = Array(12).fill(
+                `<span class="text-[10px] font-extrabold text-white -rotate-12 whitespace-nowrap m-2">${wmText}</span>`
+            ).join('');
+
+            showScreen('viewer-screen');
+
+            callApi(API_PORTFOLIO_URL, { action: 'recordView', portfolioId: p.id }).catch(() => {});
+        }
+
+        function closeViewer() {
+            document.getElementById('v_pdf_frame').src = '';
+            if (activeTab === 'myport') showScreen('my-port-screen');
+            else showScreen('home-screen');
+        }
+
+        async function submitPortfolio() {
+            if (!document.getElementById('chk_pdpa_1').checked || !document.getElementById('chk_pdpa_2').checked) {
+                return Swal.fire({ icon: 'warning', title: 'กรุณาติ๊กยืนยัน PDPA ทั้ง 2 ข้อ', confirmButtonColor: '#4C1D95', customClass: { popup: 'swal-glass' } });
+            }
+
+            const isTcas = document.getElementById('systemType').value === 'TCAS';
+            let finalUni = "";
+            let finalFac = "";
+            let finalMajor = "";
+
+            if (isTcas) {
+                const tUni = document.getElementById('tcas-uni').value.trim();
+                const tCampus = document.getElementById('tcas-campus').value.trim();
+                const tFac = document.getElementById('tcas-faculty').value.trim();
+                const tMajor = document.getElementById('tcas-major').value.trim() || tFac;
+
+                if (!tUni || !tFac) {
+                    return Swal.fire({ icon: 'warning', title: 'กรุณาเลือกมหาวิทยาลัยและคณะให้ครบถ้วน', confirmButtonColor: '#4C1D95', customClass: { popup: 'swal-glass' } });
+                }
+                finalUni = (tCampus && tCampus !== 'วิทยาเขตหลัก') ? `${tUni} (${tCampus})` : tUni;
+                finalFac = (tMajor && tMajor !== tFac && tMajor !== 'สาขาวิชาหลัก') ? `${tFac} (${tMajor})` : tFac;
+                finalMajor = tMajor;
+            } else {
+                const mUni = document.getElementById('p_uni').value.trim();
+                const mFac = document.getElementById('p_fac').value.trim();
+                const mMajor = document.getElementById('p_major').value.trim();
+
+                if (!mUni || !mFac) {
+                    return Swal.fire({ icon: 'warning', title: 'กรุณาระบุชื่อมหาวิทยาลัยและคณะ', confirmButtonColor: '#4C1D95', customClass: { popup: 'swal-glass' } });
+                }
+                finalUni = mUni;
+                finalFac = (mMajor && mMajor !== mFac) ? `${mFac} (${mMajor})` : mFac;
+                finalMajor = mMajor;
+            }
+
+            const pdfFile = document.getElementById('p_pdf_file').files[0];
+            const pdfUrlInput = document.getElementById('p_pdf_url').value.trim();
+
+            if (!pdfFile && !pdfUrlInput) {
+                return Swal.fire({ icon: 'warning', title: 'กรุณาแนบไฟล์ PDF หรือวางลิงก์ไฟล์ PDF', confirmButtonColor: '#4C1D95', customClass: { popup: 'swal-glass' } });
+            }
+
+            setLoader('กำลังอัปโหลดและบันทึกข้อมูล Portfolio...');
+            try {
+                let pdfBase64 = "";
+                if (pdfFile) {
+                    if (pdfFile.size > 12 * 1024 * 1024) {
+                        hideLoader();
+                        return Swal.fire({ icon: 'warning', title: 'ไฟล์ขนาดใหญ่เกิน 12MB', text: 'กรุณาอัปโหลดขึ้น Google Drive แล้วนำลิงก์มาวางแทนครับ', customClass: { popup: 'swal-glass' } });
+                    }
+                    pdfBase64 = await fileToBase64(pdfFile);
+                }
+
+                const res = await callApi(API_PORTFOLIO_URL, {
+                    action: 'submitPortfolio',
+                    pdpaConfirmed: true,
+                    university: finalUni,
+                    faculty: finalFac,
+                    major: finalMajor,
+                    tcasRound: document.getElementById('p_round').value,
+                    academicYear: document.getElementById('p_year').value.trim() || '2569',
+                    projectName: document.getElementById('p_project').value.trim() || '-',
+                    track: document.getElementById('p_track').value,
+                    gpaxRange: document.getElementById('p_gpax').value.trim() || '-',
+                    designTag: document.getElementById('p_style').value,
+                    colorTag: document.getElementById('p_color').value.trim() || 'ม่วง-เหลือง',
+                    highlights: document.getElementById('p_highlights').value.trim() || '-',
+                    interviewTips: document.getElementById('p_tips').value.trim() || '-',
+                    contactIg: document.getElementById('p_ig').value.trim(),
+                    pdfUrl: pdfUrlInput,
+                    pdfBase64: pdfBase64
+                });
+                hideLoader();
+
+                if (res.status === 'success') {
+                    await Swal.fire({ icon: 'success', title: 'ส่ง Portfolio สำเร็จ!', text: res.message, confirmButtonColor: '#4C1D95', customClass: { popup: 'swal-glass' } });
+                    activeTab = 'myport';
+                    await loadPortfolioData();
+                } else {
+                    Swal.fire({ icon: 'error', title: 'ไม่สำเร็จ', text: res.message, customClass: { popup: 'swal-glass' } });
+                }
+            } catch (err) {
+                hideLoader();
+                Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: err.message, customClass: { popup: 'swal-glass' } });
+            }
+        }
+
+        async function toggleBookmark(portfolioId) {
+            const p = allPortfolios.find(item => item.id === portfolioId);
+            if (p) p.isBookmarked = !p.isBookmarked;
+            renderPortfolios();
+            await callApi(API_PORTFOLIO_URL, { action: 'toggleBookmark', portfolioId });
+        }
+
+        async function toggleMentorship(portfolioId) {
+            setLoader('กำลังสลับสถานะการให้คำปรึกษา...');
+            await callApi(API_PORTFOLIO_URL, { action: 'toggleMentorship', portfolioId });
+            hideLoader();
+            await loadPortfolioData();
+        }
+
+        async function deleteMyPortfolio(portfolioId) {
+            const cf = await Swal.fire({
+                icon: 'warning',
+                title: 'ยืนยันการลบ Portfolio เล่มนี้?',
+                text: 'ข้อมูลจะถูกลบออกจากระบบอย่างถาวร',
+                showCancelButton: true,
+                confirmButtonColor: '#EF4444',
+                confirmButtonText: 'ยืนยันลบ',
+                cancelButtonText: 'ยกเลิก',
+                customClass: { popup: 'swal-glass' }
+            });
+            if (cf.isConfirmed) {
+                setLoader('กำลังลบข้อมูล...');
+                await callApi(API_PORTFOLIO_URL, { action: 'deletePortfolio', portfolioId });
+                hideLoader();
+                await loadPortfolioData();
+            }
+        }
+
+        window.onload = initApp;
+    </script>
+</body>
+</html>
