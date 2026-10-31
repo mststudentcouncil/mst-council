@@ -1347,6 +1347,15 @@
             }
         }
 
+        // โทนสีพาสเทลตามวัน (จันทร์-ศุกร์) สไตล์กระจกใส
+        const DAY_PERIOD_THEMES = {
+            1: "bg-amber-100/70 border-amber-300/80 text-amber-900 shadow-amber-500/5",     // จันทร์ (เหลืองพาสเทล)
+            2: "bg-pink-100/70 border-pink-300/80 text-pink-900 shadow-pink-500/5",         // อังคาร (ชมพูพาสเทล)
+            3: "bg-emerald-100/70 border-emerald-300/80 text-emerald-900 shadow-emerald-500/5", // พุธ (เขียวพาสเทล)
+            4: "bg-orange-100/70 border-orange-300/80 text-orange-900 shadow-orange-500/5", // พฤหัสบดี (ส้มพาสเทล)
+            5: "bg-sky-100/70 border-sky-300/80 text-sky-900 shadow-sky-500/5"              // ศุกร์ (ฟ้าพาสเทล)
+        };
+
         function renderInteractiveSchedule() {
             if (!currentViewer) return;
             const container = document.getElementById('interactiveViewBox');
@@ -1384,7 +1393,7 @@
             }
 
             days.forEach(dNum => {
-                const items = (currentScheduleData.entries || [])
+                const rawItems = (currentScheduleData.entries || [])
                     .filter(e => e.day === dNum)
                     .filter(e => {
                         if (!kw) return true;
@@ -1393,16 +1402,36 @@
                     })
                     .sort((a, b) => a.period - b.period);
 
+                // รวมคาบเรียนที่วิชาเดียวกันและเรียนติดกันเป็นก้อนเดียว
+                const mergedItems = [];
+                rawItems.forEach(item => {
+                    const prev = mergedItems[mergedItems.length - 1];
+                    const lastPeriod = prev ? prev.periods[prev.periods.length - 1] : null;
+                    const canMerge = prev &&
+                        !item.isBreak &&
+                        !prev.isBreak &&
+                        lastPeriod + 1 === item.period &&
+                        prev.title === item.title &&
+                        prev.subTitle === item.subTitle &&
+                        prev.room === item.room;
+
+                    if (canMerge) {
+                        prev.periods.push(item.period);
+                    } else {
+                        mergedItems.push({ ...item, periods: [item.period] });
+                    }
+                });
+
                 if (selectedDay === 0) {
                     html += `
                         <div class="pt-2 pb-1 px-1 flex items-center justify-between">
                             <span class="text-xs font-black text-mstPurple"><i class="fa-solid fa-calendar-day text-mstYellow mr-1"></i> ${DAY_NAMES[dNum]}</span>
-                            <span class="text-[10px] font-bold text-gray-500">${items.length} คาบ</span>
+                            <span class="text-[10px] font-bold text-gray-500">${rawItems.length} คาบ</span>
                         </div>
                     `;
                 }
 
-                if (items.length === 0) {
+                if (mergedItems.length === 0) {
                     html += `
                         <div class="glass p-6 rounded-2xl text-center text-xs font-bold text-gray-400">
                             <i class="fa-solid fa-folder-open text-2xl mb-1 block text-mstPurple opacity-40"></i>
@@ -1412,15 +1441,23 @@
                     return;
                 }
 
-                items.forEach(item => {
-                    const slot = MST_PERIODS.find(p => p.period === item.period) || { start: "-", end: "-", label: `คาบ ${item.period}` };
-                    const isNow = isTimeBetween(timeStr, slot.start, slot.end);
+                const dayTheme = DAY_PERIOD_THEMES[dNum] || DAY_PERIOD_THEMES[1];
+
+                mergedItems.forEach(item => {
+                    const firstP = item.periods[0];
+                    const lastP = item.periods[item.periods.length - 1];
+                    const startSlot = MST_PERIODS.find(p => p.period === firstP) || { start: "-", end: "-", label: `คาบ ${firstP}` };
+                    const endSlot = MST_PERIODS.find(p => p.period === lastP) || startSlot;
+
+                    const timeRangeStr = `${startSlot.start}-${endSlot.end}`;
+                    const isNow = isTimeBetween(timeStr, startSlot.start, endSlot.end);
+                    const isMultiPeriod = item.periods.length > 1;
                     const noteText = notes[item.title] || "";
 
                     if (item.isBreak) {
                         html += `
                             <div class="bg-amber-50/90 border border-amber-200 px-4 py-2.5 rounded-2xl flex items-center justify-between text-xs font-bold text-amber-900">
-                                <span><i class="fa-solid fa-utensils text-amber-600 mr-1.5"></i> ${slot.label} • ${slot.start}-${slot.end}</span>
+                                <span><i class="fa-solid fa-utensils text-amber-600 mr-1.5"></i> ${startSlot.label} • ${timeRangeStr}</span>
                                 <span>พักรับประทานอาหารกลางวัน</span>
                             </div>
                         `;
@@ -1452,32 +1489,54 @@
                         subLineHtml = `<p class="text-xs font-semibold text-gray-500 mt-0.5"><i class="fa-solid fa-circle-info text-mstPurple/70 mr-1"></i>${item.subTitle}</p>`;
                     }
 
+                    // กล่องเลขคาบด้านซ้าย (กรณีหลายคาบติดกันจะยืดความสูงเป็น 2 แถวและเรียงเลขคาบลงมา)
+                    const periodBoxHtml = isMultiPeriod
+                        ? `<div class="w-14 shrink-0 rounded-2xl border backdrop-blur-md shadow-inner px-2 py-2.5 flex flex-col items-center justify-between min-h-[7.25rem] ${dayTheme}">
+                               <span class="text-[10px] font-extrabold opacity-75 leading-none">คาบ</span>
+                               <div class="flex flex-col items-center justify-between flex-1 w-full mt-1.5">
+                                   ${item.periods.map((p, idx) => `
+                                       ${idx > 0 ? '<div class="w-5 border-t border-current opacity-20 my-1"></div>' : ''}
+                                       <span class="text-xl font-black leading-none">${p}</span>
+                                   `).join('')}
+                               </div>
+                           </div>`
+                        : `<div class="w-14 shrink-0 rounded-2xl border backdrop-blur-md shadow-inner px-2 py-2.5 flex flex-col items-center justify-center min-h-[4.5rem] ${dayTheme}">
+                               <span class="text-[10px] font-extrabold opacity-75 leading-none">คาบ</span>
+                               <span class="text-xl font-black leading-tight mt-1">${firstP}</span>
+                           </div>`;
+
                     html += `
-                        <div class="glass p-3.5 rounded-2xl space-y-2 border ${isNow ? 'border-mstPurple ring-2 ring-purple-200' : 'border-white'} transition">
-                            <div class="flex items-center justify-between gap-2 text-[10px]">
-                                <div class="flex items-center gap-1.5">
-                                    <span class="${isNow ? 'bg-mstPurple text-white' : 'bg-purple-50 text-mstPurple'} font-black px-2.5 py-1 rounded-lg border border-purple-100">
-                                        ${slot.label} • ${slot.start}-${slot.end}
-                                    </span>
-                                    ${isNow ? `<span class="bg-mstYellow text-mstDark font-black px-2 py-0.5 rounded-full animate-pulse">คาบปัจจุบัน</span>` : ''}
-                                </div>
-                                ${roomBadgeHtml}
-                            </div>
+                        <div class="glass p-3 rounded-2xl border ${isNow ? 'border-mstPurple ring-2 ring-purple-200' : 'border-white'} transition">
+                            <div class="flex items-stretch gap-3">
+                                ${periodBoxHtml}
 
-                            <div class="flex items-center justify-between gap-2">
-                                <div class="min-w-0 flex-1">
-                                    <h3 class="text-sm font-black text-gray-900 break-words">${item.title}</h3>
-                                    ${subLineHtml}
-                                </div>
-                                <button onclick="openNoteModal('${item.title.replace(/'/g, "\\'")}')" class="w-8 h-8 rounded-xl ${noteText ? 'bg-mstYellow text-mstDark' : 'bg-gray-100 text-gray-500'} flex items-center justify-center text-xs shrink-0" title="จดบันทึก/การบ้าน">
-                                    <i class="fa-solid fa-note-sticky"></i>
-                                </button>
-                            </div>
+                                <div class="flex-1 min-w-0 flex flex-col justify-center space-y-1.5 py-0.5">
+                                    <div class="flex items-center justify-between gap-2 text-[10px]">
+                                        <div class="flex items-center gap-1.5">
+                                            <span class="${isNow ? 'bg-mstPurple text-white border-mstPurple' : 'bg-purple-50/90 text-mstPurple border-purple-200'} font-black px-2.5 py-0.5 rounded-lg border">
+                                                ${timeRangeStr}
+                                            </span>
+                                            ${isNow ? `<span class="bg-mstYellow text-mstDark font-black px-2 py-0.5 rounded-full animate-pulse">คาบปัจจุบัน</span>` : ''}
+                                        </div>
+                                        ${roomBadgeHtml}
+                                    </div>
 
-                            ${noteText ? `
-                            <div onclick="openNoteModal('${item.title.replace(/'/g, "\\'")}')" class="bg-amber-50 border border-amber-200 p-2 rounded-xl text-[11px] text-amber-900 font-semibold cursor-pointer">
-                                <i class="fa-solid fa-thumbtack text-amber-600 mr-1"></i> <b>โน้ต:</b> ${noteText}
-                            </div>` : ''}
+                                    <div class="flex items-center justify-between gap-2">
+                                        <div class="min-w-0 flex-1">
+                                            <h3 class="text-sm font-black text-gray-900 break-words">${item.title}</h3>
+                                            ${subLineHtml}
+                                        </div>
+                                        <button onclick="openNoteModal('${item.title.replace(/'/g, "\\'")}')" class="w-8 h-8 rounded-xl ${noteText ? 'bg-mstYellow text-mstDark' : 'bg-gray-100 text-gray-500'} flex items-center justify-center text-xs shrink-0" title="จดบันทึก/การบ้าน">
+                                            <i class="fa-solid fa-note-sticky"></i>
+                                        </button>
+                                    </div>
+
+                                    ${noteText ? `
+                                    <div onclick="openNoteModal('${item.title.replace(/'/g, "\\'")}')" class="bg-amber-50 border border-amber-200 p-2 rounded-xl text-[11px] text-amber-900 font-semibold cursor-pointer">
+                                        <i class="fa-solid fa-thumbtack text-amber-600 mr-1"></i> <b>โน้ต:</b> ${noteText}
+                                    </div>` : ''}
+                                </div>
+                            </div>
                         </div>
                     `;
                 });
