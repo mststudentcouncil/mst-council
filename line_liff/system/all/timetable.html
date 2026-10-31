@@ -495,28 +495,27 @@
         }
 
         // เชื่อมข้อความหลายบรรทัดในช่องตารางโดยไม่เว้นช่องไฟแปลกๆ ระหว่างคำภาษาไทย
+        // เชื่อมข้อความหลายบรรทัดในช่องตารางโดยไม่เว้นช่องไฟแปลกๆ ระหว่างคำภาษาไทย แต่คงเครื่องหมายจุด (.) ไว้ทั้งหมด
         function joinThaiLinesSmart(parts) {
-            const cleaned = (parts || []).map(p => cleanScheduleToken(p)).filter(Boolean);
+            const cleaned = (parts || []).map(p => normalizeThaiPdfText(p)).filter(Boolean);
             if (cleaned.length === 0) return "";
 
             let result = cleaned[0];
-            const isSubjCode = (s) => /^([ก-ฮA-Za-z]|12)\d{4,5}$/.test(s);
+            const isSubjCode = (s) => /^([ก-ฮA-Za-z]|12)\d{4,5}\.*$/.test(s);
 
             for (let i = 1; i < cleaned.length; i++) {
                 const prev = cleaned[i - 1];
                 const curr = cleaned[i];
 
-                // เว้นวรรคเฉพาะกรณี: หลังรหัสวิชา, หน้า "ม.x", หรือคั่นระหว่างตัวเลข/ภาษาอังกฤษ
                 const needSpace =
                     isSubjCode(prev) ||
                     /^ม\.\d*/.test(curr) ||
-                    /[0-9A-Za-z]$/.test(prev) ||
+                    /[0-9A-Za-z]\.*$/.test(prev) ||
                     /^[0-9A-Za-z]/.test(curr);
 
                 result += (needSpace ? " " : "") + curr;
             }
 
-            // จัดการช่องไฟหน้าอักษรย่อ "ม." ให้สวยงามสม่ำเสมอ (เช่น "เข้า ม.", "กลุ่ม ม.4")
             return result
                 .replace(/([ก-ฮ])(ม\.)/g, '$1 $2')
                 .replace(/\s+/g, ' ')
@@ -524,19 +523,27 @@
         }
 
         // =========================================================================
-        // 2. ฟังก์ชันจำแนกข้อมูลในช่องตารางเรียน (รองรับจุดต่อท้ายและเชื่อมคำภาษาไทยอัตโนมัติ)
+        // 2. ฟังก์ชันจำแนกข้อมูลในช่องตารางเรียน (คงเครื่องหมาย . ไว้ทั้งหมดตามต้นฉบับวิชาการ)
         // =========================================================================
         function classifyCellLines(rawLines, isTeacherMode) {
-            // แยก Token กรณีที่รหัสวิชา ชั้นเรียน หรือเลขห้องอยู่บรรทัดเดียวกัน แล้วล้างจุดท้ายคำ
+            // รูปแบบการตรวจสอบแต่ละบรรทัด (รองรับ . ต่อท้ายทุกรูปแบบโดยไม่ลบจุดออก)
+            const isSubjectCode = (str) => /^([ก-ฮA-Za-z]|12)\d{4,5}\.*$/.test(str) && !/^\d{3}\.*$/.test(str);
+            const isTeacherName = (str) => /^ครู/.test(str);
+            const isClassTarget = (str) => /^(ม\.)?\d+\/\d+(-\d+)?\.*$/.test(str);
+            const isRoomLocation = (str) => {
+                if (/^\d{3}[A-Za-z]?\.*$/.test(str)) return true;
+                if (/^(สนาม|เทนนิส|อาหาร|นาฏศิลป|ดนตรี|ศิลปะ|คอม|แล็บ|LAB|หอประชุม|โรงยิม|สระว่ายน้ำ|ห้องสมุด|เกษตร|อุตสาหกรรม|คหกรรม|พละ|ฟุตบอล|บาส)/i.test(str)) return true;
+                return false;
+            };
+
+            // แยก Token กรณีที่รหัสวิชา ชั้นเรียน หรือเลขห้องอยู่บรรทัดเดียวกัน (เช่น "ว21212 พลังสิบ 323." หรือ "ค22102 2/1. 131.")
             const lines = [];
             rawLines.forEach(raw => {
-                const norm = cleanScheduleToken(raw);
+                const norm = normalizeThaiPdfText(raw);
                 if (!norm) return;
-                const tokens = norm.split(/\s+/).map(t => cleanScheduleToken(t)).filter(Boolean);
+                const tokens = norm.split(/\s+/).filter(Boolean);
                 const hasStructuredTokens = tokens.length > 1 && tokens.some(t =>
-                    /^([ก-ฮA-Za-z]|12)\d{4,5}$/.test(t) ||
-                    /^(ม\.)?\d+\/\d+(-\d+)?$/.test(t) ||
-                    /^\d{3}[A-Za-z]?$/.test(t)
+                    isSubjectCode(t) || isClassTarget(t) || /^\d{3}[A-Za-z]?\.*$/.test(t)
                 );
                 if (hasStructuredTokens && !norm.includes("วิชาเลือก") && !norm.includes("อบรม") && !norm.includes("ที่ปรึกษา")) {
                     lines.push(...tokens);
@@ -571,13 +578,13 @@
                 return { isBreak: false, isActivity: true, title: "รักการอ่าน", subTitle: "กิจกรรมส่งเสริมการอ่าน", canJump: false, jumpTarget: "", room: "" };
             }
             if (joinedNoSpace.includes("อบรมระดับ") || (lines[0] === "อบรม" && joinedNoSpace.includes("ระดับ"))) {
-                const levelMatch = joinedNoSpace.match(/ม\.\d+(\/\d+(-\d+)?)?/);
+                const levelMatch = joinedNoSpace.match(/ม\.\d+(\/\d+(-\d+)?)?\.*$/);
                 const titleStr = levelMatch ? `อบรมระดับ ${levelMatch[0]}` : "อบรมระดับ";
                 return { isBreak: false, isActivity: true, title: titleStr, subTitle: "กิจกรรมอบรมนักเรียนประจำระดับชั้น", canJump: false, jumpTarget: "", room: "" };
             }
             if (joinedNoSpace.includes("โฮมรูม")) {
-                const classMatch = joinedNoSpace.match(/(ม\.)?\d+\/\d+/);
-                const roomMatch = lines.find(l => /^\d{3}[A-Za-z]?$/.test(l));
+                const classMatch = joinedNoSpace.match(/(ม\.)?\d+\/\d+\.*/);
+                const roomMatch = lines.find(l => /^\d{3}[A-Za-z]?\.*$/.test(l));
                 return {
                     isBreak: false,
                     isActivity: true,
@@ -598,21 +605,11 @@
                 return { isBreak: false, isActivity: true, title: joinedSmart, subTitle: "งานบริหารวิชาการ / กลุ่มสาระฯ", canJump: false, jumpTarget: "", room: "" };
             }
 
-            // รูปแบบการตรวจสอบแต่ละบรรทัด (หลังตัดจุดท้ายคำออกแล้ว)
-            const isSubjectCode = (str) => /^([ก-ฮA-Za-z]|12)\d{4,5}$/.test(str) && !/^\d{3}$/.test(str);
-            const isTeacherName = (str) => /^ครู/.test(str);
-            const isClassTarget = (str) => /^(ม\.)?\d+\/\d+(-\d+)?$/.test(str);
-            const isRoomLocation = (str) => {
-                if (/^\d{3}[A-Za-z]?$/.test(str)) return true;
-                if (/^(สนาม|เทนนิส|อาหาร|นาฏศิลป|ดนตรี|ศิลปะ|คอม|แล็บ|LAB|หอประชุม|โรงยิม|สระว่ายน้ำ|ห้องสมุด|เกษตร|อุตสาหกรรม|คหกรรม|พละ|ฟุตบอล|บาส)/i.test(str)) return true;
-                return false;
-            };
-
             // 3. ตรวจสอบวิชาที่มีคำว่า "ที่ปรึกษา"
             if (joinedNoSpace.includes("ที่ปรึกษา")) {
                 const subjLine = lines.find(l => isSubjectCode(l)) || lines[0];
-                const roomLine = lines.find(l => l !== subjLine && /^\d{3}[A-Za-z]?$/.test(l)) || "";
-                const classMatch = joinedNoSpace.match(/ม\.\d+(\/\d+)?/);
+                const roomLine = lines.find(l => l !== subjLine && /^\d{3}[A-Za-z]?\.*$/.test(l)) || "";
+                const classMatch = joinedNoSpace.match(/ม\.\d+(\/\d+)?\.*/);
                 const levelText = classMatch ? classMatch[0] : "";
 
                 if (isTeacherMode) {
@@ -638,7 +635,7 @@
                 }
             }
 
-            // 4. จำแนกรายวิชาปกติทีละบรรทัด
+            // 4. จำแนกรายวิชาปกติทีละบรรทัด (คงเครื่องหมายจุดไว้ทั้งหมด)
             let subjectParts = [];
             let teacherName = "";
             let classTarget = "";
@@ -979,9 +976,15 @@
         }
 
         function getTeacherDisplayName(shortName) {
-            const cleanShort = cleanScheduleToken(shortName).replace(/^ครู/, "").trim();
+            const cleanShort = normalizeThaiPdfText(shortName).replace(/^ครู/, "").trim();
             const full = teacherFullNameMap[cleanShort];
-            return full ? `ครู${full}` : `ครู${cleanShort}`;
+            if (full) {
+                // หากชื่อย่อมีจุดต่อท้าย (เช่น "เบญจพร.") ให้แสดงจุดต่อท้ายชื่อด้วยเพื่อแยกครูชื่อซ้ำ
+                const trailingDots = (cleanShort.match(/\.+$/) || [""])[0];
+                const fullWithDot = (trailingDots && !full.endsWith(".")) ? `${full}${trailingDots}` : full;
+                return `ครู${fullWithDot}`;
+            }
+            return `ครู${cleanShort}`;
         }
 
         function getTargetDisplayLabel(meta) {
@@ -1203,19 +1206,40 @@
         }
 
         function jumpToTeacherByName(rawTeacherName) {
-            const cleanName = normalizeThaiPdfText(rawTeacherName).replace(/^ครู/, '').replace(/\./g, '').trim();
-            if (!cleanName) return;
+            // เก็บจุด (.) ท้ายชื่อครูไว้เพื่อแยกแยะครูที่ชื่อซ้ำกัน (เช่น "เบญจพร" vs "เบญจพร.")
+            const targetName = normalizeThaiPdfText(rawTeacherName).replace(/^ครู/, '').trim();
+            if (!targetName) return;
 
+            const hasDot = targetName.endsWith('.');
+
+            // รอบที่ 1: ค้นหาชื่อไฟล์ที่ตรงกันเป๊ะ 100% (รวมเครื่องหมายจุด) ก่อนเสมอ
             for (let dIdx = 0; dIdx < catalogData.teacherGroups.length; dIdx++) {
                 const grp = catalogData.teacherGroups[dIdx];
-                const foundFile = grp.files.find(f => {
-                    const fClean = normalizeThaiPdfText(f.name);
-                    return fClean.includes(cleanName) || cleanName.includes(fClean);
+                const exactFile = (grp.files || []).find(f => {
+                    const fClean = normalizeThaiPdfText(f.name).replace(/^ครู/, '').trim();
+                    return fClean === targetName;
                 });
-                if (foundFile) {
+                if (exactFile) {
                     document.getElementById('selDeptFolder').value = dIdx;
                     onDeptFolderChange(false);
-                    document.getElementById('selTeacherFile').value = foundFile.name;
+                    document.getElementById('selTeacherFile').value = exactFile.name;
+                    switchBottomTab('teacher');
+                    return;
+                }
+            }
+
+            // รอบที่ 2: ค้นหาแบบมีเงื่อนไขว่าสถานะจุดท้ายชื่อ (มีจุด / ไม่มีจุด) ต้องตรงกันเท่านั้น ป้องกันการกระโดดข้ามคน
+            for (let dIdx = 0; dIdx < catalogData.teacherGroups.length; dIdx++) {
+                const grp = catalogData.teacherGroups[dIdx];
+                const matchedFile = (grp.files || []).find(f => {
+                    const fClean = normalizeThaiPdfText(f.name).replace(/^ครู/, '').trim();
+                    if (fClean.endsWith('.') !== hasDot) return false;
+                    return fClean.includes(targetName) || targetName.includes(fClean);
+                });
+                if (matchedFile) {
+                    document.getElementById('selDeptFolder').value = dIdx;
+                    onDeptFolderChange(false);
+                    document.getElementById('selTeacherFile').value = matchedFile.name;
                     switchBottomTab('teacher');
                     return;
                 }
@@ -1223,7 +1247,7 @@
 
             Swal.fire({
                 icon: 'info',
-                title: `ตารางสอน "${cleanName ? 'ครู' + cleanName : rawTeacherName}"`,
+                title: `ตารางสอน "ครู${targetName}"`,
                 text: 'คุณสามารถเลือกค้นหาจากกลุ่มสาระการเรียนรู้ในแท็บ "ตารางสอนครู" ได้เลยครับ',
                 confirmButtonColor: '#4C1D95',
                 customClass: { popup: 'swal-glass' }
@@ -1231,7 +1255,8 @@
         }
 
         function jumpToClassByCode(rawClassCode) {
-            const normalized = String(rawClassCode).replace(/^ม\./, '').replace('/', '-').trim();
+            // ตัดจุดท้ายชื่อชั้นเรียนออกเฉพาะตอนนำไปเทียบหาชื่อไฟล์ PDF ของห้องเรียน (เช่น "2/1." -> "2-1")
+            const normalized = String(rawClassCode).replace(/^ม\./, '').replace(/\.+$/g, '').replace('/', '-').trim();
             const gradePrefix = normalized.split('-')[0];
             const gIdx = catalogData.studentGroups.findIndex(g => g.folderName.includes(gradePrefix));
 
@@ -1239,7 +1264,7 @@
                 document.getElementById('selGradeFolder').value = gIdx;
                 onGradeFolderChange(false);
                 const grp = catalogData.studentGroups[gIdx];
-                const found = grp.files.find(f => f.name === normalized);
+                const found = grp.files.find(f => f.name.replace(/\.+$/g, '') === normalized);
                 if (found) {
                     document.getElementById('selClassFile').value = found.name;
                     switchBottomTab('student');
@@ -1456,8 +1481,8 @@
 
                     if (item.isBreak) {
                         html += `
-                            <div class="bg-amber-50/90 border border-amber-200 px-4 py-2.5 rounded-2xl flex items-center justify-between text-xs font-bold text-amber-900">
-                                <span><i class="fa-solid fa-utensils text-amber-600 mr-1.5"></i> ${startSlot.label} • ${timeRangeStr}</span>
+                            <div class="glass px-4 py-2.5 rounded-2xl border backdrop-blur-md flex items-center justify-between text-xs font-extrabold ${dayTheme}">
+                                <span><i class="fa-solid fa-utensils mr-1.5 opacity-80"></i> ${startSlot.label} • ${timeRangeStr}</span>
                                 <span>พักรับประทานอาหารกลางวัน</span>
                             </div>
                         `;
