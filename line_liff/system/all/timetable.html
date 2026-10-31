@@ -438,7 +438,7 @@
         }
 
         // =========================================================================
-        // 1. ฟังก์ชันแปลงรหัสอักขระพิเศษ (Thai PUA \uF700-\uF71F) ในไฟล์ PDF ให้เป็นภาษาไทยมาตรฐาน
+        // 1. ฟังก์ชันแปลงรหัสอักขระพิเศษ (Thai PUA \uF700-\uF71F) และทำความสะอาดจุดท้ายคำ
         // =========================================================================
         function normalizeThaiPdfText(rawStr) {
             if (!rawStr) return "";
@@ -478,18 +478,77 @@
                 .trim();
         }
 
+        // ลบจุด (.) ที่โปรแกรมจัดตารางใส่ต่อท้ายรหัสวิชา ห้องเรียน ชั้นเรียน หรือชื่อคน โดยไม่กระทบอักษรย่อ เช่น "ม."
+        function cleanScheduleToken(str) {
+            if (!str) return "";
+            let s = normalizeThaiPdfText(str);
+
+            // 1. ลบจุดที่อยู่หลังตัวเลขหรือตัวอักษรภาษาอังกฤษ (เช่น ว23211. -> ว23211, 2/1. -> 2/1, 323. -> 323)
+            s = s.replace(/([0-9A-Za-z])\.+(?=\s|$)/g, '$1');
+
+            // 2. ลบจุดท้ายคำภาษาไทยที่ไม่ใช่อักษรย่อมาตรฐาน (ยังคง "ม.", "ดร.", "ร.ต.", "น." ไว้ตามปกติ)
+            if (!/(?:^|\s)(?:ม|ดร|ผศ|รศ|ศ|ร\.ต|ว่าที่\s*ร\.ต|พ\.ต|จ\.ส\.อ|น\.ส|ช|ญ|จ|อ|พ|พฤ|ศ|น)\.$/.test(s)) {
+                s = s.replace(/\.+$/, '');
+            }
+
+            return s.replace(/\s+/g, ' ').trim();
+        }
+
+        // เชื่อมข้อความหลายบรรทัดในช่องตารางโดยไม่เว้นช่องไฟแปลกๆ ระหว่างคำภาษาไทย
+        function joinThaiLinesSmart(parts) {
+            const cleaned = (parts || []).map(p => cleanScheduleToken(p)).filter(Boolean);
+            if (cleaned.length === 0) return "";
+
+            let result = cleaned[0];
+            const isSubjCode = (s) => /^([ก-ฮA-Za-z]|12)\d{4,5}$/.test(s);
+
+            for (let i = 1; i < cleaned.length; i++) {
+                const prev = cleaned[i - 1];
+                const curr = cleaned[i];
+
+                // เว้นวรรคเฉพาะกรณี: หลังรหัสวิชา, หน้า "ม.x", หรือคั่นระหว่างตัวเลข/ภาษาอังกฤษ
+                const needSpace =
+                    isSubjCode(prev) ||
+                    /^ม\.\d*/.test(curr) ||
+                    /[0-9A-Za-z]$/.test(prev) ||
+                    /^[0-9A-Za-z]/.test(curr);
+
+                result += (needSpace ? " " : "") + curr;
+            }
+
+            // จัดการช่องไฟหน้าอักษรย่อ "ม." ให้สวยงามสม่ำเสมอ (เช่น "เข้า ม.", "กลุ่ม ม.4")
+            return result
+                .replace(/([ก-ฮ])(ม\.)/g, '$1 $2')
+                .replace(/\s+/g, ' ')
+                .trim();
+        }
+
         // =========================================================================
-        // 2. ฟังก์ชันจำแนกข้อมูลในช่องตารางเรียนตามข้อสังเกตของโรงเรียน
+        // 2. ฟังก์ชันจำแนกข้อมูลในช่องตารางเรียน (รองรับจุดต่อท้ายและเชื่อมคำภาษาไทยอัตโนมัติ)
         // =========================================================================
         function classifyCellLines(rawLines, isTeacherMode) {
-            const lines = rawLines
-                .map(l => normalizeThaiPdfText(l))
-                .filter(Boolean);
+            // แยก Token กรณีที่รหัสวิชา ชั้นเรียน หรือเลขห้องอยู่บรรทัดเดียวกัน แล้วล้างจุดท้ายคำ
+            const lines = [];
+            rawLines.forEach(raw => {
+                const norm = cleanScheduleToken(raw);
+                if (!norm) return;
+                const tokens = norm.split(/\s+/).map(t => cleanScheduleToken(t)).filter(Boolean);
+                const hasStructuredTokens = tokens.length > 1 && tokens.some(t =>
+                    /^([ก-ฮA-Za-z]|12)\d{4,5}$/.test(t) ||
+                    /^(ม\.)?\d+\/\d+(-\d+)?$/.test(t) ||
+                    /^\d{3}[A-Za-z]?$/.test(t)
+                );
+                if (hasStructuredTokens && !norm.includes("วิชาเลือก") && !norm.includes("อบรม") && !norm.includes("ที่ปรึกษา")) {
+                    lines.push(...tokens);
+                } else {
+                    lines.push(norm);
+                }
+            });
 
             if (lines.length === 0) return null;
 
             const joinedNoSpace = lines.join("").replace(/\s+/g, "");
-            const joinedWithSpace = lines.join(" ").replace(/\s+/g, " ").trim();
+            const joinedSmart = joinThaiLinesSmart(lines);
 
             // 1. ตรวจสอบคาบพักกลางวัน
             if (/^(พัก|พก|พักกลางวัน)$/.test(joinedNoSpace)) {
@@ -512,7 +571,7 @@
                 return { isBreak: false, isActivity: true, title: "รักการอ่าน", subTitle: "กิจกรรมส่งเสริมการอ่าน", canJump: false, jumpTarget: "", room: "" };
             }
             if (joinedNoSpace.includes("อบรมระดับ") || (lines[0] === "อบรม" && joinedNoSpace.includes("ระดับ"))) {
-                const levelMatch = joinedNoSpace.match(/ม\.\d+(\/\d+)?/);
+                const levelMatch = joinedNoSpace.match(/ม\.\d+(\/\d+(-\d+)?)?/);
                 const titleStr = levelMatch ? `อบรมระดับ ${levelMatch[0]}` : "อบรมระดับ";
                 return { isBreak: false, isActivity: true, title: titleStr, subTitle: "กิจกรรมอบรมนักเรียนประจำระดับชั้น", canJump: false, jumpTarget: "", room: "" };
             }
@@ -536,13 +595,13 @@
                 return { isBreak: false, isActivity: true, title: "ชุมนุม", subTitle: "กิจกรรมชุมนุม", canJump: false, jumpTarget: "", room: "" };
             }
             if (joinedNoSpace === "PLC" || joinedNoSpace.startsWith("ประชุม")) {
-                return { isBreak: false, isActivity: true, title: joinedWithSpace, subTitle: "งานบริหารวิชาการ / กลุ่มสาระฯ", canJump: false, jumpTarget: "", room: "" };
+                return { isBreak: false, isActivity: true, title: joinedSmart, subTitle: "งานบริหารวิชาการ / กลุ่มสาระฯ", canJump: false, jumpTarget: "", room: "" };
             }
 
-            // รูปแบบการตรวจสอบแต่ละบรรทัด
+            // รูปแบบการตรวจสอบแต่ละบรรทัด (หลังตัดจุดท้ายคำออกแล้ว)
             const isSubjectCode = (str) => /^([ก-ฮA-Za-z]|12)\d{4,5}$/.test(str) && !/^\d{3}$/.test(str);
             const isTeacherName = (str) => /^ครู/.test(str);
-            const isClassTarget = (str) => /^(ม\.)?\d+\/\d+$/.test(str);
+            const isClassTarget = (str) => /^(ม\.)?\d+\/\d+(-\d+)?$/.test(str);
             const isRoomLocation = (str) => {
                 if (/^\d{3}[A-Za-z]?$/.test(str)) return true;
                 if (/^(สนาม|เทนนิส|อาหาร|นาฏศิลป|ดนตรี|ศิลปะ|คอม|แล็บ|LAB|หอประชุม|โรงยิม|สระว่ายน้ำ|ห้องสมุด|เกษตร|อุตสาหกรรม|คหกรรม|พละ|ฟุตบอล|บาส)/i.test(str)) return true;
@@ -579,7 +638,7 @@
                 }
             }
 
-            // 4. จำแนกรายวิชาปกติทีละบรรทัดตาม Pattern จริง
+            // 4. จำแนกรายวิชาปกติทีละบรรทัด
             let subjectParts = [];
             let teacherName = "";
             let classTarget = "";
@@ -588,7 +647,7 @@
             lines.forEach((line, idx) => {
                 if (isTeacherName(line)) {
                     teacherName = line;
-                } else if (isTeacherMode && isClassTarget(line)) {
+                } else if (isClassTarget(line)) {
                     classTarget = line.replace(/^ม\./, '');
                 } else if (isSubjectCode(line) && subjectParts.length === 0) {
                     subjectParts.push(line);
@@ -603,26 +662,27 @@
                 }
             });
 
-            const finalTitle = subjectParts.join(" ").trim() || joinedWithSpace;
+            const finalTitle = joinThaiLinesSmart(subjectParts) || joinedSmart;
 
             if (isTeacherMode) {
                 return {
                     isBreak: false,
-                    isActivity: !classTarget,
+                    isActivity: !classTarget && !roomName,
                     title: finalTitle,
                     subTitle: classTarget ? `ชั้น ม.${classTarget}` : "",
-                    canJump: Boolean(classTarget),
+                    canJump: Boolean(classTarget && !classTarget.includes("-")),
                     jumpTarget: classTarget,
                     room: roomName
                 };
             } else {
+                const subText = teacherName || (classTarget ? `ชั้น ม.${classTarget}` : "");
                 return {
                     isBreak: false,
-                    isActivity: !teacherName,
+                    isActivity: !teacherName && !roomName,
                     title: finalTitle,
-                    subTitle: teacherName,
-                    canJump: Boolean(teacherName),
-                    jumpTarget: teacherName,
+                    subTitle: subText,
+                    canJump: Boolean(teacherName || (classTarget && !classTarget.includes("-"))),
+                    jumpTarget: teacherName || classTarget,
                     room: roomName
                 };
             }
@@ -919,7 +979,7 @@
         }
 
         function getTeacherDisplayName(shortName) {
-            const cleanShort = normalizeThaiPdfText(shortName).replace(/^ครู/, "").trim();
+            const cleanShort = cleanScheduleToken(shortName).replace(/^ครู/, "").trim();
             const full = teacherFullNameMap[cleanShort];
             return full ? `ครู${full}` : `ครู${cleanShort}`;
         }
