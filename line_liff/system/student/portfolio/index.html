@@ -758,7 +758,8 @@
                 if (!data || data.status !== 'success' || !data.viewer || !data.viewer.std_id) {
                     currentViewer = null;
                     clearUnifiedViewer();
-                    showScreen('link-screen');
+                    // หากยังไม่เข้าสู่ระบบ ให้เด้งไปหน้า Connect ทันที
+                    window.location.replace("https://liff.line.me/2008923798-pVEtog9o");
                     return;
                 }
 
@@ -775,7 +776,7 @@
                 }
             } catch (e) {
                 console.error("Load portfolio error:", e);
-                showScreen('link-screen');
+                window.location.replace("https://liff.line.me/2008923798-pVEtog9o");
             }
         }
 

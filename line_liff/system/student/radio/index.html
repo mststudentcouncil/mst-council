@@ -444,6 +444,13 @@
                 }
 
                 currentUser = data.linkedUser;
+
+                if (!currentUser || !currentUser.std_id) {
+                    clearAllUnifiedKeys();
+                    // หากยังไม่ผูกบัญชีในระบบ Connect ให้เด้งไปหน้า Connect ทันที
+                    window.location.replace("https://liff.line.me/2008923798-pVEtog9o");
+                    return;
+                }
                 saveUnifiedViewer(currentUser);
 
                 const headerActions = document.getElementById('headerActions');
