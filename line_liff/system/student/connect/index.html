@@ -74,6 +74,18 @@
             outline: none;
             box-shadow: 0 0 0 3px rgba(76, 29, 149, 0.15);
         }
+        .modern-input {
+            background: #F8FAFC;
+            border: 1px solid #CBD5E1;
+            border-radius: 0.75rem;
+            outline: none;
+            transition: all 0.2s;
+        }
+        .modern-input:focus {
+            background: #FFFFFF;
+            border-color: #4C1D95 !important;
+            box-shadow: 0 0 0 3px rgba(76, 29, 149, 0.15);
+        }
         .btn-main {
             background: linear-gradient(135deg, #4C1D95 0%, #6D28D9 100%);
             color: white;
@@ -143,9 +155,9 @@
         <div id="loginPage" class="hidden fade-in flex-col my-auto py-6">
             <div class="glass rounded-[2.5rem] p-8 text-center w-full shadow-lg">
                 <img src="/logo.webp" class="w-24 h-24 mx-auto mb-4 drop-shadow-md object-contain" alt="MSTSC" onerror="this.src='https://mstsc.pages.dev/logo.webp'">
-                <span class="inline-block bg-purple-50 text-mstPurple text-[10px] font-extrabold px-3.5 py-1 rounded-full border border-purple-100 uppercase tracking-widest">MSTSC Student Connect</span>
-                <h2 class="text-2xl font-black text-mstDark mt-3 mb-1">ยืนยันตัวตนนักเรียน</h2>
-                <p class="text-xs font-medium text-gray-500 mb-7 leading-relaxed">เชื่อมรหัสประจำตัวนักเรียนเข้ากับบัญชี LINE ด้วยระบบยืนยัน 2 ขั้นตอนผ่านอีเมลโรงเรียน (@mst.ac.th)</p>
+                <span class="inline-block bg-purple-50 text-mstPurple text-[10px] font-extrabold px-3.5 py-1 rounded-full border border-purple-100 uppercase tracking-widest">MSTSC Connect</span>
+                <h2 class="text-2xl font-black text-mstDark mt-3 mb-1">ยืนยันตัวตนเข้าสู่ระบบ</h2>
+                <p class="text-xs font-medium text-gray-500 mb-7 leading-relaxed">เชื่อมข้อมูลนักเรียน ศิษย์เก่า และครู/บุคลากร เข้ากับบัญชี LINE ด้วยระบบยืนยัน 2 ขั้นตอนผ่านอีเมลโรงเรียน (@mst.ac.th)</p>
                 <button onclick="triggerLineLogin()" class="w-full bg-lineGreen hover:bg-[#05b34c] active:scale-[0.98] text-white py-4 rounded-2xl font-bold shadow-md text-sm flex justify-center items-center gap-2.5 transition">
                     <i class="fa-brands fa-line text-xl"></i> เข้าสู่ระบบด้วย LINE
                 </button>
@@ -195,7 +207,7 @@
                 <div id="step1_email" class="space-y-3.5 text-left">
                     <div>
                         <label class="block text-xs font-bold text-gray-700 mb-1.5">
-                            <i class="fa-solid fa-envelope-circle-check text-mstPurple mr-1"></i> อีเมลโรงเรียน (@mst.ac.th)
+                            <i class="fa-solid fa-envelope-circle-check text-mstPurple mr-1"></i> อีเมลโรงเรียนสำหรับนักเรียน (@mst.ac.th)
                         </label>
                         <div class="flex shadow-xs rounded-2xl overflow-hidden focus-within:ring-2 focus-within:ring-mstPurple border border-gray-300 bg-white">
                             <input type="text" id="linkEmailInput" inputmode="numeric" maxlength="20"
@@ -222,7 +234,12 @@
                         <i class="fa-solid fa-paper-plane"></i> ขอรับรหัส OTP ทางอีเมล
                     </button>
 
-                    <div class="pt-1">
+                    <!-- ปุ่มสำหรับ ครู / บุคลากร และ ศิษย์เก่า -->
+                    <div class="pt-1 space-y-2">
+                        <button type="button" onclick="openStaffBindModal()" class="w-full py-3 px-3 rounded-xl bg-purple-50/90 border border-purple-200 text-xs font-bold text-mstPurple hover:bg-purple-100 transition flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-chalkboard-user text-mstPurple"></i> สำหรับ ครู / บุคลากร (ใช้อีเมล name@mst.ac.th)
+                        </button>
+
                         <button type="button" onclick="openAlumniBindModal()" class="w-full py-3 px-3 rounded-xl bg-amber-50/90 border border-amber-200 text-xs font-bold text-amber-800 hover:bg-amber-100 transition flex items-center justify-center gap-1.5">
                             <i class="fa-solid fa-user-graduate text-amber-600"></i> สำหรับรุ่นพี่ศิษย์เก่าทั่วไป (ลงทะเบียนข้อมูลศิษย์เก่า)
                         </button>
@@ -232,7 +249,7 @@
                 <!-- ขั้นที่ 2: กรอกรหัส OTP 6 หลัก พร้อมเวลาถอยหลัง 05:00 และหลอดโปรเกรส -->
                 <div id="step2_otp" class="hidden space-y-4 text-left fade-in">
 
-                    <!-- กล่องแสดงข้อมูลนักเรียนที่ตรวจสอบพบ -->
+                    <!-- กล่องแสดงข้อมูลบัญชีที่ตรวจสอบพบ -->
                     <div id="otpStudentPreviewBox" class="bg-purple-50/90 p-3.5 rounded-2xl border border-purple-200 text-xs space-y-1"></div>
 
                     <!-- กรณีเป็นศิษย์เก่าสภานักเรียน (SC67) ให้เลือกแผนการเรียนตอน ม.ปลาย -->
@@ -310,15 +327,15 @@
 
                 <div class="grid grid-cols-3 gap-2 bg-white/10 rounded-2xl p-3 border border-white/10 text-xs">
                     <div>
-                        <span class="text-[10px] text-purple-200 font-semibold block">รหัสประจำตัว</span>
-                        <span id="pass-sid" class="font-black text-mstYellow text-sm">-</span>
+                        <span class="text-[10px] text-purple-200 font-semibold block" id="pass-sid-label">รหัสประจำตัว</span>
+                        <span id="pass-sid" class="font-black text-mstYellow text-sm truncate block">-</span>
                     </div>
                     <div>
                         <span class="text-[10px] text-purple-200 font-semibold block">สถานะ</span>
-                        <span id="pass-class" class="font-black text-white text-sm">-</span>
+                        <span id="pass-class" class="font-black text-white text-sm truncate block">-</span>
                     </div>
                     <div class="min-w-0">
-                        <span class="text-[10px] text-purple-200 font-semibold block">แผนการเรียน</span>
+                        <span class="text-[10px] text-purple-200 font-semibold block" id="pass-plan-label">แผนการเรียน/สังกัด</span>
                         <span id="pass-plan" class="font-bold text-white text-xs truncate block mt-0.5">-</span>
                     </div>
                 </div>
@@ -401,7 +418,7 @@
 
                 <div class="pt-2 border-t border-gray-100">
                     <button onclick="promptUnlink()" class="w-full py-2.5 rounded-xl bg-gray-50 hover:bg-red-50 text-gray-500 hover:text-red-600 border border-gray-200 text-xs font-bold transition flex items-center justify-center gap-1.5">
-                        <i class="fa-solid fa-rotate"></i> เปลี่ยนรหัสนักเรียน / ยกเลิกการผูกบัญชี
+                        <i class="fa-solid fa-rotate"></i> เปลี่ยนบัญชีผู้ใช้ / ยกเลิกการผูกบัญชี
                     </button>
                 </div>
             </div>
@@ -583,16 +600,22 @@
             saveAllUnifiedKeys(currentUser);
             if (btnUnlink) { btnUnlink.classList.remove('hidden'); btnUnlink.classList.add('flex'); }
 
+            const isStaffRole = currentUser.role === 'TEACHER' || currentUser.role === 'STAFF' || currentUser.level === 'ครู/บุคลากร';
             const roomDisplay = `${currentUser.level}${currentUser.room && currentUser.room !== '-' ? '/' + currentUser.room : ''}`;
+            const planOrDept = currentUser.department || currentUser.plan || '-';
 
             document.getElementById('user-avatar').src = currentUser.linePic || 'https://mstsc.pages.dev/logo.webp';
             document.getElementById('user-fullname').innerText = currentUser.fullName;
-            document.getElementById('user-meta').innerText = `รหัส: ${currentUser.std_id} • สถานะ: ${roomDisplay}`;
+            document.getElementById('user-meta').innerText = isStaffRole
+                ? `สังกัด: ${planOrDept} • สถานะ: ${roomDisplay}`
+                : `รหัส: ${currentUser.std_id} • สถานะ: ${roomDisplay}`;
 
             document.getElementById('pass-fullname').innerText = currentUser.fullName;
+            document.getElementById('pass-sid-label').innerText = isStaffRole ? 'บัญชีผู้ใช้' : 'รหัสประจำตัว';
             document.getElementById('pass-sid').innerText = currentUser.std_id;
             document.getElementById('pass-class').innerText = roomDisplay;
-            document.getElementById('pass-plan').innerText = currentUser.plan || '-';
+            document.getElementById('pass-plan-label').innerText = isStaffRole ? 'กลุ่มสาระ/หน่วยงาน' : 'แผนการเรียน';
+            document.getElementById('pass-plan').innerText = planOrDept;
             document.getElementById('pass-role').innerText = currentUser.role || 'STUDENT';
 
             if (isInitial) showScreen('home-screen');
@@ -654,11 +677,29 @@
             document.getElementById("otpStepSubtitle").innerText = "กรอกรหัสอีเมลโรงเรียนเพื่อรับรหัส OTP 6 หลัก";
         }
 
-        // ขั้นที่ 1: ขอรับรหัส OTP ทางอีเมลโรงเรียน (@mst.ac.th)
-        async function requestEmailOtp(alumniPayload = null) {
+        // ฟังก์ชันเปิด/ปิดช่องระบุหน่วยงานอื่นๆ สำหรับครู/บุคลากร
+        function toggleDeptOther() {
+            const selectEl = document.getElementById('reg-dept-select');
+            const otherInput = document.getElementById('reg-dept-other');
+            if (!selectEl || !otherInput) return;
+            if (selectEl.value === 'อื่นๆ') {
+                otherInput.classList.remove('hidden');
+                otherInput.required = true;
+                otherInput.focus();
+            } else {
+                otherInput.classList.add('hidden');
+                otherInput.required = false;
+                otherInput.value = '';
+            }
+        }
+
+        // ขั้นที่ 1: ขอรับรหัส OTP ทางอีเมลโรงเรียน (@mst.ac.th) รองรับทั้งนักเรียน ศิษย์เก่า และครู/บุคลากร
+        async function requestEmailOtp(customPayload = null) {
             let emailPrefix = "";
-            if (alumniPayload && alumniPayload.emailPrefix) {
-                emailPrefix = alumniPayload.emailPrefix;
+            const isStaffRequest = Boolean(customPayload && customPayload.isStaff);
+
+            if (customPayload && customPayload.emailPrefix) {
+                emailPrefix = customPayload.emailPrefix.trim().toLowerCase().replace("@mst.ac.th", "");
             } else {
                 emailPrefix = document.getElementById("linkEmailInput").value.trim().toLowerCase().replace("@mst.ac.th", "").replace(/\s+/g, "");
                 const pdpaConsent = document.getElementById("pdpaConsent").checked;
@@ -673,21 +714,33 @@
                 }
             }
 
-            if (!/^(\d{2})(\d{5})$/.test(emailPrefix)) {
-                return Swal.fire({
-                    icon: 'error',
-                    title: 'รูปแบบอีเมลไม่ถูกต้อง',
-                    text: 'กรุณากรอกตัวเลข 7 หลัก (ปี 2 หลัก + รหัสนักเรียน 5 หลัก เช่น 7012345)',
-                    confirmButtonColor: '#4C1D95',
-                    customClass: { popup: 'swal-glass' }
-                });
+            if (isStaffRequest) {
+                if (!/^[a-z0-9._-]{2,64}$/i.test(emailPrefix)) {
+                    return Swal.fire({
+                        icon: 'error',
+                        title: 'รูปแบบอีเมลไม่ถูกต้อง',
+                        text: 'กรุณากรอกชื่อบัญชีอีเมลโรงเรียนให้ถูกต้อง (เช่น name@mst.ac.th)',
+                        confirmButtonColor: '#4C1D95',
+                        customClass: { popup: 'swal-glass' }
+                    });
+                }
+            } else {
+                if (!/^(\d{2})(\d{5})$/.test(emailPrefix)) {
+                    return Swal.fire({
+                        icon: 'error',
+                        title: 'รูปแบบอีเมลไม่ถูกต้อง',
+                        text: 'กรุณากรอกตัวเลข 7 หลัก (ปี 2 หลัก + รหัสนักเรียน 5 หลัก เช่น 7012345)',
+                        confirmButtonColor: '#4C1D95',
+                        customClass: { popup: 'swal-glass' }
+                    });
+                }
             }
 
             setLoader('กำลังตรวจสอบฐานข้อมูลและส่งรหัส OTP ไปยัง ' + emailPrefix + '@mst.ac.th...');
             const res = await apiCall({
                 action: 'requestConnectOtp',
                 emailPrefix,
-                ...(alumniPayload || {})
+                ...(customPayload || {})
             });
             hideLoader();
 
@@ -700,21 +753,34 @@
                 return Swal.fire({
                     icon: 'error',
                     title: 'ไม่สามารถส่งรหัส OTP ได้',
-                    text: res.message || 'ไม่พบข้อมูลรหัสนักเรียนในระบบ',
+                    text: res.message || 'ไม่พบข้อมูลในระบบ หรือไม่สามารถส่งอีเมลได้',
                     confirmButtonColor: '#4C1D95',
                     customClass: { popup: 'swal-glass' }
                 });
             }
 
-            pendingStudentPreview = res.studentPreview;
-            document.getElementById("sentEmailDisplay").innerText = res.email;
+            pendingStudentPreview = res.studentPreview || {
+                std_id: customPayload?.std_id || emailPrefix,
+                fullName: customPayload ? `${customPayload.prefix}${customPayload.fname} ${customPayload.lname}` : emailPrefix,
+                level: customPayload?.level || (isStaffRequest ? 'ครู/บุคลากร' : '-'),
+                room: customPayload?.department || customPayload?.plan || '-'
+            };
+            document.getElementById("sentEmailDisplay").innerText = res.email || `${emailPrefix}@mst.ac.th`;
 
-            const stu = res.studentPreview;
-            document.getElementById("otpStudentPreviewBox").innerHTML = `
-                <p class="font-black text-mstPurple text-xs"><i class="fa-solid fa-user-check mr-1"></i> ข้อมูลบัญชีที่จะเชื่อมต่อ:</p>
-                <p><b>รหัสประจำตัว:</b> ${stu.std_id} • <b>ชื่อ:</b> ${stu.fullName}</p>
-                <p><b>ระดับชั้น/สถานะ:</b> <span class="font-black text-mstPurple">${stu.level}${stu.room && stu.room !== '-' ? '/' + stu.room : ''}</span></p>
-            `;
+            const stu = pendingStudentPreview;
+            if (isStaffRequest || stu.role === 'TEACHER' || stu.level === 'ครู/บุคลากร') {
+                document.getElementById("otpStudentPreviewBox").innerHTML = `
+                    <p class="font-black text-mstPurple text-xs"><i class="fa-solid fa-chalkboard-user mr-1"></i> ข้อมูลครู / บุคลากรที่จะเชื่อมต่อ:</p>
+                    <p><b>ชื่อ-นามสกุล:</b> ${stu.fullName}</p>
+                    <p><b>กลุ่มสาระ / หน่วยงาน:</b> <span class="font-black text-mstPurple">${customPayload?.department || stu.plan || stu.room || '-'}</span></p>
+                `;
+            } else {
+                document.getElementById("otpStudentPreviewBox").innerHTML = `
+                    <p class="font-black text-mstPurple text-xs"><i class="fa-solid fa-user-check mr-1"></i> ข้อมูลบัญชีที่จะเชื่อมต่อ:</p>
+                    <p><b>รหัสประจำตัว:</b> ${stu.std_id} • <b>ชื่อ:</b> ${stu.fullName}</p>
+                    <p><b>ระดับชั้น/สถานะ:</b> <span class="font-black text-mstPurple">${stu.level}${stu.room && stu.room !== '-' ? '/' + stu.room : ''}</span></p>
+                `;
+            }
 
             // หากเป็นศิษย์เก่าสภานักเรียน (SC67) ให้แสดงตัวเลือกแผนการเรียน
             const scPlanBox = document.getElementById("scAlumniPlanBox");
@@ -793,6 +859,114 @@
                     customClass: { popup: 'swal-glass' }
                 });
             }
+        }
+
+        // โมดอลสำหรับ ครู / บุคลากร (ใช้อีเมลโรงเรียน name@mst.ac.th รับรหัส OTP 6 หลัก)
+        async function openStaffBindModal() {
+            const { value: formValues } = await Swal.fire({
+                title: 'เข้าสู่ระบบ ครู / บุคลากร (2FA)',
+                html: `
+                    <div class="text-left space-y-2.5 text-xs mt-2">
+                        <div>
+                            <label class="font-bold text-gray-700 block mb-1">อีเมลโรงเรียน (@mst.ac.th) <span class="text-red-500">*</span></label>
+                            <div class="flex rounded-xl overflow-hidden border border-gray-300 bg-white focus-within:border-mstPurple">
+                                <input id="sw-staff-email" type="text" class="w-full p-2.5 text-sm font-black text-center text-mstPurple outline-none" placeholder="เช่น name"
+                                    oninput="this.value = this.value.toLowerCase().replace('@mst.ac.th', '').replace(/[^a-z0-9._-]/g, '')">
+                                <span class="bg-purple-50 px-3 flex items-center text-[11px] font-bold text-mstPurple border-l border-purple-100">@mst.ac.th</span>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-3 gap-2">
+                            <div>
+                                <label class="font-bold text-gray-700 block mb-1">คำนำหน้า <span class="text-red-500">*</span></label>
+                                <select id="sw-staff-prefix" class="glass-input text-xs py-2.5 px-2">
+                                    <option value="" disabled selected>-- เลือก --</option>
+                                    <option value="นาย">นาย</option>
+                                    <option value="นาง">นาง</option>
+                                    <option value="นางสาว">นางสาว</option>
+                                    <option value="ว่าที่ ร.ต.">ว่าที่ ร.ต.</option>
+                                    <option value="ดร.">ดร.</option>
+                                </select>
+                            </div>
+                            <div class="col-span-2">
+                                <label class="font-bold text-gray-700 block mb-1">ชื่อ <span class="text-red-500">*</span></label>
+                                <input id="sw-staff-fname" type="text" class="glass-input text-xs py-2.5" placeholder="ชื่อจริง">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="font-bold text-gray-700 block mb-1">นามสกุล <span class="text-red-500">*</span></label>
+                            <input id="sw-staff-lname" type="text" class="glass-input text-xs py-2.5" placeholder="นามสกุล">
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="block text-gray-700 font-bold mb-1 text-xs">กลุ่มสาระ / หน่วยงาน <span class="text-red-500">*</span></label>
+                            <select id="reg-dept-select" class="w-full modern-input py-2 px-2 text-gray-900 font-medium text-xs" style="border-bottom: 2px solid #e5e7eb;" required onchange="toggleDeptOther()">
+                                <option value="" disabled selected>-- โปรดเลือกกลุ่มสาระหรือหน่วยงาน --</option>
+                                <option value="บุคลากร">ผู้บริหาร</option>
+                                <option value="กลุ่มสาระวิทยาศาสตร์และเทคโนโลยี">กลุ่มสาระวิทยาศาสตร์และเทคโนโลยี</option>
+                                <option value="กลุ่มสาระคณิตศาสตร์">กลุ่มสาระคณิตศาสตร์</option>
+                                <option value="กลุ่มสาระภาษาต่างประเทศ">กลุ่มสาระภาษาต่างประเทศ</option>
+                                <option value="กลุ่มสาระภาษาไทย">กลุ่มสาระภาษาไทย</option>
+                                <option value="กลุ่มสาระสังคมศึกษาฯ">กลุ่มสาระสังคมศึกษาฯ</option>
+                                <option value="กลุ่มสาระศิลปะ">กลุ่มสาระศิลปะ</option>
+                                <option value="กลุ่มสาระการงานอาชีพ">กลุ่มสาระการงานอาชีพ</option>
+                                <option value="กลุ่มสาระสุขศึกษาและพลศึกษา">กลุ่มสาระสุขศึกษาและพลศึกษา</option>
+                                <option value="งานแนะแนว">งานแนะแนว</option>
+                                <option value="ครูอัตราจ้าง">ครูอัตราจ้าง</option>
+                                <option value="เจ้าหน้าที่ประจำสำนักงาน">เจ้าหน้าที่ประจำสำนักงาน</option>
+                                <option value="ลูกจ้างประจำ/ลูกจ้างชั่วคราว">ลูกจ้างประจำ/ลูกจ้างชั่วคราว</option>
+                                <option value="อื่นๆ">อื่นๆ (โปรดระบุ)</option>
+                            </select>
+                            <input type="text" id="reg-dept-other" class="w-full modern-input py-2 px-2 text-gray-900 font-medium mt-3 hidden text-xs" placeholder="โปรดระบุหน่วยงานของคุณ">
+                        </div>
+                    </div>
+                `,
+                showCancelButton: true,
+                confirmButtonText: 'ขอรับรหัส OTP ทางอีเมล',
+                cancelButtonText: 'ยกเลิก',
+                confirmButtonColor: '#4C1D95',
+                customClass: { popup: 'swal-glass' },
+                preConfirm: () => {
+                    const emailPrefix = document.getElementById('sw-staff-email').value.trim().toLowerCase().replace('@mst.ac.th', '');
+                    const prefix = document.getElementById('sw-staff-prefix').value;
+                    const fname = document.getElementById('sw-staff-fname').value.trim();
+                    const lname = document.getElementById('sw-staff-lname').value.trim();
+                    const deptSelect = document.getElementById('reg-dept-select').value;
+                    const deptOther = document.getElementById('reg-dept-other').value.trim();
+
+                    if (!/^[a-z0-9._-]{2,64}$/i.test(emailPrefix)) {
+                        Swal.showValidationMessage('กรุณากรอกชื่ออีเมลโรงเรียนให้ถูกต้อง (เช่น name@mst.ac.th)');
+                        return false;
+                    }
+                    if (!prefix || !fname || !lname || !deptSelect) {
+                        Swal.showValidationMessage('กรุณากรอกข้อมูลครู/บุคลากรให้ครบทุกช่อง');
+                        return false;
+                    }
+                    if (deptSelect === 'อื่นๆ' && !deptOther) {
+                        Swal.showValidationMessage('กรุณาระบุหน่วยงานของคุณ');
+                        return false;
+                    }
+
+                    const finalDept = deptSelect === 'อื่นๆ' ? deptOther : deptSelect;
+
+                    return {
+                        emailPrefix,
+                        std_id: emailPrefix,
+                        prefix,
+                        fname,
+                        lname,
+                        department: finalDept,
+                        plan: finalDept,
+                        level: 'ครู/บุคลากร',
+                        role: 'TEACHER',
+                        isStaff: true
+                    };
+                }
+            });
+
+            if (!formValues) return;
+            await requestEmailOtp(formValues);
         }
 
         // โมดอลสำหรับศิษย์เก่าทั่วไป (ใช้อีเมลโรงเรียน 7 หลัก @mst.ac.th รับรหัส OTP 6 หลักเช่นเดียวกัน)
@@ -881,8 +1055,8 @@
         async function promptUnlink() {
             const confirm = await Swal.fire({
                 icon: 'warning',
-                title: 'สลับบัญชีรหัสนักเรียน?',
-                text: 'ต้องการยกเลิกการผูกบัญชี LINE กับรหัสนักเรียนปัจจุบันหรือไม่ (หากผูกใหม่ต้องยืนยันรหัส OTP ทางอีเมลอีกครั้ง)',
+                title: 'สลับบัญชีผู้ใช้?',
+                text: 'ต้องการยกเลิกการผูกบัญชี LINE กับข้อมูลปัจจุบันหรือไม่ (หากผูกใหม่ต้องยืนยันรหัส OTP ทางอีเมลอีกครั้ง)',
                 showCancelButton: true,
                 confirmButtonText: 'ยืนยันยกเลิก',
                 cancelButtonText: 'ปิด',
