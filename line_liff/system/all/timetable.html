@@ -118,7 +118,7 @@
                     <button onclick="syncDriveCatalog(true)" class="w-9 h-9 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 flex items-center justify-center text-xs transition" title="ดึงข้อมูลล่าสุดจากเว็บโรงเรียน">
                         <i class="fa-solid fa-rotate" id="syncIcon"></i>
                     </button>
-                    <a href="/richmenuline" class="w-9 h-9 rounded-xl bg-purple-50 hover:bg-purple-100 text-mstPurple border border-purple-100 flex items-center justify-center text-xs transition" title="ศูนย์รวมบริการนักเรียน">
+                    <a href="/line_liff/system/all/richmenuline/" class="w-9 h-9 rounded-xl bg-purple-50 hover:bg-purple-100 text-mstPurple border border-purple-100 flex items-center justify-center text-xs transition" title="ศูนย์รวมบริการนักเรียน">
                         <i class="fa-solid fa-grip"></i>
                     </a>
                 </div>
@@ -1328,6 +1328,13 @@
             initUserBanner();
             selectDay(selectedDay);
             await syncDriveCatalog(false);
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const reqMode = urlParams.get('mode') || urlParams.get('schedule');
+            if (reqMode === 'teacher' || reqMode === 'student' || reqMode === 'pdf') {
+                await switchBottomTab(reqMode);
+            }
+
             hideLoader();
             setInterval(updateLiveBanner, 30000);
         };

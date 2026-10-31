@@ -288,7 +288,8 @@
     </div>
 
     <script>
-        const GAS_SCHEDULE_URL = "https://mst-schedule-api.studentcouncil-f38.workers.dev";
+        // ลิงก์ไปยังหน้าเว็บระบบตารางเรียนใหม่ (ปรับ Path ได้ตามโครงสร้างโฟลเดอร์จริง)
+        const TIMETABLE_PAGE_URL = "/line_liff/system/all/timetable";
 
         function showLoader() { $('#globalLoader').css('display', 'flex').hide().fadeIn(150); }
         function hideLoader() { $('#globalLoader').fadeOut(150); }
@@ -299,29 +300,10 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        async function fetchSchedule(type) {
+        function fetchSchedule(type) {
             showLoader();
-            try {
-                const res = await fetch(GAS_SCHEDULE_URL);
-                const result = await res.json();
-                if (result.status === 'success') {
-                    const targetUrl = type === 'student' ? result.student : result.teacher;
-                    window.location.href = targetUrl;
-                } else {
-                    throw new Error('Error');
-                }
-            } catch (error) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'ดึงลิงก์ไม่สำเร็จ',
-                    text: 'ระบบจะพาคุณไปยังหน้าเว็บโรงเรียนโดยตรง',
-                    confirmButtonColor: '#4C1D95'
-                }).then(() => {
-                    window.location.href = 'http://www.mst.ac.th/index.php';
-                });
-            } finally {
-                hideLoader();
-            }
+            const targetMode = type === 'teacher' ? 'teacher' : 'student';
+            window.location.href = `${TIMETABLE_PAGE_URL}?mode=${targetMode}`;
         }
 
         function openOsModal(e) { e.preventDefault(); $('#osPopup').removeClass('hidden').addClass('flex'); }
