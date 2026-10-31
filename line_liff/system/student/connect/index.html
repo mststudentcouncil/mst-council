@@ -237,11 +237,11 @@
                     <!-- ปุ่มสลับไปหน้า ครู / บุคลากร และ ศิษย์เก่า แบบเต็มหน้าจอ -->
                     <div class="pt-1 space-y-2">
                         <button type="button" onclick="openStaffBindModal()" class="w-full py-3 px-3 rounded-xl bg-purple-50/90 border border-purple-200 text-xs font-bold text-mstPurple hover:bg-purple-100 transition flex items-center justify-center gap-1.5">
-                            <i class="fa-solid fa-chalkboard-user text-mstPurple"></i> สำหรับ ครู / บุคลากร (ใช้อีเมล name@mst.ac.th)
+                            <i class="fa-solid fa-chalkboard-user text-mstPurple"></i> สำหรับครู / บุคลากร
                         </button>
 
                         <button type="button" onclick="openAlumniBindModal()" class="w-full py-3 px-3 rounded-xl bg-amber-50/90 border border-amber-200 text-xs font-bold text-amber-800 hover:bg-amber-100 transition flex items-center justify-center gap-1.5">
-                            <i class="fa-solid fa-user-graduate text-amber-600"></i> สำหรับรุ่นพี่ศิษย์เก่าทั่วไป (ลงทะเบียนข้อมูลศิษย์เก่า)
+                            <i class="fa-solid fa-user-graduate text-amber-600"></i> สำหรับศิษย์เก่า
                         </button>
                     </div>
                 </div>
@@ -255,7 +255,7 @@
                             </div>
                             <div>
                                 <p class="text-xs font-black text-mstPurple">สำหรับ ครู / บุคลากร</p>
-                                <p class="text-[10px] font-medium text-gray-500">ยืนยันตัวตนด้วยอีเมลโรงเรียน (@mst.ac.th)</p>
+                                <p class="text-[10px] font-medium text-gray-500">ยืนยันตัวตนด้วยอีเมล @mst.ac.th</p>
                             </div>
                         </div>
                         <button type="button" onclick="switchLinkMode('student')" class="text-[11px] font-bold text-gray-500 hover:text-mstPurple bg-white px-2.5 py-1.5 rounded-xl border border-purple-100 shadow-2xs transition">
@@ -348,8 +348,8 @@
                                 <i class="fa-solid fa-user-graduate"></i>
                             </div>
                             <div>
-                                <p class="text-xs font-black text-amber-900">สำหรับรุ่นพี่ศิษย์เก่า ม.ส.ธ.</p>
-                                <p class="text-[10px] font-medium text-amber-700">ลงทะเบียนและยืนยันตัวตนผ่านอีเมลโรงเรียน</p>
+                                <p class="text-xs font-black text-amber-900">สำหรับศิษย์เก่า</p>
+                                <p class="text-[10px] font-medium text-amber-700">ยืนยันตัวตนด้วยอีเมล @mst.ac.th</p>
                             </div>
                         </div>
                         <button type="button" onclick="switchLinkMode('student')" class="text-[11px] font-bold text-gray-600 hover:text-amber-800 bg-white px-2.5 py-1.5 rounded-xl border border-amber-200 shadow-2xs transition">
@@ -379,7 +379,7 @@
                                 <option value="">-- เลือก --</option>
                                 <option value="นาย">นาย</option>
                                 <option value="น.ส.">น.ส.</option>
-                                <option value="นางสาว">นางสาว</option>
+                                <option value="นาง">นาง</option>
                             </select>
                         </div>
                         <div class="col-span-2">
@@ -513,7 +513,7 @@
                         <span id="pass-class" class="font-black text-white text-sm truncate block">-</span>
                     </div>
                     <div class="min-w-0">
-                        <span class="text-[10px] text-purple-200 font-semibold block" id="pass-plan-label">แผนการเรียน/สังกัด</span>
+                        <span class="text-[10px] text-purple-200 font-semibold block" id="pass-plan-label">แผนการเรียน</span>
                         <span id="pass-plan" class="font-bold text-white text-xs truncate block mt-0.5">-</span>
                     </div>
                 </div>
@@ -672,15 +672,15 @@
             if (currentLinkMode === 'staff') {
                 document.getElementById('step1_staff').classList.remove('hidden');
                 if (titleEl) titleEl.innerText = 'เข้าสู่ระบบ ครู / บุคลากร (2FA)';
-                if (subEl) subEl.innerText = 'กรอกข้อมูลและอีเมลโรงเรียน (@mst.ac.th) เพื่อรับรหัส OTP 6 หลัก';
+                if (subEl) subEl.innerText = 'กรอกข้อมูลและอีเมล @mst.ac.th เพื่อรับรหัส OTP 6 หลัก';
             } else if (currentLinkMode === 'alumni') {
                 document.getElementById('step1_alumni').classList.remove('hidden');
                 if (titleEl) titleEl.innerText = 'ลงทะเบียนศิษย์เก่า ม.ส.ธ. (2FA)';
-                if (subEl) subEl.innerText = 'กรอกข้อมูลศิษย์เก่าและอีเมลโรงเรียนเพื่อรับรหัส OTP 6 หลัก';
+                if (subEl) subEl.innerText = 'กรอกข้อมูลศิษย์เก่าและอีเมล @mst.ac.th เพื่อรับรหัส OTP 6 หลัก';
             } else {
                 document.getElementById('step1_email').classList.remove('hidden');
-                if (titleEl) titleEl.innerText = 'ยืนยันตัวตนด้วยอีเมลโรงเรียน';
-                if (subEl) subEl.innerText = 'กรอกรหัสอีเมลโรงเรียนเพื่อรับรหัส OTP 6 หลัก';
+                if (titleEl) titleEl.innerText = 'ยืนยันตัวตนด้วยอีเมล @mst.ac.th ';
+                if (subEl) subEl.innerText = 'กรอกรหัสอีเมล @mst.ac.th เพื่อรับรหัส OTP 6 หลัก';
             }
 
             window.scrollTo({ top: 0, behavior: 'smooth' });
