@@ -270,7 +270,7 @@
                         <div class="flex shadow-xs rounded-2xl overflow-hidden focus-within:ring-2 focus-within:ring-mstPurple border border-gray-300 bg-white">
                             <input id="sw-staff-email" type="text"
                                 class="w-full p-3.5 border-none outline-none text-center font-black text-base text-mstPurple"
-                                placeholder="เช่น name"
+                                placeholder="เช่น teachername"
                                 oninput="this.value = this.value.toLowerCase().replace('@mst.ac.th', '').replace(/[^a-z0-9._-]/g, '')">
                             <div class="bg-purple-50 px-4 flex items-center justify-center border-l border-purple-100 text-mstPurple font-black text-xs shrink-0">
                                 @mst.ac.th
@@ -1037,7 +1037,7 @@
                     return Swal.fire({
                         icon: 'error',
                         title: 'รูปแบบอีเมลไม่ถูกต้อง',
-                        text: 'กรุณากรอกชื่อบัญชีอีเมลโรงเรียนให้ถูกต้อง (เช่น name@mst.ac.th)',
+                        text: 'กรุณากรอกชื่อบัญชีอีเมลโรงเรียนให้ถูกต้อง (เช่น teacher@mst.ac.th)',
                         confirmButtonColor: '#4C1D95',
                         customClass: { popup: 'swal-glass' }
                     });

@@ -439,18 +439,12 @@
                 if (data.status !== 'success' || !data.linkedUser || !data.linkedUser.std_id) {
                     currentUser = null;
                     clearUnifiedViewer();
-                    if (currentScreenId !== 'link-screen') showScreen('link-screen');
-                    return;
-                }
-
-                currentUser = data.linkedUser;
-
-                if (!currentUser || !currentUser.std_id) {
-                    clearAllUnifiedKeys();
                     // หากยังไม่ผูกบัญชีในระบบ Connect ให้เด้งไปหน้า Connect ทันที
                     window.location.replace("https://liff.line.me/2008923798-pVEtog9o");
                     return;
                 }
+
+                currentUser = data.linkedUser;
                 saveUnifiedViewer(currentUser);
 
                 const headerActions = document.getElementById('headerActions');
