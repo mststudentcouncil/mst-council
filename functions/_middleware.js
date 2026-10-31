@@ -83,7 +83,7 @@ export async function onRequest(context) {
     "/files",
     "/feedback",
     "/richmenuline",
-    "/line_liff/system/all/web"
+    "/line_liff/system"
   ];
 
   const isPublicPath = publicPaths.includes(url.pathname);

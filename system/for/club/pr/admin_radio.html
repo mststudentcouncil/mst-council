@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <title>MSTSC Radio Console - ระบบบริหารเสียงตามสายสภานักเรียน</title>
+    <link rel="icon" type="image/webp" href="/logo.webp">
+
+    <link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+    <script>
+        if (typeof tailwind !== 'undefined') {
+            tailwind.config = {
+                theme: {
+                    extend: {
+                        fontFamily: { sans: ['Anuphan', 'sans-serif'] },
+                        colors: {
+                            mstPurple: '#4C1D95',
+                            mstPurpleLight: '#EDE9FE',
+                            mstYellow: '#FBBF24',
+                            mstCream: '#FEFCF5',
+                            mstDark: '#1E1B4B'
+                        }
+                    }
+                }
+            };
+        }
+    </script>
+
+    <style>
+        .hidden { display: none !important; }
+        body { font-family: 'Anuphan', sans-serif; background-color: #FEFCF5; color: #1E293B; min-height: 100vh; margin: 0; }
+        .blob-1 { position: fixed; top: -10%; left: -10%; width: 50vw; height: 50vw; background: rgba(251, 191, 36, 0.2); border-radius: 50%; filter: blur(100px); z-index: -1; pointer-events: none; }
+        .blob-2 { position: fixed; top: 20%; right: -10%; width: 40vw; height: 40vw; background: rgba(76, 29, 149, 0.15); border-radius: 50%; filter: blur(100px); z-index: -1; pointer-events: none; }
+        .glass { background: rgba(255, 255, 255, 0.82); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.85); box-shadow: 0 10px 30px rgba(76, 29, 149, 0.05); }
+        .glass-card { background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(20px); border: 1px solid #E2E8F0; box-shadow: 0 12px 32px rgba(76, 29, 149, 0.06); }
+        .form-input { background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 0.85rem; padding: 0.7rem 0.95rem; font-size: 14px; font-weight: 600; width: 100%; transition: all 0.2s; color: #1E293B; }
+        .form-input:focus { background: #FFFFFF; border-color: #4C1D95; outline: none; box-shadow: 0 0 0 3px rgba(76, 29, 149, 0.12); }
+        .day-check-label { user-select: none; cursor: pointer; transition: all 0.15s ease; }
+        .loader-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+    </style>
+</head>
+<body class="pb-16 antialiased relative">
+
+    <div class="blob-1"></div>
+    <div class="blob-2"></div>
+
+    <!-- Global Loader Overlay -->
+    <div id="globalLoader" class="loader-overlay hidden">
+        <i class="fas fa-circle-notch fa-spin text-5xl text-mstPurple mb-4 drop-shadow-md"></i>
+        <p class="text-base font-bold text-mstPurple" id="loaderText">กำลังตรวจสอบข้อมูล...</p>
+    </div>
+
+    <!-- Navbar -->
+    <nav class="glass sticky top-0 z-40 px-4 sm:px-8 h-20 flex items-center justify-between border-b border-gray-200/80">
+        <div class="flex items-center gap-4">
+            <img src="/logo.webp" alt="Logo" style="width: 48px; height: 48px;" class="h-12 w-12 object-contain drop-shadow-md">
+            <div>
+                <div class="flex items-center gap-2">
+                    <h1 class="font-black text-mstPurple text-lg sm:text-xl leading-tight">STUDENT COUNCIL</h1>
+                    <span class="bg-mstYellow text-mstDark text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase">Smart Radio DJ</span>
+                </div>
+                <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">OF MUANGSURATTHANI SCHOOL</p>
+            </div>
+        </div>
+
+        <div id="authUserBox" class="hidden items-center gap-3">
+            <div class="hidden sm:flex items-center gap-2.5 bg-white px-3.5 py-1.5 rounded-full border border-purple-100 shadow-sm">
+                <img id="djUserPhoto" src="/logo.webp" style="width: 28px; height: 28px;" class="w-7 h-7 rounded-full object-cover border border-purple-200" onerror="this.src='/logo.webp'">
+                <div class="text-left pr-1">
+                    <p id="djUserName" class="text-xs font-black text-gray-900 leading-none">Admin</p>
+                    <p id="djEmailBadge" class="text-[10px] font-bold text-mstPurple mt-0.5">-</p>
+                </div>
+            </div>
+            <button onclick="logoutDj()" class="bg-red-50 hover:bg-red-500 text-red-600 hover:text-white border border-red-200 font-bold px-4 py-2 rounded-full text-xs transition flex items-center gap-1.5">
+                <i class="fa-solid fa-power-off"></i> ออกจากระบบ
+            </button>
+        </div>
+    </nav>
+
+    <!-- Login Overlay -->
+    <div id="loginOverlay" class="fixed inset-0 bg-white/40 z-50 flex items-center justify-center px-4 backdrop-blur-xl">
+        <div class="glass-card p-8 md:p-12 rounded-[3rem] w-full max-w-md text-center relative overflow-hidden">
+            <img src="/logo.webp" style="width: 80px; height: 80px;" class="w-20 h-20 mx-auto mb-4 object-contain drop-shadow-md" alt="MSTSC Logo">
+            <h2 class="text-2xl font-black text-mstDark mb-1">MSTSC Smart Radio</h2>
+            <p class="text-xs font-bold text-mstPurple bg-purple-50 inline-block px-4 py-1.5 rounded-full border border-purple-100 mb-8">
+                แผงควบคุมเสียงตามสายสำหรับฝ่ายประชาสัมพันธ์ และสภานักเรียน
+            </p>
+
+            <div class="flex justify-center mb-4">
+                <div id="g_id_onload"
+                     data-client_id="1055496557-rm1petnl1gtd6c1ed01q9o6k880ik2ta.apps.googleusercontent.com"
+                     data-callback="handleDjGoogleLogin"
+                     data-auto_prompt="false"></div>
+                <div class="g_id_signin" data-type="standard" data-shape="pill" data-theme="filled_blue" data-text="signin_with" data-size="large" data-logo_alignment="left"></div>
+            </div>
+
+            <p class="text-xs text-center text-gray-500 font-bold mt-4 flex items-center justify-center gap-1.5">
+                <i class="fa-solid fa-lock text-mstYellow"></i> เข้าสู่ระบบด้วยอีเมลที่ได้รับสิทธิ์จากสภานักเรียน
+            </p>
+        </div>
+    </div>
+
+    <!-- Main Console -->
+    <main id="consoleSection" class="hidden max-w-7xl mx-auto px-4 sm:px-6 pt-6 space-y-6">
+
+        <!-- แถบสถิติภาพรวม -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="glass-card rounded-2xl p-5 flex items-center gap-4">
+                <div class="w-12 h-12 rounded-2xl bg-purple-100 text-mstPurple flex items-center justify-center text-xl shrink-0">
+                    <i class="fa-solid fa-tower-broadcast"></i>
+                </div>
+                <div>
+                    <p class="text-xs font-bold text-gray-400 uppercase">สถานะสถานี</p>
+                    <p id="statStationState" class="text-sm font-black text-gray-800">-</p>
+                </div>
+            </div>
+            <div class="glass-card rounded-2xl p-5 flex items-center gap-4">
+                <div class="w-12 h-12 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center text-xl shrink-0">
+                    <i class="fa-solid fa-compact-disc"></i>
+                </div>
+                <div>
+                    <p class="text-xs font-bold text-gray-400 uppercase">คิวเพลงวันนี้</p>
+                    <p id="statQueueQuota" class="text-sm font-black text-mstPurple">0 / 20 เพลง</p>
+                </div>
+            </div>
+            <div class="glass-card rounded-2xl p-5 flex items-center gap-4">
+                <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-xl shrink-0">
+                    <i class="fa-solid fa-user-check"></i>
+                </div>
+                <div>
+                    <p class="text-xs font-bold text-gray-400 uppercase">ฐานข้อมูลนักเรียน ม.1-ม.6</p>
+                    <p id="statStudentDbCount" class="text-sm font-black text-emerald-700">0 คน</p>
+                </div>
+            </div>
+            <div class="glass-card rounded-2xl p-5 flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-bold text-gray-400 uppercase">อัปเดตคิวสด</p>
+                    <p class="text-xs font-bold text-gray-600">ซิงค์อัตโนมัติทุก 10 วินาที</p>
+                </div>
+                <button onclick="fetchConsoleData()" class="bg-mstPurpleLight hover:bg-purple-200 text-mstPurple px-4 py-2.5 rounded-xl text-xs font-bold transition">
+                    <i class="fa-solid fa-rotate-right mr-1"></i> รีเฟรช
+                </button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+            <!-- คอลัมน์ซ้าย -->
+            <div class="lg:col-span-5 space-y-6">
+
+                <!-- 1. เครื่องเล่นเพลงปัจจุบัน -->
+                <div class="glass-card rounded-[2rem] p-6 space-y-4 border-2 border-purple-200">
+                    <div class="flex items-center justify-between border-b border-gray-100 pb-3">
+                        <span class="text-sm font-black text-mstPurple flex items-center gap-2">
+                            <i class="fa-solid fa-circle-play text-lg"></i> เพลงที่กำลังออกอากาศ (Now Playing)
+                        </span>
+                        <span class="text-[10px] font-black bg-red-500 text-white px-3 py-1 rounded-full tracking-wider">
+                            <i class="fa-solid fa-circle text-[7px] mr-1 animate-ping"></i>ON AIR
+                        </span>
+                    </div>
+
+                    <div id="playerEmbedContainer" class="w-full aspect-video bg-mstDark rounded-2xl overflow-hidden flex items-center justify-center text-gray-300 text-xs font-bold p-4 text-center shadow-inner">
+                        <span>กดปุ่ม "เริ่มเปิดเพลงนี้" จากคิวด้านขวาเพื่อเปิดเพลงตามเวอร์ชันที่นักเรียนเลือก</span>
+                    </div>
+
+                    <div id="nowPlayingDetailBox" class="space-y-3">
+                        <p class="text-xs font-bold text-gray-400 text-center py-2">ยังไม่มีเพลงที่กำลังออกอากาศ</p>
+                    </div>
+                </div>
+
+                <!-- 2. ตั้งค่าเวลาเปิด-ปิดสถานีและสิทธิ์ดีเจ -->
+                <div class="glass-card rounded-[2rem] p-6 space-y-5">
+                    <div class="flex items-center gap-3 border-b border-gray-100 pb-3">
+                        <div class="w-10 h-10 rounded-xl bg-mstPurpleLight text-mstPurple flex items-center justify-center text-lg">
+                            <i class="fa-solid fa-sliders"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-base font-black text-gray-900">ตั้งค่าเวลาเปิด-ปิดสถานีและสิทธิ์ดีเจ</h3>
+                            <p class="text-xs font-medium text-gray-500">คลิกเลือกวัน เวลา และรายชื่อผู้ดูแลได้ทันที</p>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="text-xs font-bold text-gray-700 block mb-2">
+                            <i class="fa-solid fa-power-off text-mstPurple mr-1"></i> โหมดการทำงานของสถานี
+                        </label>
+                        <select id="cfgOverride" class="form-input">
+                            <option value="auto">เปิด-ปิดอัตโนมัติตามวันและเวลาที่ตั้งไว้</option>
+                            <option value="force_open">บังคับเปิดรับเพลงทันที (เปิดพิเศษนอกเวลา)</option>
+                            <option value="force_closed">ปิดรับเพลงชั่วคราว (งดเสียงตามสาย / มีกิจกรรมสอบ)</option>
+                        </select>
+                    </div>
+
+                    <div class="bg-gray-50/80 p-4 rounded-2xl border border-gray-200/80 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <label class="text-xs font-bold text-gray-700">
+                                <i class="fa-solid fa-calendar-check text-mstPurple mr-1"></i> วันเปิดรับคำขอเพลง
+                            </label>
+                            <div class="flex gap-1.5">
+                                <button type="button" onclick="selectPresetDays([1,2,3,4,5])" class="text-[10px] font-bold bg-purple-100 hover:bg-purple-200 text-mstPurple px-2.5 py-1 rounded-lg transition">
+                                    จันทร์ - ศุกร์
+                                </button>
+                                <button type="button" onclick="selectPresetDays([1,2,3,4,5,6,0])" class="text-[10px] font-bold bg-gray-200 hover:bg-gray-300 text-gray-700 px-2.5 py-1 rounded-lg transition">
+                                    ทุกวัน
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2" id="daysCheckboxContainer">
+                            <label class="day-check-label flex items-center gap-2 p-2.5 rounded-xl border border-gray-200 bg-white text-xs font-bold text-gray-700">
+                                <input type="checkbox" value="1" class="day-chk w-4 h-4 accent-mstPurple rounded"> วันจันทร์
+                            </label>
+                            <label class="day-check-label flex items-center gap-2 p-2.5 rounded-xl border border-gray-200 bg-white text-xs font-bold text-gray-700">
+                                <input type="checkbox" value="2" class="day-chk w-4 h-4 accent-mstPurple rounded"> วันอังคาร
+                            </label>
+                            <label class="day-check-label flex items-center gap-2 p-2.5 rounded-xl border border-gray-200 bg-white text-xs font-bold text-gray-700">
+                                <input type="checkbox" value="3" class="day-chk w-4 h-4 accent-mstPurple rounded"> วันพุธ
+                            </label>
+                            <label class="day-check-label flex items-center gap-2 p-2.5 rounded-xl border border-gray-200 bg-white text-xs font-bold text-gray-700">
+                                <input type="checkbox" value="4" class="day-chk w-4 h-4 accent-mstPurple rounded"> วันพฤหัสบดี
+                            </label>
+                            <label class="day-check-label flex items-center gap-2 p-2.5 rounded-xl border border-gray-200 bg-white text-xs font-bold text-gray-700">
+                                <input type="checkbox" value="5" class="day-chk w-4 h-4 accent-mstPurple rounded"> วันศุกร์
+                            </label>
+                            <label class="day-check-label flex items-center gap-2 p-2.5 rounded-xl border border-gray-200 bg-white text-xs font-bold text-gray-700">
+                                <input type="checkbox" value="6" class="day-chk w-4 h-4 accent-mstPurple rounded"> วันเสาร์
+                            </label>
+                            <label class="day-check-label flex items-center gap-2 p-2.5 rounded-xl border border-gray-200 bg-white text-xs font-bold text-gray-700">
+                                <input type="checkbox" value="0" class="day-chk w-4 h-4 accent-mstPurple rounded"> วันอาทิตย์
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-3">
+                        <div>
+                            <label class="text-xs font-bold text-gray-700 block mb-1.5">เวลาเปิดรับ</label>
+                            <input type="time" id="cfgOpenTime" class="form-input text-center">
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold text-gray-700 block mb-1.5">เวลาปิดรับ</label>
+                            <input type="time" id="cfgCloseTime" class="form-input text-center">
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold text-gray-700 block mb-1.5">โควตา (เพลง/วัน)</label>
+                            <input type="number" id="cfgQuota" min="1" max="100" class="form-input text-center">
+                        </div>
+                    </div>
+
+                    <div class="bg-purple-50/50 p-4 rounded-2xl border border-purple-100 space-y-2.5">
+                        <label class="text-xs font-bold text-gray-800 block">
+                            <i class="fa-solid fa-envelope-circle-check text-mstPurple mr-1"></i> อีเมลที่มีสิทธิ์เข้าหน้าดีเจบนคอมพิวเตอร์
+                            <span class="block text-[11px] font-medium text-gray-500 mt-0.5">พิมพ์อีเมลแล้วกดปุ่ม "+ เพิ่ม" หรือพิมพ์แยกบรรทัดละ 1 อีเมล</span>
+                        </label>
+                        <div class="flex gap-2">
+                            <input type="email" id="addEmailInput" onkeydown="if(event.key==='Enter'){event.preventDefault();addEmailTag();}" placeholder="พิมพ์อีเมล เช่น 7012345@mst.ac.th" class="form-input text-xs bg-white py-2">
+                            <button type="button" onclick="addEmailTag()" class="bg-mstPurple text-white font-bold px-4 py-2 rounded-xl text-xs shrink-0 hover:bg-purple-800 transition">
+                                <i class="fa-solid fa-plus mr-1"></i> เพิ่ม
+                            </button>
+                        </div>
+                        <div id="emailTagsContainer" class="flex flex-wrap gap-1.5 pt-1"></div>
+                        <textarea id="cfgDjEmails" rows="3" oninput="syncEmailTagsFromTextarea()" class="form-input text-xs bg-white font-mono leading-relaxed" placeholder="พิมพ์บรรทัดละ 1 อีเมล เช่น&#10;studentcouncil@mst.ac.th&#10;7012345@mst.ac.th"></textarea>
+                    </div>
+
+                    <div class="bg-amber-50/50 p-4 rounded-2xl border border-amber-200/70 space-y-2.5">
+                        <label class="text-xs font-bold text-gray-800 block">
+                            <i class="fa-solid fa-id-card text-amber-600 mr-1"></i> รหัสนักเรียนผู้มีสิทธิ์ / ฝ่ายประชาสัมพันธ์ (5 หลัก)
+                            <span class="block text-[11px] font-medium text-gray-500 mt-0.5">พิมพ์รหัสนักเรียนแล้วกด "+ เพิ่ม" หรือพิมพ์บรรทัดละ 1 รหัส</span>
+                        </label>
+                        <div class="flex gap-2">
+                            <input type="tel" id="addStdIdInput" maxlength="5" onkeydown="if(event.key==='Enter'){event.preventDefault();addStdIdTag();}" placeholder="รหัสนักเรียน 5 หลัก เช่น 12345" class="form-input text-xs bg-white py-2">
+                            <button type="button" onclick="addStdIdTag()" class="bg-amber-500 text-white font-bold px-4 py-2 rounded-xl text-xs shrink-0 hover:bg-amber-600 transition">
+                                <i class="fa-solid fa-plus mr-1"></i> เพิ่ม
+                            </button>
+                        </div>
+                        <div id="stdIdTagsContainer" class="flex flex-wrap gap-1.5 pt-1"></div>
+                        <textarea id="cfgDjIds" rows="2" oninput="syncStdIdTagsFromTextarea()" class="form-input text-xs bg-white font-mono leading-relaxed" placeholder="พิมพ์บรรทัดละ 1 รหัส เช่น&#10;12345"></textarea>
+                    </div>
+
+                    <button onclick="saveStationConfig()" class="w-full bg-gradient-to-r from-mstPurple to-purple-800 hover:shadow-lg text-white font-bold py-3.5 rounded-2xl text-sm shadow-md transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-floppy-disk"></i> บันทึกการตั้งค่าสถานี
+                    </button>
+                </div>
+
+                <!-- 3. อัปเดตฐานข้อมูลนักเรียน ม.1-ม.6 -->
+                <div class="glass-card rounded-[2rem] p-6 space-y-3">
+                    <h3 class="text-sm font-black text-mstPurple flex items-center gap-2">
+                        <i class="fa-solid fa-database"></i> ซิงค์ฐานข้อมูลรายชื่อนักเรียน (ม.1 - ม.6)
+                    </h3>
+                    <p class="text-xs text-gray-500 leading-relaxed">
+                        ดึงไฟล์จากเมนู <b>"รายชื่อนักเรียน 1/2569"</b> บนหน้าเว็บโรงเรียน หรือเลือกไฟล์ Excel (<code class="bg-gray-100 px-1.5 py-0.5 rounded">.xlsx</code>) ระบบจะอ่านเฉพาะชีต <b>m.1 ถึง m.6</b> ที่แสดงผลและข้ามชีตซ่อนอัตโนมัติ
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-2.5 pt-1">
+                        <button onclick="syncFromSchoolWeb()" class="flex-1 bg-mstPurple hover:bg-purple-800 text-white font-bold py-3 px-3 rounded-xl text-xs shadow-sm transition flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-globe"></i> ดึงจากเว็บ mst.ac.th
+                        </button>
+                        <label class="flex-1 bg-mstYellow hover:bg-amber-400 text-mstDark font-bold py-3 px-3 rounded-xl text-xs shadow-sm text-center cursor-pointer transition flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-file-excel"></i> อัปโหลดไฟล์ .xlsx
+                            <input type="file" accept=".xlsx,.xls" onchange="uploadExcelFile(this)" class="hidden">
+                        </label>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- คอลัมน์ขวา -->
+            <div class="lg:col-span-7 space-y-6">
+
+                <div class="glass-card rounded-[2rem] p-6 space-y-4">
+                    <div class="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100 pb-4">
+                        <div>
+                            <h2 class="text-lg font-black text-gray-900 flex items-center gap-2">
+                                <i class="fa-solid fa-list-ol text-mstPurple"></i> รายการคิวเพลงรอออกอากาศ (Up Next)
+                            </h2>
+                            <p class="text-xs text-gray-500 mt-0.5">เรียงตามจำนวนหัวใจโหวต • กดปุ่ม "ลิงก์ตรง" เพื่อเปิด YouTube/Spotify ต้นฉบับ</p>
+                        </div>
+                        <button onclick="clearTodayQueue()" class="bg-red-50 hover:bg-red-500 text-red-600 hover:text-white border border-red-200 px-4 py-2 rounded-xl text-xs font-bold transition">
+                            <i class="fa-solid fa-trash-can mr-1"></i> ล้างคิววันนี้
+                        </button>
+                    </div>
+
+                    <div id="djUpNextList" class="space-y-3"></div>
+                </div>
+
+                <div class="glass-card rounded-[2rem] p-6 space-y-4">
+                    <h3 class="text-sm font-black text-gray-700 flex items-center gap-2">
+                        <i class="fa-solid fa-clock-rotate-left text-mstPurple"></i> ประวัติเพลงที่เปิดแล้ววันนี้ (Played History)
+                    </h3>
+                    <div id="djPlayedList" class="space-y-2.5"></div>
+                </div>
+
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        const API_RADIO_URL = "https://admission-backend-592123078141.asia-southeast1.run.app/api/radio";
+        const ADMIN_TOKEN_KEY = "mstsc_portal_admin_id_token";
+        const ADMIN_INFO_KEY = "mstsc_portal_admin_info";
+
+        let djEmail = "";
+        let currentPlayingVideoId = "";
+        let refreshTimer = null;
+
+        function setLoader(text) {
+            document.getElementById('loaderText').innerText = text || 'กำลังตรวจสอบข้อมูล...';
+            document.getElementById('globalLoader').classList.remove('hidden');
+        }
+
+        function hideLoader() {
+            document.getElementById('globalLoader').classList.add('hidden');
+        }
+
+        function parseJwt(token) {
+            const base64Url = token.split('.')[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            return JSON.parse(decodeURIComponent(window.atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')));
+        }
+
+        async function callRadioApi(payload) {
+            const idToken = sessionStorage.getItem(ADMIN_TOKEN_KEY) || "";
+            const res = await fetch(`${API_RADIO_URL}?t=${Date.now()}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': idToken ? `Bearer ${idToken}` : ''
+                },
+                body: JSON.stringify({
+                    ...payload,
+                    email: djEmail,
+                    idToken: idToken
+                })
+            });
+            return await res.json();
+        }
+
+        window.openPopupMiniPlayer = function(url) {
+            window.open(url, 'MSTSC_Radio_Player', 'width=960,height=580,menubar=no,toolbar=no,location=no,status=no');
+        };
+
+        function setDaysCheckboxes(openDaysStr) {
+            const arr = String(openDaysStr || "1,2,3,4,5").split(/[\s,]+/).map(s => s.trim()).filter(Boolean);
+            document.querySelectorAll('.day-chk').forEach(chk => {
+                chk.checked = arr.includes(chk.value);
+                updateDayLabelStyle(chk);
+                chk.onchange = () => updateDayLabelStyle(chk);
+            });
+        }
+
+        function updateDayLabelStyle(chk) {
+            const label = chk.closest('.day-check-label');
+            if (!label) return;
+            if (chk.checked) {
+                label.className = "day-check-label flex items-center gap-2 p-2.5 rounded-xl border-2 border-mstPurple bg-purple-50 text-xs font-black text-mstPurple shadow-sm";
+            } else {
+                label.className = "day-check-label flex items-center gap-2 p-2.5 rounded-xl border border-gray-200 bg-white text-xs font-bold text-gray-500";
+            }
+        }
+
+        window.selectPresetDays = function(dayNums) {
+            const strList = dayNums.map(String);
+            document.querySelectorAll('.day-chk').forEach(chk => {
+                chk.checked = strList.includes(chk.value);
+                updateDayLabelStyle(chk);
+            });
+        };
+
+        function getSelectedOpenDaysString() {
+            const checked = [];
+            document.querySelectorAll('.day-chk:checked').forEach(chk => checked.push(chk.value));
+            return checked.length > 0 ? checked.join(',') : "1,2,3,4,5";
+        }
+
+        function parseMultiLineItems(rawStr) {
+            return [...new Set(String(rawStr || "").split(/[\n,;]+/).map(s => s.trim()).filter(Boolean))];
+        }
+
+        window.syncEmailTagsFromTextarea = function() {
+            const items = parseMultiLineItems(document.getElementById('cfgDjEmails').value);
+            const box = document.getElementById('emailTagsContainer');
+            box.innerHTML = items.map(email => `
+                <span class="inline-flex items-center gap-1.5 bg-white text-mstPurple border border-purple-200 px-3 py-1 rounded-full text-xs font-bold shadow-xs">
+                    <i class="fa-regular fa-envelope text-[10px]"></i> ${email}
+                    <button type="button" onclick="removeEmailTag('${email}')" class="text-gray-400 hover:text-red-500 ml-0.5"><i class="fa-solid fa-circle-xmark"></i></button>
+                </span>
+            `).join('');
+        };
+
+        window.addEmailTag = function() {
+            const input = document.getElementById('addEmailInput');
+            const val = input.value.trim().toLowerCase();
+            if (!val || !val.includes('@')) return;
+            const current = parseMultiLineItems(document.getElementById('cfgDjEmails').value);
+            if (!current.includes(val)) current.push(val);
+            document.getElementById('cfgDjEmails').value = current.join('\n');
+            input.value = '';
+            syncEmailTagsFromTextarea();
+        };
+
+        window.removeEmailTag = function(targetEmail) {
+            const current = parseMultiLineItems(document.getElementById('cfgDjEmails').value).filter(e => e !== targetEmail);
+            document.getElementById('cfgDjEmails').value = current.join('\n');
+            syncEmailTagsFromTextarea();
+        };
+
+        window.syncStdIdTagsFromTextarea = function() {
+            const items = parseMultiLineItems(document.getElementById('cfgDjIds').value);
+            const box = document.getElementById('stdIdTagsContainer');
+            box.innerHTML = items.map(id => `
+                <span class="inline-flex items-center gap-1.5 bg-white text-amber-800 border border-amber-300 px-3 py-1 rounded-full text-xs font-bold shadow-xs">
+                    <i class="fa-solid fa-user-tag text-[10px]"></i> ${id}
+                    <button type="button" onclick="removeStdIdTag('${id}')" class="text-gray-400 hover:text-red-500 ml-0.5"><i class="fa-solid fa-circle-xmark"></i></button>
+                </span>
+            `).join('');
+        };
+
+        window.addStdIdTag = function() {
+            const input = document.getElementById('addStdIdInput');
+            const val = input.value.replace(/\D/g, '').trim();
+            if (val.length !== 5) return;
+            const current = parseMultiLineItems(document.getElementById('cfgDjIds').value);
+            if (!current.includes(val)) current.push(val);
+            document.getElementById('cfgDjIds').value = current.join('\n');
+            input.value = '';
+            syncStdIdTagsFromTextarea();
+        };
+
+        window.removeStdIdTag = function(targetId) {
+            const current = parseMultiLineItems(document.getElementById('cfgDjIds').value).filter(id => id !== targetId);
+            document.getElementById('cfgDjIds').value = current.join('\n');
+            syncStdIdTagsFromTextarea();
+        };
+
+        window.handleDjGoogleLogin = async function(response) {
+            try {
+                const idToken = response.credential;
+                const payload = parseJwt(idToken);
+                sessionStorage.setItem(ADMIN_TOKEN_KEY, idToken);
+                sessionStorage.setItem(ADMIN_INFO_KEY, JSON.stringify({
+                    email: payload.email,
+                    name: payload.name,
+                    picture: payload.picture
+                }));
+                await verifyAndLoadConsole(payload.email, payload.name, payload.picture, true);
+            } catch (e) {
+                Swal.fire('ข้อผิดพลาด', 'ไม่สามารถเข้าสู่ระบบด้วย Google ได้', 'error');
+            }
+        };
+
+        window.logoutDj = function() {
+            Swal.fire({
+                title: 'ออกจากระบบ?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                confirmButtonText: 'ออกจากระบบ',
+                cancelButtonText: 'ยกเลิก'
+            }).then(r => {
+                if (r.isConfirmed) {
+                    sessionStorage.removeItem(ADMIN_TOKEN_KEY);
+                    sessionStorage.removeItem(ADMIN_INFO_KEY);
+                    if (refreshTimer) clearInterval(refreshTimer);
+                    location.reload();
+                }
+            });
+        };
+
+        async function verifyAndLoadConsole(email, name, picture, isFirstLoad = false) {
+            djEmail = String(email || '').trim().toLowerCase();
+            if (isFirstLoad) {
+                setLoader('กำลังตรวจสอบสิทธิ์ผู้ดูแลระบบ...');
+            }
+
+            try {
+                const data = await callRadioApi({ action: 'initRadio', isPcAdminLogin: true });
+                if (isFirstLoad) hideLoader();
+
+                if (data.status !== 'success') {
+                    sessionStorage.removeItem(ADMIN_TOKEN_KEY);
+                    sessionStorage.removeItem(ADMIN_INFO_KEY);
+                    Swal.fire('ปฏิเสธการเข้าถึง', data.message || 'บัญชีอีเมลนี้ไม่มีสิทธิ์เข้าใช้งานแผงควบคุมดีเจ', 'error');
+                    return;
+                }
+
+                document.getElementById('loginOverlay').classList.add('hidden');
+                document.getElementById('consoleSection').classList.remove('hidden');
+                const authBox = document.getElementById('authUserBox');
+                authBox.classList.remove('hidden');
+                authBox.classList.add('flex');
+
+                document.getElementById('djUserName').innerText = name || djEmail.split('@')[0];
+                document.getElementById('djEmailBadge').innerText = djEmail;
+                if (picture) document.getElementById('djUserPhoto').src = picture;
+
+                if (isFirstLoad && data.adminSettings) {
+                    const s = data.adminSettings;
+                    document.getElementById('cfgOverride').value = s.manualOverride || 'auto';
+                    document.getElementById('cfgOpenTime').value = s.openTime || '07:30';
+                    document.getElementById('cfgCloseTime').value = s.closeTime || '12:30';
+                    document.getElementById('cfgQuota').value = s.dailyQuota || 20;
+
+                    setDaysCheckboxes(s.openDays || '1,2,3,4,5');
+
+                    const emailList = parseMultiLineItems(s.djEmails || 'studentcouncil@mst.ac.th,tassanee@mst.ac.th,7012345@mst.ac.th');
+                    document.getElementById('cfgDjEmails').value = emailList.join('\n');
+                    syncEmailTagsFromTextarea();
+
+                    const stdList = parseMultiLineItems(s.djStdIds || '12345');
+                    document.getElementById('cfgDjIds').value = stdList.join('\n');
+                    syncStdIdTagsFromTextarea();
+
+                    if (!refreshTimer) {
+                        refreshTimer = setInterval(() => {
+                            if (!document.hidden) {
+                                verifyAndLoadConsole(djEmail, name, picture, false);
+                            }
+                        }, 10000);
+                    }
+                }
+
+                renderDashboard(data);
+            } catch (err) {
+                if (isFirstLoad) hideLoader();
+                console.error("Load Console Error:", err);
+            }
+        }
+
+        window.fetchConsoleData = function() {
+            const savedInfo = JSON.parse(sessionStorage.getItem(ADMIN_INFO_KEY) || "null");
+            if (savedInfo) {
+                verifyAndLoadConsole(savedInfo.email, savedInfo.name, savedInfo.picture, false);
+            }
+        };
+
+        function renderDashboard(data) {
+            const st = data.radioStatus;
+            document.getElementById('statStationState').innerHTML = st.isOpen
+                ? `<span class="text-emerald-600"><i class="fa-solid fa-circle-check mr-1"></i>เปิดรับเพลง (${st.openTime}-${st.closeTime})</span>`
+                : `<span class="text-rose-600"><i class="fa-solid fa-lock mr-1"></i>ปิดรับเพลง</span>`;
+            document.getElementById('statQueueQuota').innerText = `${st.currentCount} / ${st.dailyQuota} เพลง`;
+            document.getElementById('statStudentDbCount').innerText = `${(data.studentsCountInDb || 0).toLocaleString()} คน`;
+
+            const np = data.timeline.nowPlaying;
+            const npDetail = document.getElementById('nowPlayingDetailBox');
+            const playerBox = document.getElementById('playerEmbedContainer');
+
+            if (np) {
+                if (np.videoId && currentPlayingVideoId !== np.videoId) {
+                    currentPlayingVideoId = np.videoId;
+                    const originParam = encodeURIComponent(window.location.origin);
+                    playerBox.innerHTML = `<iframe class="w-full h-full border-0" referrerpolicy="strict-origin-when-cross-origin" src="https://www.youtube.com/embed/${np.videoId}?autoplay=1&rel=0&enablejsapi=1&origin=${originParam}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>`;
+                } else if (!np.videoId) {
+                    currentPlayingVideoId = "";
+                    playerBox.innerHTML = `
+                        <div class="p-6 text-center space-y-3">
+                            <p class="text-white font-bold text-xs">เพลงนี้เป็นลิงก์ตรงภายนอก (Spotify / YouTube)</p>
+                            <button onclick="openPopupMiniPlayer('${np.externalUrl}')" class="inline-flex items-center gap-2 bg-mstYellow hover:bg-amber-400 text-mstDark px-4 py-2.5 rounded-xl text-xs font-black shadow-md transition">
+                                <i class="fa-solid fa-window-restore"></i> เปิดหน้าต่างเครื่องเล่นเพลง
+                            </button>
+                        </div>`;
+                }
+
+                npDetail.innerHTML = `
+                    <div class="bg-purple-50/90 p-4 rounded-2xl border border-purple-200 space-y-2.5">
+                        <div class="flex flex-wrap items-start justify-between gap-2">
+                            <div class="min-w-0 flex-1">
+                                <h4 class="font-black text-base text-gray-900 leading-snug break-words">${np.title}</h4>
+                                <p class="text-xs font-bold text-mstPurple mt-0.5">${np.artist}</p>
+                            </div>
+                            <div class="flex gap-1.5 shrink-0">
+                                <button onclick="openPopupMiniPlayer('${np.externalUrl}')" class="bg-mstPurple hover:bg-purple-800 text-white font-bold px-3 py-2 rounded-xl text-xs flex items-center gap-1.5 shadow-xs transition" title="เปิดป๊อปอัปแยกกรณีคลิปติดลิขสิทธิ์">
+                                    <i class="fa-solid fa-window-restore"></i> ป๊อปอัป
+                                </button>
+                                <a href="${np.externalUrl}" target="_blank" rel="noopener noreferrer" class="bg-red-600 hover:bg-red-700 text-white font-bold px-3 py-2 rounded-xl text-xs flex items-center gap-1.5 shadow-xs transition">
+                                    <i class="fa-solid fa-arrow-up-right-from-square"></i> แท็บใหม่
+                                </a>
+                            </div>
+                        </div>
+                        <div class="bg-white p-3 rounded-xl border border-purple-100 text-xs">
+                            <p class="font-semibold text-gray-700 break-words"><i class="fa-solid fa-comment-dots text-mstPurple mr-1"></i> ข้อความฝากบอก: "${np.message}"</p>
+                            <p class="text-[11px] font-bold text-gray-500 mt-1"><i class="fa-solid fa-id-badge mr-1"></i> ผู้ขอเพลง: ${np.requesterName}</p>
+                        </div>
+                        <button onclick="djUpdateStatus('${np.id}', 'PLAYED')" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl text-xs shadow-sm transition">
+                            <i class="fa-solid fa-circle-check mr-1"></i> เปิดเพลงนี้จบแล้ว (เลื่อนคิวถัดไป)
+                        </button>
+                    </div>
+                `;
+            } else {
+                currentPlayingVideoId = "";
+                playerBox.innerHTML = `<span>กดปุ่ม "เริ่มเปิดเพลงนี้" จากรายการคิวด้านขวา</span>`;
+                npDetail.innerHTML = `<p class="text-xs font-bold text-gray-400 text-center py-2">ยังไม่มีเพลงที่กำลังออกอากาศในขณะนี้</p>`;
+            }
+
+            const upList = data.timeline.upNext || [];
+            const upContainer = document.getElementById('djUpNextList');
+            if (upList.length === 0) {
+                upContainer.innerHTML = `<div class="p-10 text-center text-gray-400 font-bold text-sm border-2 border-dashed border-gray-200 rounded-2xl"><i class="fa-solid fa-inbox text-2xl mb-2 block"></i>ยังไม่มีคิวเพลงที่รอเปิดในขณะนี้</div>`;
+            } else {
+                upContainer.innerHTML = upList.map(item => `
+                    <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 hover:border-mstPurple transition">
+                        <div class="flex items-center gap-3.5 min-w-0 flex-1">
+                            <div class="w-10 h-10 rounded-xl bg-mstPurpleLight text-mstPurple font-black text-sm flex items-center justify-center shrink-0">
+                                #${item.queueOrder}
+                            </div>
+                            <img src="${item.albumArt || '/logo.webp'}" class="w-14 h-14 rounded-xl object-cover border border-gray-200 shrink-0 bg-gray-50" onerror="this.src='/logo.webp'">
+                            <div class="min-w-0 flex-1">
+                                <h4 class="font-extrabold text-sm text-gray-900 truncate">${item.title}</h4>
+                                <p class="text-xs font-bold text-mstPurple truncate">${item.artist} • <span class="text-pink-600"><i class="fa-solid fa-heart mr-0.5"></i> ${item.upvotesCount} โหวต</span></p>
+                                <p class="text-xs text-gray-600 mt-1 break-words"><i class="fa-solid fa-quote-left text-gray-400 mr-1"></i>${item.message}</p>
+                                <p class="text-[11px] font-bold text-gray-400 mt-0.5"><i class="fa-solid fa-user mr-1"></i>ผู้ขอ: ${item.requesterName}</p>
+                            </div>
+                        </div>
+                        <div class="flex flex-wrap sm:flex-nowrap items-center gap-2 shrink-0 w-full sm:w-auto">
+                            <button onclick="djPlayNow('${item.id}')" class="flex-1 sm:flex-initial bg-mstPurple hover:bg-purple-800 text-white font-bold px-3.5 py-2.5 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-sm transition">
+                                <i class="fa-solid fa-play"></i> เริ่มเปิดเพลงนี้
+                            </button>
+                            <a href="${item.externalUrl}" target="_blank" rel="noopener noreferrer" title="เปิดลิงก์ต้นฉบับตามเวอร์ชันที่นักเรียนขอ" class="bg-mstYellow hover:bg-amber-400 text-mstDark font-bold px-3 py-2.5 rounded-xl text-xs flex items-center gap-1 transition">
+                                <i class="fa-solid fa-arrow-up-right-from-square"></i> ลิงก์ตรง
+                            </a>
+                            <button onclick="djRejectSong('${item.id}')" title="ปฏิเสธเพลงพร้อมส่งเหตุผลเข้า LINE นักเรียน" class="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 font-bold px-3 py-2.5 rounded-xl text-xs transition">
+                                <i class="fa-solid fa-ban"></i>
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            const played = data.timeline.playedList || [];
+            const playedBox = document.getElementById('djPlayedList');
+            if (played.length === 0) {
+                playedBox.innerHTML = `<p class="text-xs text-gray-400 font-bold text-center py-4">ยังไม่มีประวัติเพลงที่เปิดจบในวันนี้</p>`;
+            } else {
+                playedBox.innerHTML = played.map(item => `
+                    <div class="bg-gray-50 p-3 rounded-xl border border-gray-200 flex items-center justify-between text-xs">
+                        <div class="flex items-center gap-3 min-w-0">
+                            <img src="${item.albumArt || '/logo.webp'}" class="w-10 h-10 rounded-lg object-cover bg-white" onerror="this.src='/logo.webp'">
+                            <div class="min-w-0">
+                                <p class="font-bold text-gray-800 truncate">${item.title}</p>
+                                <p class="text-gray-500 truncate">${item.artist} • ขอโดย ${item.requesterName}</p>
+                            </div>
+                        </div>
+                        <a href="${item.externalUrl}" target="_blank" rel="noopener noreferrer" class="text-mstPurple font-bold hover:underline shrink-0 ml-2">
+                            <i class="fa-solid fa-arrow-up-right-from-square mr-1"></i>ดูลิงก์เดิม
+                        </a>
+                    </div>
+                `).join('');
+            }
+        }
+
+        window.djPlayNow = async function(queueId) {
+            setLoader('กำลังสลับเพลงออกอากาศ...');
+            await callRadioApi({ action: 'djUpdateQueueStatus', queueId, newStatus: 'PLAYING' });
+            hideLoader();
+            fetchConsoleData();
+        };
+
+        window.djUpdateStatus = async function(queueId, newStatus) {
+            setLoader('กำลังอัปเดตสถานะคิวเพลง...');
+            await callRadioApi({ action: 'djUpdateQueueStatus', queueId, newStatus });
+            hideLoader();
+            fetchConsoleData();
+        };
+
+        window.djRejectSong = async function(queueId) {
+            const { value: reason } = await Swal.fire({
+                title: 'ระบุเหตุผลที่ปฏิเสธเพลง',
+                input: 'text',
+                inputPlaceholder: 'เช่น เนื้อหาไม่เหมาะสม หรือเป็นเพลงนอกระเบียบเสียงตามสาย',
+                showCancelButton: true,
+                confirmButtonText: 'ยืนยันปฏิเสธเพลง',
+                cancelButtonText: 'ยกเลิก',
+                confirmButtonColor: '#EF4444'
+            });
+            if (reason !== undefined) {
+                setLoader('กำลังบันทึกและส่งแจ้งเตือน...');
+                await callRadioApi({ action: 'djUpdateQueueStatus', queueId, newStatus: 'REJECTED', rejectReason: reason });
+                hideLoader();
+                fetchConsoleData();
+            }
+        };
+
+        window.saveStationConfig = async function() {
+            const openDays = getSelectedOpenDaysString();
+            const djEmails = parseMultiLineItems(document.getElementById('cfgDjEmails').value).join(',');
+            const djStdIds = parseMultiLineItems(document.getElementById('cfgDjIds').value).join(',');
+
+            setLoader('กำลังบันทึกการตั้งค่าสถานี...');
+            const res = await callRadioApi({
+                action: 'saveRadioSettings',
+                manualOverride: document.getElementById('cfgOverride').value,
+                openTime: document.getElementById('cfgOpenTime').value,
+                closeTime: document.getElementById('cfgCloseTime').value,
+                dailyQuota: document.getElementById('cfgQuota').value,
+                openDays: openDays,
+                djEmails: djEmails,
+                djStdIds: djStdIds
+            });
+            hideLoader();
+            if (res.status === 'success') {
+                Swal.fire({ icon: 'success', title: 'บันทึกการตั้งค่าเรียบร้อย', timer: 1500, showConfirmButton: false });
+                fetchConsoleData();
+            }
+        };
+
+        window.clearTodayQueue = async function() {
+            const cf = await Swal.fire({
+                icon: 'warning',
+                title: 'ล้างคิวเพลงวันนี้ทั้งหมด?',
+                text: 'ข้อมูลสถิติเพลงฮิตประจำสัปดาห์จะยังคงถูกเก็บไว้ตามปกติ',
+                showCancelButton: true,
+                confirmButtonColor: '#EF4444',
+                confirmButtonText: 'ยืนยันล้างคิว',
+                cancelButtonText: 'ยกเลิก'
+            });
+            if (cf.isConfirmed) {
+                setLoader('กำลังล้างคิวเพลง...');
+                await callRadioApi({ action: 'manualClearQueue' });
+                hideLoader();
+                fetchConsoleData();
+            }
+        };
+
+        window.syncFromSchoolWeb = async function() {
+            setLoader('กำลังดึงไฟล์รายชื่อนักเรียนจากเว็บ mst.ac.th...');
+            const res = await callRadioApi({ action: 'syncStudentsFromSchoolWeb' });
+            hideLoader();
+            if (res.status === 'success') {
+                Swal.fire({ icon: 'success', title: 'ซิงค์รายชื่อนักเรียนสำเร็จ', text: res.message });
+                fetchConsoleData();
+            } else {
+                Swal.fire({ icon: 'error', title: 'ดึงไม่สำเร็จ', text: res.message });
+            }
+        };
+
+        window.uploadExcelFile = function(inputEl) {
+            const file = inputEl.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                setLoader('กำลังนำเข้าไฟล์ Excel (เฉพาะชีต m.1 - m.6 ที่แสดงผล)...');
+                const res = await callRadioApi({ action: 'uploadSchoolExcelBase64', excelBase64: e.target.result });
+                hideLoader();
+                if (res.status === 'success') {
+                    Swal.fire({ icon: 'success', title: 'นำเข้าข้อมูลสำเร็จ', text: res.message });
+                    fetchConsoleData();
+                } else {
+                    Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: res.message });
+                }
+            };
+            reader.readAsDataURL(file);
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            setDaysCheckboxes("1,2,3,4,5");
+            const savedToken = sessionStorage.getItem(ADMIN_TOKEN_KEY);
+            const savedInfo = JSON.parse(sessionStorage.getItem(ADMIN_INFO_KEY) || "null");
+            if (savedToken && savedInfo && savedInfo.email) {
+                verifyAndLoadConsole(savedInfo.email, savedInfo.name, savedInfo.picture, true);
+            }
+        });
+    </script>
+</body>
+</html>

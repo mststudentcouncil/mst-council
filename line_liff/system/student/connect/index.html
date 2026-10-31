@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#4C1D95">
+    <title>CONNECT</title>
+    <link rel="icon" type="image/webp" href="/logo.webp">
+
+    <link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+
+    <script>
+        if (typeof tailwind !== 'undefined') {
+            tailwind.config = {
+                theme: {
+                    extend: {
+                        fontFamily: { sans: ['Anuphan', 'sans-serif'] },
+                        colors: {
+                            mstPurple: '#4C1D95',
+                            mstPurpleLight: '#EDE9FE',
+                            mstYellow: '#FBBF24',
+                            mstCream: '#FEFCF5',
+                            mstDark: '#1E1B4B',
+                            lineGreen: '#06C755'
+                        }
+                    }
+                }
+            };
+        }
+    </script>
+
+    <style>
+        .hidden { display: none !important; }
+        body {
+            font-family: 'Anuphan', sans-serif;
+            background: linear-gradient(135deg, #f3e5f5 0%, #fffde7 100%);
+            color: #1E293B;
+            min-height: 100vh;
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: calc(env(safe-area-inset-bottom) + 3rem);
+        }
+        .glass {
+            background: rgba(255, 255, 255, 0.88);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.94);
+            box-shadow: 0 10px 30px rgba(76, 29, 149, 0.06);
+        }
+        .glass-dark {
+            background: linear-gradient(135deg, #1E1B4B 0%, #3B0764 100%);
+            color: #FFFFFF;
+            box-shadow: 0 12px 30px rgba(30, 27, 75, 0.22);
+        }
+        .glass-input {
+            background: #F8FAFC;
+            border: 1px solid #CBD5E1;
+            border-radius: 0.9rem;
+            padding: 0.8rem 1rem;
+            font-size: 15px;
+            width: 100%;
+            color: #1E293B;
+            transition: all 0.2s;
+            font-weight: 600;
+        }
+        .glass-input:focus {
+            background: #FFFFFF;
+            border-color: #4C1D95;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(76, 29, 149, 0.15);
+        }
+        .btn-main {
+            background: linear-gradient(135deg, #4C1D95 0%, #6D28D9 100%);
+            color: white;
+            font-weight: 700;
+            padding: 0.9rem 1.2rem;
+            border-radius: 1rem;
+            transition: all 0.15s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 14px;
+            box-shadow: 0 6px 18px rgba(76, 29, 149, 0.25);
+        }
+        .btn-main:active { transform: scale(0.97); }
+        .btn-main:disabled { opacity: 0.45; pointer-events: none; }
+
+        .loader-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .fade-in { animation: fadeIn 0.25s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .swal-glass { background: #FFFFFF !important; border-radius: 1.75rem !important; font-family: 'Anuphan', sans-serif !important; }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Global Loader -->
+    <div id="globalLoader" class="loader-overlay px-6 text-center">
+        <i class="fas fa-circle-notch fa-spin text-5xl text-mstPurple mb-4 drop-shadow-md"></i>
+        <p class="text-base font-bold text-mstPurple" id="loaderText">กำลังตรวจสอบข้อมูล...</p>
+    </div>
+
+    <div class="w-full max-w-md mx-auto min-h-screen flex flex-col px-4">
+
+        <!-- Sticky Top Header -->
+        <header class="sticky top-0 z-30 pt-3 pb-2.5">
+            <div class="glass rounded-2xl px-4 py-3 flex items-center justify-between gap-2 shadow-sm border border-white">
+                <div class="flex items-center gap-3 min-w-0">
+                    <img src="/logo.webp" class="w-10 h-10 object-contain drop-shadow-sm shrink-0" alt="MSTSC Logo" onerror="this.src='https://mstsc.pages.dev/logo.webp'">
+                    <div class="min-w-0">
+                        <div class="flex items-center gap-1.5">
+                            <h1 class="text-sm font-black text-mstPurple truncate">STUDENT COUNCIL</h1>
+                            <span class="bg-mstYellow text-mstDark text-[9px] font-black px-2 py-0.5 rounded-full shrink-0">CONNECT</span>
+                        </div>
+                        <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider truncate">ระบบยืนยันตัวตน 2 ขั้นตอน (2FA OTP)</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-1.5 shrink-0">
+                    <a href="/richmenuline" class="w-9 h-9 rounded-xl bg-purple-50 hover:bg-purple-100 text-mstPurple border border-purple-100 flex items-center justify-center text-xs shadow-xs transition" title="ศูนย์รวมบริการนักเรียน">
+                        <i class="fa-solid fa-grip"></i>
+                    </a>
+                </div>
+            </div>
+        </header>
+
+        <!-- 1. LINE Login Screen -->
+        <div id="loginPage" class="hidden fade-in flex-col my-auto py-6">
+            <div class="glass rounded-[2.5rem] p-8 text-center w-full shadow-lg">
+                <img src="/logo.webp" class="w-24 h-24 mx-auto mb-4 drop-shadow-md object-contain" alt="MSTSC" onerror="this.src='https://mstsc.pages.dev/logo.webp'">
+                <span class="inline-block bg-purple-50 text-mstPurple text-[10px] font-extrabold px-3.5 py-1 rounded-full border border-purple-100 uppercase tracking-widest">MSTSC Student Connect</span>
+                <h2 class="text-2xl font-black text-mstDark mt-3 mb-1">ยืนยันตัวตนนักเรียน</h2>
+                <p class="text-xs font-medium text-gray-500 mb-7 leading-relaxed">เชื่อมรหัสประจำตัวนักเรียนเข้ากับบัญชี LINE ด้วยระบบยืนยัน 2 ขั้นตอนผ่านอีเมลโรงเรียน (@mst.ac.th)</p>
+                <button onclick="triggerLineLogin()" class="w-full bg-lineGreen hover:bg-[#05b34c] active:scale-[0.98] text-white py-4 rounded-2xl font-bold shadow-md text-sm flex justify-center items-center gap-2.5 transition">
+                    <i class="fa-brands fa-line text-xl"></i> เข้าสู่ระบบด้วย LINE
+                </button>
+            </div>
+        </div>
+
+        <!-- 2. หน้ายืนยันตัวตน 2 ขั้นตอนผ่านอีเมลโรงเรียน (2FA Email OTP) -->
+        <div id="link-screen" class="hidden fade-in flex-col mt-2 space-y-3.5">
+            <div class="glass rounded-[2rem] p-6 text-center space-y-4">
+
+                <!-- แสดงเส้นเชื่อม: MSTSC -> LINE OA -> โปรไฟล์ผู้ใช้ -->
+                <div class="flex items-center justify-center gap-1.5 sm:gap-2.5 py-2 overflow-x-hidden">
+                    <div class="flex flex-col items-center shrink-0">
+                        <div class="flex items-center gap-1 bg-white/90 border border-purple-100 py-1 px-2.5 rounded-2xl shadow-sm">
+                            <span class="text-[11px] font-black text-mstPurple tracking-wider">MSTSC</span>
+                            <img src="/logo.webp" class="w-6 h-6 object-contain" alt="MSTSC" onerror="this.src='https://mstsc.pages.dev/logo.webp'">
+                        </div>
+                        <span class="text-[9px] font-bold text-gray-500 mt-1">สภานักเรียน</span>
+                    </div>
+
+                    <div class="w-4 sm:w-8 h-0.5 bg-gradient-to-r from-mstPurple to-lineGreen"></div>
+
+                    <div class="flex flex-col items-center shrink-0">
+                        <div class="w-10 h-10 rounded-2xl bg-lineGreen text-white shadow-md flex items-center justify-center text-lg">
+                            <i class="fa-brands fa-line"></i>
+                        </div>
+                        <span class="text-[9px] font-bold text-gray-500 mt-1">LINE OA</span>
+                    </div>
+
+                    <div class="w-4 sm:w-8 h-0.5 bg-gradient-to-r from-lineGreen to-purple-400"></div>
+
+                    <div class="flex flex-col items-center shrink-0">
+                        <div class="flex items-center gap-1.5 bg-white/90 border border-purple-100 py-1 px-2.5 rounded-2xl shadow-sm max-w-[120px]">
+                            <img id="linkingLineAvatar" src="/logo.webp" class="w-7 h-7 rounded-full object-cover border border-purple-200 shrink-0 bg-white" onerror="this.src='https://mstsc.pages.dev/logo.webp'">
+                            <span id="linkingLineName" class="text-[11px] font-bold text-gray-800 truncate">LINE User</span>
+                        </div>
+                        <span class="text-[9px] font-bold text-gray-500 mt-1">บัญชีของคุณ</span>
+                    </div>
+                </div>
+
+                <div>
+                    <h2 class="text-lg font-black text-mstDark">ยืนยันตัวตนด้วยอีเมลโรงเรียน</h2>
+                    <p class="text-xs text-gray-500 font-medium mt-0.5" id="otpStepSubtitle">กรอกรหัสอีเมลโรงเรียนเพื่อรับรหัส OTP 6 หลัก</p>
+                </div>
+
+                <!-- ขั้นที่ 1: กรอกอีเมลโรงเรียน (@mst.ac.th) และยอมรับ PDPA -->
+                <div id="step1_email" class="space-y-3.5 text-left">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1.5">
+                            <i class="fa-solid fa-envelope-circle-check text-mstPurple mr-1"></i> อีเมลโรงเรียน (@mst.ac.th)
+                        </label>
+                        <div class="flex shadow-xs rounded-2xl overflow-hidden focus-within:ring-2 focus-within:ring-mstPurple border border-gray-300 bg-white">
+                            <input type="text" id="linkEmailInput" inputmode="numeric" maxlength="20"
+                                oninput="this.value = this.value.toLowerCase().replace('@mst.ac.th', '').replace(/[^0-9]/g, '').slice(0, 7)"
+                                onkeydown="if(event.key==='Enter') requestEmailOtp()"
+                                class="w-full p-3.5 border-none outline-none text-center font-black text-lg tracking-widest text-mstPurple"
+                                placeholder="เช่น 7012345">
+                            <div class="bg-purple-50 px-4 flex items-center justify-center border-l border-purple-100 text-mstPurple font-black text-xs shrink-0">
+                                @mst.ac.th
+                            </div>
+                        </div>
+                        <p class="text-[11px] text-gray-400 mt-1.5 text-center font-medium">พิมพ์เฉพาะเลขปี 2 หลัก + รหัสนักเรียน 5 หลัก (รวม 7 หลัก)</p>
+                    </div>
+
+                    <!-- Checkbox PDPA -->
+                    <label class="flex items-start gap-2.5 p-3 rounded-2xl bg-purple-50/60 border border-purple-100 cursor-pointer">
+                        <input type="checkbox" id="pdpaConsent" class="mt-0.5 w-4 h-4 accent-mstPurple rounded shrink-0 cursor-pointer">
+                        <span class="text-[11px] text-gray-600 font-medium leading-relaxed">
+                            ข้าพเจ้ายินยอมให้ประมวลผลข้อมูลส่วนบุคคลเพื่อใช้ยืนยันตัวตนและเชื่อมต่อบริการดิจิทัลของสภานักเรียน ตาม พ.ร.บ. คุ้มครองข้อมูลส่วนบุคคล (PDPA)
+                        </span>
+                    </label>
+
+                    <button type="button" id="btnRequestOtp" onclick="requestEmailOtp()" class="btn-main w-full py-4">
+                        <i class="fa-solid fa-paper-plane"></i> ขอรับรหัส OTP ทางอีเมล
+                    </button>
+
+                    <div class="pt-1">
+                        <button type="button" onclick="openAlumniBindModal()" class="w-full py-3 px-3 rounded-xl bg-amber-50/90 border border-amber-200 text-xs font-bold text-amber-800 hover:bg-amber-100 transition flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-user-graduate text-amber-600"></i> สำหรับรุ่นพี่ศิษย์เก่าทั่วไป (ลงทะเบียนข้อมูลศิษย์เก่า)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ขั้นที่ 2: กรอกรหัส OTP 6 หลัก พร้อมเวลาถอยหลัง 05:00 และหลอดโปรเกรส -->
+                <div id="step2_otp" class="hidden space-y-4 text-left fade-in">
+
+                    <!-- กล่องแสดงข้อมูลนักเรียนที่ตรวจสอบพบ -->
+                    <div id="otpStudentPreviewBox" class="bg-purple-50/90 p-3.5 rounded-2xl border border-purple-200 text-xs space-y-1"></div>
+
+                    <!-- กรณีเป็นศิษย์เก่าสภานักเรียน (SC67) ให้เลือกแผนการเรียนตอน ม.ปลาย -->
+                    <div id="scAlumniPlanBox" class="hidden bg-amber-50/90 p-3.5 rounded-2xl border border-amber-200 space-y-1.5">
+                        <label class="block text-xs font-black text-amber-900">
+                            <i class="fa-solid fa-graduation-cap mr-1"></i> เลือกแผนการเรียนตอน ม.ปลาย *
+                        </label>
+                        <select id="scAlumniPlanSelect" class="glass-input text-xs py-2.5 bg-white">
+                            <option value="">-- เลือกแผนการเรียน --</option>
+                            <option value="ห้องเรียนพิเศษ วิทยาศาสตร์ - คณิตศาสตร์ (S.M.)">ห้องเรียนพิเศษ: วิทยาศาสตร์ - คณิตศาสตร์ (S.M.)</option>
+                            <option value="ห้องเรียนพิเศษ วิทยาศาสตร์ - คณิตศาสตร์ - เทคโนโลยี (S.M.T.)">ห้องเรียนพิเศษ: วิทยาศาสตร์ - คณิตศาสตร์ - เทคโนโลยี (S.M.T.)</option>
+                            <option value="ห้องเรียนพิเศษ วิทยาศาสตร์ - คณิตศาสตร์ - ภาษาอังกฤษ (S.M.E.)">ห้องเรียนพิเศษ: วิทยาศาสตร์ - คณิตศาสตร์ - ภาษาอังกฤษ (S.M.E.)</option>
+                            <option value="วิทยาศาสตร์ - คณิตศาสตร์">แผนการเรียน: วิทยาศาสตร์ - คณิตศาสตร์</option>
+                            <option value="คณิตศาสตร์ - ภาษาอังกฤษ">แผนการเรียน: คณิตศาสตร์ - ภาษาอังกฤษ</option>
+                            <option value="ศิลป์ภาษาจีน">แผนการเรียน: ศิลป์ภาษาจีน</option>
+                            <option value="ภาษาไทย - สังคมศึกษา">แผนการเรียน: ภาษาไทย - สังคมศึกษา</option>
+                        </select>
+                    </div>
+
+                    <!-- กล่องเวลานับถอยหลัง 05:00 + หลอดโปรเกรสเปลี่ยนสี -->
+                    <div class="bg-emerald-50 p-4 rounded-2xl text-center border border-emerald-200 shadow-xs relative overflow-hidden">
+                        <p class="text-xs font-bold text-emerald-800">ส่งรหัส 6 หลักไปที่ <span id="sentEmailDisplay" class="underline font-black"></span> แล้ว</p>
+                        <div id="otpTimerText" class="mt-1 font-black text-2xl text-emerald-600 tracking-wider transition-colors duration-500">05:00</div>
+                        <div class="w-full bg-emerald-200/60 rounded-full h-2.5 mt-2.5 overflow-hidden shadow-inner">
+                            <div id="otpProgressBar" class="bg-gradient-to-r from-green-500 to-emerald-500 h-full rounded-full transition-all duration-1000 ease-linear" style="width: 100%"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1.5 text-center">กรอกรหัส OTP 6 หลักจากแอป Gmail</label>
+                        <input type="tel" id="linkOtpInput" maxlength="6" inputmode="numeric"
+                            oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6)"
+                            onkeydown="if(event.key==='Enter') verifyOtpAndBind()"
+                            class="glass-input text-center text-2xl tracking-[0.45em] font-mono font-black p-4 bg-white"
+                            placeholder="------">
+                    </div>
+
+                    <button type="button" id="btnVerifyOtp" onclick="verifyOtpAndBind()" class="btn-main w-full py-4">
+                        <i class="fa-solid fa-shield-check text-mstYellow"></i> ยืนยันรหัส OTP และผูกบัญชี
+                    </button>
+
+                    <button type="button" onclick="cancelOtpProcess()" class="w-full py-3 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold text-xs transition">
+                        ยกเลิก / เปลี่ยนอีเมล
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- 3. Connected Home Screen -->
+        <div id="home-screen" class="hidden flex-col fade-in space-y-3.5 pt-1">
+
+            <div class="glass rounded-2xl p-3.5 flex items-center justify-between gap-2">
+                <div class="flex items-center gap-3 min-w-0 flex-1">
+                    <img id="user-avatar" src="/logo.webp" class="w-11 h-11 rounded-full object-cover border-2 border-mstYellow shrink-0 shadow-xs bg-white" onerror="this.src='https://mstsc.pages.dev/logo.webp'">
+                    <div class="min-w-0 flex-1">
+                        <p id="user-fullname" class="text-xs font-black text-gray-900 truncate">-</p>
+                        <p id="user-meta" class="text-[11px] font-bold text-mstPurple truncate">-</p>
+                    </div>
+                </div>
+                <span class="px-3 py-1.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-700 border border-emerald-200 shrink-0 flex items-center gap-1.5">
+                    <i class="fa-solid fa-circle-check text-[10px]"></i> เชื่อมต่อแล้ว
+                </span>
+            </div>
+
+            <!-- การ์ดบัตรประจำตัวดิจิทัล -->
+            <div class="glass-dark rounded-[1.75rem] p-5 relative overflow-hidden space-y-4">
+                <div class="flex items-center justify-between gap-2">
+                    <div>
+                        <span class="text-[10px] font-black text-mstYellow uppercase tracking-widest block">MSTSC DIGITAL PASS</span>
+                        <h3 id="pass-fullname" class="text-base font-black text-white mt-0.5">-</h3>
+                    </div>
+                    <span id="pass-role" class="bg-mstYellow text-mstDark text-[10px] font-black px-3 py-1 rounded-full uppercase shrink-0">STUDENT</span>
+                </div>
+
+                <div class="grid grid-cols-3 gap-2 bg-white/10 rounded-2xl p-3 border border-white/10 text-xs">
+                    <div>
+                        <span class="text-[10px] text-purple-200 font-semibold block">รหัสประจำตัว</span>
+                        <span id="pass-sid" class="font-black text-mstYellow text-sm">-</span>
+                    </div>
+                    <div>
+                        <span class="text-[10px] text-purple-200 font-semibold block">สถานะ</span>
+                        <span id="pass-class" class="font-black text-white text-sm">-</span>
+                    </div>
+                    <div class="min-w-0">
+                        <span class="text-[10px] text-purple-200 font-semibold block">แผนการเรียน</span>
+                        <span id="pass-plan" class="font-bold text-white text-xs truncate block mt-0.5">-</span>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between pt-1 text-[10px] text-purple-200 font-medium">
+                    <span><i class="fa-solid fa-shield-halved text-lineGreen mr-1"></i> ยืนยันตัวตน 2 ขั้นตอนผ่านอีเมล @mst.ac.th สำเร็จแล้ว</span>
+                </div>
+            </div>
+
+            <!-- รายการบริการดิจิทัล -->
+            <div class="glass rounded-[1.75rem] p-4 space-y-3 border-2 border-purple-100">
+                <div class="flex items-center justify-between">
+                    <span class="text-[10px] font-black uppercase tracking-wider text-mstPurple bg-purple-50 px-3 py-1 rounded-full border border-purple-100">
+                        <i class="fa-solid fa-bolt mr-1"></i> เข้าใช้งานระบบสภานักเรียนได้ทันที
+                    </span>
+                    <span class="text-[10px] font-bold text-gray-400">Single Sign-On</span>
+                </div>
+
+                <div class="space-y-2.5">
+                    <a href="https://liff.line.me/2008923798-TRND2m0M" class="bg-white hover:bg-purple-50/70 p-3.5 rounded-2xl border border-gray-200 flex items-center justify-between gap-3 transition active:scale-[0.99]">
+                        <div class="flex items-center gap-3 min-w-0">
+                            <div class="w-11 h-11 rounded-2xl bg-purple-100 text-mstPurple flex items-center justify-center text-lg shrink-0">
+                                <i class="fa-solid fa-tower-broadcast"></i>
+                            </div>
+                            <div class="min-w-0">
+                                <p class="text-xs font-black text-gray-900">Smart Radio</p>
+                                <p class="text-[10px] font-medium text-gray-500 truncate">ขอเพลงเสียงตามสาย & โหวตคิวเพลง</p>
+                            </div>
+                        </div>
+                        <span class="text-xs font-black text-mstPurple bg-purple-50 px-3 py-1.5 rounded-xl shrink-0">
+                            เปิด <i class="fa-solid fa-chevron-right text-[10px] ml-0.5"></i>
+                        </span>
+                    </a>
+
+                    <a href="https://liff.line.me/2008923798-LmKWCP2j" class="bg-white hover:bg-amber-50/70 p-3.5 rounded-2xl border border-gray-200 flex items-center justify-between gap-3 transition active:scale-[0.99]">
+                        <div class="flex items-center gap-3 min-w-0">
+                            <div class="w-11 h-11 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center text-lg shrink-0">
+                                <i class="fa-solid fa-book-open-reader"></i>
+                            </div>
+                            <div class="min-w-0">
+                                <p class="text-xs font-black text-gray-900">Senior Portfolio Hub</p>
+                                <p class="text-[10px] font-medium text-gray-500 truncate">คลังพอร์ตโฟลิโอและรีวิวสัมภาษณ์รุ่นพี่</p>
+                            </div>
+                        </div>
+                        <span class="text-xs font-black text-amber-700 bg-amber-50 px-3 py-1.5 rounded-xl shrink-0">
+                            เปิด <i class="fa-solid fa-chevron-right text-[10px] ml-0.5"></i>
+                        </span>
+                    </a>
+
+                    <a href="https://liff.line.me/2008923798-7EBZdt6r" class="bg-white hover:bg-blue-50/70 p-3.5 rounded-2xl border border-gray-200 flex items-center justify-between gap-3 transition active:scale-[0.99]">
+                        <div class="flex items-center gap-3 min-w-0">
+                            <div class="w-11 h-11 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center text-lg shrink-0">
+                                <i class="fa-solid fa-bullhorn"></i>
+                            </div>
+                            <div class="min-w-0">
+                                <p class="text-xs font-black text-gray-900">Public Hearing</p>
+                                <p class="text-[10px] font-medium text-gray-500 truncate">แจ้งเรื่องร้องเรียน เสนอแนะ & ติดตามสถานะ</p>
+                            </div>
+                        </div>
+                        <span class="text-xs font-black text-blue-700 bg-blue-50 px-3 py-1.5 rounded-xl shrink-0">
+                            เปิด <i class="fa-solid fa-chevron-right text-[10px] ml-0.5"></i>
+                        </span>
+                    </a>
+
+                    <a href="/richmenuline" class="bg-white hover:bg-emerald-50/70 p-3.5 rounded-2xl border border-gray-200 flex items-center justify-between gap-3 transition active:scale-[0.99]">
+                        <div class="flex items-center gap-3 min-w-0">
+                            <div class="w-11 h-11 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-lg shrink-0">
+                                <i class="fa-solid fa-grip"></i>
+                            </div>
+                            <div class="min-w-0">
+                                <p class="text-xs font-black text-gray-900">ศูนย์รวมบริการนักเรียน</p>
+                                <p class="text-[10px] font-medium text-gray-500 truncate">ตารางเรียน ผลการเรียน และบริการทั้งหมด</p>
+                            </div>
+                        </div>
+                        <span class="text-xs font-black text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-xl shrink-0">
+                            เปิด <i class="fa-solid fa-chevron-right text-[10px] ml-0.5"></i>
+                        </span>
+                    </a>
+                </div>
+
+                <div class="pt-2 border-t border-gray-100">
+                    <button onclick="promptUnlink()" class="w-full py-2.5 rounded-xl bg-gray-50 hover:bg-red-50 text-gray-500 hover:text-red-600 border border-gray-200 text-xs font-bold transition flex items-center justify-center gap-1.5">
+                        <i class="fa-solid fa-rotate"></i> เปลี่ยนรหัสนักเรียน / ยกเลิกการผูกบัญชี
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const API_BASE_URL = "https://admission-backend-592123078141.asia-southeast1.run.app/api/radio";
+        const LIFF_ID = "2008923798-pVEtog9o";
+        const UNIFIED_CACHE_KEYS = ["mstsc_student_viewer", "mstsc_portfolio_viewer_v3", "mstsc_unified_user"];
+        const RELOGIN_FLAG_KEY = "mstsc_connect_relogin_once";
+
+        const STUDY_PLANS_OPTIONS_HTML = `
+            <option value="">-- เลือกแผนการเรียน --</option>
+            <option value="ห้องเรียนพิเศษ วิทยาศาสตร์ - คณิตศาสตร์ (S.M.)">ห้องเรียนพิเศษ: วิทยาศาสตร์ - คณิตศาสตร์ (S.M.)</option>
+            <option value="ห้องเรียนพิเศษ วิทยาศาสตร์ - คณิตศาสตร์ - เทคโนโลยี (S.M.T.)">ห้องเรียนพิเศษ: วิทยาศาสตร์ - คณิตศาสตร์ - เทคโนโลยี (S.M.T.)</option>
+            <option value="ห้องเรียนพิเศษ วิทยาศาสตร์ - คณิตศาสตร์ - ภาษาอังกฤษ (S.M.E.)">ห้องเรียนพิเศษ: วิทยาศาสตร์ - คณิตศาสตร์ - ภาษาอังกฤษ (S.M.E.)</option>
+            <option value="วิทยาศาสตร์ - คณิตศาสตร์">แผนการเรียน: วิทยาศาสตร์ - คณิตศาสตร์</option>
+            <option value="คณิตศาสตร์ - ภาษาอังกฤษ">แผนการเรียน: คณิตศาสตร์ - ภาษาอังกฤษ</option>
+            <option value="ศิลป์ภาษาจีน">แผนการเรียน: ศิลป์ภาษาจีน</option>
+            <option value="ภาษาไทย - สังคมศึกษา">แผนการเรียน: ภาษาไทย - สังคมศึกษา</option>
+        `;
+
+        let lineAccessToken = "";
+        let currentUser = null;
+        let currentScreenId = "";
+        let otpInterval = null;
+        let pendingStudentPreview = null;
+
+        function saveAllUnifiedKeys(userObj) {
+            if (!userObj || !userObj.std_id) return;
+            const raw = JSON.stringify(userObj);
+            UNIFIED_CACHE_KEYS.forEach(k => {
+                try { localStorage.setItem(k, raw); } catch (e) {}
+            });
+        }
+
+        function clearAllUnifiedKeys() {
+            UNIFIED_CACHE_KEYS.forEach(k => {
+                try { localStorage.removeItem(k); } catch (e) {}
+            });
+        }
+
+        function setLoader(text) {
+            document.getElementById('loaderText').innerText = text || 'กำลังตรวจสอบข้อมูล...';
+            const loader = document.getElementById('globalLoader');
+            loader.classList.remove('hidden');
+            loader.style.display = 'flex';
+        }
+
+        function hideLoader() {
+            const loader = document.getElementById('globalLoader');
+            loader.classList.add('hidden');
+            loader.style.display = 'none';
+        }
+
+        function showScreen(screenId) {
+            const isChanged = currentScreenId !== screenId;
+            currentScreenId = screenId;
+            ['loginPage', 'link-screen', 'home-screen'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) { el.classList.add('hidden'); el.classList.remove('flex'); }
+            });
+            const target = document.getElementById(screenId);
+            if (target) { target.classList.remove('hidden'); target.classList.add('flex'); }
+            if (isChanged) {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        function triggerLineLogin() {
+            try {
+                if (window.liff && liff.isLoggedIn()) liff.logout();
+            } catch (e) {}
+            liff.login({ redirectUri: window.location.href });
+        }
+
+        async function apiCall(payload) {
+            if (window.liff && liff.isLoggedIn()) {
+                const latestToken = liff.getAccessToken();
+                if (latestToken) lineAccessToken = latestToken;
+            }
+
+            const res = await fetch(`${API_BASE_URL}?t=${Date.now()}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ...payload, lineAccessToken })
+            });
+
+            const data = await res.json();
+            if (
+                res.status === 403 &&
+                data.message &&
+                (data.message.includes('เซสชัน LINE') || data.message.includes('LINE Access Token'))
+            ) {
+                data.isLineSessionExpired = true;
+            }
+            return data;
+        }
+
+        async function handleExpiredLineSession() {
+            hideLoader();
+            try {
+                if (window.liff && liff.isLoggedIn()) liff.logout();
+            } catch (e) {}
+
+            if (!sessionStorage.getItem(RELOGIN_FLAG_KEY)) {
+                sessionStorage.setItem(RELOGIN_FLAG_KEY, "1");
+                liff.login({ redirectUri: window.location.href });
+                return;
+            }
+
+            sessionStorage.removeItem(RELOGIN_FLAG_KEY);
+            showScreen('loginPage');
+        }
+
+        async function initApp() {
+            setLoader('กำลังเชื่อมต่อระบบยืนยันตัวตน...');
+            try {
+                await liff.init({ liffId: LIFF_ID });
+
+                if (!liff.isLoggedIn()) {
+                    hideLoader();
+                    if (liff.isInClient()) {
+                        liff.login({ redirectUri: window.location.href });
+                    } else {
+                        showScreen('loginPage');
+                    }
+                    return;
+                }
+
+                lineAccessToken = liff.getAccessToken();
+
+                try {
+                    const profile = await liff.getProfile();
+                    if (profile) {
+                        document.getElementById('linkingLineAvatar').src = profile.pictureUrl || 'https://mstsc.pages.dev/logo.webp';
+                        document.getElementById('linkingLineName').innerText = profile.displayName || 'LINE User';
+                    }
+                } catch (profileErr) {
+                    await handleExpiredLineSession();
+                    return;
+                }
+
+                await refreshIdentityData(true);
+                hideLoader();
+            } catch (e) {
+                hideLoader();
+                showScreen('loginPage');
+            }
+        }
+
+        async function refreshIdentityData(isInitial = false) {
+            const data = await apiCall({ action: 'initRadio', isPcAdminLogin: false });
+
+            if (data.isLineSessionExpired) {
+                await handleExpiredLineSession();
+                return;
+            }
+
+            if (data.status !== 'success') {
+                showScreen('link-screen');
+                return;
+            }
+
+            sessionStorage.removeItem(RELOGIN_FLAG_KEY);
+
+            currentUser = data.linkedUser;
+            const btnUnlink = document.getElementById('btnUnlinkHeader');
+
+            if (!currentUser) {
+                clearAllUnifiedKeys();
+                if (btnUnlink) { btnUnlink.classList.add('hidden'); btnUnlink.classList.remove('flex'); }
+                showScreen('link-screen');
+                return;
+            }
+
+            saveAllUnifiedKeys(currentUser);
+            if (btnUnlink) { btnUnlink.classList.remove('hidden'); btnUnlink.classList.add('flex'); }
+
+            const roomDisplay = `${currentUser.level}${currentUser.room && currentUser.room !== '-' ? '/' + currentUser.room : ''}`;
+
+            document.getElementById('user-avatar').src = currentUser.linePic || 'https://mstsc.pages.dev/logo.webp';
+            document.getElementById('user-fullname').innerText = currentUser.fullName;
+            document.getElementById('user-meta').innerText = `รหัส: ${currentUser.std_id} • สถานะ: ${roomDisplay}`;
+
+            document.getElementById('pass-fullname').innerText = currentUser.fullName;
+            document.getElementById('pass-sid').innerText = currentUser.std_id;
+            document.getElementById('pass-class').innerText = roomDisplay;
+            document.getElementById('pass-plan').innerText = currentUser.plan || '-';
+            document.getElementById('pass-role').innerText = currentUser.role || 'STUDENT';
+
+            if (isInitial) showScreen('home-screen');
+        }
+
+        // =====================================================
+        // ระบบจับเวลาถอยหลัง 05:00 และหลอดโปรเกรสเปลี่ยนสี (เหมือนระบบ e-Voting)
+        // =====================================================
+        function startOtpTimer() {
+            if (otpInterval) clearInterval(otpInterval);
+            let timeLeft = 300; // 5 นาที (300 วินาที)
+
+            const timerText = document.getElementById("otpTimerText");
+            const progressBar = document.getElementById("otpProgressBar");
+
+            timerText.innerText = "05:00";
+            timerText.className = "mt-1 font-black text-2xl tracking-wider transition-colors duration-500 text-emerald-600";
+            progressBar.style.width = "100%";
+            progressBar.className = "h-full rounded-full transition-all duration-1000 ease-linear bg-gradient-to-r from-green-500 to-emerald-500";
+
+            otpInterval = setInterval(() => {
+                timeLeft--;
+                const m = Math.floor(timeLeft / 60);
+                const s = timeLeft % 60;
+                timerText.innerText = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+                progressBar.style.width = `${(timeLeft / 300) * 100}%`;
+
+                if (timeLeft === 120) {
+                    timerText.classList.replace("text-emerald-600", "text-orange-500");
+                    progressBar.classList.replace("from-green-500", "from-orange-400");
+                    progressBar.classList.replace("to-emerald-500", "to-orange-500");
+                } else if (timeLeft === 60) {
+                    timerText.classList.replace("text-orange-500", "text-red-600");
+                    progressBar.classList.replace("from-orange-400", "from-red-500");
+                    progressBar.classList.replace("to-orange-500", "to-red-600");
+                }
+
+                if (timeLeft <= 0) {
+                    clearInterval(otpInterval);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'รหัส OTP หมดอายุ',
+                        text: 'เกินเวลา 5 นาทีที่กำหนด กรุณากดขอรับรหัส OTP ใหม่อีกครั้ง',
+                        confirmButtonColor: '#4C1D95',
+                        customClass: { popup: 'swal-glass' }
+                    }).then(() => {
+                        cancelOtpProcess();
+                    });
+                }
+            }, 1000);
+        }
+
+        function cancelOtpProcess() {
+            if (otpInterval) clearInterval(otpInterval);
+            pendingStudentPreview = null;
+            document.getElementById("step2_otp").classList.add("hidden");
+            document.getElementById("step1_email").classList.remove("hidden");
+            document.getElementById("linkOtpInput").value = "";
+            document.getElementById("otpStepSubtitle").innerText = "กรอกรหัสอีเมลโรงเรียนเพื่อรับรหัส OTP 6 หลัก";
+        }
+
+        // ขั้นที่ 1: ขอรับรหัส OTP ทางอีเมลโรงเรียน (@mst.ac.th)
+        async function requestEmailOtp(alumniPayload = null) {
+            let emailPrefix = "";
+            if (alumniPayload && alumniPayload.emailPrefix) {
+                emailPrefix = alumniPayload.emailPrefix;
+            } else {
+                emailPrefix = document.getElementById("linkEmailInput").value.trim().toLowerCase().replace("@mst.ac.th", "").replace(/\s+/g, "");
+                const pdpaConsent = document.getElementById("pdpaConsent").checked;
+                if (!pdpaConsent) {
+                    return Swal.fire({
+                        icon: 'warning',
+                        title: 'กรุณากดยอมรับเงื่อนไข',
+                        text: 'ต้องยินยอมนโยบายคุ้มครองข้อมูลส่วนบุคคล (PDPA) ก่อนทำรายการ',
+                        confirmButtonColor: '#4C1D95',
+                        customClass: { popup: 'swal-glass' }
+                    });
+                }
+            }
+
+            if (!/^(\d{2})(\d{5})$/.test(emailPrefix)) {
+                return Swal.fire({
+                    icon: 'error',
+                    title: 'รูปแบบอีเมลไม่ถูกต้อง',
+                    text: 'กรุณากรอกตัวเลข 7 หลัก (ปี 2 หลัก + รหัสนักเรียน 5 หลัก เช่น 7012345)',
+                    confirmButtonColor: '#4C1D95',
+                    customClass: { popup: 'swal-glass' }
+                });
+            }
+
+            setLoader('กำลังตรวจสอบฐานข้อมูลและส่งรหัส OTP ไปยัง ' + emailPrefix + '@mst.ac.th...');
+            const res = await apiCall({
+                action: 'requestConnectOtp',
+                emailPrefix,
+                ...(alumniPayload || {})
+            });
+            hideLoader();
+
+            if (res.isLineSessionExpired) {
+                await handleExpiredLineSession();
+                return;
+            }
+
+            if (res.status !== 'success') {
+                return Swal.fire({
+                    icon: 'error',
+                    title: 'ไม่สามารถส่งรหัส OTP ได้',
+                    text: res.message || 'ไม่พบข้อมูลรหัสนักเรียนในระบบ',
+                    confirmButtonColor: '#4C1D95',
+                    customClass: { popup: 'swal-glass' }
+                });
+            }
+
+            pendingStudentPreview = res.studentPreview;
+            document.getElementById("sentEmailDisplay").innerText = res.email;
+
+            const stu = res.studentPreview;
+            document.getElementById("otpStudentPreviewBox").innerHTML = `
+                <p class="font-black text-mstPurple text-xs"><i class="fa-solid fa-user-check mr-1"></i> ข้อมูลบัญชีที่จะเชื่อมต่อ:</p>
+                <p><b>รหัสประจำตัว:</b> ${stu.std_id} • <b>ชื่อ:</b> ${stu.fullName}</p>
+                <p><b>ระดับชั้น/สถานะ:</b> <span class="font-black text-mstPurple">${stu.level}${stu.room && stu.room !== '-' ? '/' + stu.room : ''}</span></p>
+            `;
+
+            // หากเป็นศิษย์เก่าสภานักเรียน (SC67) ให้แสดงตัวเลือกแผนการเรียน
+            const scPlanBox = document.getElementById("scAlumniPlanBox");
+            if (stu.isScAlumni) {
+                scPlanBox.classList.remove("hidden");
+            } else {
+                scPlanBox.classList.add("hidden");
+            }
+
+            document.getElementById("step1_email").classList.add("hidden");
+            document.getElementById("step2_otp").classList.remove("hidden");
+            document.getElementById("otpStepSubtitle").innerText = "ตรวจสอบรหัส OTP 6 หลักในแอป Gmail (@mst.ac.th)";
+            document.getElementById("linkOtpInput").value = "";
+            document.getElementById("linkOtpInput").focus();
+
+            startOtpTimer();
+        }
+
+        // ขั้นที่ 2: ตรวจสอบรหัส OTP 6 หลักและผูกบัญชีกับ LINE
+        async function verifyOtpAndBind() {
+            const otpCode = document.getElementById("linkOtpInput").value.replace(/\D/g, '').trim();
+            if (otpCode.length !== 6) {
+                return Swal.fire({
+                    icon: 'warning',
+                    title: 'รหัสไม่ครบ 6 หลัก',
+                    text: 'กรุณากรอกรหัส OTP 6 หลักที่ได้รับทางอีเมลโรงเรียน',
+                    confirmButtonColor: '#4C1D95',
+                    customClass: { popup: 'swal-glass' }
+                });
+            }
+
+            let selectedPlan = "";
+            if (pendingStudentPreview && pendingStudentPreview.isScAlumni) {
+                selectedPlan = document.getElementById("scAlumniPlanSelect").value;
+                if (!selectedPlan) {
+                    return Swal.fire({
+                        icon: 'warning',
+                        title: 'กรุณาเลือกแผนการเรียน',
+                        text: 'กรุณาเลือกแผนการเรียนตอน ม.ปลาย ก่อนยืนยัน',
+                        confirmButtonColor: '#4C1D95',
+                        customClass: { popup: 'swal-glass' }
+                    });
+                }
+            }
+
+            setLoader('กำลังตรวจสอบรหัส OTP และผูกบัญชีกับ LINE...');
+            const res = await apiCall({
+                action: 'verifyConnectOtp',
+                otpCode,
+                plan: selectedPlan || undefined
+            });
+            hideLoader();
+
+            if (res.isLineSessionExpired) {
+                await handleExpiredLineSession();
+                return;
+            }
+
+            if (res.status === 'success') {
+                if (otpInterval) clearInterval(otpInterval);
+                await refreshIdentityData(true);
+                Swal.fire({
+                    icon: 'success',
+                    title: 'ยืนยันตัวตนและเชื่อมข้อมูลสำเร็จ!',
+                    text: 'สามารถเข้าใช้งานทุกระบบของสภานักเรียนได้ทันที',
+                    timer: 1800,
+                    showConfirmButton: false,
+                    customClass: { popup: 'swal-glass' }
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'รหัส OTP ไม่ถูกต้อง',
+                    text: res.message || 'กรุณาตรวจสอบรหัส 6 หลักในอีเมลอีกครั้ง',
+                    confirmButtonColor: '#4C1D95',
+                    customClass: { popup: 'swal-glass' }
+                });
+            }
+        }
+
+        // โมดอลสำหรับศิษย์เก่าทั่วไป (ใช้อีเมลโรงเรียน 7 หลัก @mst.ac.th รับรหัส OTP 6 หลักเช่นเดียวกัน)
+        async function openAlumniBindModal() {
+            const { value: formValues } = await Swal.fire({
+                title: 'ลงทะเบียนศิษย์เก่า ม.ส.ธ. (2FA)',
+                html: `
+                    <div class="text-left space-y-2.5 text-xs mt-2">
+                        <div>
+                            <label class="font-bold text-gray-700 block mb-1">รหัสอีเมลโรงเรียน 7 หลัก (@mst.ac.th) *</label>
+                            <div class="flex rounded-xl overflow-hidden border border-gray-300 bg-white">
+                                <input id="sw-alumni-email" type="tel" maxlength="7" class="w-full p-2.5 text-sm font-black text-center text-mstPurple outline-none" placeholder="เช่น 6812345"
+                                    oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 7)">
+                                <span class="bg-purple-50 px-3 flex items-center text-[11px] font-bold text-mstPurple border-l border-purple-100">@mst.ac.th</span>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-3 gap-2">
+                            <div>
+                                <label class="font-bold text-gray-600 block mb-1">คำนำหน้า *</label>
+                                <select id="sw-alumni-prefix" class="glass-input text-xs py-2.5 px-2">
+                                    <option value="">-- เลือก --</option>
+                                    <option value="นาย">นาย</option>
+                                    <option value="น.ส.">น.ส.</option>
+                                </select>
+                            </div>
+                            <div class="col-span-2">
+                                <label class="font-bold text-gray-600 block mb-1">ชื่อจริง *</label>
+                                <input id="sw-alumni-fname" type="text" class="glass-input text-xs py-2.5" placeholder="ชื่อจริง">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="font-bold text-gray-600 block mb-1">นามสกุล *</label>
+                            <input id="sw-alumni-lname" type="text" class="glass-input text-xs py-2.5" placeholder="นามสกุล">
+                        </div>
+                        <div>
+                            <label class="font-bold text-gray-600 block mb-1">แผนการเรียน *</label>
+                            <select id="sw-alumni-plan" class="glass-input text-xs py-2.5">
+                                ${STUDY_PLANS_OPTIONS_HTML}
+                            </select>
+                        </div>
+                        <div>
+                            <label class="font-bold text-gray-600 block mb-1">รุ่นปีการศึกษาที่จบ (พ.ศ.) *</label>
+                            <input id="sw-alumni-year" type="tel" maxlength="4" class="glass-input text-xs py-2.5" placeholder="เช่น 2568"
+                                oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 4)">
+                        </div>
+                    </div>
+                `,
+                showCancelButton: true,
+                confirmButtonText: 'ขอรับรหัส OTP ทางอีเมล',
+                cancelButtonText: 'ยกเลิก',
+                confirmButtonColor: '#4C1D95',
+                customClass: { popup: 'swal-glass' },
+                preConfirm: () => {
+                    const emailPrefix = document.getElementById('sw-alumni-email').value.replace(/\D/g, '').trim();
+                    const prefix = document.getElementById('sw-alumni-prefix').value;
+                    const fname = document.getElementById('sw-alumni-fname').value.trim();
+                    const lname = document.getElementById('sw-alumni-lname').value.trim();
+                    const selectedPlan = document.getElementById('sw-alumni-plan').value;
+                    const yearStr = document.getElementById('sw-alumni-year').value.trim();
+
+                    if (!/^(\d{2})(\d{5})$/.test(emailPrefix)) {
+                        Swal.showValidationMessage('กรุณากรอกรหัสอีเมลโรงเรียนให้ครบ 7 หลัก (เช่น 6812345)');
+                        return false;
+                    }
+                    if (!prefix || !fname || !lname || !selectedPlan || !yearStr) {
+                        Swal.showValidationMessage('กรุณากรอกข้อมูลศิษย์เก่าให้ครบทุกช่อง');
+                        return false;
+                    }
+                    return {
+                        emailPrefix,
+                        std_id: emailPrefix.slice(-5),
+                        prefix,
+                        fname,
+                        lname,
+                        plan: selectedPlan,
+                        academicYear: yearStr,
+                        isAlumni: true
+                    };
+                }
+            });
+
+            if (!formValues) return;
+            await requestEmailOtp(formValues);
+        }
+
+        async function promptUnlink() {
+            const confirm = await Swal.fire({
+                icon: 'warning',
+                title: 'สลับบัญชีรหัสนักเรียน?',
+                text: 'ต้องการยกเลิกการผูกบัญชี LINE กับรหัสนักเรียนปัจจุบันหรือไม่ (หากผูกใหม่ต้องยืนยันรหัส OTP ทางอีเมลอีกครั้ง)',
+                showCancelButton: true,
+                confirmButtonText: 'ยืนยันยกเลิก',
+                cancelButtonText: 'ปิด',
+                confirmButtonColor: '#EF4444',
+                customClass: { popup: 'swal-glass' }
+            });
+            if (confirm.isConfirmed) {
+                setLoader('กำลังยกเลิกการผูกบัญชี...');
+                await apiCall({ action: 'unlinkLineAccount' });
+                clearAllUnifiedKeys();
+                location.reload();
+            }
+        }
+
+        window.onload = initApp;
+    </script>
+</body>
+</html>

@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#4C1D95">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <title>ระบบบริหารคลังพอร์ตโฟลิโอ (งานแนะแนว x สภานักเรียน ม.ส.ธ.)</title>
+    <link rel="icon" type="image/webp" href="/logo.webp">
+
+    <link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+    <script>
+        if (typeof tailwind !== 'undefined') {
+            tailwind.config = {
+                theme: {
+                    extend: {
+                        fontFamily: { sans: ['Anuphan', 'sans-serif'] },
+                        colors: {
+                            mstPurple: '#4C1D95',
+                            mstPurpleLight: '#EDE9FE',
+                            mstYellow: '#FBBF24',
+                            mstCream: '#FEFCF5',
+                            mstDark: '#1E1B4B'
+                        }
+                    }
+                }
+            };
+        }
+    </script>
+
+    <style>
+        .hidden { display: none !important; }
+        body {
+            font-family: 'Anuphan', sans-serif;
+            background: linear-gradient(135deg, #f3e5f5 0%, #fffde7 100%);
+            color: #1E293B;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .glass {
+            background: rgba(255, 255, 255, 0.88);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.95);
+            box-shadow: 0 10px 30px rgba(76, 29, 149, 0.06);
+        }
+        .form-input {
+            background: #FFFFFF;
+            border: 1px solid #CBD5E1;
+            border-radius: 0.85rem;
+            padding: 0.7rem 0.95rem;
+            font-size: 13px;
+            font-weight: 600;
+            width: 100%;
+            color: #1E293B;
+            transition: all 0.2s;
+        }
+        .form-input:focus {
+            border-color: #4C1D95;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(76, 29, 149, 0.12);
+        }
+        .form-input:disabled {
+            background: #F1F5F9;
+            color: #94A3B8;
+            cursor: not-allowed;
+        }
+        .loader-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .fade-in { animation: fadeIn 0.25s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="pb-16 antialiased">
+
+    <!-- Global Loader -->
+    <div id="globalLoader" class="loader-overlay hidden px-6 text-center">
+        <i class="fas fa-circle-notch fa-spin text-5xl text-mstPurple mb-4 drop-shadow-md"></i>
+        <p class="text-sm sm:text-base font-bold text-mstPurple max-w-xs mx-auto leading-relaxed" id="loaderText">กำลังตรวจสอบสิทธิ์กับเซิร์ฟเวอร์...</p>
+    </div>
+
+    <!-- Top Navbar -->
+    <nav class="glass sticky top-0 z-40 px-4 sm:px-8 h-20 flex items-center justify-between border-b border-gray-200/80">
+        <div class="flex items-center gap-3.5 min-w-0">
+            <img src="/logo.webp" style="width: 46px; height: 46px;" class="w-11 h-11 object-contain drop-shadow-sm shrink-0" alt="Logo">
+            <div class="min-w-0">
+                <div class="flex items-center gap-2">
+                    <h1 class="font-black text-mstPurple text-base sm:text-xl leading-tight truncate">PORTFOLIO ADMIN</h1>
+                    <span class="bg-mstYellow text-mstDark text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase shrink-0">SC x GUIDANCE</span>
+                </div>
+                <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest truncate">ระบบบริหารคลังพอร์ตโฟลิโอ สภานักเรียน x งานแนะแนว</p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-2 shrink-0">
+            <a href="/portfolio" class="bg-purple-50 hover:bg-purple-100 text-mstPurple border border-purple-200 font-bold px-3.5 py-2 rounded-xl text-xs transition flex items-center gap-1.5">
+                <i class="fa-solid fa-book-open"></i> <span class="hidden sm:inline">หน้านักเรียน</span>
+            </a>
+            <div id="adminAuthBox" class="hidden items-center gap-2">
+                <div class="hidden md:flex items-center gap-2 bg-white px-3.5 py-1.5 rounded-full border border-purple-100 shadow-2xs">
+                    <img id="adminPhoto" src="/logo.webp" style="width: 26px; height: 26px;" class="w-6 h-6 rounded-full object-cover" onerror="this.src='/logo.webp'">
+                    <div class="text-left pr-1">
+                        <p id="adminBadgeName" class="text-xs font-black text-gray-900 leading-none">-</p>
+                        <p id="adminBadgeRole" class="text-[9px] font-bold text-emerald-600 mt-0.5">VERIFIED ADMIN</p>
+                    </div>
+                </div>
+                <button onclick="openPermissionsModal()" class="bg-white hover:bg-purple-50 text-mstPurple border border-purple-200 font-bold px-3.5 py-2 rounded-xl text-xs transition flex items-center gap-1.5" title="ตั้งค่าสิทธิ์อีเมลครูงานแนะแนวและผู้ดูแล">
+                    <i class="fa-solid fa-user-gear"></i> <span class="hidden sm:inline">ตั้งค่าสิทธิ์</span>
+                </button>
+                <button onclick="logoutAdminPort()" class="bg-red-50 hover:bg-red-500 text-red-600 hover:text-white border border-red-200 font-bold px-3.5 py-2 rounded-xl text-xs transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-power-off"></i> <span class="hidden sm:inline">ออกระบบ</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Login Overlay (Server-Side Verified Authentication Only) -->
+    <div id="loginOverlay" class="fixed inset-0 bg-slate-900/45 z-50 flex items-center justify-center p-4 backdrop-blur-md">
+        <div class="glass bg-white/95 p-6 sm:p-8 rounded-[2.5rem] w-full max-w-md text-center shadow-2xl border border-white space-y-5 fade-in">
+            <img src="/logo.webp" style="width: 72px; height: 72px;" class="w-18 h-18 mx-auto drop-shadow-md object-contain" alt="MSTSC">
+            <div>
+                <span class="bg-purple-50 text-mstPurple text-[10px] font-black px-3 py-1 rounded-full border border-purple-100 uppercase tracking-wider">Strict Server-Side Security</span>
+                <h2 class="text-xl font-black text-mstDark mt-2">ยืนยันตัวตนผู้ดูแลคลังพอร์ตโฟลิโอ</h2>
+                <p class="text-xs text-gray-500 font-medium mt-0.5">สงวนสิทธิ์เฉพาะครูงานแนะแนว และคณะกรรมการสภานักเรียน</p>
+            </div>
+
+            <!-- สลับโหมดยืนยันตัวตน -->
+            <div class="grid grid-cols-2 gap-1.5 bg-gray-100 p-1 rounded-xl text-xs font-bold">
+                <button type="button" id="tabLoginGoogle" onclick="switchLoginMode('google')" class="py-2.5 rounded-lg bg-mstPurple text-white transition">
+                    <i class="fa-brands fa-google mr-1"></i> อีเมลครู / แอดมิน
+                </button>
+                <button type="button" id="tabLoginCouncil" onclick="switchLoginMode('council')" class="py-2.5 rounded-lg text-gray-600 transition">
+                    <i class="fa-solid fa-id-card-clip mr-1"></i> สภานักเรียน (REGIS)
+                </button>
+            </div>
+
+            <!-- วิธีที่ 1: Google OAuth 2.0 (ตรวจ Token และสิทธิ์อีเมลที่เซิร์ฟเวอร์) -->
+            <div id="boxLoginGoogle" class="space-y-4 py-2">
+                <div class="bg-purple-50/70 p-4 rounded-2xl border border-purple-100 text-xs text-gray-600 leading-relaxed text-left">
+                    <p class="font-black text-mstPurple mb-1"><i class="fa-solid fa-shield-halved mr-1"></i> การตรวจสอบสิทธิ์ด้วยบัญชี Google:</p>
+                    <ul class="list-disc list-inside space-y-1 text-[11px]">
+                        <li><b>ครูงานแนะแนว / ครูที่ปรึกษา:</b> ใช้อีเมลที่ลงทะเบียนสิทธิ์ผู้ดูแลไว้ในระบบ</li>
+                        <li><b>สภานักเรียน:</b> ใช้อีเมลกลาง <code class="text-mstPurple font-bold">studentcouncil@mst.ac.th</code> หรืออีเมล <code class="text-mstPurple font-bold">@mst.ac.th</code> ที่มีรายชื่อในระบบรายงานตัว REGIS</li>
+                    </ul>
+                </div>
+
+                <div class="flex justify-center py-2">
+                    <div id="g_id_onload"
+                         data-client_id="1055496557-rm1petnl1gtd6c1ed01q9o6k880ik2ta.apps.googleusercontent.com"
+                         data-callback="handleAdminGoogleLogin"
+                         data-auto_prompt="false"></div>
+                    <div class="g_id_signin" data-type="standard" data-shape="pill" data-theme="filled_blue" data-text="signin_with" data-size="large" data-logo_alignment="left"></div>
+                </div>
+            </div>
+
+            <!-- วิธีที่ 2: ยืนยันตัวตน 2 ชั้นผ่านฐานข้อมูล REGIS บนเซิร์ฟเวอร์ -->
+            <form id="boxLoginCouncil" onsubmit="loginWithCouncilRegis(event)" class="hidden space-y-3.5 text-left">
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">
+                        <i class="fa-solid fa-id-badge text-mstPurple mr-1"></i> รหัสประจำตัวนักเรียน *
+                    </label>
+                    <input type="tel" id="scStdId" maxlength="5" required placeholder="เช่น 12345" class="form-input text-center text-base font-black tracking-[0.2em]">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">
+                        <i class="fa-solid fa-lock text-mstPurple mr-1"></i> เลขประจำตัวประชาชน *
+                    </label>
+                    <div class="relative">
+                        <input type="password" id="scIdCard" maxlength="13" inputmode="numeric" required placeholder="ระบุเลขบัตรประชาชน 13 หลัก" class="form-input text-center text-sm font-bold tracking-widest pr-10">
+                        <button type="button" onclick="toggleRegisIdVisibility()" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-mstPurple">
+                            <i id="regisEyeIcon" class="fa-solid fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="bg-amber-50/80 p-3 rounded-xl border border-amber-200 text-[11px] text-amber-900 leading-relaxed">
+                    <i class="fa-solid fa-circle-info text-amber-600 mr-1"></i> เซิร์ฟเวอร์จะตรวจสอบรหัสนักเรียนคู่กับเลขประจำตัวประชาชน 13 หลักจากฐานข้อมูล <b>REGIS</b> แบบตรงกันทุกหลักก่อนอนุญาตให้เข้าถึงข้อมูล
+                </div>
+                <button type="submit" class="w-full bg-gradient-to-r from-mstPurple to-purple-800 text-white font-bold py-3.5 rounded-xl text-xs shadow-md hover:shadow-lg transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-user-check text-mstYellow"></i> ตรวจสอบสิทธิ์กับฐานข้อมูล REGIS
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Dashboard -->
+    <main id="dashboardMain" class="hidden max-w-7xl mx-auto px-4 sm:px-6 pt-6 space-y-6">
+
+        <!-- แถบสถิติภาพรวม -->
+        <div class="grid grid-cols-2 lg:grid-cols-5 gap-3.5">
+            <div onclick="setQuickStatus('all')" class="glass p-4 rounded-2xl cursor-pointer hover:border-mstPurple transition">
+                <p class="text-[11px] font-bold text-gray-500">พอร์ตทั้งหมดในคลัง</p>
+                <p class="text-2xl font-black text-mstDark mt-1" id="stTotal">0</p>
+                <p class="text-[10px] font-bold text-mstPurple mt-0.5">คลิกดูทั้งหมด</p>
+            </div>
+            <div onclick="setQuickStatus('PENDING')" class="glass p-4 rounded-2xl cursor-pointer hover:border-amber-400 transition">
+                <p class="text-[11px] font-bold text-amber-700">รอตรวจสอบ (Pending)</p>
+                <p class="text-2xl font-black text-amber-600 mt-1" id="stPending">0</p>
+                <p class="text-[10px] font-bold text-amber-600 mt-0.5">คลิกเพื่อตรวจอนุมัติ</p>
+            </div>
+            <div onclick="setQuickStatus('VERIFIED')" class="glass p-4 rounded-2xl cursor-pointer hover:border-emerald-400 transition">
+                <p class="text-[11px] font-bold text-emerald-700">อนุมัติแล้ว (Verified)</p>
+                <p class="text-2xl font-black text-emerald-600 mt-1" id="stVerified">0</p>
+                <p class="text-[10px] font-bold text-emerald-600 mt-0.5">แสดงผลให้น้องๆ ดูแล้ว</p>
+            </div>
+            <div onclick="setQuickStatus('REJECTED')" class="glass p-4 rounded-2xl cursor-pointer hover:border-rose-400 transition">
+                <p class="text-[11px] font-bold text-rose-700">ส่งกลับแก้ไข</p>
+                <p class="text-2xl font-black text-rose-600 mt-1" id="stRejected">0</p>
+                <p class="text-[10px] font-bold text-rose-500 mt-0.5">ไม่ผ่าน PDPA / ลิงก์เสีย</p>
+            </div>
+            <div class="glass p-4 rounded-2xl col-span-2 lg:col-span-1 flex flex-col justify-between">
+                <p class="text-[11px] font-bold text-gray-500">ยอดเข้าชมรวม (Views)</p>
+                <p class="text-2xl font-black text-mstPurple mt-1" id="stViews">0</p>
+                <p class="text-[10px] font-bold text-gray-400 mt-0.5">จำนวนครั้งที่นักเรียนเปิดศึกษา</p>
+            </div>
+        </div>
+
+        <!-- แถบปุ่มเครื่องมือและตัวกรองค้นหา -->
+        <div class="glass p-5 rounded-[1.75rem] space-y-4">
+            <div class="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100 pb-3.5">
+                <div>
+                    <h2 class="text-base font-black text-mstPurple flex items-center gap-2">
+                        <i class="fa-solid fa-folder-tree text-mstYellow"></i> จัดการและตรวจสอบเล่ม Portfolio รุ่นพี่
+                    </h2>
+                    <p class="text-xs text-gray-500">ตรวจสอบการเบลอข้อมูลส่วนบุคคล (PDPA) และความถูกต้องของลิงก์ก่อนกดอนุมัติ</p>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <button onclick="openAddByStaffModal()" class="bg-mstPurple hover:bg-purple-800 text-white font-bold px-4 py-2.5 rounded-xl text-xs shadow-sm transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-plus-circle text-mstYellow"></i> เพิ่มพอร์ตรุ่นพี่ (อนุมัติทันที)
+                    </button>
+                    <button onclick="exportPortfoliosCSV()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2.5 rounded-xl text-xs shadow-sm transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-file-excel"></i> ส่งออกรายงาน Excel (CSV)
+                    </button>
+                    <button onclick="fetchAdminPortfolios(true)" class="bg-white hover:bg-purple-50 text-mstPurple border border-purple-200 font-bold px-3.5 py-2.5 rounded-xl text-xs transition">
+                        <i class="fa-solid fa-rotate-right mr-1"></i> รีเฟรช
+                    </button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                <input type="text" id="admSearch" oninput="renderAdminList()" class="form-input" placeholder="ค้นหาชื่อรุ่นพี่, รหัส, มหาลัย, คณะ...">
+                <select id="admStatusFilter" onchange="renderAdminList()" class="form-input">
+                    <option value="all">ทุกสถานะการตรวจสอบ</option>
+                    <option value="PENDING">เฉพาะ รอตรวจสอบ (Pending)</option>
+                    <option value="VERIFIED">เฉพาะ อนุมัติแล้ว (Verified)</option>
+                    <option value="REJECTED">เฉพาะ ส่งกลับแก้ไข (Rejected)</option>
+                </select>
+                <select id="admRoundFilter" onchange="renderAdminList()" class="form-input">
+                    <option value="all">ทุกรอบ TCAS</option>
+                    <option value="รอบ 1 Portfolio">รอบ 1 Portfolio</option>
+                    <option value="รอบ 2 Quota">รอบ 2 Quota</option>
+                    <option value="รอบ 3 Admission">รอบ 3 Admission</option>
+                    <option value="โครงการพิเศษ">โครงการพิเศษ</option>
+                </select>
+                <select id="admTrackFilter" onchange="renderAdminList()" class="form-input">
+                    <option value="all">ทุกสายการเรียน</option>
+                    <option value="ห้องเรียนพิเศษ วิทยาศาสตร์ - คณิตศาสตร์ (S.M.)">S.M. (วิทย์-คณิต)</option>
+                    <option value="ห้องเรียนพิเศษ วิทยาศาสตร์ - คณิตศาสตร์ - เทคโนโลยี (S.M.T.)">S.M.T. (เทคโนโลยี)</option>
+                    <option value="ห้องเรียนพิเศษ วิทยาศาสตร์ - คณิตศาสตร์ - ภาษาอังกฤษ (S.M.E.)">S.M.E. (อังกฤษ)</option>
+                    <option value="วิทยาศาสตร์ - คณิตศาสตร์">วิทยาศาสตร์ - คณิตศาสตร์</option>
+                    <option value="คณิตศาสตร์ - ภาษาอังกฤษ">คณิตศาสตร์ - ภาษาอังกฤษ</option>
+                    <option value="ศิลป์ภาษาจีน">ศิลป์ภาษาจีน</option>
+                    <option value="ภาษาไทย - สังคมศึกษา">ภาษาไทย - สังคมศึกษา</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- รายการการ์ดสำหรับตรวจและจัดการ -->
+        <div id="adminPortGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+
+    </main>
+
+    <!-- Modal ตรวจพรีวิว PDF แบบเต็มตา (Split-Screen Preview & Verify Modal) -->
+    <div id="inspectModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-6">
+        <div class="glass bg-white rounded-[2rem] w-full max-w-5xl max-h-[92vh] flex flex-col overflow-hidden shadow-2xl border border-white fade-in">
+            <div class="px-6 py-4 bg-white border-b border-gray-100 flex items-center justify-between gap-3">
+                <div>
+                    <h3 class="text-base sm:text-lg font-black text-mstPurple" id="inspTitle">ตรวจสอบเล่ม Portfolio</h3>
+                    <p class="text-xs text-gray-500 font-bold" id="inspSubTitle"></p>
+                </div>
+                <button onclick="closeInspectModal()" class="w-9 h-9 rounded-full bg-gray-100 hover:bg-red-50 text-gray-500 hover:text-red-500 flex items-center justify-center">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="p-5 overflow-y-auto flex-1 grid grid-cols-1 lg:grid-cols-12 gap-5 bg-gray-50/70">
+                <div class="lg:col-span-7 flex flex-col space-y-2">
+                    <div class="flex items-center justify-between text-xs font-bold text-gray-600">
+                        <span><i class="fa-solid fa-file-pdf text-red-500 mr-1"></i> ตัวอย่างไฟล์ PDF</span>
+                        <a id="inspDirectLink" href="#" target="_blank" class="text-mstPurple hover:underline"><i class="fa-solid fa-up-right-from-square mr-1"></i> เปิดลิงก์ต้นฉบับในแท็บใหม่</a>
+                    </div>
+                    <div class="w-full h-[420px] bg-mstDark rounded-2xl overflow-hidden border border-gray-300">
+                        <iframe id="inspPdfFrame" src="" class="w-full h-full border-0"></iframe>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-5 flex flex-col justify-between space-y-4">
+                    <div id="inspDetailsBox" class="bg-white p-4 rounded-2xl border border-gray-200 space-y-3 text-xs"></div>
+                    <div id="inspActionButtons" class="space-y-2.5 pt-2 border-t border-gray-200"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal เพิ่มพอร์ตโดยครูแนะแนว / สภานักเรียน (ดึงรายชื่อมหาวิทยาลัยจาก MyTCAS อัตโนมัติ) -->
+    <div id="staffAddModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="glass bg-white rounded-[2rem] w-full max-w-lg max-h-[92vh] flex flex-col overflow-hidden shadow-2xl border border-white fade-in">
+            <div class="px-6 py-4 bg-white border-b border-gray-100 flex items-center justify-between">
+                <h3 class="text-base font-black text-mstPurple"><i class="fa-solid fa-folder-plus text-mstYellow mr-1.5"></i> เพิ่ม Portfolio เข้าระบบ (อนุมัติทันที)</h3>
+                <button onclick="document.getElementById('staffAddModal').classList.add('hidden')" class="w-8 h-8 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="p-6 overflow-y-auto space-y-3 text-xs">
+                <div class="grid grid-cols-3 gap-2">
+                    <input type="text" id="st_std_id" maxlength="5" class="form-input" placeholder="รหัสนักเรียน (ถ้ามี)">
+                    <input type="text" id="st_senior_name" class="form-input col-span-2" placeholder="ชื่อ-นามสกุลรุ่นพี่เจ้าของพอร์ต *">
+                </div>
+
+                <div>
+                    <label class="block text-[11px] font-black text-mstPurple mb-1">ระบบสถาบันอุดมศึกษา *</label>
+                    <select id="st_sys_type" onchange="toggleStaffTcasMode()" class="form-input">
+                        <option value="TCAS" selected>มหาวิทยาลัยในระบบ TCAS (ดึงข้อมูลจาก MyTCAS)</option>
+                        <option value="MANUAL">พิมพ์ชื่อมหาวิทยาลัยและคณะเอง</option>
+                    </select>
+                </div>
+
+                <div id="st_tcas_box" class="bg-purple-50/60 p-3 rounded-2xl border border-purple-100 space-y-2">
+                    <select id="st_tcas_uni" onchange="populateStaffCampuses()" class="form-input">
+                        <option value="">-- เลือกมหาวิทยาลัย --</option>
+                    </select>
+                    <select id="st_tcas_campus" onchange="populateStaffFaculties()" class="form-input" disabled>
+                        <option value="">-- เลือกวิทยาเขต --</option>
+                    </select>
+                    <select id="st_tcas_fac" onchange="populateStaffMajors()" class="form-input" disabled>
+                        <option value="">-- เลือกคณะ / หลักสูตร --</option>
+                    </select>
+                    <select id="st_tcas_major" class="form-input" disabled>
+                        <option value="">-- เลือกสาขาวิชา --</option>
+                    </select>
+                </div>
+
+                <div id="st_manual_box" class="hidden space-y-2">
+                    <input type="text" id="st_uni" class="form-input" placeholder="ชื่อมหาวิทยาลัย *">
+                    <input type="text" id="st_fac" class="form-input" placeholder="ชื่อคณะและสาขาวิชา *">
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                    <select id="st_round" class="form-input">
+                        <option value="รอบ 1 Portfolio">รอบ 1 Portfolio</option>
+                        <option value="รอบ 2 Quota">รอบ 2 Quota</option>
+                        <option value="รอบ 3 Admission">รอบ 3 Admission</option>
+                        <option value="โครงการพิเศษ">โครงการพิเศษ</option>
+                    </select>
+                    <input type="text" id="st_year" class="form-input" placeholder="รุ่นปี (เช่น 2569)" value="2569">
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <select id="st_track" class="form-input">
+                        <option value="ห้องเรียนพิเศษ วิทยาศาสตร์ - คณิตศาสตร์ (S.M.)">S.M. (วิทย์-คณิต)</option>
+                        <option value="ห้องเรียนพิเศษ วิทยาศาสตร์ - คณิตศาสตร์ - เทคโนโลยี (S.M.T.)">S.M.T. (เทคโนโลยี)</option>
+                        <option value="ห้องเรียนพิเศษ วิทยาศาสตร์ - คณิตศาสตร์ - ภาษาอังกฤษ (S.M.E.)">S.M.E. (อังกฤษ)</option>
+                        <option value="วิทยาศาสตร์ - คณิตศาสตร์">วิทยาศาสตร์ - คณิตศาสตร์</option>
+                        <option value="คณิตศาสตร์ - ภาษาอังกฤษ">คณิตศาสตร์ - ภาษาอังกฤษ</option>
+                        <option value="ศิลป์ภาษาจีน">ศิลป์ภาษาจีน</option>
+                        <option value="ภาษาไทย - สังคมศึกษา">ภาษาไทย - สังคมศึกษา</option>
+                    </select>
+                    <input type="text" id="st_gpax" class="form-input" placeholder="GPAX (เช่น 3.85)">
+                </div>
+                <input type="text" id="st_project" class="form-input" placeholder="ชื่อโครงการที่ใช้ยื่น">
+                <textarea id="st_highlights" rows="2" class="form-input" placeholder="ผลงานเด่นในเล่มพอร์ต..."></textarea>
+                <textarea id="st_tips" rows="2" class="form-input" placeholder="เทคนิคการเตรียมตัว / รีวิวสัมภาษณ์..."></textarea>
+                <input type="url" id="st_pdf_url" class="form-input" placeholder="วางลิงก์ไฟล์ PDF บน Google Drive (ตั้งค่าเปิดอ่านทุกคน) *">
+
+                <button onclick="submitStaffPortfolio()" class="w-full bg-mstPurple hover:bg-purple-800 text-white font-bold py-3.5 rounded-xl text-sm shadow-md mt-2">
+                    <i class="fa-solid fa-check-circle text-mstYellow mr-1"></i> บันทึกและเผยแพร่ทันที
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal จัดการสิทธิ์อีเมลครูงานแนะแนวและแอดมิน -->
+    <div id="permissionsModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="glass bg-white rounded-[2rem] w-full max-w-md overflow-hidden shadow-2xl border border-white fade-in">
+            <div class="px-6 py-4 bg-white border-b border-gray-100 flex items-center justify-between">
+                <h3 class="text-base font-black text-mstPurple"><i class="fa-solid fa-user-shield text-mstYellow mr-1.5"></i> จัดการสิทธิ์อีเมลครูแนะแนว / แอดมิน</h3>
+                <button onclick="document.getElementById('permissionsModal').classList.add('hidden')" class="w-8 h-8 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="p-6 space-y-4 text-xs">
+                <p class="text-gray-600 leading-relaxed">
+                    ระบุอีเมลของคุณครูงานแนะแนว ครูที่ปรึกษา หรือผู้ดูแลระบบที่มีสิทธิ์เข้าใช้งานหน้านี้ด้วยปุ่ม <b>Sign in with Google</b> (พิมพ์แยกบรรทัดละ 1 อีเมล)
+                </p>
+                <div class="flex gap-2">
+                    <input type="email" id="newGuidanceEmailInput" onkeydown="if(event.key==='Enter'){event.preventDefault();addGuidanceEmailItem();}" class="form-input" placeholder="พิมพ์อีเมล เช่น teacher@mst.ac.th">
+                    <button type="button" onclick="addGuidanceEmailItem()" class="bg-mstPurple text-white font-bold px-4 rounded-xl shrink-0">
+                        + เพิ่ม
+                    </button>
+                </div>
+                <div id="guidanceEmailTags" class="flex flex-wrap gap-1.5"></div>
+                <textarea id="guidanceEmailsTextarea" rows="4" oninput="renderGuidanceEmailTags()" class="form-input font-mono text-xs" placeholder="studentcouncil@mst.ac.th&#10;tassanee@mst.ac.th"></textarea>
+                <button onclick="saveGuidanceEmails()" class="w-full bg-gradient-to-r from-mstPurple to-purple-800 text-white font-bold py-3.5 rounded-xl text-sm shadow-md">
+                    <i class="fa-solid fa-floppy-disk mr-1"></i> บันทึกรายชื่อผู้มีสิทธิ์
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_PORTFOLIO_URL = "https://admission-backend-592123078141.asia-southeast1.run.app/api/portfolio";
+        const MYTCAS_COURSES_URL = "https://my-tcas.s3.ap-southeast-1.amazonaws.com/mytcas/courses.json";
+        const PORT_ADMIN_AUTH_KEY = "mstsc_portfolio_verified_admin_v2";
+        const PORTAL_TOKEN_KEY = "mstsc_portal_admin_id_token";
+        const PORTAL_INFO_KEY = "mstsc_portal_admin_info";
+
+        let adminCredentials = null; // เก็บเฉพาะ Token หรือรหัสที่ผ่านการตรวจสอบจากเซิร์ฟเวอร์จริงแล้วเท่านั้น
+        let allAdminPortfolios = [];
+        let allowedAdminEmails = [];
+        let staffTcasTree = {};
+
+        function setLoader(text) {
+            document.getElementById('loaderText').innerText = text || 'กำลังตรวจสอบข้อมูลกับเซิร์ฟเวอร์...';
+            document.getElementById('globalLoader').classList.remove('hidden');
+        }
+
+        function hideLoader() {
+            document.getElementById('globalLoader').classList.add('hidden');
+        }
+
+        function switchLoginMode(mode) {
+            const isGoogle = mode === 'google';
+            document.getElementById('tabLoginGoogle').className = isGoogle ? "py-2.5 rounded-lg bg-mstPurple text-white transition" : "py-2.5 rounded-lg text-gray-600 transition";
+            document.getElementById('tabLoginCouncil').className = !isGoogle ? "py-2.5 rounded-lg bg-mstPurple text-white transition" : "py-2.5 rounded-lg text-gray-600 transition";
+            document.getElementById('boxLoginGoogle').classList.toggle('hidden', !isGoogle);
+            document.getElementById('boxLoginCouncil').classList.toggle('hidden', isGoogle);
+        }
+
+        function toggleRegisIdVisibility() {
+            const inp = document.getElementById('scIdCard');
+            const ic = document.getElementById('regisEyeIcon');
+            if (inp.type === 'password') {
+                inp.type = 'text';
+                ic.classList.replace('fa-eye', 'fa-eye-slash');
+            } else {
+                inp.type = 'password';
+                ic.classList.replace('fa-eye-slash', 'fa-eye');
+            }
+        }
+
+        function parseJwt(token) {
+            const base64Url = token.split('.')[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            return JSON.parse(decodeURIComponent(window.atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')));
+        }
+
+        // ส่งหลักฐานการยืนยันตัวตน (Google ID Token หรือ REGIS 2FA) ไปให้เซิร์ฟเวอร์ตรวจสอบทุกคำสั่ง
+        async function callAdminPortApi(payload) {
+            const idToken = (adminCredentials && adminCredentials.idToken) ? adminCredentials.idToken : "";
+            const res = await fetch(`${API_PORTFOLIO_URL}?t=${Date.now()}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': idToken ? `Bearer ${idToken}` : ''
+                },
+                body: JSON.stringify({
+                    ...payload,
+                    idToken: idToken || undefined,
+                    adminAuth: (adminCredentials && adminCredentials.regisAuth) ? adminCredentials.regisAuth : undefined
+                })
+            });
+            return await res.json();
+        }
+
+        // 1. เมื่อกดล็อกอินด้วย Google Sign-In
+        window.handleAdminGoogleLogin = async function(response) {
+            try {
+                const idToken = response.credential;
+                const payload = parseJwt(idToken);
+                await verifyAdminWithBackend({
+                    mode: 'google',
+                    idToken,
+                    email: payload.email,
+                    name: payload.name,
+                    picture: payload.picture
+                });
+            } catch (e) {
+                Swal.fire('ข้อผิดพลาด', 'ไม่สามารถเข้าสู่ระบบด้วย Google ได้', 'error');
+            }
+        };
+
+        // 2. เมื่อกดล็อกอินด้วยรหัสสภานักเรียน 5 หลัก + เลขบัตรประชาชน 13 หลักใน REGIS
+        async function loginWithCouncilRegis(e) {
+            e.preventDefault();
+            const std_id = document.getElementById('scStdId').value.replace(/\D/g, '').trim();
+            const id_card = document.getElementById('scIdCard').value.replace(/\D/g, '').trim();
+
+            if (std_id.length !== 5) {
+                return Swal.fire({ icon: 'warning', title: 'ข้อมูลไม่ครบ', text: 'กรุณาระบุรหัสนักเรียน 5 หลัก', confirmButtonColor: '#4C1D95' });
+            }
+            if (id_card.length !== 13) {
+                return Swal.fire({ icon: 'warning', title: 'ข้อมูลไม่ครบ', text: 'กรุณาระบุเลขประจำตัวประชาชน 13 หลัก', confirmButtonColor: '#4C1D95' });
+            }
+
+            await verifyAdminWithBackend({
+                mode: 'regis',
+                regisAuth: { std_id, id_card }
+            });
+        }
+
+        // ส่งไปให้เซิร์ฟเวอร์ Cloud Run ตรวจสอบสิทธิ์จริงก่อนเปิดหน้า Dashboard
+        async function verifyAdminWithBackend(credObj) {
+            setLoader('กำลังตรวจสอบสิทธิ์ผู้ดูแลระบบกับเซิร์ฟเวอร์...');
+            adminCredentials = credObj;
+            try {
+                const res = await callAdminPortApi({
+                    action: 'verifyPortfolioAdmin',
+                    email: credObj.email || undefined
+                });
+                hideLoader();
+
+                if (!res || res.status !== 'success' || !res.viewer || !res.viewer.isAdminOrDj) {
+                    adminCredentials = null;
+                    sessionStorage.removeItem(PORT_ADMIN_AUTH_KEY);
+                    return Swal.fire({
+                        icon: 'error',
+                        title: 'ปฏิเสธการเข้าถึง!',
+                        text: (res && res.message) ? res.message : 'บัญชีหรือข้อมูลของคุณไม่มีสิทธิ์เป็นผู้ดูแลคลังพอร์ตโฟลิโอ',
+                        confirmButtonColor: '#4C1D95'
+                    });
+                }
+
+                // ผ่านการตรวจสอบจากเซิร์ฟเวอร์จริง
+                adminCredentials.verifiedName = res.viewer.fullName;
+                adminCredentials.verifiedRole = res.viewer.level || 'Admin';
+                sessionStorage.setItem(PORT_ADMIN_AUTH_KEY, JSON.stringify(adminCredentials));
+
+                allAdminPortfolios = res.portfolios || [];
+                allowedAdminEmails = res.portfolioAdminEmails || [];
+
+                document.getElementById('loginOverlay').classList.add('hidden');
+                document.getElementById('dashboardMain').classList.remove('hidden');
+                const authBox = document.getElementById('adminAuthBox');
+                authBox.classList.remove('hidden');
+                authBox.classList.add('flex');
+
+                document.getElementById('adminBadgeName').innerText = adminCredentials.verifiedName;
+                document.getElementById('adminBadgeRole').innerText = `${adminCredentials.verifiedRole} • VERIFIED`;
+                if (credObj.picture) {
+                    document.getElementById('adminPhoto').src = credObj.picture;
+                }
+
+                updateDashboardStats();
+                renderAdminList();
+            } catch (err) {
+                hideLoader();
+                adminCredentials = null;
+                Swal.fire('ข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์เพื่อตรวจสอบสิทธิ์ได้', 'error');
+            }
+        }
+
+        function logoutAdminPort() {
+            Swal.fire({
+                title: 'ออกจากระบบผู้ดูแล?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#EF4444',
+                confirmButtonText: 'ออกจากระบบ',
+                cancelButtonText: 'ยกเลิก'
+            }).then(r => {
+                if (r.isConfirmed) {
+                    sessionStorage.removeItem(PORT_ADMIN_AUTH_KEY);
+                    adminCredentials = null;
+                    location.reload();
+                }
+            });
+        }
+
+        async function fetchAdminPortfolios(showSpin = false) {
+            if (showSpin) setLoader('กำลังดึงข้อมูลพอร์ตโฟลิโอล่าสุด...');
+            try {
+                const res = await callAdminPortApi({ action: 'verifyPortfolioAdmin' });
+                if (res && res.status === 'success') {
+                    allAdminPortfolios = res.portfolios || [];
+                    if (res.portfolioAdminEmails) allowedAdminEmails = res.portfolioAdminEmails;
+                    updateDashboardStats();
+                    renderAdminList();
+                }
+            } catch (e) {
+                console.error(e);
+            }
+            if (showSpin) hideLoader();
+        }
+
+        function updateDashboardStats() {
+            let pending = 0, verified = 0, rejected = 0, views = 0;
+            allAdminPortfolios.forEach(p => {
+                if (p.status === 'VERIFIED') verified++;
+                else if (p.status === 'REJECTED') rejected++;
+                else pending++;
+                views += (parseInt(p.viewsCount, 10) || 0);
+            });
+            document.getElementById('stTotal').innerText = allAdminPortfolios.length;
+            document.getElementById('stPending').innerText = pending;
+            document.getElementById('stVerified').innerText = verified;
+            document.getElementById('stRejected').innerText = rejected;
+            document.getElementById('stViews').innerText = views.toLocaleString();
+        }
+
+        function setQuickStatus(st) {
+            document.getElementById('admStatusFilter').value = st;
+            renderAdminList();
+        }
+
+        function renderAdminList() {
+            const kw = document.getElementById('admSearch').value.trim().toLowerCase();
+            const st = document.getElementById('admStatusFilter').value;
+            const rd = document.getElementById('admRoundFilter').value;
+            const tr = document.getElementById('admTrackFilter').value;
+
+            const filtered = allAdminPortfolios.filter(p => {
+                if (st !== 'all' && p.status !== st) return false;
+                if (rd !== 'all' && p.tcasRound !== rd) return false;
+                if (tr !== 'all' && p.track !== tr) return false;
+                if (kw) {
+                    const hay = `${p.seniorName} ${p.seniorStdId || ''} ${p.university} ${p.faculty} ${p.projectName}`.toLowerCase();
+                    if (!hay.includes(kw)) return false;
+                }
+                return true;
+            });
+
+            const grid = document.getElementById('adminPortGrid');
+            if (filtered.length === 0) {
+                grid.innerHTML = `<div class="col-span-full glass p-12 rounded-[2rem] text-center text-gray-400 font-bold text-sm"><i class="fa-solid fa-folder-open text-3xl mb-2 block opacity-40"></i>ไม่พบรายการ Portfolio ในหมวดนี้</div>`;
+                return;
+            }
+
+            grid.innerHTML = filtered.map(p => {
+                const encoded = encodeURIComponent(JSON.stringify(p));
+                let badge = '';
+                if (p.status === 'VERIFIED') badge = `<span class="bg-emerald-100 text-emerald-700 border border-emerald-200 px-2.5 py-1 rounded-full text-[10px] font-black"><i class="fa-solid fa-check-circle mr-1"></i>อนุมัติแล้ว</span>`;
+                else if (p.status === 'REJECTED') badge = `<span class="bg-rose-100 text-rose-700 border border-rose-200 px-2.5 py-1 rounded-full text-[10px] font-black"><i class="fa-solid fa-ban mr-1"></i>ส่งกลับแก้ไข</span>`;
+                else badge = `<span class="bg-amber-100 text-amber-800 border border-amber-200 px-2.5 py-1 rounded-full text-[10px] font-black animate-pulse"><i class="fa-solid fa-clock mr-1"></i>รอตรวจสอบ</span>`;
+
+                return `
+                    <div class="glass p-5 rounded-[1.75rem] flex flex-col justify-between space-y-3 border border-white hover:border-mstPurple/40 transition">
+                        <div class="space-y-2">
+                            <div class="flex items-center justify-between gap-2">
+                                <span class="text-[11px] font-black text-mstPurple bg-purple-50 px-3 py-1 rounded-lg border border-purple-100">${p.tcasRound} • รุ่น ${p.academicYear || '2569'}</span>
+                                ${badge}
+                            </div>
+                            <h3 class="text-base font-black text-gray-900 leading-snug">${p.university}</h3>
+                            <p class="text-xs font-bold text-mstPurple">${p.faculty}</p>
+                            <div class="bg-gray-50 p-3 rounded-xl border border-gray-100 text-xs space-y-1">
+                                <p><b>ผู้ส่ง:</b> ${p.seniorName} ${p.seniorStdId ? `(รหัส ${p.seniorStdId})` : ''}</p>
+                                <p><b>สายการเรียน:</b> ${p.track || '-'} | <b>GPAX:</b> ${p.gpaxRange || '-'}</p>
+                                <p><b>โครงการ:</b> ${p.projectName || '-'}</p>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-wrap gap-2 pt-2 border-t border-gray-100">
+                            <button onclick="openInspectModal('${encoded}')" class="flex-1 bg-mstPurple hover:bg-purple-800 text-white font-bold py-2.5 px-3 rounded-xl text-xs transition flex items-center justify-center gap-1.5">
+                                <i class="fa-solid fa-magnifying-glass-plus text-mstYellow"></i> เปิดตรวจไฟล์ PDF / จัดการ
+                            </button>
+                            ${p.status !== 'VERIFIED' ? `
+                            <button onclick="quickVerify('${p.id}', 'VERIFIED')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-3.5 rounded-xl text-xs transition" title="อนุมัติทันที">
+                                <i class="fa-solid fa-check"></i> อนุมัติ
+                            </button>` : ''}
+                            <button onclick="adminDeletePort('${p.id}')" class="bg-rose-50 hover:bg-rose-500 text-rose-600 hover:text-white border border-rose-200 font-bold py-2.5 px-3 rounded-xl text-xs transition" title="ลบรายการ">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function openInspectModal(encoded) {
+            const p = JSON.parse(decodeURIComponent(encoded));
+            document.getElementById('inspTitle').innerText = `${p.university} — ${p.faculty}`;
+            document.getElementById('inspSubTitle').innerText = `ผู้ส่ง: ${p.seniorName} ${p.seniorStdId ? '(รหัส ' + p.seniorStdId + ')' : ''} • ${p.tcasRound}`;
+
+            let rawUrl = p.pdfUrl || '';
+            let embedUrl = rawUrl;
+            const match = rawUrl.match(/(?:\/d\/|id=)([a-zA-Z0-9_-]{20,})/);
+            if (match && match[1]) {
+                embedUrl = `https://drive.google.com/file/d/${match[1]}/preview`;
+            }
+            document.getElementById('inspPdfFrame').src = embedUrl;
+            document.getElementById('inspDirectLink').href = rawUrl || embedUrl;
+
+            document.getElementById('inspDetailsBox').innerHTML = `
+                <p><b>สถานะปัจจุบัน:</b> <span class="font-black text-mstPurple">${p.status}</span></p>
+                <p><b>สายการเรียน:</b> ${p.track || '-'}</p>
+                <p><b>เกรดเฉลี่ย (GPAX):</b> ${p.gpaxRange || '-'}</p>
+                <p><b>โครงการ:</b> ${p.projectName || '-'}</p>
+                <p><b>ผลงานเด่น:</b><br><span class="text-gray-600 whitespace-pre-line">${p.highlights || '-'}</span></p>
+                <p><b>รีวิวสัมภาษณ์:</b><br><span class="text-gray-600 whitespace-pre-line">${p.interviewTips || '-'}</span></p>
+                <p><b>ช่องทางติดต่อรุ่นพี่:</b> ${p.contactIg || '-'}</p>
+            `;
+
+            document.getElementById('inspActionButtons').innerHTML = `
+                <button onclick="quickVerify('${p.id}', 'VERIFIED', true)" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl text-xs shadow-sm transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-circle-check"></i> อนุมัติและเผยแพร่ (Verify Portfolio)
+                </button>
+                <button onclick="promptRejectPort('${p.id}')" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 rounded-xl text-xs shadow-sm transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-reply"></i> ส่งกลับให้แก้ไข (พร้อมแจ้งเหตุผลเข้า LINE)
+                </button>
+                <button onclick="adminDeletePort('${p.id}', true)" class="w-full bg-rose-50 hover:bg-rose-500 text-rose-600 hover:text-white border border-rose-200 font-bold py-2.5 rounded-xl text-xs transition">
+                    <i class="fa-solid fa-trash-can mr-1"></i> ลบพอร์ตโฟลิโอเล่มนี้
+                </button>
+            `;
+
+            document.getElementById('inspectModal').classList.remove('hidden');
+        }
+
+        function closeInspectModal() {
+            document.getElementById('inspPdfFrame').src = '';
+            document.getElementById('inspectModal').classList.add('hidden');
+        }
+
+        async function quickVerify(portfolioId, status, closeInsp = false) {
+            if (closeInsp) closeInspectModal();
+            setLoader('กำลังบันทึกผลการอนุมัติ...');
+            const res = await callAdminPortApi({ action: 'verifyPortfolio', portfolioId, status });
+            hideLoader();
+            if (res.status === 'success') {
+                Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'อัปเดตสถานะเรียบร้อยแล้ว', showConfirmButton: false, timer: 1400 });
+                await fetchAdminPortfolios(false);
+            } else {
+                Swal.fire('ปฏิเสธคำสั่ง', res.message || 'ไม่สามารถอนุมัติได้', 'error');
+            }
+        }
+
+        async function promptRejectPort(portfolioId) {
+            closeInspectModal();
+            const { value: reason } = await Swal.fire({
+                title: 'ระบุเหตุผลที่ส่งกลับให้แก้ไข',
+                input: 'text',
+                inputPlaceholder: 'เช่น กรุณาเบลอเลขบัตรประชาชนในหน้าประวัติส่วนตัว หรือเปิดสิทธิ์ลิงก์ Google Drive',
+                showCancelButton: true,
+                confirmButtonText: 'ส่งกลับแก้ไข',
+                cancelButtonText: 'ยกเลิก',
+                confirmButtonColor: '#F59E0B'
+            });
+            if (reason !== undefined) {
+                setLoader('กำลังบันทึกและส่งแจ้งเตือน...');
+                await callAdminPortApi({ action: 'verifyPortfolio', portfolioId, status: 'REJECTED', rejectReason: reason });
+                hideLoader();
+                await fetchAdminPortfolios(false);
+            }
+        }
+
+        async function adminDeletePort(portfolioId, closeInsp = false) {
+            if (closeInsp) closeInspectModal();
+            const cf = await Swal.fire({
+                icon: 'warning',
+                title: 'ยืนยันการลบพอร์ตเล่มนี้?',
+                showCancelButton: true,
+                confirmButtonColor: '#EF4444',
+                confirmButtonText: 'ลบถาวร',
+                cancelButtonText: 'ยกเลิก'
+            });
+            if (cf.isConfirmed) {
+                setLoader('กำลังลบข้อมูล...');
+                const res = await callAdminPortApi({ action: 'deletePortfolio', portfolioId });
+                hideLoader();
+                if (res.status === 'success') {
+                    await fetchAdminPortfolios(false);
+                } else {
+                    Swal.fire('ผิดพลาด', res.message || 'ไม่สามารถลบได้', 'error');
+                }
+            }
+        }
+
+        // ระบบจัดการสิทธิ์อีเมลครูงานแนะแนวและแอดมิน
+        function parseEmailList(raw) {
+            return [...new Set(String(raw || '').split(/[\n,;]+/).map(s => s.trim().toLowerCase()).filter(Boolean))];
+        }
+
+        function openPermissionsModal() {
+            document.getElementById('guidanceEmailsTextarea').value = allowedAdminEmails.join('\n');
+            renderGuidanceEmailTags();
+            document.getElementById('permissionsModal').classList.remove('hidden');
+        }
+
+        function renderGuidanceEmailTags() {
+            const list = parseEmailList(document.getElementById('guidanceEmailsTextarea').value);
+            document.getElementById('guidanceEmailTags').innerHTML = list.map(em => `
+                <span class="inline-flex items-center gap-1.5 bg-purple-50 text-mstPurple border border-purple-200 px-2.5 py-1 rounded-full text-[11px] font-bold">
+                    ${em}
+                    <button type="button" onclick="removeGuidanceEmailItem('${em}')" class="text-gray-400 hover:text-red-500"><i class="fa-solid fa-circle-xmark"></i></button>
+                </span>
+            `).join('');
+        }
+
+        function addGuidanceEmailItem() {
+            const inp = document.getElementById('newGuidanceEmailInput');
+            const val = inp.value.trim().toLowerCase();
+            if (!val || !val.includes('@')) return;
+            const list = parseEmailList(document.getElementById('guidanceEmailsTextarea').value);
+            if (!list.includes(val)) list.push(val);
+            document.getElementById('guidanceEmailsTextarea').value = list.join('\n');
+            inp.value = '';
+            renderGuidanceEmailTags();
+        }
+
+        function removeGuidanceEmailItem(target) {
+            const list = parseEmailList(document.getElementById('guidanceEmailsTextarea').value).filter(e => e !== target);
+            document.getElementById('guidanceEmailsTextarea').value = list.join('\n');
+            renderGuidanceEmailTags();
+        }
+
+        async function saveGuidanceEmails() {
+            const list = parseEmailList(document.getElementById('guidanceEmailsTextarea').value);
+            document.getElementById('permissionsModal').classList.add('hidden');
+            setLoader('กำลังบันทึกรายชื่อผู้มีสิทธิ์...');
+            const res = await callAdminPortApi({
+                action: 'savePortfolioAdminEmails',
+                portfolioAdminEmails: list.join(',')
+            });
+            hideLoader();
+            if (res.status === 'success') {
+                allowedAdminEmails = list;
+                Swal.fire({ icon: 'success', title: 'บันทึกสิทธิ์เรียบร้อยแล้ว', timer: 1400, showConfirmButton: false });
+            } else {
+                Swal.fire('ผิดพลาด', res.message || 'ไม่สามารถบันทึกได้', 'error');
+            }
+        }
+
+        // ระบบดึงข้อมูล MyTCAS สำหรับหน้าเพิ่มพอร์ตของแอดมิน
+        function loadStaffTcasData() {
+            if (Object.keys(staffTcasTree).length > 0) return;
+            fetch(MYTCAS_COURSES_URL)
+                .then(r => r.json())
+                .then(data => {
+                    data.forEach(item => {
+                        const u = item.university_name_th;
+                        const c = item.campus_name_th || 'วิทยาเขตหลัก';
+                        const f = item.faculty_name_th;
+                        const m = item.major_name_th || item.program_name_th || 'สาขาวิชาหลัก';
+                        if (!u || !f) return;
+                        if (!staffTcasTree[u]) staffTcasTree[u] = {};
+                        if (!staffTcasTree[u][c]) staffTcasTree[u][c] = {};
+                        if (!staffTcasTree[u][c][f]) staffTcasTree[u][c][f] = new Set();
+                        staffTcasTree[u][c][f].add(m);
+                    });
+                    const sel = document.getElementById('st_tcas_uni');
+                    Object.keys(staffTcasTree).sort((a, b) => a.localeCompare(b, 'th')).forEach(u => {
+                        sel.innerHTML += `<option value="${u}">${u}</option>`;
+                    });
+                }).catch(() => {});
+        }
+
+        function toggleStaffTcasMode() {
+            const isTcas = document.getElementById('st_sys_type').value === 'TCAS';
+            document.getElementById('st_tcas_box').classList.toggle('hidden', !isTcas);
+            document.getElementById('st_manual_box').classList.toggle('hidden', isTcas);
+        }
+
+        function populateStaffCampuses() {
+            const u = document.getElementById('st_tcas_uni').value;
+            const cSel = document.getElementById('st_tcas_campus');
+            const fSel = document.getElementById('st_tcas_fac');
+            const mSel = document.getElementById('st_tcas_major');
+            cSel.innerHTML = '<option value="">-- เลือกวิทยาเขต --</option>';
+            fSel.innerHTML = '<option value="">-- เลือกคณะ / หลักสูตร --</option>';
+            mSel.innerHTML = '<option value="">-- เลือกสาขาวิชา --</option>';
+            cSel.disabled = true; fSel.disabled = true; mSel.disabled = true;
+            if (u && staffTcasTree[u]) {
+                const list = Object.keys(staffTcasTree[u]).sort((a, b) => a.localeCompare(b, 'th'));
+                list.forEach(c => cSel.innerHTML += `<option value="${c}">${c}</option>`);
+                cSel.disabled = false;
+                if (list.length === 1) { cSel.value = list[0]; populateStaffFaculties(); }
+            }
+        }
+
+        function populateStaffFaculties() {
+            const u = document.getElementById('st_tcas_uni').value;
+            const c = document.getElementById('st_tcas_campus').value;
+            const fSel = document.getElementById('st_tcas_fac');
+            const mSel = document.getElementById('st_tcas_major');
+            fSel.innerHTML = '<option value="">-- เลือกคณะ / หลักสูตร --</option>';
+            mSel.innerHTML = '<option value="">-- เลือกสาขาวิชา --</option>';
+            fSel.disabled = true; mSel.disabled = true;
+            if (u && c && staffTcasTree[u] && staffTcasTree[u][c]) {
+                const list = Object.keys(staffTcasTree[u][c]).sort((a, b) => a.localeCompare(b, 'th'));
+                list.forEach(f => fSel.innerHTML += `<option value="${f}">${f}</option>`);
+                fSel.disabled = false;
+                if (list.length === 1) { fSel.value = list[0]; populateStaffMajors(); }
+            }
+        }
+
+        function populateStaffMajors() {
+            const u = document.getElementById('st_tcas_uni').value;
+            const c = document.getElementById('st_tcas_campus').value;
+            const f = document.getElementById('st_tcas_fac').value;
+            const mSel = document.getElementById('st_tcas_major');
+            mSel.innerHTML = '<option value="">-- เลือกสาขาวิชา --</option>';
+            mSel.disabled = true;
+            if (u && c && f && staffTcasTree[u] && staffTcasTree[u][c] && staffTcasTree[u][c][f]) {
+                let list = Array.from(staffTcasTree[u][c][f]).filter(Boolean).sort((a, b) => a.localeCompare(b, 'th'));
+                if (list.length === 0) list = [f];
+                list.forEach(m => mSel.innerHTML += `<option value="${m}">${m}</option>`);
+                mSel.disabled = false;
+                if (list.length === 1) mSel.value = list[0];
+            }
+        }
+
+        function openAddByStaffModal() {
+            loadStaffTcasData();
+            document.getElementById('staffAddModal').classList.remove('hidden');
+        }
+
+        async function submitStaffPortfolio() {
+            const seniorName = document.getElementById('st_senior_name').value.trim();
+            const pdfUrl = document.getElementById('st_pdf_url').value.trim();
+            const isTcas = document.getElementById('st_sys_type').value === 'TCAS';
+
+            let uni = "", fac = "", major = "";
+            if (isTcas) {
+                const u = document.getElementById('st_tcas_uni').value;
+                const c = document.getElementById('st_tcas_campus').value;
+                const f = document.getElementById('st_tcas_fac').value;
+                const m = document.getElementById('st_tcas_major').value || f;
+                if (!u || !f) return Swal.fire({ icon: 'warning', title: 'กรุณาเลือกมหาวิทยาลัยและคณะ', confirmButtonColor: '#4C1D95' });
+                uni = (c && c !== 'วิทยาเขตหลัก') ? `${u} (${c})` : u;
+                fac = (m && m !== f && m !== 'สาขาวิชาหลัก') ? `${f} (${m})` : f;
+                major = m;
+            } else {
+                uni = document.getElementById('st_uni').value.trim();
+                fac = document.getElementById('st_fac').value.trim();
+            }
+
+            if (!seniorName || !uni || !fac || !pdfUrl) {
+                return Swal.fire({ icon: 'warning', title: 'กรุณากรอกข้อมูลที่มีเครื่องหมาย * ให้ครบถ้วน', confirmButtonColor: '#4C1D95' });
+            }
+
+            document.getElementById('staffAddModal').classList.add('hidden');
+            setLoader('กำลังบันทึก Portfolio เข้าระบบ...');
+            const res = await callAdminPortApi({
+                action: 'submitPortfolio',
+                pdpaConfirmed: true,
+                seniorStdId: document.getElementById('st_std_id').value.trim() || 'ALUMNI',
+                seniorName,
+                university: uni,
+                faculty: fac,
+                major,
+                tcasRound: document.getElementById('st_round').value,
+                academicYear: document.getElementById('st_year').value.trim() || '2569',
+                track: document.getElementById('st_track').value,
+                gpaxRange: document.getElementById('st_gpax').value.trim() || '-',
+                projectName: document.getElementById('st_project').value.trim() || '-',
+                highlights: document.getElementById('st_highlights').value.trim() || '-',
+                interviewTips: document.getElementById('st_tips').value.trim() || '-',
+                pdfUrl
+            });
+            hideLoader();
+            if (res.status === 'success') {
+                Swal.fire({ icon: 'success', title: 'เพิ่ม Portfolio สำเร็จ', timer: 1400, showConfirmButton: false });
+                await fetchAdminPortfolios(false);
+            } else {
+                Swal.fire('ผิดพลาด', res.message || 'ไม่สามารถบันทึกได้', 'error');
+            }
+        }
+
+        function exportPortfoliosCSV() {
+            if (allAdminPortfolios.length === 0) {
+                return Swal.fire({ icon: 'info', title: 'ยังไม่มีข้อมูลสำหรับส่งออก' });
+            }
+            const headers = ["รหัสพอร์ต", "รหัสนักเรียน", "ชื่อ-สกุลรุ่นพี่", "ปีการศึกษา", "รอบ TCAS", "มหาวิทยาลัย", "คณะ/สาขา", "โครงการ", "แผนการเรียน", "GPAX", "สถานะ", "ยอดเข้าชม", "ลิงก์ไฟล์ PDF"];
+            const esc = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
+            const rows = allAdminPortfolios.map(p => [
+                p.id, p.seniorStdId || '-', p.seniorName, p.academicYear, p.tcasRound,
+                p.university, p.faculty, p.projectName, p.track, p.gpaxRange,
+                p.status, p.viewsCount || 0, p.pdfUrl
+            ].map(esc).join(','));
+
+            const csv = "\uFEFF" + [headers.map(esc).join(','), ...rows].join('\r\n');
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `MST_Portfolio_Guidance_Report_${new Date().toISOString().slice(0,10)}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // 1. ตรวจสอบเซสชันที่เคยยืนยันตัวตนผ่านเซิร์ฟเวอร์ไว้แล้ว
+            const saved = sessionStorage.getItem(PORT_ADMIN_AUTH_KEY);
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    if (parsed && (parsed.idToken || parsed.regisAuth)) {
+                        verifyAdminWithBackend(parsed);
+                        return;
+                    }
+                } catch (e) {}
+            }
+
+            // 2. หากเคยล็อกอินจากหน้า admin.html หรือ admin_radio.html ค้างไว้ ให้นำ Google Token มาตรวจสอบกับเซิร์ฟเวอร์อัตโนมัติ
+            const portalToken = sessionStorage.getItem(PORTAL_TOKEN_KEY);
+            const portalInfo = JSON.parse(sessionStorage.getItem(PORTAL_INFO_KEY) || "null");
+            if (portalToken && portalInfo && portalInfo.email) {
+                verifyAdminWithBackend({
+                    mode: 'google',
+                    idToken: portalToken,
+                    email: portalInfo.email,
+                    name: portalInfo.name,
+                    picture: portalInfo.picture
+                });
+            }
+        });
+    </script>
+</body>
+</html>
