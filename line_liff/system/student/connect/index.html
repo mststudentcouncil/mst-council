@@ -140,7 +140,7 @@
                             <h1 class="text-sm font-black text-mstPurple truncate">STUDENT COUNCIL</h1>
                             <span class="bg-mstYellow text-mstDark text-[9px] font-black px-2 py-0.5 rounded-full shrink-0">CONNECT</span>
                         </div>
-                        <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider truncate">ระบบยืนยันตัวตน 2 ขั้นตอน (2FA OTP)</p>
+                        <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider truncate">ระบบเชื่อมต่อข้อมูล</p>
                     </div>
                 </div>
                 <div class="flex items-center gap-1.5 shrink-0">
@@ -495,26 +495,26 @@
 
             <!-- การ์ดบัตรประจำตัวดิจิทัล -->
             <div class="glass-dark rounded-[1.75rem] p-5 relative overflow-hidden space-y-4">
-                <div class="flex items-center justify-between gap-2">
-                    <div>
+                <div class="flex items-start justify-between gap-2">
+                    <div class="min-w-0">
                         <span class="text-[10px] font-black text-mstYellow uppercase tracking-widest block">MSTSC DIGITAL PASS</span>
-                        <h3 id="pass-fullname" class="text-base font-black text-white mt-0.5">-</h3>
+                        <h3 id="pass-fullname" class="text-base font-black text-white mt-0.5 break-words">-</h3>
                     </div>
                     <span id="pass-role" class="bg-mstYellow text-mstDark text-[10px] font-black px-3 py-1 rounded-full uppercase shrink-0">STUDENT</span>
                 </div>
 
-                <div class="grid grid-cols-3 gap-2 bg-white/10 rounded-2xl p-3 border border-white/10 text-xs">
-                    <div>
+                <div class="grid grid-cols-2 gap-y-2.5 gap-x-4 bg-white/10 rounded-2xl p-3.5 border border-white/10 text-xs">
+                    <div class="min-w-0">
                         <span class="text-[10px] text-purple-200 font-semibold block" id="pass-sid-label">รหัสประจำตัว</span>
-                        <span id="pass-sid" class="font-black text-mstYellow text-sm truncate block">-</span>
-                    </div>
-                    <div>
-                        <span class="text-[10px] text-purple-200 font-semibold block">สถานะ</span>
-                        <span id="pass-class" class="font-black text-white text-sm truncate block">-</span>
+                        <span id="pass-sid" class="font-black text-mstYellow text-sm break-all block mt-0.5">-</span>
                     </div>
                     <div class="min-w-0">
+                        <span class="text-[10px] text-purple-200 font-semibold block">สถานะ</span>
+                        <span id="pass-class" class="font-black text-white text-sm break-words block mt-0.5">-</span>
+                    </div>
+                    <div class="col-span-2 pt-2 border-t border-white/10 min-w-0">
                         <span class="text-[10px] text-purple-200 font-semibold block" id="pass-plan-label">แผนการเรียน</span>
-                        <span id="pass-plan" class="font-bold text-white text-xs truncate block mt-0.5">-</span>
+                        <span id="pass-plan" class="font-bold text-white text-xs break-words leading-relaxed block mt-0.5">-</span>
                     </div>
                 </div>
 
