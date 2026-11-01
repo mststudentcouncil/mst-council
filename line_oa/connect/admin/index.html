@@ -698,41 +698,19 @@
         <p class="text-xs text-gray-500 mt-0.5">บริหารจัดการแชทนักเรียนและตั้งค่าสมองกลน้องคอนเนค AI</p>
       </div>
 
-      <div class="grid grid-cols-2 gap-1.5 bg-gray-100/90 p-1 rounded-2xl text-xs font-bold">
-        <button type="button" id="loginTabGoogle" onclick="switchLoginTab('google')" class="py-2.5 rounded-xl bg-mstPurple text-white shadow-sm transition">
-          <i class="fa-brands fa-google mr-1"></i> อีเมลสภานักเรียน
-        </button>
-        <button type="button" id="loginTabRegis" onclick="switchLoginTab('regis')" class="py-2.5 rounded-xl text-gray-600 hover:text-mstPurple transition">
-          <i class="fa-solid fa-id-card mr-1"></i> รหัสนักเรียน REGIS
-        </button>
-      </div>
-
       <div id="loginBoxGoogle" class="space-y-3 py-3">
         <div class="flex justify-center min-h-[44px]">
           <div id="g_id_onload"
                data-client_id="1055496557-rm1petnl1gtd6c1ed01q9o6k880ik2ta.apps.googleusercontent.com"
                data-callback="handleGoogleCredential"
-               data-auto_prompt="false"></div>
+               data-auto_prompt="false"
+               data-hd="mst.ac.th"></div>
           <div class="g_id_signin" data-type="standard" data-shape="pill" data-theme="filled_blue" data-text="signin_with" data-size="large" data-logo_alignment="left"></div>
         </div>
         <p class="text-[11px] text-gray-500 leading-relaxed bg-purple-50/60 p-3 rounded-xl border border-purple-100">
-          รองรับอีเมลกรรมการสภานักเรียน <b class="text-mstPurple">@mst.ac.th</b> ทุกท่าน และ <b class="text-mstPurple">studentcouncil@mst.ac.th</b>
+          เข้าสู่ระบบด้วยอีเมลกรรมการสภานักเรียน <b class="text-mstPurple">@mst.ac.th</b> หรือ <b class="text-mstPurple">อีเมลกลาง</b> เท่านั้น
         </p>
       </div>
-
-      <form id="loginBoxRegis" onsubmit="handleRegisLogin(event)" class="hidden space-y-3 text-left pt-1">
-        <div>
-          <label class="block text-xs font-bold text-gray-700 mb-1">รหัสประจำตัวนักเรียน (5 หลัก)</label>
-          <input type="tel" id="admStdId" maxlength="5" inputmode="numeric" placeholder="เช่น 29903" class="form-input text-center text-base font-black tracking-widest">
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-gray-700 mb-1">เลขประจำตัวประชาชน 13 หลัก (ใน REGIS)</label>
-          <input type="password" id="admIdCard" maxlength="13" inputmode="numeric" placeholder="เลขบัตรประชาชน 13 หลัก" class="form-input text-center text-sm font-bold tracking-widest">
-        </div>
-        <button type="submit" id="btnLogin" class="w-full bg-gradient-to-r from-mstPurple to-purple-800 hover:from-purple-800 hover:to-mstPurple text-white font-black py-3.5 rounded-xl text-xs shadow-md transition active:scale-[0.99]">
-          <i class="fa-solid fa-shield-check text-mstYellow mr-1"></i> ยืนยันสิทธิ์และเปิดกระดานแชท
-        </button>
-      </form>
 
       <div class="pt-2 border-t border-gray-100 flex items-center justify-center gap-2 text-[11px] text-gray-400 font-semibold">
         <i class="fa-solid fa-lock text-[10px]"></i>
@@ -1318,18 +1296,6 @@
       });
     }
 
-    function switchLoginTab(tab) {
-      const isG = tab === 'google';
-      document.getElementById('loginTabGoogle').className = isG
-        ? "py-2.5 rounded-xl bg-mstPurple text-white shadow-sm transition"
-        : "py-2.5 rounded-xl text-gray-600 hover:text-mstPurple transition";
-      document.getElementById('loginTabRegis').className = !isG
-        ? "py-2.5 rounded-xl bg-mstPurple text-white shadow-sm transition"
-        : "py-2.5 rounded-xl text-gray-600 hover:text-mstPurple transition";
-      document.getElementById('loginBoxGoogle').classList.toggle('hidden', !isG);
-      document.getElementById('loginBoxRegis').classList.toggle('hidden', isG);
-    }
-
     // =========================================================
     // 4. RESPONSIVE PANE MANAGEMENT
     // =========================================================
@@ -1445,20 +1411,28 @@
       }
     }
 
-    window.handleGoogleCredential = async function(response) {
-      sessionStorage.setItem(PORTAL_TOKEN_KEY, response.credential);
-      localStorage.setItem(PORTAL_TOKEN_KEY, response.credential);
-      adminAuth = { idToken: response.credential };
-      await verifyAndOpenConsole();
-    };
-
-    async function handleRegisLogin(e) {
-      e.preventDefault();
-      const std_id = document.getElementById('admStdId').value.replace(/\D/g, '').trim();
-      const id_card = document.getElementById('admIdCard').value.replace(/\D/g, '').trim();
-      adminAuth = { std_id, id_card };
-      await verifyAndOpenConsole();
+    function parseJwt(token) {
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      return JSON.parse(decodeURIComponent(window.atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')));
     }
+
+    window.handleGoogleCredential = async function(response) {
+      try {
+        const payload = parseJwt(response.credential);
+        const email = String(payload.email || '').trim().toLowerCase();
+        if (!email.endsWith('@mst.ac.th')) {
+          Swal.fire({ icon: 'warning', title: 'จำกัดสิทธิ์เฉพาะ @mst.ac.th', text: 'กรุณาเข้าสู่ระบบด้วยอีเมลโรงเรียน (@mst.ac.th) เท่านั้น', confirmButtonColor: '#4C1D95' });
+          return;
+        }
+        sessionStorage.setItem(PORTAL_TOKEN_KEY, response.credential);
+        localStorage.setItem(PORTAL_TOKEN_KEY, response.credential);
+        adminAuth = { idToken: response.credential };
+        await verifyAndOpenConsole();
+      } catch (e) {
+        Swal.fire({ icon: 'error', title: 'ข้อผิดพลาด', text: 'ไม่สามารถเข้าสู่ระบบด้วย Google ได้', confirmButtonColor: '#4C1D95' });
+      }
+    };
 
     async function verifyAndOpenConsole() {
       const btn = document.getElementById('btnLogin');
@@ -2946,10 +2920,14 @@
       const saved = sessionStorage.getItem(SESSION_KEY) || localStorage.getItem(SESSION_KEY);
       if (saved) {
         try {
-          adminAuth = JSON.parse(saved);
-          if (adminAuth) {
+          const parsed = JSON.parse(saved);
+          if (parsed && parsed.idToken) {
+            adminAuth = { idToken: parsed.idToken };
             verifyAndOpenConsole();
             return;
+          } else {
+            sessionStorage.removeItem(SESSION_KEY);
+            localStorage.removeItem(SESSION_KEY);
           }
         } catch (e) {}
       }
