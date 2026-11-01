@@ -92,6 +92,17 @@
                 <i class="fas fa-concierge-bell text-mstYellow text-lg"></i> เมนูบริการนักเรียน
             </h2>
             <div class="grid grid-cols-2 gap-3.5">
+                <a onclick="fetchSchedule()" class="col-span-2 cursor-pointer bg-white/95 border-2 border-purple-100 rounded-2xl p-4 text-center shadow-xs hover:shadow-md transition-all flex items-center justify-center gap-3.5 group relative overflow-hidden">
+                    <span class="absolute top-2 right-2 bg-mstYellow text-mstDark text-[8px] font-black px-2 py-0.5 rounded-full">NEW</span>
+                    <div class="w-12 h-12 bg-gradient-to-br from-cyan-500 to-mstPurple text-white rounded-full flex items-center justify-center text-xl shadow-inner group-hover:scale-110 transition-transform shrink-0">
+                        <i class="fa-solid fa-calendar-days"></i>
+                    </div>
+                    <div class="text-left">
+                        <span class="font-black text-mstPurple text-xs block">ตารางเรียน - ตารางสอน</span>
+                        <span class="text-[10px] text-gray-500 font-medium">ระบบตารางเรียนนักเรียนและตารางสอนครูรูปแบบใหม่</span>
+                    </div>
+                </a>
+
                 <a href="https://liff.line.me/2008923798-TRND2m0M" class="bg-white/95 border-2 border-purple-100 rounded-2xl p-4 text-center shadow-xs hover:shadow-md transition-all flex flex-col items-center justify-center gap-2.5 group relative overflow-hidden min-h-[116px]">
                     <span class="absolute top-2 right-2 bg-mstYellow text-mstDark text-[8px] font-black px-2 py-0.5 rounded-full">HOT</span>
                     <div class="w-12 h-12 bg-gradient-to-br from-mstPurple to-purple-600 text-white rounded-full flex items-center justify-center text-xl shadow-inner group-hover:scale-110 transition-transform shrink-0"><i class="fa-solid fa-tower-broadcast"></i></div>
@@ -104,25 +115,14 @@
                     <span class="font-extrabold text-gray-800 text-xs leading-tight">พอร์ตโฟลิโอรุ่นพี่</span>
                 </a>
 
+                <a href="https://liff.line.me/2008923798-hd6mzZd8" class="bg-white/90 border border-gray-100 rounded-2xl p-4 text-center shadow-xs hover:shadow-md transition-all flex flex-col items-center justify-center gap-2.5 group min-h-[116px]">
+                    <div class="w-12 h-12 bg-gradient-to-br from-red-400 to-red-600 text-white rounded-full flex items-center justify-center text-xl shadow-inner group-hover:scale-110 transition-transform shrink-0"><i class="fa-solid fa-check-to-slot"></i></div>
+                    <span class="font-bold text-gray-700 text-xs leading-tight">ลงคะแนน</span>
+                </a>
+
                 <a href="https://liff.line.me/2008923798-7EBZdt6r" class="bg-white/90 border border-gray-100 rounded-2xl p-4 text-center shadow-xs hover:shadow-md transition-all flex flex-col items-center justify-center gap-2.5 group min-h-[116px]">
                     <div class="w-12 h-12 bg-gradient-to-br from-indigo-400 to-indigo-600 text-white rounded-full flex items-center justify-center text-xl shadow-inner group-hover:scale-110 transition-transform shrink-0"><i class="fa-solid fa-bullhorn"></i></div>
                     <span class="font-bold text-gray-700 text-xs leading-tight">แจ้งเรื่อง / เสนอแนะ</span>
-                </a>
-
-                <a href="https://liff.line.me/2008923798-hd6mzZd8" class="bg-white/90 border border-gray-100 rounded-2xl p-4 text-center shadow-xs hover:shadow-md transition-all flex flex-col items-center justify-center gap-2.5 group min-h-[116px]">
-                    <div class="w-12 h-12 bg-gradient-to-br from-red-400 to-red-600 text-white rounded-full flex items-center justify-center text-xl shadow-inner group-hover:scale-110 transition-transform shrink-0"><i class="fa-solid fa-check-to-slot"></i></div>
-                    <span class="font-bold text-gray-700 text-xs leading-tight">e-Voting</span>
-                </a>
-
-                <a onclick="fetchSchedule()" class="col-span-2 cursor-pointer bg-white/95 border-2 border-purple-100 rounded-2xl p-4 text-center shadow-xs hover:shadow-md transition-all flex items-center justify-center gap-3.5 group relative overflow-hidden">
-                    <span class="absolute top-2 right-2 bg-mstYellow text-mstDark text-[8px] font-black px-2 py-0.5 rounded-full">NEW</span>
-                    <div class="w-12 h-12 bg-gradient-to-br from-cyan-500 to-mstPurple text-white rounded-full flex items-center justify-center text-xl shadow-inner group-hover:scale-110 transition-transform shrink-0">
-                        <i class="fa-solid fa-calendar-days"></i>
-                    </div>
-                    <div class="text-left">
-                        <span class="font-black text-mstPurple text-xs block">ตารางเรียน - ตารางสอน</span>
-                        <span class="text-[10px] text-gray-500 font-medium">ระบบตารางเรียนนักเรียนและตารางสอนครูรูปแบบใหม่</span>
-                    </div>
                 </a>
 
                 <a href="https://sgs.bopp-obec.info/sgss/TblStudentsInfo/Show-TblStudentsInfo-Table.aspx" class="bg-white/90 border border-gray-100 rounded-2xl p-4 text-center shadow-xs hover:shadow-md transition-all flex flex-col items-center justify-center gap-2.5 group min-h-[116px]">
@@ -191,7 +191,7 @@
         <!-- หมวดติดต่อสภานักเรียน -->
         <div class="glass rounded-[2rem] p-5 shadow-sm border border-white mt-auto">
             <p class="text-center text-xs font-medium text-gray-600 mb-3.5 bg-white/70 py-2.5 px-3 rounded-xl border border-gray-100">
-                หากต้องการติดต่อสภานักเรียนโดยตรง ให้พิมพ์ข้อความในแชทว่า<br><span class="font-black text-mstPurple text-sm">"คุยกับสภา"</span>
+                หากต้องการติดต่อสภานักเรียนโดยตรง ให้พิมพ์ข้อความ<br><span class="font-black text-mstPurple text-sm">"คุยกับสภา"</span>
             </p>
             <div class="space-y-2.5">
                 <a href="https://www.facebook.com/mstcouncil" target="_blank" class="flex items-center gap-3.5 bg-white/90 p-3 rounded-xl border border-gray-100 hover:bg-white hover:shadow-sm transition-all group">
