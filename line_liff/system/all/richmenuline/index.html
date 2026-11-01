@@ -114,14 +114,15 @@
                     <span class="font-bold text-gray-700 text-xs leading-tight">e-Voting</span>
                 </a>
 
-                <a onclick="fetchSchedule('student')" class="cursor-pointer bg-white/90 border border-gray-100 rounded-2xl p-4 text-center shadow-xs hover:shadow-md transition-all flex flex-col items-center justify-center gap-2.5 group min-h-[116px]">
-                    <div class="w-12 h-12 bg-gradient-to-br from-cyan-400 to-cyan-600 text-white rounded-full flex items-center justify-center text-xl shadow-inner group-hover:scale-110 transition-transform shrink-0"><i class="fa-solid fa-calendar-days"></i></div>
-                    <span class="font-bold text-gray-700 text-xs leading-tight">ตารางเรียนนักเรียน</span>
-                </a>
-
-                <a onclick="fetchSchedule('teacher')" class="cursor-pointer bg-white/90 border border-gray-100 rounded-2xl p-4 text-center shadow-xs hover:shadow-md transition-all flex flex-col items-center justify-center gap-2.5 group min-h-[116px]">
-                    <div class="w-12 h-12 bg-gradient-to-br from-purple-400 to-purple-600 text-white rounded-full flex items-center justify-center text-xl shadow-inner group-hover:scale-110 transition-transform shrink-0"><i class="fa-solid fa-chalkboard-user"></i></div>
-                    <span class="font-bold text-gray-700 text-xs leading-tight">ตารางสอนครู</span>
+                <a onclick="fetchSchedule()" class="col-span-2 cursor-pointer bg-white/95 border-2 border-purple-100 rounded-2xl p-4 text-center shadow-xs hover:shadow-md transition-all flex items-center justify-center gap-3.5 group relative overflow-hidden">
+                    <span class="absolute top-2 right-2 bg-mstYellow text-mstDark text-[8px] font-black px-2 py-0.5 rounded-full">NEW</span>
+                    <div class="w-12 h-12 bg-gradient-to-br from-cyan-500 to-mstPurple text-white rounded-full flex items-center justify-center text-xl shadow-inner group-hover:scale-110 transition-transform shrink-0">
+                        <i class="fa-solid fa-calendar-days"></i>
+                    </div>
+                    <div class="text-left">
+                        <span class="font-black text-mstPurple text-xs block">ตารางเรียน - ตารางสอน</span>
+                        <span class="text-[10px] text-gray-500 font-medium">ระบบตารางเรียนนักเรียนและตารางสอนครูรูปแบบใหม่</span>
+                    </div>
                 </a>
 
                 <a href="https://sgs.bopp-obec.info/sgss/TblStudentsInfo/Show-TblStudentsInfo-Table.aspx" class="bg-white/90 border border-gray-100 rounded-2xl p-4 text-center shadow-xs hover:shadow-md transition-all flex flex-col items-center justify-center gap-2.5 group min-h-[116px]">
@@ -300,10 +301,9 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        function fetchSchedule(type) {
+        function fetchSchedule() {
             showLoader();
-            const targetMode = type === 'teacher' ? 'teacher' : 'student';
-            window.location.href = `${TIMETABLE_PAGE_URL}?mode=${targetMode}`;
+            window.location.href = TIMETABLE_PAGE_URL;
         }
 
         function openOsModal(e) { e.preventDefault(); $('#osPopup').removeClass('hidden').addClass('flex'); }
