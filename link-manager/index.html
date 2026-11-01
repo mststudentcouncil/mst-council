@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="referrer" content="no-referrer">
     <title>ระบบบริหารจัดการลิงก์ (MSTSC URL Shortener)</title>
     <link rel="icon" type="image/webp" href="/logo.webp">
 
@@ -44,9 +45,9 @@
         <div class="glass-card p-8 md:p-10 rounded-3xl w-full max-w-md text-center fade-in">
             <img src="/logo.webp" class="w-24 mx-auto mb-6 opacity-90" alt="MSTSC Logo">
             <h1 class="text-3xl font-black text-purple-900 mb-2">MSTSC URL</h1>
-            <h2 class="text-xl font-bold text-purple-800 mb-4">ระบบบริหารจัดการลิงก์</h2>
+            <h2 class="text-xl font-bold text-purple-800 mb-4">ระบบบริหารจัดการลิงก์ & QR Code</h2>
             <p class="text-sm text-gray-500 mb-8 bg-white/60 py-2 px-4 rounded-xl border border-white shadow-sm inline-block">
-                เฉพาะอีเมลคณะกรรมการสภานักเรียนที่รายงานตัวแล้ว
+                เฉพาะอีเมลคณะกรรมการสภานักเรียนที่รายงานตัวแล้ว (@mst.ac.th)
             </p>
 
             <div class="flex justify-center">
@@ -68,16 +69,19 @@
                     <i class="fa-solid fa-link"></i>
                 </div>
                 <div>
-                    <h1 class="text-lg lg:text-xl font-black text-gray-900 leading-tight">ระบบจัดการลิงก์</h1>
+                    <h1 class="text-lg lg:text-xl font-black text-gray-900 leading-tight">ระบบจัดการลิงก์ & QR Code</h1>
                     <p class="text-[10px] sm:text-xs text-gray-500 font-bold tracking-wide">Domain: link-mstsc.pages.dev</p>
                 </div>
             </div>
-            <div class="flex items-center gap-4">
-                <div class="hidden sm:block text-right">
-                    <p id="adminUserName" class="text-sm font-bold text-gray-900">User</p>
-                    <p id="adminUserRole" class="text-[10px] font-bold text-emerald-500 uppercase tracking-wider bg-emerald-50 px-2 py-0.5 rounded-full inline-block mt-0.5">Authorized</p>
+            <div class="flex items-center gap-3.5">
+                <div class="flex items-center gap-2.5 bg-white px-3 py-1.5 rounded-2xl border border-gray-100 shadow-xs">
+                    <img id="adminUserAvatar" src="/logo.webp" referrerpolicy="no-referrer" class="w-9 h-9 rounded-full object-cover border border-purple-200" onerror="this.src='/logo.webp'">
+                    <div class="hidden sm:block text-left pr-1">
+                        <p id="adminUserName" class="text-xs sm:text-sm font-black text-gray-900 leading-tight">User</p>
+                        <p id="adminUserRole" class="text-[10px] font-bold text-emerald-600 uppercase tracking-wider bg-emerald-50 px-2 py-0.5 rounded-full inline-block mt-0.5">Authorized</p>
+                    </div>
                 </div>
-                <button onclick="logoutApp()" class="bg-gray-100 text-gray-600 hover:bg-red-500 hover:text-white w-10 h-10 lg:w-12 lg:h-12 rounded-xl flex items-center justify-center transition shadow-sm border border-gray-200" title="ออกจากระบบ">
+                <button onclick="logoutApp()" class="bg-gray-100 text-gray-600 hover:bg-red-500 hover:text-white w-10 h-10 lg:w-11 lg:h-11 rounded-xl flex items-center justify-center transition shadow-sm border border-gray-200" title="ออกจากระบบ">
                     <i class="fa-solid fa-right-from-bracket"></i>
                 </button>
             </div>
@@ -86,44 +90,104 @@
         <main class="flex-1 overflow-y-auto p-4 lg:p-8 bg-[#f1f5f9] relative">
             <div class="max-w-[1200px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6">
                 
-                <!-- Left Column: Form -->
+                <!-- Left Column: Form & Standalone QR Generator -->
                 <div class="lg:col-span-4 space-y-6">
-                    <div class="bg-white p-6 md:p-8 rounded-[2rem] shadow-sm border border-gray-100 lg:sticky lg:top-4">
-                        <div class="flex items-center justify-between mb-6">
-                            <h3 id="formTitle" class="text-xl font-black text-gray-900"><i class="fa-solid fa-wand-magic-sparkles text-mstPurple mr-2"></i> สร้างลิงก์ใหม่</h3>
-                            <button type="button" id="cancelEditBtn" onclick="cancelEdit()" class="hidden text-[10px] font-bold bg-gray-100 text-gray-600 px-3 py-1.5 rounded-lg hover:bg-gray-200 transition">ยกเลิกแก้ไข</button>
-                        </div>
+                    <div class="bg-white p-6 md:p-7 rounded-[2rem] shadow-sm border border-gray-100 lg:sticky lg:top-4">
                         
-                        <form id="linkForm" class="space-y-5">
-                            <div class="bg-purple-50/50 p-5 rounded-2xl border border-purple-100 relative overflow-hidden">
-                                <div class="flex items-center justify-between mb-2">
-                                    <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider">ชื่อย่อลิงก์ (Slug) <span class="text-red-500">*</span></label>
-                                    <button type="button" onclick="generateRandomSlug()" class="text-[10px] font-bold text-mstPurple hover:underline bg-white px-2 py-1 rounded shadow-sm border border-purple-100">
-                                        <i class="fa-solid fa-dice"></i> สุ่มชื่อ
-                                    </button>
+                        <!-- สลับโหมด: ย่อลิงก์ใหม่ vs สร้างแค่ QR Code -->
+                        <div class="grid grid-cols-2 gap-1.5 bg-gray-100 p-1.5 rounded-2xl mb-6 text-xs font-black">
+                            <button type="button" id="tabModeShorten" onclick="switchToolMode('shorten')" class="py-2.5 rounded-xl bg-mstPurple text-white shadow-sm transition flex items-center justify-center gap-1.5">
+                                <i class="fa-solid fa-link"></i> ย่อลิงก์ใหม่
+                            </button>
+                            <button type="button" id="tabModeQrOnly" onclick="switchToolMode('qronly')" class="py-2.5 rounded-xl text-gray-600 hover:text-mstPurple transition flex items-center justify-center gap-1.5">
+                                <i class="fa-solid fa-qrcode"></i> สร้างแค่ QR Code
+                            </button>
+                        </div>
+
+                        <!-- โหมดที่ 1: ย่อลิงก์และบันทึกลงระบบ -->
+                        <div id="shortenModeBox">
+                            <div class="flex items-center justify-between mb-5">
+                                <h3 id="formTitle" class="text-lg font-black text-gray-900">
+                                    <i class="fa-solid fa-wand-magic-sparkles text-mstPurple mr-1.5"></i> สร้างลิงก์ย่อใหม่
+                                </h3>
+                                <button type="button" id="cancelEditBtn" onclick="cancelEdit()" class="hidden text-[10px] font-bold bg-gray-100 text-gray-600 px-3 py-1.5 rounded-lg hover:bg-gray-200 transition">ยกเลิกแก้ไข</button>
+                            </div>
+                            
+                            <form id="linkForm" class="space-y-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wider">ชื่อลิงก์ / หัวข้อ <span class="text-red-500">*</span></label>
+                                    <div class="relative">
+                                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400"><i class="fa-solid fa-tag"></i></div>
+                                        <input type="text" id="linkTitle" required placeholder="เช่น แบบฟอร์มรับสมัครสภานักเรียน" class="w-full border border-gray-200 rounded-xl py-3 pl-11 pr-4 text-sm font-bold focus:border-mstPurple outline-none bg-gray-50 focus:bg-white transition">
+                                    </div>
                                 </div>
-                                <div class="relative flex items-center">
-                                    <span class="absolute left-4 text-sm text-gray-400 font-bold select-none">/</span>
-                                    <input type="text" id="shortSlug" required placeholder="my-event" class="w-full border border-gray-300 rounded-xl py-3.5 pl-8 pr-4 text-base focus:border-mstPurple outline-none bg-white font-black text-mstPurple transition">
+
+                                <div class="bg-purple-50/50 p-4 rounded-2xl border border-purple-100 relative overflow-hidden">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider">ชื่อย่อลิงก์ (Slug) <span class="text-red-500">*</span></label>
+                                        <button type="button" onclick="generateRandomSlug()" class="text-[10px] font-bold text-mstPurple hover:underline bg-white px-2.5 py-1 rounded-lg shadow-xs border border-purple-100">
+                                            <i class="fa-solid fa-dice"></i> สุ่มชื่อ
+                                        </button>
+                                    </div>
+                                    <div class="relative flex items-center">
+                                        <span class="absolute left-4 text-sm text-gray-400 font-bold select-none">/</span>
+                                        <input type="text" id="shortSlug" required placeholder="my-event" class="w-full border border-gray-300 rounded-xl py-3 pl-8 pr-4 text-base focus:border-mstPurple outline-none bg-white font-black text-mstPurple transition">
+                                    </div>
+                                    <p class="text-[10px] text-gray-500 mt-2"><i class="fa-solid fa-circle-info"></i> อนุญาตเฉพาะ <b>a-z, 0-9 และขีดกลาง (-)</b> ห้ามเว้นวรรค</p>
+                                    <p id="editSlugWarning" class="hidden text-[10px] text-red-500 font-bold mt-2 bg-red-50 p-2 rounded-lg border border-red-100">
+                                        <i class="fa-solid fa-triangle-exclamation"></i> การเปลี่ยนชื่อย่อลิงก์ จะทำให้ลิงก์เดิมที่เคยแชร์ไปใช้งานไม่ได้ทันที!
+                                    </p>
                                 </div>
-                                <p class="text-[10px] text-gray-500 mt-2"><i class="fa-solid fa-circle-info"></i> อนุญาตเฉพาะ <b>a-z, 0-9 และขีดกลาง (-)</b> ห้ามเว้นวรรค</p>
-                                <p id="editSlugWarning" class="hidden text-[10px] text-red-500 font-bold mt-2 bg-red-50 p-2 rounded-lg border border-red-100">
-                                    <i class="fa-solid fa-triangle-exclamation"></i> การเปลี่ยนชื่อย่อลิงก์ จะทำให้ลิงก์เดิมที่เคยแชร์ไปใช้งานไม่ได้ทันที!
+
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wider">ลิงก์ปลายทาง (Target URL) <span class="text-red-500">*</span></label>
+                                    <div class="relative">
+                                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400"><i class="fa-solid fa-globe"></i></div>
+                                        <input type="url" id="targetUrl" required placeholder="https://forms.gle/..." class="w-full border border-gray-200 rounded-xl py-3 pl-11 pr-4 text-sm focus:border-mstPurple outline-none bg-gray-50 focus:bg-white transition">
+                                    </div>
+                                </div>
+                                
+                                <button type="submit" id="submitBtn" class="w-full bg-gradient-to-r from-mstPurple to-purple-700 text-white font-bold py-4 rounded-xl shadow-lg hover-lift transition flex items-center justify-center gap-2 text-sm sm:text-base mt-2">
+                                    <i class="fa-solid fa-plus-circle"></i> บันทึกและสร้างลิงก์
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- โหมดที่ 2: สร้างเฉพาะ QR Code จากลิงก์ใดก็ได้ (ไม่บันทึกลงฐานข้อมูล) -->
+                        <div id="qrOnlyModeBox" class="hidden">
+                            <div class="mb-5">
+                                <h3 class="text-lg font-black text-gray-900">
+                                    <i class="fa-solid fa-qrcode text-mstPurple mr-1.5"></i> สร้างเฉพาะ QR Code
+                                </h3>
+                                <p class="text-xs text-gray-500 font-medium mt-1">
+                                    วางลิงก์จากที่อื่นเพื่อแปลงเป็น QR Code เทมเพลตสภานักเรียนได้ทันทีโดยไม่ต้องบันทึกลิงก์ลงระบบ
                                 </p>
                             </div>
 
-                            <div>
-                                <label class="block text-xs font-bold text-gray-500 mb-2 uppercase tracking-wider">ลิงก์ปลายทาง (Target URL) <span class="text-red-500">*</span></label>
-                                <div class="relative">
-                                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400"><i class="fa-solid fa-globe"></i></div>
-                                    <input type="url" id="targetUrl" required placeholder="https://forms.gle/..." class="w-full border border-gray-200 rounded-xl py-3.5 pl-11 pr-4 text-sm focus:border-mstPurple outline-none bg-gray-50 hover:bg-white transition">
+                            <form id="qrOnlyForm" class="space-y-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wider">ลิงก์ที่ต้องการทำ QR Code <span class="text-red-500">*</span></label>
+                                    <div class="relative">
+                                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400"><i class="fa-solid fa-link"></i></div>
+                                        <input type="url" id="qrOnlyUrl" required placeholder="https://..." class="w-full border border-gray-200 rounded-xl py-3 pl-11 pr-4 text-sm focus:border-mstPurple outline-none bg-gray-50 focus:bg-white transition">
+                                    </div>
                                 </div>
-                            </div>
-                            
-                            <button type="submit" id="submitBtn" class="w-full bg-gradient-to-r from-mstPurple to-purple-700 text-white font-bold py-4 rounded-xl shadow-lg hover-lift transition flex items-center justify-center gap-2 text-base mt-2">
-                                <i class="fa-solid fa-plus-circle"></i> บันทึกและสร้างลิงก์
-                            </button>
-                        </form>
+
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wider">ข้อความกำกับใต้ภาพ QR (ไม่บังคับ)</label>
+                                    <div class="relative">
+                                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400"><i class="fa-solid fa-font"></i></div>
+                                        <input type="text" id="qrOnlyCaption" placeholder="เช่น ลงทะเบียนงานเปิดบ้าน / ชื่อลิงก์" class="w-full border border-gray-200 rounded-xl py-3 pl-11 pr-4 text-sm font-bold focus:border-mstPurple outline-none bg-gray-50 focus:bg-white transition">
+                                    </div>
+                                    <p class="text-[10px] text-gray-400 mt-1.5">ใช้แสดงด้านล่างภาพเมื่อติ๊กเลือก "ใส่ข้อความกำกับไว้ด้านล่างรูป"</p>
+                                </div>
+
+                                <button type="submit" class="w-full bg-gradient-to-r from-mstPurple to-indigo-700 text-white font-bold py-4 rounded-xl shadow-lg hover-lift transition flex items-center justify-center gap-2 text-sm sm:text-base">
+                                    <i class="fa-solid fa-wand-magic-sparkles text-mstYellow"></i> สร้าง QR Code ทันที
+                                </button>
+                            </form>
+                        </div>
+
                     </div>
                 </div>
 
@@ -131,9 +195,9 @@
                 <div class="lg:col-span-8 bg-white p-6 md:p-8 rounded-[2rem] shadow-sm border border-gray-100 min-h-[500px] flex flex-col relative">
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
                         <h3 class="text-xl font-black text-gray-900"><i class="fa-solid fa-list-ul text-blue-500 mr-2"></i> ลิงก์ที่ถูกสร้างไว้ทั้งหมด</h3>
-                        <div class="relative w-full sm:w-64 shrink-0">
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400"><i class="fa-solid fa-magnifying-glass"></i></div>
-                            <input type="text" id="searchInput" placeholder="ค้นหาชื่อ หรือ ลิงก์..." class="w-full border border-gray-200 rounded-xl py-2.5 pl-10 pr-4 text-sm focus:border-blue-500 outline-none bg-gray-50 transition">
+                        <div class="relative w-full sm:w-72 shrink-0">
+                            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400"><i class="fa-solid fa-magnifying-glass"></i></div>
+                            <input type="text" id="searchInput" placeholder="ค้นหาชื่อลิงก์, Slug หรือผู้สร้าง..." class="w-full border border-gray-200 rounded-xl py-2.5 pl-10 pr-4 text-sm focus:border-blue-500 outline-none bg-gray-50 transition">
                         </div>
                     </div>
 
@@ -150,17 +214,35 @@
 
     <script>
         const PORTAL_API_URL = "https://admission-backend-592123078141.asia-southeast1.run.app/api/portal";
-        const LINK_USER_KEY = "mstsc_link_user_email";
+        const LINK_PROFILE_KEY = "mstsc_link_user_profile_v2";
+        const LEGACY_EMAIL_KEY = "mstsc_link_user_email";
 
         let allLinksData = [];
         let editingOriginalId = null;
-        let currentUserEmail = "";
+        let currentUser = {
+            email: "",
+            name: "",
+            picture: "",
+            idToken: ""
+        };
+        let activeQrModalConfig = {
+            qrDataUrl: "",
+            bottomText: "",
+            fileName: "MSTSC_QR.png"
+        };
 
         async function portalApi(payload) {
+            const headers = { 'Content-Type': 'application/json' };
+            if (currentUser.idToken) {
+                headers['Authorization'] = `Bearer ${currentUser.idToken}`;
+            }
             const res = await fetch(`${PORTAL_API_URL}?t=${Date.now()}`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
+                headers,
+                body: JSON.stringify({
+                    ...payload,
+                    idToken: currentUser.idToken || undefined
+                })
             });
             return await res.json();
         }
@@ -171,28 +253,80 @@
             return JSON.parse(decodeURIComponent(window.atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')));
         }
 
-        async function handleLinkUserLogin(response) {
-            const payload = parseJwt(response.credential);
-            await verifyAndInitLinkManager(payload.email, payload.name);
+        function escapeHtml(str) {
+            return String(str || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
         }
 
-        async function verifyAndInitLinkManager(email, displayName) {
+        // สลับโหมดระหว่าง ย่อลิงก์ใหม่ กับ สร้างแค่ QR Code
+        window.switchToolMode = (mode) => {
+            const isShorten = mode === 'shorten';
+            document.getElementById('shortenModeBox').classList.toggle('hidden', !isShorten);
+            document.getElementById('qrOnlyModeBox').classList.toggle('hidden', isShorten);
+
+            document.getElementById('tabModeShorten').className = isShorten
+                ? "py-2.5 rounded-xl bg-mstPurple text-white shadow-sm transition flex items-center justify-center gap-1.5"
+                : "py-2.5 rounded-xl text-gray-600 hover:text-mstPurple transition flex items-center justify-center gap-1.5";
+            document.getElementById('tabModeQrOnly').className = !isShorten
+                ? "py-2.5 rounded-xl bg-mstPurple text-white shadow-sm transition flex items-center justify-center gap-1.5"
+                : "py-2.5 rounded-xl text-gray-600 hover:text-mstPurple transition flex items-center justify-center gap-1.5";
+        };
+
+        async function handleLinkUserLogin(response) {
+            const payload = parseJwt(response.credential);
+            const profile = {
+                email: String(payload.email || '').trim().toLowerCase(),
+                name: payload.name || payload.email.split('@')[0],
+                picture: payload.picture || "",
+                idToken: response.credential
+            };
+            await verifyAndInitLinkManager(profile);
+        }
+
+        async function verifyAndInitLinkManager(profile) {
             Swal.fire({ title: 'ตรวจสอบสิทธิ์ความปลอดภัย', text: 'กำลังเชื่อมต่อฐานข้อมูลสภานักเรียน...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
             try {
-                const res = await portalApi({ action: 'initLinkManager', email });
+                currentUser = {
+                    email: profile.email || "",
+                    name: profile.name || (profile.email ? profile.email.split('@')[0] : "User"),
+                    picture: profile.picture || "",
+                    idToken: profile.idToken || ""
+                };
+
+                const res = await portalApi({
+                    action: 'initLinkManager',
+                    email: currentUser.email,
+                    creatorName: currentUser.name,
+                    creatorPic: currentUser.picture
+                });
                 Swal.close();
+
                 if (res.status === 'success') {
-                    currentUserEmail = email;
-                    localStorage.setItem(LINK_USER_KEY, email);
+                    // หากเซิร์ฟเวอร์ส่งชื่อหรือรูปที่อัปเดตกลับมา ให้ใช้ร่วมกัน
+                    if (res.userProfile) {
+                        currentUser.name = res.userProfile.name || currentUser.name;
+                        currentUser.picture = res.userProfile.picture || currentUser.picture;
+                    }
+                    localStorage.setItem(LINK_PROFILE_KEY, JSON.stringify(currentUser));
+                    localStorage.setItem(LEGACY_EMAIL_KEY, currentUser.email);
+
                     document.getElementById('loginOverlay').classList.add('hidden');
                     document.getElementById('appWorkspace').classList.remove('hidden');
-                    document.getElementById('adminUserName').innerText = displayName || email.split('@')[0];
+                    document.getElementById('adminUserName').innerText = currentUser.name;
                     document.getElementById('adminUserRole').innerText = res.role || 'Member';
+
+                    const avatarUrl = currentUser.picture || `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.name)}&background=4C1D95&color=fff`;
+                    document.getElementById('adminUserAvatar').src = avatarUrl;
+
                     allLinksData = res.links || [];
                     document.getElementById('totalLinks').innerText = allLinksData.length;
                     renderCards(allLinksData);
                 } else {
-                    localStorage.removeItem(LINK_USER_KEY);
+                    localStorage.removeItem(LINK_PROFILE_KEY);
+                    localStorage.removeItem(LEGACY_EMAIL_KEY);
                     Swal.fire({ title: 'ปฏิเสธการเข้าถึง', text: res.message, icon: 'error', confirmButtonColor: '#4C1D95', customClass: { popup: 'rounded-[2rem]' } });
                 }
             } catch (err) {
@@ -204,11 +338,28 @@
             Swal.fire({ title: 'ออกจากระบบ?', icon: 'question', showCancelButton: true, confirmButtonColor: '#ef4444', confirmButtonText: 'ออกจากระบบ', cancelButtonText: 'ยกเลิก', customClass: { popup: 'rounded-3xl' } })
             .then(r => {
                 if (r.isConfirmed) {
-                    localStorage.removeItem(LINK_USER_KEY);
+                    localStorage.removeItem(LINK_PROFILE_KEY);
+                    localStorage.removeItem(LEGACY_EMAIL_KEY);
                     location.reload();
                 }
             });
         };
+
+        function resolveCreatorDisplay(item) {
+            const rawEmail = String(item.creator || '').trim().toLowerCase();
+            const isCurrentUser = rawEmail && currentUser.email && rawEmail === currentUser.email.toLowerCase();
+
+            // ดึงชื่อบัญชีผู้สร้าง (หากเป็นลิงก์เก่าของตัวเองที่ยังไม่มีชื่อในชีต ให้ใช้ชื่อจากบัญชีที่ล็อกอินอยู่ทันที)
+            let displayName = item.creatorName || (isCurrentUser ? currentUser.name : '') || (rawEmail ? rawEmail.split('@')[0] : 'สภานักเรียน');
+            let displayPic = item.creatorPic || (isCurrentUser ? currentUser.picture : '');
+            const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=4C1D95&color=fff`;
+
+            return {
+                name: displayName,
+                pic: displayPic || fallbackAvatar,
+                fallback: fallbackAvatar
+            };
+        }
 
         function renderCards(dataArray) {
             const container = document.getElementById('linksContainer');
@@ -220,32 +371,34 @@
             container.innerHTML = dataArray.map(item => {
                 const fullLink = `https://link-mstsc.pages.dev/${item.id}`;
                 const dateStr = item.timestamp ? String(item.timestamp).split(' ')[0] : 'ไม่ระบุ';
-                const creatorName = item.creator ? item.creator.split('@')[0] : 'MSTSC';
+                const linkTitle = item.title ? String(item.title).trim() : '';
+                const creatorInfo = resolveCreatorDisplay(item);
 
                 return `
                 <div class="bg-gray-50 hover:bg-purple-50/30 transition border border-gray-200 rounded-2xl p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm group">
                     <div class="flex-1 min-w-0">
-                        <div class="flex items-center gap-2 mb-1.5">
-                            <h4 class="font-black text-mstPurple text-lg truncate">/${item.id}</h4>
-                            <span class="text-[10px] text-gray-400 bg-white px-2 py-0.5 rounded-md border border-gray-100 shadow-sm"><i class="fa-regular fa-clock"></i> ${dateStr}</span>
+                        <div class="flex flex-wrap items-center gap-2 mb-1">
+                            ${linkTitle ? `<span class="font-black text-gray-900 text-base sm:text-lg truncate max-w-full">${escapeHtml(linkTitle)}</span>` : ''}
+                            <span class="font-black text-mstPurple ${linkTitle ? 'text-xs bg-purple-100 px-2.5 py-0.5 rounded-lg border border-purple-200' : 'text-lg'}">/${escapeHtml(item.id)}</span>
+                            <span class="text-[10px] text-gray-400 bg-white px-2 py-0.5 rounded-md border border-gray-100 shadow-xs"><i class="fa-regular fa-clock"></i> ${escapeHtml(dateStr)}</span>
                         </div>
-                        <a href="${item.targetUrl}" target="_blank" class="text-sm text-blue-500 hover:text-blue-700 hover:underline truncate block w-full mb-2">${item.targetUrl}</a>
-                        <div class="inline-flex items-center gap-1.5 text-xs text-gray-500">
-                            <div class="w-4 h-4 bg-gray-300 rounded-full flex items-center justify-center text-[8px] text-white"><i class="fa-solid fa-user"></i></div>
-                            <span class="font-bold truncate max-w-[150px]">${creatorName}</span>
+                        <a href="${escapeHtml(item.targetUrl)}" target="_blank" rel="noopener noreferrer" class="text-xs sm:text-sm text-blue-500 hover:text-blue-700 hover:underline truncate block w-full mb-2.5">${escapeHtml(item.targetUrl)}</a>
+                        <div class="inline-flex items-center gap-2 text-xs text-gray-600 bg-white px-2.5 py-1 rounded-full border border-gray-200/80 shadow-2xs">
+                            <img src="${escapeHtml(creatorInfo.pic)}" referrerpolicy="no-referrer" class="w-5 h-5 rounded-full object-cover border border-purple-200" onerror="this.src='${creatorInfo.fallback}'">
+                            <span class="font-bold truncate max-w-[200px]">${escapeHtml(creatorInfo.name)}</span>
                         </div>
                     </div>
                     <div class="flex items-center gap-2 shrink-0 border-t md:border-t-0 pt-3 md:pt-0 mt-2 md:mt-0 border-gray-200">
-                        <button onclick="showQRCode('${item.id}')" class="flex-1 md:flex-none w-auto md:w-10 h-10 rounded-xl bg-gray-200/70 text-gray-700 hover:bg-gray-800 hover:text-white transition font-bold text-xs md:text-base flex items-center justify-center gap-1">
+                        <button onclick="showQRCode('${escapeHtml(item.id)}')" class="flex-1 md:flex-none w-auto md:w-10 h-10 rounded-xl bg-gray-200/70 text-gray-700 hover:bg-gray-800 hover:text-white transition font-bold text-xs md:text-base flex items-center justify-center gap-1" title="สร้าง QR Code">
                             <i class="fa-solid fa-qrcode"></i> <span class="md:hidden">QR</span>
                         </button>
-                        <button onclick="copyToClipboard('${fullLink}')" class="flex-1 md:flex-none w-auto md:w-10 h-10 rounded-xl bg-gray-200/70 text-gray-700 hover:bg-blue-500 hover:text-white transition font-bold text-xs md:text-base flex items-center justify-center gap-1">
+                        <button onclick="copyToClipboard('${fullLink}')" class="flex-1 md:flex-none w-auto md:w-10 h-10 rounded-xl bg-gray-200/70 text-gray-700 hover:bg-blue-500 hover:text-white transition font-bold text-xs md:text-base flex items-center justify-center gap-1" title="คัดลอกลิงก์สั้น">
                             <i class="fa-regular fa-copy"></i> <span class="md:hidden">คัดลอก</span>
                         </button>
-                        <button onclick="editLink('${item.id}', '${item.targetUrl.replace(/'/g, "\\'")}')" class="flex-1 md:flex-none w-auto md:w-10 h-10 rounded-xl bg-amber-50 text-amber-600 hover:bg-amber-500 hover:text-white transition font-bold text-xs md:text-base flex items-center justify-center gap-1">
+                        <button onclick="editLinkById('${escapeHtml(item.id)}')" class="flex-1 md:flex-none w-auto md:w-10 h-10 rounded-xl bg-amber-50 text-amber-600 hover:bg-amber-500 hover:text-white transition font-bold text-xs md:text-base flex items-center justify-center gap-1" title="แก้ไขลิงก์">
                             <i class="fa-solid fa-pen"></i> <span class="md:hidden">แก้</span>
                         </button>
-                        <button onclick="deleteLink('${item.id}')" class="flex-1 md:flex-none w-auto md:w-10 h-10 rounded-xl bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition font-bold text-xs md:text-base flex items-center justify-center gap-1">
+                        <button onclick="deleteLink('${escapeHtml(item.id)}')" class="flex-1 md:flex-none w-auto md:w-10 h-10 rounded-xl bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition font-bold text-xs md:text-base flex items-center justify-center gap-1" title="ลบลิงก์">
                             <i class="fa-solid fa-trash-can"></i> <span class="md:hidden">ลบ</span>
                         </button>
                     </div>
@@ -256,35 +409,48 @@
         document.getElementById('searchInput').addEventListener('input', (e) => {
             const keyword = e.target.value.toLowerCase().trim();
             if (!keyword) return renderCards(allLinksData);
-            renderCards(allLinksData.filter(item => item.id.toLowerCase().includes(keyword) || item.targetUrl.toLowerCase().includes(keyword)));
+            renderCards(allLinksData.filter(item =>
+                (item.id && item.id.toLowerCase().includes(keyword)) ||
+                (item.title && item.title.toLowerCase().includes(keyword)) ||
+                (item.targetUrl && item.targetUrl.toLowerCase().includes(keyword)) ||
+                (item.creatorName && item.creatorName.toLowerCase().includes(keyword))
+            ));
         });
 
-        window.editLink = (id, url) => {
-            editingOriginalId = id;
-            document.getElementById('shortSlug').value = id;
-            document.getElementById('targetUrl').value = url;
-            document.getElementById('formTitle').innerHTML = `<i class="fa-solid fa-pen text-amber-500 mr-2"></i> แก้ไขลิงก์: /${id}`;
+        window.editLinkById = (id) => {
+            const target = allLinksData.find(x => x.id === id);
+            if (!target) return;
+
+            switchToolMode('shorten');
+            editingOriginalId = target.id;
+            document.getElementById('linkTitle').value = target.title || '';
+            document.getElementById('shortSlug').value = target.id;
+            document.getElementById('targetUrl').value = target.targetUrl;
+            document.getElementById('formTitle').innerHTML = `<i class="fa-solid fa-pen text-amber-500 mr-2"></i> แก้ไขลิงก์: /${escapeHtml(target.id)}`;
             document.getElementById('editSlugWarning').classList.remove('hidden');
+
             const btn = document.getElementById('submitBtn');
-            btn.className = "w-full bg-gradient-to-r from-amber-500 to-amber-600 text-white font-bold py-4 rounded-xl shadow-lg hover-lift transition flex items-center justify-center gap-2 text-base mt-2";
-            btn.innerHTML = '<i class="fa-solid fa-save"></i> อัปเดตข้อมูล';
+            btn.className = "w-full bg-gradient-to-r from-amber-500 to-amber-600 text-white font-bold py-4 rounded-xl shadow-lg hover-lift transition flex items-center justify-center gap-2 text-sm sm:text-base mt-2";
+            btn.innerHTML = '<i class="fa-solid fa-save"></i> อัปเดตข้อมูลลิงก์';
             document.getElementById('cancelEditBtn').classList.remove('hidden');
         };
 
         window.cancelEdit = () => {
             editingOriginalId = null;
             document.getElementById('linkForm').reset();
-            document.getElementById('formTitle').innerHTML = `<i class="fa-solid fa-wand-magic-sparkles text-mstPurple mr-2"></i> สร้างลิงก์ใหม่`;
+            document.getElementById('formTitle').innerHTML = `<i class="fa-solid fa-wand-magic-sparkles text-mstPurple mr-1.5"></i> สร้างลิงก์ย่อใหม่`;
             document.getElementById('editSlugWarning').classList.add('hidden');
             const btn = document.getElementById('submitBtn');
-            btn.className = "w-full bg-gradient-to-r from-mstPurple to-purple-700 text-white font-bold py-4 rounded-xl shadow-lg hover-lift transition flex items-center justify-center gap-2 text-base mt-2";
+            btn.className = "w-full bg-gradient-to-r from-mstPurple to-purple-700 text-white font-bold py-4 rounded-xl shadow-lg hover-lift transition flex items-center justify-center gap-2 text-sm sm:text-base mt-2";
             btn.innerHTML = '<i class="fa-solid fa-plus-circle"></i> บันทึกและสร้างลิงก์';
             document.getElementById('cancelEditBtn').classList.add('hidden');
         };
 
+        // บันทึกลิงก์ย่อพร้อมชื่อลิงก์ + ชื่อและรูปโปรไฟล์ผู้สร้าง
         document.getElementById('linkForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('submitBtn');
+            const title = document.getElementById('linkTitle').value.trim();
             const cleanSlug = document.getElementById('shortSlug').value.trim().toLowerCase().replace(/[^a-z0-9-]/g, '');
             const targetUrl = document.getElementById('targetUrl').value.trim();
 
@@ -296,9 +462,12 @@
             try {
                 const res = await portalApi({
                     action: 'saveLink',
+                    title,
                     slug: cleanSlug,
                     targetUrl,
-                    creator: currentUserEmail,
+                    creator: currentUser.email,
+                    creatorName: currentUser.name,
+                    creatorPic: currentUser.picture,
                     originalSlug: editingOriginalId
                 });
 
@@ -312,7 +481,7 @@
                     Swal.fire({
                         icon: 'success',
                         title: 'บันทึกลิงก์สำเร็จ!',
-                        html: `ลิงก์ของคุณพร้อมใช้งาน<br><br><b class="text-mstPurple bg-purple-50 px-4 py-2 rounded-lg inline-block">link-mstsc.pages.dev/${cleanSlug}</b>`,
+                        html: `<p class="text-sm font-bold text-gray-700 mb-2">${escapeHtml(title)}</p><b class="text-mstPurple bg-purple-50 px-4 py-2 rounded-lg inline-block">link-mstsc.pages.dev/${cleanSlug}</b>`,
                         confirmButtonColor: '#4C1D95',
                         customClass: { popup: 'rounded-[2rem]' }
                     });
@@ -325,10 +494,35 @@
             }
         });
 
+        // โหมดสร้างเฉพาะ QR Code จากลิงก์ภายนอกโดยไม่บันทึกลงฐานข้อมูล
+        document.getElementById('qrOnlyForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const rawUrl = document.getElementById('qrOnlyUrl').value.trim();
+            const caption = document.getElementById('qrOnlyCaption').value.trim();
+            if (!rawUrl) return;
+
+            let displayBottomText = caption;
+            if (!displayBottomText) {
+                try {
+                    const u = new URL(rawUrl);
+                    displayBottomText = u.hostname + (u.pathname !== '/' ? u.pathname : '');
+                } catch (err) {
+                    displayBottomText = rawUrl;
+                }
+            }
+            const safeFileSlug = (caption || 'custom_link').replace(/[^a-zA-Z0-9ก-๙_-]/g, '_').slice(0, 30);
+            await openQRCodeModal({
+                qrDataUrl: rawUrl,
+                titleText: caption || 'QR Code ลิงก์ภายนอก',
+                bottomText: displayBottomText,
+                fileName: `MSTSC_QR_${safeFileSlug}.png`
+            });
+        });
+
         window.deleteLink = (id) => {
             Swal.fire({
                 title: 'ยืนยันการลบ?',
-                html: `คุณกำลังจะลบ <b>/${id}</b>`,
+                html: `คุณกำลังจะลบ <b>/${escapeHtml(id)}</b>`,
                 icon: 'warning', showCancelButton: true, confirmButtonColor: '#ef4444', confirmButtonText: 'ยืนยันลบ', cancelButtonText: 'ยกเลิก', customClass: { popup: 'rounded-[2rem]' }
             }).then(async (result) => {
                 if (result.isConfirmed) {
@@ -357,8 +551,22 @@
             document.getElementById('shortSlug').value = res;
         };
 
+        // เรียกเปิด QR Code จากการ์ดลิงก์ที่บันทึกไว้
         window.showQRCode = async (id) => {
-            const fullLink = `link-mstsc.pages.dev/${id}`;
+            const item = allLinksData.find(x => x.id === id);
+            const shortLinkText = `link-mstsc.pages.dev/${id}`;
+            await openQRCodeModal({
+                qrDataUrl: `https://${shortLinkText}`,
+                titleText: (item && item.title) ? item.title : `/${id}`,
+                bottomText: shortLinkText,
+                fileName: `MSTSC_QR_${id}.png`
+            });
+        };
+
+        // ฟังก์ชันกลางสำหรับสร้าง QR Code เทมเพลตสภานักเรียน (ใช้ได้ทั้งลิงก์ในระบบและลิงก์ภายนอก)
+        async function openQRCodeModal({ qrDataUrl, titleText, bottomText, fileName }) {
+            activeQrModalConfig = { qrDataUrl, bottomText, fileName };
+
             const logoWithWhiteBorder = await new Promise((resolve) => {
                 const img = new Image();
                 img.crossOrigin = "anonymous";
@@ -379,17 +587,21 @@
             });
 
             Swal.fire({
-                title: 'QR Code',
+                title: escapeHtml(titleText || 'QR Code'),
                 html: `
-                    <div id="qrcode-box" class="flex justify-center mt-4 mb-4 [&>canvas]:w-[240px] [&>canvas]:h-[240px]"></div>
-                    <div class="flex items-center justify-center mb-4 bg-gray-50 rounded-lg border border-gray-200 w-3/4 mx-auto">
+                    <div id="qrcode-box" class="flex justify-center mt-3 mb-4 [&>canvas]:w-[240px] [&>canvas]:h-[240px]"></div>
+                    <div class="mb-3 px-2">
+                        <label class="block text-[11px] font-bold text-gray-500 mb-1">ข้อความที่จะแสดงใต้รูปเมื่อดาวน์โหลด</label>
+                        <input type="text" id="qrCustomBottomTextInput" value="${escapeHtml(bottomText || '')}" class="w-full border border-gray-200 rounded-xl px-3 py-2 text-xs font-bold text-center text-mstPurple bg-gray-50 focus:bg-white outline-none">
+                    </div>
+                    <div class="flex items-center justify-center mb-4 bg-gray-50 rounded-xl border border-gray-200 w-4/5 mx-auto">
                         <label for="showUrlCheckbox" class="flex items-center justify-center gap-2 w-full py-2.5 cursor-pointer">
-                            <input type="checkbox" id="showUrlCheckbox" class="w-4 h-4 text-mstPurple rounded cursor-pointer">
-                            <span class="text-sm font-bold text-gray-700 select-none">ใส่ชื่อลิงก์ไว้ด้านล่างรูป</span>
+                            <input type="checkbox" id="showUrlCheckbox" class="w-4 h-4 accent-mstPurple rounded cursor-pointer">
+                            <span class="text-xs sm:text-sm font-bold text-gray-700 select-none">ใส่ข้อความกำกับไว้ด้านล่างรูป</span>
                         </label>
                     </div>
-                    <button onclick="downloadQR('${id}')" class="w-full bg-gradient-to-r from-mstPurple to-purple-600 text-white py-3 rounded-xl font-bold shadow-md flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-download"></i> ดาวน์โหลด QR Code
+                    <button onclick="downloadActiveQR()" class="w-full bg-gradient-to-r from-mstPurple to-purple-600 text-white py-3.5 rounded-xl font-bold shadow-md flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-download"></i> ดาวน์โหลด QR Code (PNG)
                     </button>
                 `,
                 showConfirmButton: false, showCloseButton: true, customClass: { popup: 'rounded-[2.5rem] p-6' },
@@ -397,7 +609,7 @@
                     const qrcodeBox = document.getElementById("qrcode-box");
                     qrcodeBox.innerHTML = "";
                     const qrCode = new QRCodeStyling({
-                        width: 1000, height: 1000, type: "canvas", data: `https://${fullLink}`, image: logoWithWhiteBorder,
+                        width: 1000, height: 1000, type: "canvas", data: qrDataUrl, image: logoWithWhiteBorder,
                         qrOptions: { errorCorrectionLevel: 'H' },
                         dotsOptions: { color: "#61177C", type: "rounded" },
                         cornersSquareOptions: { color: "#2E073E", type: "extra-rounded" },
@@ -408,16 +620,16 @@
                     qrCode.append(qrcodeBox);
                 }
             });
-        };
+        }
 
-        window.downloadQR = (id) => {
+        window.downloadActiveQR = () => {
             const sourceCanvas = document.querySelector('#qrcode-box canvas');
             if (!sourceCanvas) return;
             const includeText = document.getElementById('showUrlCheckbox').checked;
-            const linkText = `link-mstsc.pages.dev/${id}`;
-            const fileName = `MSTSC_QR_${id}.png`;
+            const customBottomText = (document.getElementById('qrCustomBottomTextInput')?.value || activeQrModalConfig.bottomText || '').trim();
+            const fileName = activeQrModalConfig.fileName || 'MSTSC_QR.png';
 
-            if (includeText) {
+            if (includeText && customBottomText) {
                 const finalCanvas = document.createElement('canvas');
                 const ctx = finalCanvas.getContext('2d');
                 const paddingBottom = 160;
@@ -427,10 +639,10 @@
                 ctx.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
                 ctx.drawImage(sourceCanvas, 0, 0);
                 ctx.fillStyle = '#4C1D95';
-                ctx.font = 'bold 60px sans-serif';
+                ctx.font = 'bold 54px Anuphan, sans-serif';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
-                ctx.fillText(linkText, finalCanvas.width / 2, sourceCanvas.height + (paddingBottom / 2));
+                ctx.fillText(customBottomText, finalCanvas.width / 2, sourceCanvas.height + (paddingBottom / 2));
                 triggerDownload(finalCanvas.toDataURL("image/png"), fileName);
             } else {
                 triggerDownload(sourceCanvas.toDataURL("image/png"), fileName);
@@ -448,8 +660,20 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            const savedEmail = localStorage.getItem(LINK_USER_KEY);
-            if (savedEmail) verifyAndInitLinkManager(savedEmail, null);
+            const savedProfileRaw = localStorage.getItem(LINK_PROFILE_KEY);
+            if (savedProfileRaw) {
+                try {
+                    const parsed = JSON.parse(savedProfileRaw);
+                    if (parsed && parsed.email) {
+                        verifyAndInitLinkManager(parsed);
+                        return;
+                    }
+                } catch (e) {}
+            }
+            const legacyEmail = localStorage.getItem(LEGACY_EMAIL_KEY);
+            if (legacyEmail) {
+                verifyAndInitLinkManager({ email: legacyEmail, name: legacyEmail.split('@')[0], picture: "" });
+            }
         });
     </script>
 </body>
