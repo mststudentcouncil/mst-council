@@ -915,7 +915,9 @@
 
         let activeTab = "student";
         let currentMode = "student";
-        let selectedDay = 0;
+        // ถ้าเข้าใช้งานวันจันทร์-ศุกร์ (1-5) ให้เปิดตารางของวันนั้นทันที ถ้าเป็นเสาร์-อาทิตย์ให้เปิดแท็บ "รวม" (0)
+        const initTodayNum = new Date().getDay();
+        let selectedDay = (initTodayNum >= 1 && initTodayNum <= 5) ? initTodayNum : 0;
         let currentScheduleData = { header: "-", type: "student", entries: [] };
         let currentFileMeta = null;
         let simulatedTime = null;
@@ -999,65 +1001,73 @@
             const gradeSel = document.getElementById('selGradeFolder');
             const deptSel = document.getElementById('selDeptFolder');
 
-            gradeSel.innerHTML = catalogData.studentGroups.map((g, idx) => `<option value="${idx}">${g.folderName}</option>`).join('');
-            deptSel.innerHTML = catalogData.teacherGroups.map((g, idx) => `<option value="${idx}">${cleanDeptName(g.folderName)}</option>`).join('');
+            // ใส่ตัวเลือกค่าว่างไว้ด้านบนสุดเสมอ
+            gradeSel.innerHTML = `<option value="">-- เลือกระดับชั้น --</option>` +
+                catalogData.studentGroups.map((g, idx) => `<option value="${idx}">${g.folderName}</option>`).join('');
+
+            deptSel.innerHTML = `<option value="">-- เลือกกลุ่มสาระฯ --</option>` +
+                catalogData.teacherGroups.map((g, idx) => `<option value="${idx}">${cleanDeptName(g.folderName)}</option>`).join('');
 
             onGradeFolderChange(false);
             onDeptFolderChange(false);
 
+            // ตรวจสอบเฉพาะตารางที่ผู้ใช้กดปักหมุดไว้เท่านั้น (ถ้าไม่เคยปักหมุด ให้ปล่อยว่างไว้)
             const pinned = JSON.parse(localStorage.getItem(PINNED_KEY) || "null");
             if (pinned) {
                 if (pinned.mode === "student") {
                     const gIdx = catalogData.studentGroups.findIndex(g => g.folderName === pinned.folderName);
                     if (gIdx !== -1) {
-                        gradeSel.value = gIdx;
+                        gradeSel.value = String(gIdx);
                         onGradeFolderChange(false);
                         document.getElementById('selClassFile').value = pinned.fileName;
                     }
                 } else if (pinned.mode === "teacher") {
                     const dIdx = catalogData.teacherGroups.findIndex(g => g.folderName === pinned.folderName);
                     if (dIdx !== -1) {
-                        deptSel.value = dIdx;
+                        deptSel.value = String(dIdx);
                         onDeptFolderChange(false);
                         document.getElementById('selTeacherFile').value = pinned.fileName;
-                    }
-                }
-            } else if (currentViewer) {
-                // หากยังไม่ได้ปักหมุด ให้เลือกตารางตามข้อมูลผู้ใช้ที่เชื่อมกับระบบ Connect อัตโนมัติ
-                const levelMatch = String(currentViewer.level || "").match(/(\d+)/);
-                const roomNum = String(currentViewer.room || "").trim();
-                if (levelMatch && roomNum && roomNum !== "-") {
-                    const gradeNum = levelMatch[1];
-                    const targetCode = `${gradeNum}-${roomNum}`;
-                    const gIdx = catalogData.studentGroups.findIndex(g => g.folderName.includes(gradeNum));
-                    if (gIdx !== -1) {
-                        gradeSel.value = gIdx;
-                        onGradeFolderChange(false);
-                        const hasRoom = (catalogData.studentGroups[gIdx].files || []).some(f => f.name === targetCode);
-                        if (hasRoom) {
-                            document.getElementById('selClassFile').value = targetCode;
-                        }
                     }
                 }
             }
         }
 
         function onGradeFolderChange(triggerLoad = true) {
-            const gIdx = parseInt(document.getElementById('selGradeFolder').value, 10) || 0;
-            const group = catalogData.studentGroups[gIdx] || { files: [] };
+            const val = document.getElementById('selGradeFolder').value;
             const fileSel = document.getElementById('selClassFile');
-            fileSel.innerHTML = group.files.map(f => {
-                const roomOnly = f.name.includes('-') ? f.name.split('-')[1] : f.name;
-                return `<option value="${f.name}">ห้อง ${roomOnly}</option>`;
-            }).join('');
+
+            if (val === "") {
+                fileSel.innerHTML = `<option value="">-- เลือกห้องเรียน --</option>`;
+                if (triggerLoad) onSelectScheduleFile();
+                return;
+            }
+
+            const gIdx = parseInt(val, 10);
+            const group = catalogData.studentGroups[gIdx] || { files: [] };
+            fileSel.innerHTML = `<option value="">-- เลือกห้องเรียน --</option>` +
+                group.files.map(f => {
+                    const roomOnly = f.name.includes('-') ? f.name.split('-')[1] : f.name;
+                    return `<option value="${f.name}">ห้อง ${roomOnly}</option>`;
+                }).join('');
+
             if (triggerLoad) onSelectScheduleFile();
         }
 
         function onDeptFolderChange(triggerLoad = true) {
-            const dIdx = parseInt(document.getElementById('selDeptFolder').value, 10) || 0;
-            const group = catalogData.teacherGroups[dIdx] || { files: [] };
+            const val = document.getElementById('selDeptFolder').value;
             const fileSel = document.getElementById('selTeacherFile');
-            fileSel.innerHTML = group.files.map(f => `<option value="${f.name}">${getTeacherDisplayName(f.name)}</option>`).join('');
+
+            if (val === "") {
+                fileSel.innerHTML = `<option value="">-- เลือกครูผู้สอน --</option>`;
+                if (triggerLoad) onSelectScheduleFile();
+                return;
+            }
+
+            const dIdx = parseInt(val, 10);
+            const group = catalogData.teacherGroups[dIdx] || { files: [] };
+            fileSel.innerHTML = `<option value="">-- เลือกครูผู้สอน --</option>` +
+                group.files.map(f => `<option value="${f.name}">${getTeacherDisplayName(f.name)}</option>`).join('');
+
             prefetchTeacherFullNamesInGroup(group);
             if (triggerLoad) onSelectScheduleFile();
         }
@@ -1112,18 +1122,50 @@
         async function onSelectScheduleFile() {
             if (!currentViewer) return;
             const isTeacher = currentMode === "teacher";
-            const groupIdx = parseInt(document.getElementById(isTeacher ? 'selDeptFolder' : 'selGradeFolder').value, 10) || 0;
+            const folderVal = document.getElementById(isTeacher ? 'selDeptFolder' : 'selGradeFolder').value;
+            const selectedName = document.getElementById(isTeacher ? 'selTeacherFile' : 'selClassFile').value;
+            const viewerMetaStr = currentViewer ? `รหัส ${currentViewer.std_id} • ` : "";
+
+            // กรณีที่ยังไม่ได้เลือกชั้นเรียน/ห้องเรียน หรือ กลุ่มสาระฯ/ครูผู้สอน
+            if (folderVal === "" || !selectedName) {
+                currentFileMeta = null;
+                lastPdfDoc = null;
+                currentScheduleData = { header: "-", type: currentMode, entries: [] };
+
+                document.getElementById('activeScheduleHeader').innerText = isTeacher
+                    ? `${viewerMetaStr}กรุณาเลือกกลุ่มสาระฯ และชื่อครูผู้สอน`
+                    : `${viewerMetaStr}กรุณาเลือกระดับชั้นและห้องเรียน`;
+                document.getElementById('pdfViewerTitle').innerText = `ยังไม่ได้เลือกไฟล์ตาราง`;
+                document.getElementById('btnOpenDriveFolder').href = isTeacher ? catalogData.teacherDriveUrl : catalogData.studentDriveUrl;
+                document.getElementById('btnDownloadPdf').href = "#";
+
+                const canvas = document.getElementById('pdfRenderCanvas');
+                if (canvas) {
+                    const ctx = canvas.getContext('2d');
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    canvas.width = 0;
+                    canvas.height = 0;
+                }
+
+                updatePinButtonUI();
+                renderInteractiveSchedule();
+                updateLiveBanner();
+                return;
+            }
+
+            const groupIdx = parseInt(folderVal, 10) || 0;
             const groups = isTeacher ? catalogData.teacherGroups : catalogData.studentGroups;
             const group = groups[groupIdx] || { folderName: "-", files: [] };
-            const selectedName = document.getElementById(isTeacher ? 'selTeacherFile' : 'selClassFile').value;
-            const fileObj = group.files.find(f => f.name === selectedName) || group.files[0];
+            const fileObj = group.files.find(f => f.name === selectedName);
+
+            if (!fileObj) return;
 
             currentFileMeta = {
                 mode: currentMode,
                 folderName: group.folderName,
-                fileName: fileObj ? fileObj.name : selectedName,
-                fileId: fileObj ? fileObj.id : "",
-                downloadUrl: fileObj && fileObj.downloadUrl ? fileObj.downloadUrl : ""
+                fileName: fileObj.name,
+                fileId: fileObj.id || "",
+                downloadUrl: fileObj.downloadUrl || ""
             };
 
             if (currentFileMeta.fileId && !currentFileMeta.fileId.startsWith("demo_") && !WORKER_API_URL.includes("your-subdomain")) {
@@ -1138,9 +1180,6 @@
             }
 
             const targetLabel = getTargetDisplayLabel(currentFileMeta);
-            const viewerMetaStr = currentViewer
-                ? `รหัส ${currentViewer.std_id} • `
-                : "";
             document.getElementById('activeScheduleHeader').innerText = isTeacher
                 ? `${viewerMetaStr}กำลังดูตารางสอน ${targetLabel}`
                 : `${viewerMetaStr}กำลังดูตารางเรียน ${targetLabel}`;
@@ -1295,22 +1334,45 @@
             if (!currentViewer) return;
             const timeStr = getCurrentTimeStr();
             document.getElementById('liveClockBadge').innerText = `${timeStr} น.${simulatedTime ? ' (จำลอง)' : ''}`;
-
-            const activeSlot = MST_PERIODS.find(p => isTimeBetween(timeStr, p.start, p.end));
-            const todayNum = new Date().getDay();
-            const dayToUse = selectedDay === 0 ? ((todayNum >= 1 && todayNum <= 5) ? todayNum : 1) : selectedDay;
-
-            if (!activeSlot) {
-                document.getElementById('livePeriodLabel').innerText = `ไม่อยู่ในช่วงเวลาเรียน (${DAY_NAMES[dayToUse] || 'วันจันทร์'})`;
-                document.getElementById('liveSubjectTitle').innerText = currentFileMeta
-                    ? (currentFileMeta.mode === 'teacher' ? `ตารางสอน ครู${currentFileMeta.fileName}` : `ตารางเรียน ห้อง ม.${currentFileMeta.fileName.replace('-', '/')}`)
-                    : '-';
-                document.getElementById('liveSubDetail').innerText = `เวลาเรียน 08:30 - 16:00 น.`;
+            if (!currentFileMeta) {
+                const isTeacher = currentMode === "teacher";
+                document.getElementById('livePeriodLabel').innerText = `ยังไม่ได้เลือกตาราง`;
+                document.getElementById('liveSubjectTitle').innerText = isTeacher
+                    ? `กรุณาเลือก กลุ่มสาระฯ และครูผู้สอน ก่อน`
+                    : `กรุณาเลือก ชั้นเรียน และห้องเรียน ก่อน`;
+                document.getElementById('liveSubDetail').innerText = `เมื่อเลือกแล้วสามารถกด "ปักหมุดตารางนี้" เพื่อบันทึกไว้ดูครั้งถัดไป`;
                 return;
             }
 
-            const matched = (currentScheduleData.entries || []).find(e => e.day === dayToUse && e.period === activeSlot.period);
-            document.getElementById('livePeriodLabel').innerText = `กำลังเรียน ${activeSlot.label} (${activeSlot.start}-${activeSlot.end})`;
+            const realToday = new Date().getDay(); // 0=อาทิตย์, 1..5=จันทร์..ศุกร์, 6=เสาร์
+            const isWeekday = realToday >= 1 && realToday <= 5;
+            const targetName = currentFileMeta ? getTargetDisplayLabel(currentFileMeta) : '-';
+            const scheduleTitle = currentFileMeta
+                ? (currentFileMeta.mode === 'teacher' ? `ตารางสอน ${targetName}` : `ตารางเรียน ห้อง ${targetName}`)
+                : '-';
+
+            // กรณีวันเสาร์ - อาทิตย์ (วันหยุดราชการ)
+            if (!isWeekday) {
+                const weekendName = realToday === 0 ? 'วันอาทิตย์' : 'วันเสาร์';
+                document.getElementById('livePeriodLabel').innerText = `วันหยุดสุดสัปดาห์ (${weekendName})`;
+                document.getElementById('liveSubjectTitle').innerText = scheduleTitle;
+                document.getElementById('liveSubDetail').innerText = `ไม่มีคาบเรียนในวันนี้ • เปิดเรียนวันจันทร์ 08:15 น.`;
+                return;
+            }
+
+            const activeSlot = MST_PERIODS.find(p => isTimeBetween(timeStr, p.start, p.end));
+
+            // กรณีวันจันทร์ - ศุกร์ แต่นอกเวลาเรียน (ก่อน 08:15 หรือหลัง 16:50)
+            if (!activeSlot) {
+                document.getElementById('livePeriodLabel').innerText = `ไม่อยู่ในช่วงเวลาเรียน (${DAY_NAMES[realToday]})`;
+                document.getElementById('liveSubjectTitle').innerText = scheduleTitle;
+                document.getElementById('liveSubDetail').innerText = `เวลาเรียน 08:15 - 16:50 น.`;
+                return;
+            }
+
+            // กรณีวันจันทร์ - ศุกร์ และอยู่ในเวลาเรียน -> ดึงวิชาของ "วันจริง" และ "คาบจริง"
+            const matched = (currentScheduleData.entries || []).find(e => e.day === realToday && e.period === activeSlot.period);
+            document.getElementById('livePeriodLabel').innerText = `${DAY_NAMES[realToday]} • กำลังเรียน ${activeSlot.label} (${activeSlot.start}-${activeSlot.end})`;
 
             if (matched) {
                 if (matched.isBreak) {
@@ -1322,7 +1384,7 @@
                 }
             } else {
                 document.getElementById('liveSubjectTitle').innerText = `คาบว่าง / ไม่มีตารางในคาบนี้`;
-                document.getElementById('liveSubDetail').innerText = `ช่วงเวลา ${activeSlot.start} - ${activeSlot.end} น.`;
+                document.getElementById('liveSubDetail').innerText = `${DAY_NAMES[realToday]} ช่วงเวลา ${activeSlot.start} - ${activeSlot.end} น.`;
             }
         }
 
@@ -1384,7 +1446,31 @@
         function renderInteractiveSchedule() {
             if (!currentViewer) return;
             const container = document.getElementById('interactiveViewBox');
+
+            // หากยังไม่ได้เลือกตาราง (และไม่ได้ค้นหาด่วน) ให้แสดงหน้าจอแนะนำให้เลือกก่อน
             const kw = document.getElementById('inpQuickFilter').value.trim().toLowerCase();
+            if (!currentFileMeta && kw.length < 2) {
+                const isTeacher = currentMode === "teacher";
+                container.innerHTML = `
+                    <div class="glass p-8 rounded-3xl text-center space-y-3 my-2 border border-purple-100 shadow-sm">
+                        <div class="w-14 h-14 mx-auto rounded-2xl bg-purple-50 text-mstPurple flex items-center justify-center text-2xl shadow-inner border border-purple-100">
+                            <i class="fa-solid ${isTeacher ? 'fa-chalkboard-user' : 'fa-graduation-cap'}"></i>
+                        </div>
+                        <div class="space-y-1">
+                            <h3 class="text-sm font-black text-mstDark">
+                                ${isTeacher ? 'กรุณาเลือก กลุ่มสาระฯ และครูผู้สอน ก่อน' : 'กรุณาเลือก ชั้นเรียน และห้องเรียน ก่อน'}
+                            </h3>
+                            <p class="text-xs font-medium text-gray-500 leading-relaxed">
+                                ${isTeacher
+                                    ? 'เลือกกลุ่มสาระการเรียนรู้และชื่อครูผู้สอนจากเมนูด้านบน<br>หรือกด <b>"ปักหมุดตารางนี้"</b> เพื่อเปิดตารางเดิมอัตโนมัติในครั้งถัดไป'
+                                    : 'เลือกระดับชั้นและห้องเรียนจากเมนูด้านบน<br>หรือกด <b>"ปักหมุดตารางนี้"</b> เพื่อเปิดตารางเดิมอัตโนมัติในครั้งถัดไป'}
+                            </p>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
             const isTeacherMode = currentScheduleData.type === "teacher";
             const notes = getNotes();
             const timeStr = getCurrentTimeStr();
@@ -1475,7 +1561,8 @@
                     const endSlot = MST_PERIODS.find(p => p.period === lastP) || startSlot;
 
                     const timeRangeStr = `${startSlot.start}-${endSlot.end}`;
-                    const isNow = isTimeBetween(timeStr, startSlot.start, endSlot.end);
+                    const realToday = new Date().getDay(); // 0=อาทิตย์, 1=จันทร์ ... 6=เสาร์
+                    const isNow = (dNum === realToday) && isTimeBetween(timeStr, startSlot.start, endSlot.end);
                     const isMultiPeriod = item.periods.length > 1;
                     const noteText = notes[item.title] || "";
 
@@ -1589,11 +1676,14 @@
             selectDay(selectedDay);
             await syncDriveCatalog(false);
 
+            const pinned = JSON.parse(localStorage.getItem(PINNED_KEY) || "null");
             const urlParams = new URLSearchParams(window.location.search);
             const reqMode = urlParams.get('mode') || urlParams.get('schedule');
             if (reqMode === 'teacher' || reqMode === 'student' || reqMode === 'pdf') {
                 await switchBottomTab(reqMode);
-            } else if (currentViewer && (currentViewer.role === 'TEACHER' || currentViewer.level === 'ครู/บุคลากร') && !localStorage.getItem(PINNED_KEY)) {
+            } else if (pinned && pinned.mode === 'teacher') {
+                await switchBottomTab('teacher');
+            } else if (!pinned && currentViewer && (currentViewer.role === 'TEACHER' || currentViewer.level === 'ครู/บุคลากร')) {
                 await switchBottomTab('teacher');
             }
 
