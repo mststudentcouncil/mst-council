@@ -139,23 +139,13 @@
                 <p class="text-xs text-gray-500 font-medium mt-0.5">สงวนสิทธิ์เฉพาะครูงานแนะแนว และคณะกรรมการสภานักเรียน</p>
             </div>
 
-            <!-- สลับโหมดยืนยันตัวตน -->
-            <div class="grid grid-cols-2 gap-1.5 bg-gray-100 p-1 rounded-xl text-xs font-bold">
-                <button type="button" id="tabLoginGoogle" onclick="switchLoginMode('google')" class="py-2.5 rounded-lg bg-mstPurple text-white transition">
-                    <i class="fa-brands fa-google mr-1"></i> อีเมลครู / แอดมิน
-                </button>
-                <button type="button" id="tabLoginCouncil" onclick="switchLoginMode('council')" class="py-2.5 rounded-lg text-gray-600 transition">
-                    <i class="fa-solid fa-id-card-clip mr-1"></i> สภานักเรียน (REGIS)
-                </button>
-            </div>
-
-            <!-- วิธีที่ 1: Google OAuth 2.0 (ตรวจ Token และสิทธิ์อีเมลที่เซิร์ฟเวอร์) -->
+            <!-- เข้าสู่ระบบด้วย Google OAuth 2.0 (@mst.ac.th เท่านั้น) -->
             <div id="boxLoginGoogle" class="space-y-4 py-2">
                 <div class="bg-purple-50/70 p-4 rounded-2xl border border-purple-100 text-xs text-gray-600 leading-relaxed text-left">
-                    <p class="font-black text-mstPurple mb-1"><i class="fa-solid fa-shield-halved mr-1"></i> การตรวจสอบสิทธิ์ด้วยบัญชี Google:</p>
+                    <p class="font-black text-mstPurple mb-1"><i class="fa-solid fa-shield-halved mr-1"></i> เข้าสู่ระบบด้วยอีเมลโรงเรียน (@mst.ac.th):</p>
                     <ul class="list-disc list-inside space-y-1 text-[11px]">
-                        <li><b>ครูงานแนะแนว / ครูที่ปรึกษา:</b> ใช้อีเมลที่ลงทะเบียนสิทธิ์ผู้ดูแลไว้ในระบบ</li>
-                        <li><b>สภานักเรียน:</b> ใช้อีเมลกลาง <code class="text-mstPurple font-bold">studentcouncil@mst.ac.th</code> หรืออีเมล <code class="text-mstPurple font-bold">@mst.ac.th</code> ที่มีรายชื่อในระบบรายงานตัว REGIS</li>
+                        <li><b>ครูงานแนะแนว / ครูที่ปรึกษา:</b> ใช้อีเมล <code class="text-mstPurple font-bold">@mst.ac.th</code> ที่ลงทะเบียนสิทธิ์ผู้ดูแลไว้ในระบบ</li>
+                        <li><b>สภานักเรียน:</b> ใช้อีเมลกลาง <code class="text-mstPurple font-bold"></code> หรืออีเมล <code class="text-mstPurple font-bold">@mst.ac.th</code> ที่มีรายชื่อในระบบรายงานตัว REGIS</li>
                     </ul>
                 </div>
 
@@ -163,37 +153,11 @@
                     <div id="g_id_onload"
                          data-client_id="1055496557-rm1petnl1gtd6c1ed01q9o6k880ik2ta.apps.googleusercontent.com"
                          data-callback="handleAdminGoogleLogin"
-                         data-auto_prompt="false"></div>
+                         data-auto_prompt="false"
+                         data-hd="mst.ac.th"></div>
                     <div class="g_id_signin" data-type="standard" data-shape="pill" data-theme="filled_blue" data-text="signin_with" data-size="large" data-logo_alignment="left"></div>
                 </div>
             </div>
-
-            <!-- วิธีที่ 2: ยืนยันตัวตน 2 ชั้นผ่านฐานข้อมูล REGIS บนเซิร์ฟเวอร์ -->
-            <form id="boxLoginCouncil" onsubmit="loginWithCouncilRegis(event)" class="hidden space-y-3.5 text-left">
-                <div>
-                    <label class="block text-xs font-bold text-gray-700 mb-1">
-                        <i class="fa-solid fa-id-badge text-mstPurple mr-1"></i> รหัสประจำตัวนักเรียน *
-                    </label>
-                    <input type="tel" id="scStdId" maxlength="5" required placeholder="เช่น 12345" class="form-input text-center text-base font-black tracking-[0.2em]">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-700 mb-1">
-                        <i class="fa-solid fa-lock text-mstPurple mr-1"></i> เลขประจำตัวประชาชน *
-                    </label>
-                    <div class="relative">
-                        <input type="password" id="scIdCard" maxlength="13" inputmode="numeric" required placeholder="ระบุเลขบัตรประชาชน 13 หลัก" class="form-input text-center text-sm font-bold tracking-widest pr-10">
-                        <button type="button" onclick="toggleRegisIdVisibility()" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-mstPurple">
-                            <i id="regisEyeIcon" class="fa-solid fa-eye"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="bg-amber-50/80 p-3 rounded-xl border border-amber-200 text-[11px] text-amber-900 leading-relaxed">
-                    <i class="fa-solid fa-circle-info text-amber-600 mr-1"></i> เซิร์ฟเวอร์จะตรวจสอบรหัสนักเรียนคู่กับเลขประจำตัวประชาชน 13 หลักจากฐานข้อมูล <b>REGIS</b> แบบตรงกันทุกหลักก่อนอนุญาตให้เข้าถึงข้อมูล
-                </div>
-                <button type="submit" class="w-full bg-gradient-to-r from-mstPurple to-purple-800 text-white font-bold py-3.5 rounded-xl text-xs shadow-md hover:shadow-lg transition flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-user-check text-mstYellow"></i> ตรวจสอบสิทธิ์กับฐานข้อมูล REGIS
-                </button>
-            </form>
         </div>
     </div>
 
@@ -399,7 +363,7 @@
             </div>
             <div class="p-6 space-y-4 text-xs">
                 <p class="text-gray-600 leading-relaxed">
-                    ระบุอีเมลของคุณครูงานแนะแนว ครูที่ปรึกษา หรือผู้ดูแลระบบที่มีสิทธิ์เข้าใช้งานหน้านี้ด้วยปุ่ม <b>Sign in with Google</b> (พิมพ์แยกบรรทัดละ 1 อีเมล)
+                    ระบุอีเมลโรงเรียน (<code class="text-mstPurple font-bold">@mst.ac.th</code>) ของคุณครูงานแนะแนว ครูที่ปรึกษา หรือผู้ดูแลระบบที่มีสิทธิ์เข้าใช้งานหน้านี้ แล้วกดปุ่ม <b>+ เพิ่ม</b>
                 </p>
                 <div class="flex gap-2">
                     <input type="email" id="newGuidanceEmailInput" onkeydown="if(event.key==='Enter'){event.preventDefault();addGuidanceEmailItem();}" class="form-input" placeholder="พิมพ์อีเมล เช่น teacher@mst.ac.th">
@@ -407,8 +371,7 @@
                         + เพิ่ม
                     </button>
                 </div>
-                <div id="guidanceEmailTags" class="flex flex-wrap gap-1.5"></div>
-                <textarea id="guidanceEmailsTextarea" rows="4" oninput="renderGuidanceEmailTags()" class="form-input font-mono text-xs" placeholder="studentcouncil@mst.ac.th&#10;tassanee@mst.ac.th"></textarea>
+                <div id="guidanceEmailTags" class="flex flex-wrap gap-1.5 pt-1"></div>
                 <button onclick="saveGuidanceEmails()" class="w-full bg-gradient-to-r from-mstPurple to-purple-800 text-white font-bold py-3.5 rounded-xl text-sm shadow-md">
                     <i class="fa-solid fa-floppy-disk mr-1"></i> บันทึกรายชื่อผู้มีสิทธิ์
                 </button>
@@ -437,33 +400,13 @@
             document.getElementById('globalLoader').classList.add('hidden');
         }
 
-        function switchLoginMode(mode) {
-            const isGoogle = mode === 'google';
-            document.getElementById('tabLoginGoogle').className = isGoogle ? "py-2.5 rounded-lg bg-mstPurple text-white transition" : "py-2.5 rounded-lg text-gray-600 transition";
-            document.getElementById('tabLoginCouncil').className = !isGoogle ? "py-2.5 rounded-lg bg-mstPurple text-white transition" : "py-2.5 rounded-lg text-gray-600 transition";
-            document.getElementById('boxLoginGoogle').classList.toggle('hidden', !isGoogle);
-            document.getElementById('boxLoginCouncil').classList.toggle('hidden', isGoogle);
-        }
-
-        function toggleRegisIdVisibility() {
-            const inp = document.getElementById('scIdCard');
-            const ic = document.getElementById('regisEyeIcon');
-            if (inp.type === 'password') {
-                inp.type = 'text';
-                ic.classList.replace('fa-eye', 'fa-eye-slash');
-            } else {
-                inp.type = 'password';
-                ic.classList.replace('fa-eye-slash', 'fa-eye');
-            }
-        }
-
         function parseJwt(token) {
             const base64Url = token.split('.')[1];
             const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
             return JSON.parse(decodeURIComponent(window.atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')));
         }
 
-        // ส่งหลักฐานการยืนยันตัวตน (Google ID Token หรือ REGIS 2FA) ไปให้เซิร์ฟเวอร์ตรวจสอบทุกคำสั่ง
+        // ส่ง Google ID Token ไปให้เซิร์ฟเวอร์ตรวจสอบทุกคำสั่ง
         async function callAdminPortApi(payload) {
             const idToken = (adminCredentials && adminCredentials.idToken) ? adminCredentials.idToken : "";
             const res = await fetch(`${API_PORTFOLIO_URL}?t=${Date.now()}`, {
@@ -474,22 +417,26 @@
                 },
                 body: JSON.stringify({
                     ...payload,
-                    idToken: idToken || undefined,
-                    adminAuth: (adminCredentials && adminCredentials.regisAuth) ? adminCredentials.regisAuth : undefined
+                    idToken: idToken || undefined
                 })
             });
             return await res.json();
         }
 
-        // 1. เมื่อกดล็อกอินด้วย Google Sign-In
+        // เมื่อกดล็อกอินด้วย Google Sign-In (@mst.ac.th เท่านั้น)
         window.handleAdminGoogleLogin = async function(response) {
             try {
                 const idToken = response.credential;
                 const payload = parseJwt(idToken);
+                const email = String(payload.email || '').trim().toLowerCase();
+                if (!email.endsWith('@mst.ac.th')) {
+                    Swal.fire('จำกัดสิทธิ์เฉพาะ @mst.ac.th', 'กรุณาเข้าสู่ระบบด้วยอีเมลโรงเรียน (@mst.ac.th) เท่านั้น', 'warning');
+                    return;
+                }
                 await verifyAdminWithBackend({
                     mode: 'google',
                     idToken,
-                    email: payload.email,
+                    email: email,
                     name: payload.name,
                     picture: payload.picture
                 });
@@ -497,25 +444,6 @@
                 Swal.fire('ข้อผิดพลาด', 'ไม่สามารถเข้าสู่ระบบด้วย Google ได้', 'error');
             }
         };
-
-        // 2. เมื่อกดล็อกอินด้วยรหัสสภานักเรียน 5 หลัก + เลขบัตรประชาชน 13 หลักใน REGIS
-        async function loginWithCouncilRegis(e) {
-            e.preventDefault();
-            const std_id = document.getElementById('scStdId').value.replace(/\D/g, '').trim();
-            const id_card = document.getElementById('scIdCard').value.replace(/\D/g, '').trim();
-
-            if (std_id.length !== 5) {
-                return Swal.fire({ icon: 'warning', title: 'ข้อมูลไม่ครบ', text: 'กรุณาระบุรหัสนักเรียน 5 หลัก', confirmButtonColor: '#4C1D95' });
-            }
-            if (id_card.length !== 13) {
-                return Swal.fire({ icon: 'warning', title: 'ข้อมูลไม่ครบ', text: 'กรุณาระบุเลขประจำตัวประชาชน 13 หลัก', confirmButtonColor: '#4C1D95' });
-            }
-
-            await verifyAdminWithBackend({
-                mode: 'regis',
-                regisAuth: { std_id, id_card }
-            });
-        }
 
         // ส่งไปให้เซิร์ฟเวอร์ Cloud Run ตรวจสอบสิทธิ์จริงก่อนเปิดหน้า Dashboard
         async function verifyAdminWithBackend(credObj) {
@@ -783,21 +711,18 @@
         }
 
         // ระบบจัดการสิทธิ์อีเมลครูงานแนะแนวและแอดมิน
-        function parseEmailList(raw) {
-            return [...new Set(String(raw || '').split(/[\n,;]+/).map(s => s.trim().toLowerCase()).filter(Boolean))];
-        }
+        let editingGuidanceEmails = [];
 
         function openPermissionsModal() {
-            document.getElementById('guidanceEmailsTextarea').value = allowedAdminEmails.join('\n');
+            editingGuidanceEmails = [...new Set((allowedAdminEmails || []).map(s => String(s).trim().toLowerCase()).filter(Boolean))];
             renderGuidanceEmailTags();
             document.getElementById('permissionsModal').classList.remove('hidden');
         }
 
         function renderGuidanceEmailTags() {
-            const list = parseEmailList(document.getElementById('guidanceEmailsTextarea').value);
-            document.getElementById('guidanceEmailTags').innerHTML = list.map(em => `
+            document.getElementById('guidanceEmailTags').innerHTML = editingGuidanceEmails.map(em => `
                 <span class="inline-flex items-center gap-1.5 bg-purple-50 text-mstPurple border border-purple-200 px-2.5 py-1 rounded-full text-[11px] font-bold">
-                    ${em}
+                    <i class="fa-regular fa-envelope text-[10px]"></i> ${em}
                     <button type="button" onclick="removeGuidanceEmailItem('${em}')" class="text-gray-400 hover:text-red-500"><i class="fa-solid fa-circle-xmark"></i></button>
                 </span>
             `).join('');
@@ -807,30 +732,26 @@
             const inp = document.getElementById('newGuidanceEmailInput');
             const val = inp.value.trim().toLowerCase();
             if (!val || !val.includes('@')) return;
-            const list = parseEmailList(document.getElementById('guidanceEmailsTextarea').value);
-            if (!list.includes(val)) list.push(val);
-            document.getElementById('guidanceEmailsTextarea').value = list.join('\n');
+            if (!editingGuidanceEmails.includes(val)) editingGuidanceEmails.push(val);
             inp.value = '';
             renderGuidanceEmailTags();
         }
 
         function removeGuidanceEmailItem(target) {
-            const list = parseEmailList(document.getElementById('guidanceEmailsTextarea').value).filter(e => e !== target);
-            document.getElementById('guidanceEmailsTextarea').value = list.join('\n');
+            editingGuidanceEmails = editingGuidanceEmails.filter(e => e !== target);
             renderGuidanceEmailTags();
         }
 
         async function saveGuidanceEmails() {
-            const list = parseEmailList(document.getElementById('guidanceEmailsTextarea').value);
             document.getElementById('permissionsModal').classList.add('hidden');
             setLoader('กำลังบันทึกรายชื่อผู้มีสิทธิ์...');
             const res = await callAdminPortApi({
                 action: 'savePortfolioAdminEmails',
-                portfolioAdminEmails: list.join(',')
+                portfolioAdminEmails: editingGuidanceEmails.join(',')
             });
             hideLoader();
             if (res.status === 'success') {
-                allowedAdminEmails = list;
+                allowedAdminEmails = [...editingGuidanceEmails];
                 Swal.fire({ icon: 'success', title: 'บันทึกสิทธิ์เรียบร้อยแล้ว', timer: 1400, showConfirmButton: false });
             } else {
                 Swal.fire('ผิดพลาด', res.message || 'ไม่สามารถบันทึกได้', 'error');
