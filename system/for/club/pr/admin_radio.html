@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="referrer" content="strict-origin-when-cross-origin">
-    <title>MSTSC Radio Console - ระบบบริหารเสียงตามสายสภานักเรียน</title>
+    <title>ระบบบริหารเสียงตามสาย  (สภานักเรียน ม.ส.ธ. x งานประชาสัมพันธ์)</title>
     <link rel="icon" type="image/webp" href="/logo.webp">
 
     <link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -73,10 +73,10 @@
             <img src="/logo.webp" alt="Logo" style="width: 48px; height: 48px;" class="h-12 w-12 object-contain drop-shadow-md">
             <div>
                 <div class="flex items-center gap-2">
-                    <h1 class="font-black text-mstPurple text-lg sm:text-xl leading-tight">STUDENT COUNCIL</h1>
-                    <span class="bg-mstYellow text-mstDark text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase">Smart Radio DJ</span>
+                    <h1 class="font-black text-mstPurple text-lg sm:text-xl leading-tight">SMART RADIO CONTROL</h1>
+                    <span class="bg-mstYellow text-mstDark text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase">SC x PR</span>
                 </div>
-                <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">OF MUANGSURATTHANI SCHOOL</p>
+                <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">ระบบเปิดเพลงเสียงตามสาย</p>
             </div>
         </div>
 
@@ -185,14 +185,14 @@
                     </div>
                 </div>
 
-                <!-- 2. ตั้งค่าเวลาเปิด-ปิดสถานีและสิทธิ์ดีเจ -->
+                <!-- 2. ตั้งค่าเวลาเปิด-ปิดสถานีและสิทธิ์ -->
                 <div class="glass-card rounded-[2rem] p-6 space-y-5">
                     <div class="flex items-center gap-3 border-b border-gray-100 pb-3">
                         <div class="w-10 h-10 rounded-xl bg-mstPurpleLight text-mstPurple flex items-center justify-center text-lg">
                             <i class="fa-solid fa-sliders"></i>
                         </div>
                         <div>
-                            <h3 class="text-base font-black text-gray-900">ตั้งค่าเวลาเปิด-ปิดสถานีและสิทธิ์ดีเจ</h3>
+                            <h3 class="text-base font-black text-gray-900">ตั้งค่าเวลาเปิด-ปิดสถานีและสิทธิ์ผู้ดูแล</h3>
                             <p class="text-xs font-medium text-gray-500">คลิกเลือกวัน เวลา และรายชื่อผู้ดูแลได้ทันที</p>
                         </div>
                     </div>
@@ -265,7 +265,7 @@
 
                     <div class="bg-purple-50/50 p-4 rounded-2xl border border-purple-100 space-y-2.5">
                         <label class="text-xs font-bold text-gray-800 block">
-                            <i class="fa-solid fa-envelope-circle-check text-mstPurple mr-1"></i> อีเมลที่มีสิทธิ์เข้าหน้าดีเจบนคอมพิวเตอร์
+                            <i class="fa-solid fa-envelope-circle-check text-mstPurple mr-1"></i> อีเมลที่มีสิทธิ์เข้าหน้าผู้ดูแลบนคอมพิวเตอร์
                             <span class="block text-[11px] font-medium text-gray-500 mt-0.5">พิมพ์อีเมลแล้วกดปุ่ม "+ เพิ่ม" หรือพิมพ์แยกบรรทัดละ 1 อีเมล</span>
                         </label>
                         <div class="flex gap-2">
@@ -516,7 +516,7 @@
                 if (data.status !== 'success') {
                     sessionStorage.removeItem(ADMIN_TOKEN_KEY);
                     sessionStorage.removeItem(ADMIN_INFO_KEY);
-                    Swal.fire('ปฏิเสธการเข้าถึง', data.message || 'บัญชีอีเมลนี้ไม่มีสิทธิ์เข้าใช้งานแผงควบคุมดีเจ', 'error');
+                    Swal.fire('ปฏิเสธการเข้าถึง', data.message || 'บัญชีอีเมลนี้ไม่มีสิทธิ์เข้าใช้งานแผงควบคุม', 'error');
                     return;
                 }
 
