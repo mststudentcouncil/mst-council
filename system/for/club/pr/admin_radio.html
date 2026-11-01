@@ -298,25 +298,6 @@
                     </button>
                 </div>
 
-                <!-- 3. อัปเดตฐานข้อมูลนักเรียน ม.1-ม.6 -->
-                <div class="glass-card rounded-[2rem] p-6 space-y-3">
-                    <h3 class="text-sm font-black text-mstPurple flex items-center gap-2">
-                        <i class="fa-solid fa-database"></i> ซิงค์ฐานข้อมูลรายชื่อนักเรียน (ม.1 - ม.6)
-                    </h3>
-                    <p class="text-xs text-gray-500 leading-relaxed">
-                        ดึงไฟล์จากเมนู <b>"รายชื่อนักเรียน 1/2569"</b> บนหน้าเว็บโรงเรียน หรือเลือกไฟล์ Excel (<code class="bg-gray-100 px-1.5 py-0.5 rounded">.xlsx</code>) ระบบจะอ่านเฉพาะชีต <b>m.1 ถึง m.6</b> ที่แสดงผลและข้ามชีตซ่อนอัตโนมัติ
-                    </p>
-                    <div class="flex flex-col sm:flex-row gap-2.5 pt-1">
-                        <button onclick="syncFromSchoolWeb()" class="flex-1 bg-mstPurple hover:bg-purple-800 text-white font-bold py-3 px-3 rounded-xl text-xs shadow-sm transition flex items-center justify-center gap-1.5">
-                            <i class="fa-solid fa-globe"></i> ดึงจากเว็บ mst.ac.th
-                        </button>
-                        <label class="flex-1 bg-mstYellow hover:bg-amber-400 text-mstDark font-bold py-3 px-3 rounded-xl text-xs shadow-sm text-center cursor-pointer transition flex items-center justify-center gap-1.5">
-                            <i class="fa-solid fa-file-excel"></i> อัปโหลดไฟล์ .xlsx
-                            <input type="file" accept=".xlsx,.xls" onchange="uploadExcelFile(this)" class="hidden">
-                        </label>
-                    </div>
-                </div>
-
             </div>
 
             <!-- คอลัมน์ขวา -->
@@ -775,36 +756,6 @@
                 hideLoader();
                 fetchConsoleData();
             }
-        };
-
-        window.syncFromSchoolWeb = async function() {
-            setLoader('กำลังดึงไฟล์รายชื่อนักเรียนจากเว็บ mst.ac.th...');
-            const res = await callRadioApi({ action: 'syncStudentsFromSchoolWeb' });
-            hideLoader();
-            if (res.status === 'success') {
-                Swal.fire({ icon: 'success', title: 'ซิงค์รายชื่อนักเรียนสำเร็จ', text: res.message });
-                fetchConsoleData();
-            } else {
-                Swal.fire({ icon: 'error', title: 'ดึงไม่สำเร็จ', text: res.message });
-            }
-        };
-
-        window.uploadExcelFile = function(inputEl) {
-            const file = inputEl.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = async (e) => {
-                setLoader('กำลังนำเข้าไฟล์ Excel (เฉพาะชีต m.1 - m.6 ที่แสดงผล)...');
-                const res = await callRadioApi({ action: 'uploadSchoolExcelBase64', excelBase64: e.target.result });
-                hideLoader();
-                if (res.status === 'success') {
-                    Swal.fire({ icon: 'success', title: 'นำเข้าข้อมูลสำเร็จ', text: res.message });
-                    fetchConsoleData();
-                } else {
-                    Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: res.message });
-                }
-            };
-            reader.readAsDataURL(file);
         };
 
         document.addEventListener('DOMContentLoaded', () => {
