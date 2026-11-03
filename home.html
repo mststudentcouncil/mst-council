@@ -6,6 +6,8 @@
     <meta name="theme-color" content="#090514">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
     
     <meta property="og:title" content="สภานักเรียนโรงเรียนเมืองสุราษฎร์ธานี (MSTSC)">
     <meta property="og:description" content="ระบบบริหารจัดการเนื้อหาและบริการดิจิทัล เพื่อวิถีประชาธิปไตยในโรงเรียน">
@@ -268,6 +270,22 @@
         <button id="mobileMenuBtn" onclick="toggleMobileMenu()" aria-label="เปิดเมนู" class="lg:hidden flex h-10 w-10 items-center justify-center rounded-full border border-white/25 bg-black/30 text-white backdrop-blur transition-colors">
             <i class="fa-solid fa-bars text-base"></i>
         </button>
+    </div>
+    <!-- Mobile Navigation Menu (เพิ่มส่วนนี้ก่อนปิด </header>) -->
+    <div id="mobileMenu" class="hidden lg:hidden border-t border-zinc-200/80 bg-white/95 backdrop-blur-xl px-4 pt-3 pb-6 shadow-lg">
+        <nav class="flex flex-col space-y-1 text-sm font-medium text-zinc-700">
+            <a href="#services" onclick="toggleMobileMenu()" class="rounded-xl px-3 py-2.5 hover:bg-purple-50 hover:text-mstPurple transition-colors">ศูนย์บริการดิจิทัล</a>
+            <a href="#projects" onclick="toggleMobileMenu()" class="rounded-xl px-3 py-2.5 hover:bg-purple-50 hover:text-mstPurple transition-colors">ติดตามโครงการ</a>
+            <a href="#board" onclick="toggleMobileMenu()" class="rounded-xl px-3 py-2.5 hover:bg-purple-50 hover:text-mstPurple transition-colors">ทำเนียบคณะกรรมการ</a>
+            <a href="#news" onclick="toggleMobileMenu()" class="rounded-xl px-3 py-2.5 hover:bg-purple-50 hover:text-mstPurple transition-colors">ข่าวประชาสัมพันธ์</a>
+            <a href="#mou" onclick="toggleMobileMenu()" class="rounded-xl px-3 py-2.5 hover:bg-purple-50 hover:text-mstPurple transition-colors">เครือข่าย MOU</a>
+        </nav>
+        <div class="mt-4 pt-3 border-t border-zinc-100">
+            <a href="./admin.html" class="flex w-full items-center justify-center gap-2 rounded-full bg-mstDark px-4 py-2.5 text-xs font-semibold text-white shadow-sm hover:bg-mstPurple transition-colors">
+                <i class="fa-solid fa-shield-halved text-mstChampagne"></i>
+                <span>สำหรับผู้ดูแลระบบ</span>
+            </a>
+        </div>
     </div>
 </header>
 
@@ -656,7 +674,7 @@
 
                 <!-- Column 2: ระบบบริการดิจิทัล -->
                 <div>
-                    <h4 class="text-xs font-semibold uppercase tracking-[0.25em] text-zinc-400">บริการดิจิทัล</h4>
+                    <h4 class="text-xs font-semibold tracking-normal text-zinc-500">บริการดิจิทัล</h4>
                     <ul class="mt-5 space-y-3 text-sm">
                         <li>
                             <a href="/e-voting" class="inline-flex items-center gap-1.5 text-zinc-600 transition-colors hover:text-mstPurple">
@@ -687,7 +705,7 @@
 
                 <!-- Column 3: พอร์ทัลผู้ดูแลระบบ -->
                 <div>
-                    <h4 class="text-xs font-semibold uppercase tracking-[0.25em] text-zinc-400">พอร์ทัลสภานักเรียน</h4>
+                    <h4 class="text-xs font-semibold tracking-normal text-zinc-500">พอร์ทัลสภานักเรียน</h4>
                     <ul class="mt-5 space-y-4 text-sm">
                         <li class="text-zinc-500 leading-relaxed">
                             สำหรับคณะกรรมการสภานักเรียนและผู้ดูแลระบบ เพื่อจัดการข่าวสาร โครงการ PDCA และข้อมูลทำเนียบ
@@ -778,6 +796,7 @@
 
         function toggleMobileMenu() {
             const menu = document.getElementById('mobileMenu');
+            if (!menu) return;
             menu.classList.toggle('hidden');
             updateNavbarAppearance();
         }
@@ -870,7 +889,7 @@
                 vicePresHtml = `
                 <div class="mb-12">
                     <div class="flex items-center gap-3 mb-6">
-                        <h4 class="text-xs font-semibold uppercase tracking-[0.25em] text-mstPurple">รองประธานนักเรียน</h4>
+                        <h4 class="text-sm font-semibold tracking-normal text-mstPurple">รองประธานนักเรียน</h4>
                         <div class="h-px flex-1 bg-gradient-to-r from-amber-300/60 to-transparent"></div>
                     </div>
                     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5">`;
@@ -926,7 +945,7 @@
                 let deptHtml = `
                 <div class="mb-12">
                     <div class="flex items-center gap-3 mb-6">
-                        <h4 class="text-xs font-semibold uppercase tracking-[0.25em] text-zinc-500">${dept}</h4>
+                        <h4 class="text-sm font-semibold tracking-normal text-zinc-600">${dept}</h4>
                         <div class="h-px flex-1 bg-zinc-200/80"></div>
                     </div>
                     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5">`;
@@ -959,12 +978,12 @@
                 <div class="pointer-events-none absolute -top-24 -right-24 h-64 w-64 rounded-full bg-amber-400/10 blur-3xl"></div>
                 <div class="pointer-events-none absolute -bottom-24 -left-24 h-64 w-64 rounded-full bg-mstPurple/30 blur-3xl"></div>
                 <div class="text-center relative z-10">
-                    <p class="text-[11px] text-mstChampagne font-semibold uppercase tracking-[0.28em] mb-2">ผู้อำนวยการโรงเรียน</p>
+                    <p class="text-xs text-mstChampagne font-semibold tracking-normal mb-2">ผู้อำนวยการโรงเรียน</p>
                     <p class="font-semibold text-xl sm:text-2xl text-white whitespace-nowrap">${set.directorName || "-"}</p>
                 </div>
                 <div class="hidden md:block w-px h-16 bg-gradient-to-b from-transparent via-amber-300/30 to-transparent relative z-10"></div>
                 <div class="text-center relative z-10">
-                    <p class="text-[11px] text-mstChampagne font-semibold uppercase tracking-[0.28em] mb-2">ครูที่ปรึกษาสภานักเรียน</p>
+                    <p class="text-xs text-mstChampagne font-semibold tracking-normal mb-2">ครูที่ปรึกษาสภานักเรียน</p>
                     <div class="flex flex-col sm:flex-row flex-wrap justify-center items-center gap-x-6 gap-y-1.5">
                         ${advisorsHtml || '<p class="font-semibold text-xl text-white">-</p>'}
                     </div>
