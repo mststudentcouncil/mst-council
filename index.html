@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="th" class="overflow-x-hidden">
+<html lang="th" class="overflow-x-hidden scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <meta name="theme-color" content="#4C1D95">
+    <meta name="theme-color" content="#090514">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     
@@ -11,654 +12,511 @@
     <meta property="og:description" content="ระบบบริหารจัดการเนื้อหาและบริการดิจิทัล เพื่อวิถีประชาธิปไตยในโรงเรียน">
     <meta property="og:image" content="https://images.unsplash.com/photo-1546410531-d7ce16fcee16?q=80&w=1200">
     <meta property="og:type" content="website">
-    <!-- วางโค้ดชุดนี้ไว้ด้านใน <head> ของไฟล์ index.html และ admin.html -->
     <meta name="referrer" content="no-referrer">
-    <script>
-    (function() {
-        // ฟังก์ชันดึงรหัสไฟล์ (File ID) จากลิงก์ Google Drive ทุกรูปแบบ
-        window. extractDriveFileId = function(url) {
-            if (!url || typeof url !== 'string') return null;
-            if (!url.includes('drive.google.com') && !url.includes('docs.google.com')) return null;
-            const match = url.match(/(?:\/d\/|id=|open\?id=|uc\?.*id=)([a-zA-Z0-9_-]{25,})/);
-            if (match && match[1]) return match[1];
-            const fallback = url.match(/([a-zA-Z0-9_-]{28,35})/);
-            return fallback ? fallback[1] : null;
-        };
 
-        // ฟังก์ชันแปลงลิงก์ Google Drive เป็น Direct Image URL ที่ไม่ติดบล็อก
-        window.resolveDriveImageUrl = function(url) {
-            const fileId = window.extractDriveFileId(url);
-            if (fileId) {
-                return `https://lh3.googleusercontent.com/d/${fileId}=w1000`;
-            }
-            return url;
-        };
-
-        // แปลง src ของ <img> ทั้งหมดบนหน้าเว็บอัตโนมัติเมื่อมีการสร้างหรือแก้ไข DOM
-        function fixAllDriveImages(root) {
-            const imgs = (root || document).querySelectorAll ? (root || document).querySelectorAll('img') : [];
-            imgs.forEach(img => {
-                const rawSrc = img.getAttribute('src');
-                const fileId = window.extractDriveFileId(rawSrc);
-                if (fileId) {
-                    img.setAttribute('referrerpolicy', 'no-referrer');
-                    const directUrl = `https://lh3.googleusercontent.com/d/${fileId}=w1000`;
-                    if (rawSrc !== directUrl && !rawSrc.includes('drive.google.com/thumbnail')) {
-                        img.dataset.driveId = fileId;
-                        img.src = directUrl;
-                    }
-                }
-            });
-        }
-
-        // หากลิงก์ lh3 โหลดไม่ขึ้น ให้สลับไปใช้ระบบ Thumbnail ของ Google Drive อัตโนมัติ
-        window.addEventListener('error', function(e) {
-            const el = e.target;
-            if (el && el.tagName === 'IMG') {
-                const fileId = el.dataset.driveId || window.extractDriveFileId(el.src);
-                if (fileId && !el.dataset.triedThumbnail) {
-                    el.dataset.triedThumbnail = 'true';
-                    el.src = `https://drive.google.com/thumbnail?id=${fileId}&sz=w1000`;
-                }
-            }
-        }, true);
-
-        document.addEventListener('DOMContentLoaded', function() {
-            fixAllDriveImages(document);
-            const observer = new MutationObserver(mutations => {
-                mutations.forEach(m => {
-                    m.addedNodes.forEach(node => {
-                        if (node.nodeType === 1) {
-                            if (node.tagName === 'IMG') fixAllDriveImages(node.parentElement);
-                            else fixAllDriveImages(node);
-                        }
-                    });
-                });
-            });
-            observer.observe(document.body, { childList: true, subtree: true });
-        });
-    })();
-    </script>
-
-    <title>สภานักเรียนโรงเรียนเมืองสุราษฎร์ธานี (MSTSC)</title>
+    <title>MSTSC · สภานักเรียนโรงเรียนเมืองสุราษฎร์ธานี</title>
     
     <link rel="icon" type="image/webp" href="/logo.webp">
     <link rel="apple-touch-icon" href="/logo.webp">
     
-    <link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@300;400;500;600;700;800&family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- โหลด CSS และตั้งค่า Theme -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script>
-        tailwind.config = { theme: { extend: { fontFamily: { sans: ['Anuphan', 'sans-serif'] }, colors: { mstPurple: '#4C1D95', mstYellow: '#FBBF24', mstCream: '#FEFCF5', mstDark: '#1E1B4B' } } } }
-    </script>
-    <style>
-        body { scroll-behavior: smooth; background-color: #FEFCF5; overflow-x: hidden; padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); }
-        .glass { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.8); box-shadow: 0 10px 30px rgba(76, 29, 149, 0.05); }
-        .glass-dark { background: rgba(30, 27, 75, 0.8); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .glass-hover:hover { transform: translateY(-5px); box-shadow: 0 15px 35px rgba(76, 29, 149, 0.1); border-color: #FBBF24; cursor: pointer; }
-        .blob-1 { position: absolute; top: -10%; left: -10%; width: 50vw; height: 50vw; background: rgba(251, 191, 36, 0.3); border-radius: 50%; filter: blur(100px); z-index: -1; animation: float 12s infinite alternate ease-in-out; }
-        .blob-2 { position: absolute; top: 20%; right: -10%; width: 40vw; height: 40vw; background: rgba(76, 29, 149, 0.2); border-radius: 50%; filter: blur(100px); z-index: -1; animation: float 10s infinite alternate-reverse ease-in-out; }
-        @keyframes float { 0% { transform: translate(0,0); } 100% { transform: translate(50px,-50px); } }
-        .section-title { position: relative; display: inline-block; padding-bottom: 0.5rem; }
-        .section-title::after { content: ''; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 60px; height: 4px; background-color: #FBBF24; border-radius: 2px; }
-        .fade-in-up { animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards; opacity: 0; }
-        @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-        ::-webkit-scrollbar { width: 8px; } ::-webkit-scrollbar-track { background: #FEFCF5; } ::-webkit-scrollbar-thumb { background: #d8b4fe; border-radius: 4px; }
-        
-        .modal-overlay { background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(8px); z-index: 100; opacity: 0; visibility: hidden; transition: all 0.3s ease; padding-top: env(safe-area-inset-top); }
-        .modal-overlay.active { opacity: 1; visibility: visible; }
-        .modal-content { transform: scale(0.95) translateY(20px); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-        .modal-overlay.active .modal-content { transform: scale(1) translateY(0); }
-        
-        .rich-text-content p { margin-bottom: 1em; }
-        .rich-text-content ul { list-style-type: disc; margin-left: 1.5em; margin-bottom: 1em; }
-        .rich-text-content ol { list-style-type: decimal; margin-left: 1.5em; margin-bottom: 1em; }
-        .rich-text-content a { color: #4C1D95; text-decoration: underline; }
-
-        .marquee-container {
-            width: 100%; overflow: hidden; position: relative;
-            -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
-            mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
-        }
-        .marquee-content { display: flex; width: max-content; animation: marqueeScroll 25s linear infinite; }
-        .marquee-content:hover { animation-play-state: paused; }
-        @keyframes marqueeScroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
-    </style>
+    <link href="/assets/styles.css" rel="stylesheet">
+    <script src="/assets/app.js"></script>
 </head>
-<body class="text-gray-800 antialiased relative overflow-x-hidden">
+<body class="min-h-screen bg-mstCream text-zinc-900 antialiased selection:bg-mstPurple selection:text-white">
 
-    <div class="blob-1"></div><div class="blob-2"></div>
+    <!-- Header -->
+    <header id="navbar" class="fixed inset-x-0 top-0 z-50 transition-all duration-300 bg-transparent pt-[env(safe-area-inset-top)]">
+        <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3.5 sm:px-6">
+            <a href="#" id="brandLogoLink" class="flex items-center gap-3 group">
+                <div class="relative flex items-center justify-center">
+                    <div class="absolute inset-0 rounded-full bg-mstYellow/30 blur-md opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    <img src="/logo.webp" alt="โลโก้สภานักเรียน" class="relative h-9 w-9 object-contain drop-shadow-sm transition-transform duration-300 group-hover:scale-105">
+                </div>
+                <div class="flex flex-col">
+                    <span id="navBrandText" class="text-sm font-bold tracking-tight transition-colors text-white nav-text-shadow">MSTSC</span>
+                </div>
+            </a>
 
-    <nav class="fixed w-full z-50 glass transition-all duration-300 top-0 pt-[env(safe-area-inset-top)]" id="navbar">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-20 items-center">
-                <div class="flex items-center gap-4 cursor-pointer" onclick="window.scrollTo(0,0)">
-                    <img src="/logo.webp" alt="Logo" class="h-12 w-12 drop-shadow-md">
-                    <div>
-                        <h1 class="font-black text-mstPurple text-xl leading-tight drop-shadow-sm">STUDENT COUNCIL</h1>
-                        <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest block">OF MUANGSURATTHANI SCHOOL</p>
-                    </div>
-                </div>
-                <div class="hidden lg:flex items-center space-x-6 text-sm font-bold text-gray-600">
-                    <a href="#services" class="hover:text-mstPurple transition">ศูนย์บริการ</a>
-                    <a href="#projects" class="hover:text-mstPurple transition">ติดตามโครงการ</a>
-                    <a href="#board" class="hover:text-mstPurple transition">คณะกรรมการ</a>
-                    <a href="#news" class="hover:text-mstPurple transition">ข่าวสาร</a>
-                    <a href="./admin.html" class="bg-gradient-to-r from-mstPurple to-purple-800 text-white px-6 py-2.5 rounded-full hover:shadow-lg transition flex items-center gap-2 border border-purple-400">
-                        <i class="fa-solid fa-shield-halved"></i> ผู้ดูแลระบบ
-                    </a>
-                </div>
-                <button id="mobileMenuBtn" onclick="toggleMobileMenu()" class="lg:hidden text-gray-600 text-2xl"><i class="fa-solid fa-bars-staggered"></i></button>
+            <!-- Desktop Navigation -->
+            <nav id="navLinks" class="hidden lg:flex items-center gap-7 text-sm font-medium text-white/90 transition-colors nav-text-shadow">
+                <a href="#services" class="hover:text-mstChampagne transition-colors">ศูนย์บริการดิจิทัล</a>
+                <a href="#projects" class="hover:text-mstChampagne transition-colors">ติดตามโครงการ</a>
+                <a href="#board" class="hover:text-mstChampagne transition-colors">ทำเนียบคณะกรรมการ</a>
+                <a href="#news" class="hover:text-mstChampagne transition-colors">ข่าวประชาสัมพันธ์</a>
+                <a href="#mou" class="hover:text-mstChampagne transition-colors">เครือข่าย MOU</a>
+            </nav>
+
+            <div class="hidden lg:flex items-center gap-3">
+                <a href="./admin.html" id="navAdminBtn" class="inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold transition-all bg-white/95 text-zinc-900 ring-1 ring-white/50 backdrop-blur hover:bg-white shadow-sm hover:-translate-y-0.5">
+                    <i class="fa-solid fa-shield-halved text-mstPurple"></i>
+                    <span>ผู้ดูแลระบบ</span>
+                </a>
+            </div>
+
+            <!-- Mobile Menu Button -->
+            <button id="mobileMenuBtn" type="button" aria-label="เปิดเมนู" class="lg:hidden flex h-10 w-10 items-center justify-center rounded-full border border-white/25 bg-black/30 text-white backdrop-blur transition-colors">
+                <i class="fa-solid fa-bars text-base"></i>
+            </button>
+        </div>
+
+        <!-- Mobile Navigation Menu -->
+        <div id="mobileMenu" class="hidden lg:hidden border-t border-zinc-200/80 bg-white/95 backdrop-blur-xl px-4 pt-3 pb-6 shadow-lg">
+            <nav class="flex flex-col space-y-1 text-sm font-medium text-zinc-700">
+                <a href="#services" class="mobile-nav-link rounded-xl px-3 py-2.5 hover:bg-purple-50 hover:text-mstPurple transition-colors">ศูนย์บริการดิจิทัล</a>
+                <a href="#projects" class="mobile-nav-link rounded-xl px-3 py-2.5 hover:bg-purple-50 hover:text-mstPurple transition-colors">ติดตามโครงการ</a>
+                <a href="#board" class="mobile-nav-link rounded-xl px-3 py-2.5 hover:bg-purple-50 hover:text-mstPurple transition-colors">ทำเนียบคณะกรรมการ</a>
+                <a href="#news" class="mobile-nav-link rounded-xl px-3 py-2.5 hover:bg-purple-50 hover:text-mstPurple transition-colors">ข่าวประชาสัมพันธ์</a>
+                <a href="#mou" class="mobile-nav-link rounded-xl px-3 py-2.5 hover:bg-purple-50 hover:text-mstPurple transition-colors">เครือข่าย MOU</a>
+            </nav>
+            <div class="mt-4 pt-3 border-t border-zinc-100">
+                <a href="./admin.html" class="flex w-full items-center justify-center gap-2 rounded-full bg-mstDark px-4 py-2.5 text-xs font-semibold text-white shadow-sm hover:bg-mstPurple transition-colors">
+                    <i class="fa-solid fa-shield-halved text-mstChampagne"></i>
+                    <span>สำหรับผู้ดูแลระบบ</span>
+                </a>
             </div>
         </div>
-        <div id="mobileMenu" class="hidden lg:hidden bg-white/95 backdrop-blur-md absolute w-full left-0 border-t border-gray-100 pb-[env(safe-area-inset-bottom)]">
-            <div class="flex flex-col px-6 py-6 space-y-5 text-base font-bold text-gray-700 text-center">
-                <a href="#services" onclick="toggleMobileMenu()" class="hover:text-mstPurple">ศูนย์บริการ</a>
-                <a href="#projects" onclick="toggleMobileMenu()" class="hover:text-mstPurple">ติดตามโครงการ</a>
-                <a href="#board" onclick="toggleMobileMenu()" class="hover:text-mstPurple">คณะกรรมการ</a>
-                <a href="#news" onclick="toggleMobileMenu()" class="hover:text-mstPurple">ข่าวสาร</a>
-                <a href="./admin.html" class="bg-mstPurple text-white px-4 py-3 rounded-xl mt-2">เข้าสู่ระบบผู้ดูแล</a>
-            </div>
-        </div>
-    </nav>
+    </header>
 
-    <section class="pt-40 pb-32 px-4 text-center min-h-[85vh] flex flex-col justify-center items-center relative">
-        <div class="max-w-4xl mx-auto fade-in-up relative z-10">
-            <span class="glass text-mstPurple text-xs font-bold px-6 py-2 rounded-full uppercase tracking-widest mb-6 inline-block shadow-sm">MSTSC Official</span>
-            <h2 class="text-[28px] sm:text-5xl md:text-7xl font-black mb-6 text-mstDark drop-shadow-md px-4" style="line-height: 1.4;">
-                รวมพลังความคิด<br>
-                เพื่อ <span class="text-transparent bg-clip-text bg-gradient-to-r from-mstPurple to-purple-500">วิถีประชาธิปไตย</span>
-            </h2>
-            <p class="text-lg md:text-xl text-gray-600 mb-10 font-medium leading-relaxed max-w-2xl mx-auto">
+    <!-- Hero Section -->
+    <section class="relative h-[88vh] min-h-[600px] w-full overflow-hidden bg-mstDark">
+        <video 
+            class="absolute inset-0 h-full w-full object-cover scale-[1.02]" 
+            poster="https://images.unsplash.com/photo-1546410531-d7ce16fcee16?q=80&w=2000" 
+            autoplay loop muted playsinline preload="metadata">
+            <source src="/hero.mp4" type="video/mp4">
+            <source src="https://assets.mixkit.co/videos/preview/mixkit-students-walking-in-a-university-campus-4519-large.mp4" type="video/mp4">
+            <source src="https://cdn.coverr.co/videos/coverr-walking-through-university-campus-5349/1080p.mp4" type="video/mp4">
+        </video>
+
+        <div class="absolute inset-0 bg-gradient-to-b from-[#090514]/70 via-[#170B3B]/45 to-[#090514]/90"></div>
+        <div class="absolute inset-0 bg-gradient-to-tr from-[#090514]/85 via-[#2E1065]/30 to-transparent"></div>
+        
+        <div class="pointer-events-none absolute top-1/4 -left-20 h-96 w-96 rounded-full bg-mstPurple/40 blur-[130px]"></div>
+        <div class="pointer-events-none absolute bottom-16 right-10 h-80 w-80 rounded-full bg-amber-400/15 blur-[120px]"></div>
+
+        <div class="relative z-10 mx-auto flex h-full max-w-6xl flex-col items-start justify-center px-6 sm:px-8">
+            <div class="mb-5 inline-flex items-center gap-2.5 rounded-full border border-amber-300/30 bg-white/10 px-4 py-1.5 backdrop-blur-md shadow-glam fade-up">
+                <span class="h-1.5 w-1.5 rounded-full bg-mstYellow animate-pulse"></span>
+                <span class="text-[11px] font-semibold uppercase tracking-[0.32em] text-amber-100/95">Student Council · Muangsuratthani School</span>
+            </div>
+
+            <h1 class="max-w-3xl text-5xl font-semibold leading-[1.06] tracking-tight text-white sm:text-7xl fade-up hero-title-shadow">
+                รวมพลังความคิด<br/>
+                <span class="text-glam-gold">เพื่อวิถีประชาธิปไตย.</span>
+            </h1>
+
+            <p class="mt-5 max-w-xl text-base leading-relaxed text-white/85 sm:text-lg fade-up delay-1">
                 ขับเคลื่อนกิจกรรมและการบริหารงานของสภานักเรียนโรงเรียนเมืองสุราษฎร์ธานี ด้วยความโปร่งใส น้อมนำหลักธรรมาภิบาล และจิตอาสาเพื่อส่วนรวม
             </p>
-            <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                <a href="#news" class="bg-gradient-to-r from-mstPurple to-indigo-600 text-white font-bold px-8 py-4 rounded-full shadow-lg hover:shadow-xl transition transform hover:-translate-y-1 flex items-center justify-center gap-2 text-lg">
-                    <i class="fa-solid fa-newspaper"></i> ข่าวสารล่าสุด
+
+            <div class="mt-8 flex flex-wrap items-center gap-3 fade-up delay-2">
+                <a href="#services" class="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-white via-amber-50 to-amber-100 px-6 py-3 text-sm font-semibold text-mstDark shadow-lg ring-1 ring-amber-200/60 transition-transform hover:-translate-y-0.5">
+                    <span>สำรวจบริการดิจิทัล</span>
+                    <i class="fa-solid fa-arrow-right text-xs text-mstPurple"></i>
                 </a>
-                <a href="#services" class="glass text-mstPurple font-bold px-8 py-4 rounded-full hover:bg-white transition transform hover:-translate-y-1 flex items-center justify-center gap-2 text-lg">
-                    <i class="fa-solid fa-layer-group"></i> ศูนย์บริการ
+                <a href="#news" class="inline-flex items-center gap-2 rounded-full border border-white/35 bg-white/10 px-6 py-3 text-sm font-semibold text-white backdrop-blur-md transition-colors hover:bg-white/20 hover:border-amber-200/50">
+                    <span>ข่าวสารและประกาศ</span>
+                </a>
+                <a href="#projects" class="inline-flex items-center gap-2 rounded-full border border-white/35 bg-white/10 px-6 py-3 text-sm font-semibold text-white backdrop-blur-md transition-colors hover:bg-white/20 hover:border-amber-200/50">
+                    <span>ติดตามนโยบาย</span>
+                </a>
+                <a href="https://lin.ee/XqGRR9C" target="_blank" rel="noreferrer noopener" class="inline-flex items-center gap-2 rounded-full bg-[#06C755] px-6 py-3 text-sm font-semibold text-white shadow-lg transition-transform hover:-translate-y-0.5">
+                    <i class="fa-brands fa-line text-base"></i>
+                    <span>เพิ่มเพื่อน LINE</span>
                 </a>
             </div>
         </div>
+
+        <div class="pointer-events-none absolute inset-x-0 bottom-0 h-28 bg-gradient-to-b from-transparent via-[#FAF8F5]/40 to-mstCream"></div>
     </section>
 
-    <section id="services" class="py-24 relative z-20">
-        <div class="max-w-7xl mx-auto px-4">
-            <div class="text-center mb-16 fade-in-up">
-                <h3 class="text-3xl md:text-4xl font-black text-gray-900 section-title">ศูนย์รวมบริการดิจิทัล</h3>
-                <p class="text-gray-500 font-medium mt-4">บริการอิเล็กทรอนิกส์เพื่อความสะดวกของนักเรียน</p>
-            </div>
-            
-            <div class="flex flex-wrap justify-center gap-6 fade-in-up" style="animation-delay: 0.2s;">
-                <a href="https://liff.line.me/2008923798-TRND2m0M" class="glass glass-hover p-8 rounded-[2rem] text-center block transition-all duration-300 group w-full sm:w-[calc(50%-0.75rem)] lg:w-[calc(25%-1.125rem)] max-w-[300px]">
-                    <div class="w-20 h-20 bg-purple-100 text-mstPurple rounded-2xl flex items-center justify-center text-3xl mx-auto mb-6 group-hover:scale-110 group-hover:rotate-3 transition shadow-sm">
-                        <i class="fa-solid fa-tower-broadcast"></i>
-                    </div>
-                    <h4 class="font-black text-gray-900 mb-2 text-lg">Smart Radio</h4>
-                    <p class="text-sm text-gray-500">ระบบขอเพลงและโหวตคิวเสียงตามสายสภานักเรียน</p>
-                </a>
+    <!-- Main Content -->
+    <main class="mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-28 space-y-28 sm:space-y-36">
 
-                <a href="https://liff.line.me/2008923798-LmKWCP2j" class="glass glass-hover p-8 rounded-[2rem] text-center block transition-all duration-300 group w-full sm:w-[calc(50%-0.75rem)] lg:w-[calc(25%-1.125rem)] max-w-[300px]">
-                    <div class="w-20 h-20 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-6 group-hover:scale-110 group-hover:-rotate-3 transition shadow-sm">
-                        <i class="fa-solid fa-book-open-reader"></i>
-                    </div>
-                    <h4 class="font-black text-gray-900 mb-2 text-lg">Senior Portfolio</h4>
-                    <p class="text-sm text-gray-500">คลังพอร์ตโฟลิโอและเทคนิคสอบสัมภาษณ์จากรุ่นพี่ ม.ส.ธ.</p>
-                </a>
-
-                <a href="/e-voting" class="glass glass-hover p-8 rounded-[2rem] text-center block transition-all duration-300 group w-full sm:w-[calc(50%-0.75rem)] lg:w-[calc(25%-1.125rem)] max-w-[300px]">
-                    <div class="w-20 h-20 bg-indigo-100 text-indigo-600 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-6 group-hover:scale-110 group-hover:rotate-3 transition shadow-sm">
-                        <i class="fa-solid fa-check-to-slot"></i>
-                    </div>
-                    <h4 class="font-black text-gray-900 mb-2 text-lg">E-Voting</h4>
-                    <p class="text-sm text-gray-500">ระบบลงคะแนนอิเล็กทรอนิกส์ สำหรับนักเรียนและบุคลากร</p>
-                </a>
-                
-                <a href="https://liff.line.me/2008923798-7EBZdt6r" target="_blank" class="glass glass-hover p-8 rounded-[2rem] text-center block transition-all duration-300 group w-full sm:w-[calc(50%-0.75rem)] lg:w-[calc(25%-1.125rem)] max-w-[300px]">
-                    <div class="w-20 h-20 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-6 group-hover:scale-110 group-hover:rotate-3 transition shadow-sm">
-                        <i class="fa-solid fa-bullhorn"></i>
-                    </div>
-                    <h4 class="font-black text-gray-900 mb-2 text-lg">Public Hearing</h4>
-                    <p class="text-sm text-gray-500">ส่งเรื่องร้องเรียน เสนอแนะ ถึงสภานักเรียนโดยตรง</p>
-                </a>
-      
-                <a href="/admission" target="_blank" class="glass glass-hover p-8 rounded-[2rem] text-center block transition-all duration-300 group w-full sm:w-[calc(50%-0.75rem)] lg:w-[calc(25%-1.125rem)] max-w-[300px]">
-                    <div class="w-20 h-20 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-6 group-hover:scale-110 group-hover:rotate-3 transition shadow-sm">
-                        <i class="fa-solid fa-user-graduate"></i>
-                    </div>
-                    <h4 class="font-black text-gray-900 mb-2 text-lg">SC Admission</h4>
-                    <p class="text-sm text-gray-500">ระบบรับสมัครคณะกรรมการและผู้ช่วยสภานักเรียน</p>
-                </a>
-
-                <a href="/regis" target="_blank" class="glass glass-hover p-8 rounded-[2rem] text-center block transition-all duration-300 group w-full sm:w-[calc(50%-0.75rem)] lg:w-[calc(25%-1.125rem)] max-w-[300px]">
-                    <div class="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-6 group-hover:scale-110 group-hover:-rotate-3 transition shadow-sm">
-                        <i class="fa-solid fa-folder-open"></i>
-                    </div>
-                    <h4 class="font-black text-gray-900 mb-2 text-lg">SC Regis</h4>
-                    <p class="text-sm text-gray-500">ระบบทะเบียนและจัดการข้อมูลประวัติของคณะกรรมการ</p>
-                </a>
-                
-                <a href="/vault" target="_blank" class="glass glass-hover p-8 rounded-[2rem] text-center block transition-all duration-300 group w-full sm:w-[calc(50%-0.75rem)] lg:w-[calc(25%-1.125rem)] max-w-[300px] relative overflow-hidden">
-                    <div class="absolute top-4 right-4 bg-gray-900 text-white text-[8px] font-black px-2 py-1 rounded-md tracking-wider">STAFF</div>
-                    <div class="w-20 h-20 bg-pink-100 text-pink-600 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-6 group-hover:scale-110 group-hover:-rotate-3 transition shadow-sm">
-                        <i class="fa-solid fa-vault"></i>
-                    </div>
-                    <h4 class="font-black text-gray-900 mb-2 text-lg">SC Vault</h4>
-                    <p class="text-sm text-gray-500">ระบบคลังจัดเก็บเกียรติบัตรและแฟ้มผลงานส่วนตัวแบบดิจิทัล</p>
-                </a>
-
-                <a href="/link-manager" target="_blank" class="glass glass-hover p-8 rounded-[2rem] text-center block transition-all duration-300 group w-full sm:w-[calc(50%-0.75rem)] lg:w-[calc(25%-1.125rem)] max-w-[300px] relative overflow-hidden">
-                    <div class="absolute top-4 right-4 bg-gray-900 text-white text-[8px] font-black px-2 py-1 rounded-md tracking-wider">STAFF</div>
-                    <div class="w-20 h-20 bg-purple-100 text-mstPurple rounded-2xl flex items-center justify-center text-3xl mx-auto mb-6 group-hover:scale-110 group-hover:rotate-3 transition shadow-sm">
-                        <i class="fa-solid fa-link"></i>
-                    </div>
-                    <h4 class="font-black text-gray-900 mb-2 text-lg">MSTSC URL</h4>
-                    <p class="text-sm text-gray-500">ระบบย่อลิงก์และสร้าง QR Code สำหรับคณะกรรมการ</p>
-                </a>
-            </div>
-        </div>
-    </section>
-
-    <section id="projects" class="py-24 relative">
-        <div class="max-w-7xl mx-auto px-4">
-            <div class="text-center mb-16">
-                <h3 class="text-3xl md:text-4xl font-black text-gray-900 section-title mx-auto block">ความคืบหน้านโยบายและโครงการ</h3>
-                <p class="text-gray-500 font-medium mt-4">บริหารจัดการโปร่งใส ตรวจสอบได้ ตามวงจรคุณภาพ (PDCA)</p>
-            </div>
-            <div id="projectGrid" class="flex flex-wrap justify-center gap-8">
-                <div class="col-span-full flex justify-center py-10"><div class="animate-spin rounded-full h-12 w-12 border-4 border-mstYellow border-t-mstPurple"></div></div>
-            </div>
-        </div>
-    </section>
-
-    <section id="board" class="py-24">
-        <div class="max-w-7xl mx-auto px-4 text-center">
-            <h3 class="text-3xl md:text-4xl font-black text-gray-900 section-title mx-auto" id="boardTitle">ทำเนียบคณะกรรมการสภานักเรียน</h3>
-            
-            <div id="yearSelectorContainer" class="mt-8 hidden fade-in-up">
-                <div class="inline-flex items-center bg-white p-2 rounded-2xl shadow-sm border border-gray-200">
-                    <label for="boardYearSelect" class="text-gray-500 font-bold px-4"><i class="fa-solid fa-calendar-days mr-2 text-mstPurple"></i> เลือกปีการศึกษา</label>
-                    <select id="boardYearSelect" onchange="changeBoardYear()" class="bg-gray-50 border border-gray-200 text-mstPurple font-black text-lg rounded-xl px-6 py-2 focus:outline-none focus:ring-2 focus:ring-mstPurple cursor-pointer"></select>
+        <!-- 1. ศูนย์รวมบริการดิจิทัล (#services) -->
+        <section id="services">
+            <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+                <div class="max-w-2xl">
+                    <p class="text-xs font-semibold uppercase tracking-[0.32em] text-amber-600">Digital Ecosystem</p>
+                    <h2 class="mt-2 text-3xl font-semibold tracking-tight text-zinc-900 sm:text-4xl">ศูนย์รวมบริการดิจิทัล</h2>
+                    <p class="mt-3 text-base text-zinc-500">บริการอิเล็กทรอนิกส์และระบบสารสนเทศเพื่อความสะดวกของนักเรียนและคณะกรรมการ</p>
                 </div>
             </div>
 
-            <div id="boardContainer" class="space-y-12 mt-12 min-h-[300px]">
-                <div class="flex justify-center pt-16"><div class="animate-spin rounded-full h-12 w-12 border-4 border-mstYellow border-t-mstPurple"></div></div>
-            </div>
-            
-            <div id="schoolPersonnelContainer" class="mt-20 glass-dark text-white p-8 md:p-12 rounded-[3rem] shadow-2xl flex flex-col md:flex-row justify-center items-center gap-10 md:gap-16 relative overflow-hidden">
-                <div class="animate-spin rounded-full h-8 w-8 border-4 border-mstYellow border-t-white mx-auto"></div>
-            </div>
-        </div>
-    </section>
+            <div class="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <a href="https://liff.line.me/2008923798-TRND2m0M" class="card-soft p-6 flex flex-col justify-between group">
+                    <div>
+                        <div class="flex items-center justify-between mb-5">
+                            <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-50 to-purple-100/70 text-mstPurple border border-purple-200/60 group-hover:from-mstPurpleDeep group-hover:to-mstPurple group-hover:text-mstChampagne transition-all duration-300 shadow-xs">
+                                <i class="fa-solid fa-tower-broadcast text-lg"></i>
+                            </div>
+                            <i class="fa-solid fa-arrow-up-right-from-square text-xs text-zinc-300 group-hover:text-mstPurple transition-colors"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold tracking-tight text-zinc-900">Smart Radio</h3>
+                        <p class="mt-1.5 text-sm leading-relaxed text-zinc-500">ระบบขอเพลงและโหวตคิวเสียงตามสายสภานักเรียน</p>
+                    </div>
+                    <div class="mt-6 pt-4 border-t border-zinc-100 flex items-center text-xs font-semibold text-mstPurple">
+                        <span>เข้าใช้งานระบบ</span>
+                        <i class="fa-solid fa-chevron-right ml-1.5 text-[10px] transition-transform group-hover:translate-x-1"></i>
+                    </div>
+                </a>
 
-    <section id="news" class="py-24">
-        <div class="max-w-7xl mx-auto px-4">
-            <div class="mb-16">
-                <h3 class="text-3xl md:text-4xl font-black text-gray-900 section-title mx-auto text-center block">ข่าวสารและประกาศ</h3>
-                <div id="publicNewsGrid" class="flex flex-wrap justify-center gap-8 mt-12">
-                    <div class="col-span-full flex justify-center py-10"><div class="animate-spin rounded-full h-12 w-12 border-4 border-mstYellow border-t-mstPurple"></div></div>
+                <a href="https://liff.line.me/2008923798-LmKWCP2j" class="card-soft p-6 flex flex-col justify-between group">
+                    <div>
+                        <div class="flex items-center justify-between mb-5">
+                            <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-50 to-amber-100/70 text-amber-600 border border-amber-200/60 group-hover:from-amber-500 group-hover:to-amber-600 group-hover:text-white transition-all duration-300 shadow-xs">
+                                <i class="fa-solid fa-book-open-reader text-lg"></i>
+                            </div>
+                            <i class="fa-solid fa-arrow-up-right-from-square text-xs text-zinc-300 group-hover:text-amber-600 transition-colors"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold tracking-tight text-zinc-900">Senior Portfolio</h3>
+                        <p class="mt-1.5 text-sm leading-relaxed text-zinc-500">คลังพอร์ตโฟลิโอและเทคนิคสอบสัมภาษณ์จากรุ่นพี่ ม.ส.ธ.</p>
+                    </div>
+                    <div class="mt-6 pt-4 border-t border-zinc-100 flex items-center text-xs font-semibold text-zinc-700 group-hover:text-amber-600 transition-colors">
+                        <span>เปิดคลังพอร์ตโฟลิโอ</span>
+                        <i class="fa-solid fa-chevron-right ml-1.5 text-[10px] transition-transform group-hover:translate-x-1"></i>
+                    </div>
+                </a>
+
+                <a href="/e-voting" class="card-soft p-6 flex flex-col justify-between group">
+                    <div>
+                        <div class="flex items-center justify-between mb-5">
+                            <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-50 to-indigo-100/70 text-indigo-600 border border-indigo-200/60 group-hover:from-indigo-600 group-hover:to-mstPurple group-hover:text-white transition-all duration-300 shadow-xs">
+                                <i class="fa-solid fa-check-to-slot text-lg"></i>
+                            </div>
+                            <i class="fa-solid fa-arrow-right text-xs text-zinc-300 group-hover:text-indigo-600 transition-colors"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold tracking-tight text-zinc-900">E-Voting</h3>
+                        <p class="mt-1.5 text-sm leading-relaxed text-zinc-500">ระบบลงคะแนนอิเล็กทรอนิกส์ สำหรับนักเรียนและบุคลากร</p>
+                    </div>
+                    <div class="mt-6 pt-4 border-t border-zinc-100 flex items-center text-xs font-semibold text-zinc-700 group-hover:text-indigo-600 transition-colors">
+                        <span>เข้าสู่คูหาออนไลน์</span>
+                        <i class="fa-solid fa-chevron-right ml-1.5 text-[10px] transition-transform group-hover:translate-x-1"></i>
+                    </div>
+                </a>
+
+                <a href="https://liff.line.me/2008923798-7EBZdt6r" target="_blank" rel="noreferrer noopener" class="card-soft p-6 flex flex-col justify-between group">
+                    <div>
+                        <div class="flex items-center justify-between mb-5">
+                            <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-50 to-sky-100/70 text-sky-600 border border-sky-200/60 group-hover:from-sky-500 group-hover:to-sky-600 group-hover:text-white transition-all duration-300 shadow-xs">
+                                <i class="fa-solid fa-bullhorn text-lg"></i>
+                            </div>
+                            <i class="fa-solid fa-arrow-up-right-from-square text-xs text-zinc-300 group-hover:text-sky-600 transition-colors"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold tracking-tight text-zinc-900">Public Hearing</h3>
+                        <p class="mt-1.5 text-sm leading-relaxed text-zinc-500">ส่งเรื่องร้องเรียน เสนอแนะ ถึงสภานักเรียนโดยตรง</p>
+                    </div>
+                    <div class="mt-6 pt-4 border-t border-zinc-100 flex items-center text-xs font-semibold text-zinc-700 group-hover:text-sky-600 transition-colors">
+                        <span>ส่งเรื่องร้องเรียน / เสนอแนะ</span>
+                        <i class="fa-solid fa-chevron-right ml-1.5 text-[10px] transition-transform group-hover:translate-x-1"></i>
+                    </div>
+                </a>
+
+                <a href="/admission" target="_blank" rel="noreferrer noopener" class="card-soft p-6 flex flex-col justify-between group">
+                    <div>
+                        <div class="flex items-center justify-between mb-5">
+                            <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-50 to-amber-100/70 text-amber-700 border border-amber-200/60 group-hover:from-amber-500 group-hover:to-orange-500 group-hover:text-white transition-all duration-300 shadow-xs">
+                                <i class="fa-solid fa-user-graduate text-lg"></i>
+                            </div>
+                            <i class="fa-solid fa-arrow-up-right-from-square text-xs text-zinc-300 group-hover:text-amber-600 transition-colors"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold tracking-tight text-zinc-900">SC Admission</h3>
+                        <p class="mt-1.5 text-sm leading-relaxed text-zinc-500">ระบบรับสมัครคณะกรรมการและผู้ช่วยสภานักเรียน</p>
+                    </div>
+                    <div class="mt-6 pt-4 border-t border-zinc-100 flex items-center text-xs font-semibold text-zinc-700 group-hover:text-amber-600 transition-colors">
+                        <span>สมัครเข้าร่วมสภาฯ</span>
+                        <i class="fa-solid fa-chevron-right ml-1.5 text-[10px] transition-transform group-hover:translate-x-1"></i>
+                    </div>
+                </a>
+
+                <a href="/regis" target="_blank" rel="noreferrer noopener" class="card-soft p-6 flex flex-col justify-between group">
+                    <div>
+                        <div class="flex items-center justify-between mb-5">
+                            <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-50 to-emerald-100/70 text-emerald-600 border border-emerald-200/60 group-hover:from-emerald-500 group-hover:to-emerald-600 group-hover:text-white transition-all duration-300 shadow-xs">
+                                <i class="fa-solid fa-folder-open text-lg"></i>
+                            </div>
+                            <i class="fa-solid fa-arrow-up-right-from-square text-xs text-zinc-300 group-hover:text-emerald-600 transition-colors"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold tracking-tight text-zinc-900">SC Regis</h3>
+                        <p class="mt-1.5 text-sm leading-relaxed text-zinc-500">ระบบทะเบียนและจัดการข้อมูลประวัติของคณะกรรมการ</p>
+                    </div>
+                    <div class="mt-6 pt-4 border-t border-zinc-100 flex items-center text-xs font-semibold text-zinc-700 group-hover:text-emerald-600 transition-colors">
+                        <span>จัดการข้อมูลทะเบียน</span>
+                        <i class="fa-solid fa-chevron-right ml-1.5 text-[10px] transition-transform group-hover:translate-x-1"></i>
+                    </div>
+                </a>
+
+                <a href="/vault" target="_blank" rel="noreferrer noopener" class="card-soft p-6 flex flex-col justify-between group relative overflow-hidden">
+                    <div>
+                        <div class="flex items-center justify-between mb-5">
+                            <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-rose-50 to-pink-100/70 text-rose-600 border border-rose-200/60 group-hover:from-rose-500 group-hover:to-pink-600 group-hover:text-white transition-all duration-300 shadow-xs">
+                                <i class="fa-solid fa-vault text-lg"></i>
+                            </div>
+                            <span class="rounded-full bg-mstDark px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-mstChampagne border border-amber-400/30">STAFF</span>
+                        </div>
+                        <h3 class="text-lg font-semibold tracking-tight text-zinc-900">SC Vault</h3>
+                        <p class="mt-1.5 text-sm leading-relaxed text-zinc-500">ระบบคลังจัดเก็บเกียรติบัตรและแฟ้มผลงานส่วนตัวแบบดิจิทัล</p>
+                    </div>
+                    <div class="mt-6 pt-4 border-t border-zinc-100 flex items-center text-xs font-semibold text-zinc-700 group-hover:text-rose-600 transition-colors">
+                        <span>เปิดคลังเกียรติบัตร</span>
+                        <i class="fa-solid fa-chevron-right ml-1.5 text-[10px] transition-transform group-hover:translate-x-1"></i>
+                    </div>
+                </a>
+
+                <a href="/link-manager" target="_blank" rel="noreferrer noopener" class="card-soft p-6 flex flex-col justify-between group relative overflow-hidden">
+                    <div>
+                        <div class="flex items-center justify-between mb-5">
+                            <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-50 to-indigo-100/70 text-mstPurple border border-purple-200/60 group-hover:from-mstPurpleDeep group-hover:to-mstPurple group-hover:text-mstChampagne transition-all duration-300 shadow-xs">
+                                <i class="fa-solid fa-link text-lg"></i>
+                            </div>
+                            <span class="rounded-full bg-mstDark px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-mstChampagne border border-amber-400/30">STAFF</span>
+                        </div>
+                        <h3 class="text-lg font-semibold tracking-tight text-zinc-900">MSTSC URL</h3>
+                        <p class="mt-1.5 text-sm leading-relaxed text-zinc-500">ระบบย่อลิงก์และสร้าง QR Code สำหรับคณะกรรมการ</p>
+                    </div>
+                    <div class="mt-6 pt-4 border-t border-zinc-100 flex items-center text-xs font-semibold text-zinc-700 group-hover:text-mstPurple transition-colors">
+                        <span>จัดการลิงก์และ QR</span>
+                        <i class="fa-solid fa-chevron-right ml-1.5 text-[10px] transition-transform group-hover:translate-x-1"></i>
+                    </div>
+                </a>
+            </div>
+        </section>
+
+        <!-- 2. ข่าวประชาสัมพันธ์ (#news) -->
+        <section id="news">
+            <div class="max-w-2xl">
+                <p class="text-xs font-semibold uppercase tracking-[0.32em] text-amber-600">Latest Announcements</p>
+                <h2 class="mt-2 text-3xl font-semibold tracking-tight text-zinc-900 sm:text-4xl">ข่าวสารและประกาศ</h2>
+                <p class="mt-3 text-base text-zinc-500">อัปเดตข่าวประชาสัมพันธ์ ประกาศสำคัญ และกิจกรรมล่าสุดจากสภานักเรียน</p>
+            </div>
+
+            <div id="publicNewsGrid" class="mt-10 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+                <div class="col-span-full flex justify-center py-12">
+                    <div class="animate-spin rounded-full h-10 w-10 border-2 border-zinc-200 border-t-mstPurple"></div>
                 </div>
             </div>
-            <div id="mou" class="glass p-8 md:p-12 rounded-[3rem] text-center relative overflow-hidden">
-                <div class="absolute inset-0 bg-white/40"></div>
-                <div class="relative z-10">
-                    <h3 class="text-2xl font-black text-gray-900 mb-2">เครือข่ายสภานักเรียน (MOU)</h3>
-                    <p class="text-gray-600 text-sm mb-10 font-medium">ประสานความร่วมมือ แลกเปลี่ยนเรียนรู้ เพื่อพัฒนาศักยภาพเยาวชนระดับประเทศ</p>
-                    <div id="mouGrid" class="marquee-container mt-8">
-                        <div class="animate-spin rounded-full h-8 w-8 border-4 border-mstYellow border-t-mstPurple mx-auto"></div>
+        </section>
+
+        <!-- 3. ความคืบหน้านโยบายและโครงการ (#projects) -->
+        <section id="projects">
+            <div class="max-w-2xl">
+                <p class="text-xs font-semibold uppercase tracking-[0.32em] text-amber-600">Policy & PDCA Tracker</p>
+                <h2 class="mt-2 text-3xl font-semibold tracking-tight text-zinc-900 sm:text-4xl">ความคืบหน้านโยบายและโครงการ</h2>
+                <p class="mt-3 text-base text-zinc-500">บริหารจัดการโปร่งใส ตรวจสอบได้ ตามวงจรคุณภาพ (Plan · Do · Check · Act)</p>
+            </div>
+
+            <div id="projectGrid" class="mt-10 grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
+                <div class="col-span-full flex justify-center py-12">
+                    <div class="animate-spin rounded-full h-10 w-10 border-2 border-zinc-200 border-t-mstPurple"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. ทำเนียบคณะกรรมการสภานักเรียน (#board) -->
+        <section id="board">
+            <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-6">
+                <div class="max-w-2xl">
+                    <p class="text-xs font-semibold uppercase tracking-[0.32em] text-amber-600">Directory</p>
+                    <h2 id="boardTitle" class="mt-2 text-3xl font-semibold tracking-tight text-zinc-900 sm:text-4xl">ทำเนียบคณะกรรมการสภานักเรียน</h2>
+                    <p class="mt-3 text-base text-zinc-500">โครงสร้างการบริหารงานและรายชื่อคณะกรรมการสภานักเรียน</p>
+                </div>
+
+                <div id="yearSelectorContainer" class="hidden shrink-0">
+                    <div class="inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-white px-4 py-2 shadow-soft">
+                        <label for="boardYearSelect" class="text-xs font-semibold tracking-normal text-zinc-500">
+                            <i class="fa-regular fa-calendar mr-1.5 text-mstPurple"></i>ปีการศึกษา
+                        </label>
+                        <select id="boardYearSelect" class="bg-transparent text-sm font-bold text-mstPurple focus:outline-none cursor-pointer pr-1"></select>
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
 
-    <footer class="bg-mstDark text-gray-300 pt-16 pb-8 border-t-[10px] border-mstYellow">
-        <div class="max-w-7xl mx-auto px-4 text-center">
-            <div class="inline-block bg-white p-2 rounded-full mb-6 shadow-xl">
-                <img src="/logo.webp" alt="Logo" class="h-16 w-16">
+            <div id="boardContainer" class="mt-12 space-y-14 min-h-[260px]">
+                <div class="flex justify-center py-16">
+                    <div class="animate-spin rounded-full h-10 w-10 border-2 border-zinc-200 border-t-mstPurple"></div>
+                </div>
             </div>
-            <h4 class="font-black text-2xl text-white mb-2 tracking-wide">คณะกรรมการสภานักเรียนโรงเรียนเมืองสุราษฎร์ธานี</h4>
-            <p class="text-sm text-gray-400 mb-8 max-w-lg mx-auto leading-relaxed">
-                ห้องคณะกรรมการสภานักเรียน อาคารทรง จีระกุล <br> 223 หมู่ 4 ถนนลูกเสือ อำเภอเมือง จังหวัดสุราษฎร์ธานี 84000
-            </p>
-            <div class="flex justify-center gap-4 mb-10">
-                <a href="https://www.facebook.com/mstcouncil" target="_blank" class="w-12 h-12 rounded-full glass-dark flex items-center justify-center hover:bg-blue-600 hover:border-blue-600 text-white transition text-xl"><i class="fa-brands fa-facebook-f"></i></a>
-                <a href="https://instagram.com/MST.STUDENTCOUNCIL" target="_blank" class="w-12 h-12 rounded-full glass-dark flex items-center justify-center hover:bg-pink-600 hover:border-pink-600 text-white transition text-xl"><i class="fa-brands fa-instagram"></i></a>
-                <a href="https://lin.ee/XqGRR9C" target="_blank" class="w-12 h-12 rounded-full glass-dark flex items-center justify-center hover:bg-[#00B900] hover:border-[#00B900] text-white transition text-xl"><i class="fa-brands fa-line"></i></a>
-                <a href="https://www.tiktok.com/@mst.studentcouncil" target="_blank" class="w-12 h-12 rounded-full glass-dark flex items-center justify-center hover:bg-gray-900 hover:border-gray-900 text-white transition text-xl"><i class="fa-brands fa-tiktok"></i></a>
-                <a href="https://youtube.com/@mstcouncil" target="_blank" class="w-12 h-12 rounded-full glass-dark flex items-center justify-center hover:bg-red-600 hover:border-red-600 text-white transition text-xl"><i class="fa-brands fa-youtube"></i></a>
+
+            <div id="schoolPersonnelContainer" class="mt-16 rounded-3xl bg-gradient-to-br from-[#090514] via-[#1E0B42] to-[#110826] text-white p-8 sm:p-12 shadow-float flex flex-col md:flex-row justify-around items-center gap-8 md:gap-12 relative overflow-hidden border border-amber-300/25">
+                <div class="animate-spin rounded-full h-8 w-8 border-2 border-white/20 border-t-mstYellow mx-auto"></div>
             </div>
-            <div class="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center text-xs text-gray-500 pb-[env(safe-area-inset-bottom)]">
-                <p>&copy; <script>document.write(new Date().getFullYear())</script> MSTSC. All rights reserved.</p>
-                <p class="mt-2 md:mt-0 font-bold"><i class="fa-solid fa-code text-mstPurple mr-1"></i> Developed by MSTSC Tech Team</p>
+        </section>
+
+        <!-- 5. เครือข่ายสภานักเรียน MOU (#mou) -->
+        <section id="mou">
+            <div class="card-soft p-8 sm:p-12">
+                <div class="max-w-2xl">
+                    <p class="text-xs font-semibold uppercase tracking-[0.32em] text-amber-600">Partnership Network</p>
+                    <h2 class="mt-2 text-2xl font-semibold tracking-tight text-zinc-900 sm:text-3xl">เครือข่ายสภานักเรียน (MOU)</h2>
+                    <p class="mt-2 text-sm sm:text-base text-zinc-500">ประสานความร่วมมือ แลกเปลี่ยนเรียนรู้ เพื่อพัฒนาศักยภาพเยาวชนระดับประเทศ</p>
+                </div>
+
+                <div id="mouGrid" class="marquee-container mt-8 py-2">
+                    <div class="animate-spin rounded-full h-8 w-8 border-2 border-zinc-200 border-t-mstPurple mx-auto"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 6. ช่องทางติดต่อด่วน -->
+        <section>
+            <div class="grid gap-6 lg:grid-cols-2">
+                <div class="card-soft p-6 sm:p-8 flex flex-col justify-between gap-6">
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-[0.3em] text-mstPurple">Public Hearing</p>
+                        <h3 class="mt-2 text-xl font-semibold tracking-tight text-zinc-900">แจ้งปัญหา / ข้อเสนอแนะถึงสภานักเรียน</h3>
+                        <p class="mt-2 text-sm leading-relaxed text-zinc-500">พบปัญหาภายในโรงเรียน หรืออยากเสนอไอเดียกิจกรรมใหม่ ๆ สามารถส่งเรื่องผ่านระบบ Public Hearing ของสภานักเรียนได้โดยตรง</p>
+                    </div>
+                    <div>
+                        <a href="https://liff.line.me/2008923798-7EBZdt6r" target="_blank" rel="noreferrer noopener" class="inline-flex min-h-11 items-center gap-2 rounded-full bg-gradient-to-r from-mstDark via-mstPurpleDeep to-mstPurple px-6 py-3 text-sm font-semibold text-white shadow-md transition-transform hover:-translate-y-0.5">
+                            <i class="fa-regular fa-paper-plane text-xs text-mstChampagne"></i>
+                            <span>ส่งเรื่องผ่าน Public Hearing</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="card-soft p-6 sm:p-8 flex flex-col justify-between gap-6">
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-[0.3em] text-[#06C755]">Official LINE</p>
+                        <h3 class="mt-2 text-xl font-semibold tracking-tight text-zinc-900">ติดต่อเราทาง LINE Official Account</h3>
+                        <p class="mt-2 text-sm leading-relaxed text-zinc-500">อยากพูดคุยหรือสอบถามข้อมูลกับสภานักเรียนแบบรวดเร็ว เพิ่มเพื่อนใน LINE Official Account แล้วทักหาเราได้ทันที</p>
+                    </div>
+                    <div>
+                        <a href="https://lin.ee/XqGRR9C" target="_blank" rel="noreferrer noopener" class="inline-flex min-h-11 w-full sm:w-auto items-center justify-center gap-2 rounded-full bg-[#06C755] px-6 py-3 text-sm font-semibold text-white shadow-md transition-transform hover:-translate-y-0.5">
+                            <i class="fa-brands fa-line text-base"></i>
+                            <span>เพิ่มเพื่อนใน LINE</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-zinc-200/80 bg-[#F3EFEA]/70">
+        <div class="mx-auto max-w-6xl px-4 py-14 sm:px-6">
+            <div class="grid grid-cols-1 gap-10 md:grid-cols-3">
+                <div>
+                    <div class="flex items-center gap-3">
+                        <img src="/logo.webp" alt="MSTSC Logo" class="h-9 w-9 object-contain">
+                        <span class="text-sm font-semibold text-zinc-900">
+                            สภานักเรียนโรงเรียนเมืองสุราษฎร์ธานี
+                            <span class="block text-xs font-normal text-zinc-500">Student Council of Muangsuratthani School</span>
+                        </span>
+                    </div>
+                    <ul class="mt-5 space-y-3 text-sm text-zinc-500">
+                        <li class="flex gap-2.5">
+                            <i class="fa-solid fa-location-dot mt-1 text-xs text-mstPurple shrink-0"></i>
+                            <span>ห้องคณะกรรมการสภานักเรียน อาคารทรง จีระกุล<br/>223 หมู่ 4 ถนนลูกเสือ อ.เมือง จ.สุราษฎร์ธานี 84000</span>
+                        </li>
+                        <li class="flex gap-2.5">
+                            <i class="fa-brands fa-instagram mt-1 text-xs text-mstPurple shrink-0"></i>
+                            <a href="https://instagram.com/MST.STUDENTCOUNCIL" target="_blank" rel="noreferrer noopener" class="hover:text-zinc-900 transition-colors">mst.studentcouncil</a>
+                        </li>
+                        <li class="flex gap-2.5">
+                            <i class="fa-brands fa-line mt-1 text-xs text-mstPurple shrink-0"></i>
+                            <a href="https://lin.ee/XqGRR9C" target="_blank" rel="noreferrer noopener" class="hover:text-zinc-900 transition-colors">LINE Official Account</a>
+                        </li>
+                    </ul>
+                    <div class="mt-5 flex items-center gap-2">
+                        <a href="https://www.facebook.com/mstcouncil" target="_blank" rel="noreferrer noopener" aria-label="Facebook" class="flex h-9 w-9 items-center justify-center rounded-full border border-zinc-200 bg-white text-zinc-500 transition-all hover:-translate-y-0.5 hover:text-mstPurple hover:border-mstPurple/30">
+                            <i class="fa-brands fa-facebook-f text-xs"></i>
+                        </a>
+                        <a href="https://instagram.com/MST.STUDENTCOUNCIL" target="_blank" rel="noreferrer noopener" aria-label="Instagram" class="flex h-9 w-9 items-center justify-center rounded-full border border-zinc-200 bg-white text-zinc-500 transition-all hover:-translate-y-0.5 hover:text-mstPurple hover:border-mstPurple/30">
+                            <i class="fa-brands fa-instagram text-xs"></i>
+                        </a>
+                        <a href="https://lin.ee/XqGRR9C" target="_blank" rel="noreferrer noopener" aria-label="LINE" class="flex h-9 w-9 items-center justify-center rounded-full border border-zinc-200 bg-white text-zinc-500 transition-all hover:-translate-y-0.5 hover:text-[#06C755] hover:border-[#06C755]/30">
+                            <i class="fa-brands fa-line text-xs"></i>
+                        </a>
+                        <a href="https://www.tiktok.com/@mst.studentcouncil" target="_blank" rel="noreferrer noopener" aria-label="TikTok" class="flex h-9 w-9 items-center justify-center rounded-full border border-zinc-200 bg-white text-zinc-500 transition-all hover:-translate-y-0.5 hover:text-zinc-900 hover:border-zinc-400">
+                            <i class="fa-brands fa-tiktok text-xs"></i>
+                        </a>
+                        <a href="https://youtube.com/@mstcouncil" target="_blank" rel="noreferrer noopener" aria-label="YouTube" class="flex h-9 w-9 items-center justify-center rounded-full border border-zinc-200 bg-white text-zinc-500 transition-all hover:-translate-y-0.5 hover:text-red-600 hover:border-red-300">
+                            <i class="fa-brands fa-youtube text-xs"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 class="text-xs font-semibold tracking-normal text-zinc-500">บริการดิจิทัล</h4>
+                    <ul class="mt-5 space-y-3 text-sm">
+                        <li>
+                            <a href="/e-voting" class="inline-flex items-center gap-1.5 text-zinc-600 transition-colors hover:text-mstPurple">
+                                <span>ระบบลงคะแนน E-Voting</span>
+                                <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/admission" target="_blank" rel="noreferrer noopener" class="inline-flex items-center gap-1.5 text-zinc-600 transition-colors hover:text-mstPurple">
+                                <span>ระบบรับสมัครคณะกรรมการ (SC Admission)</span>
+                                <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/regis" target="_blank" rel="noreferrer noopener" class="inline-flex items-center gap-1.5 text-zinc-600 transition-colors hover:text-mstPurple">
+                                <span>ระบบทะเบียนประวัติ (SC Regis)</span>
+                                <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/vault" target="_blank" rel="noreferrer noopener" class="inline-flex items-center gap-1.5 text-zinc-600 transition-colors hover:text-mstPurple">
+                                <span>คลังเกียรติบัตรดิจิทัล (SC Vault)</span>
+                                <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="text-xs font-semibold tracking-normal text-zinc-500">พอร์ทัลสภานักเรียน</h4>
+                    <ul class="mt-5 space-y-4 text-sm">
+                        <li class="text-zinc-500 leading-relaxed">
+                            สำหรับคณะกรรมการสภานักเรียนและผู้ดูแลระบบ เพื่อจัดการข่าวสาร โครงการ PDCA และข้อมูลทำเนียบ
+                        </li>
+                        <li class="flex flex-wrap gap-2">
+                            <a href="./admin.html" class="inline-flex items-center gap-2 rounded-full bg-mstDark px-4 py-2 text-xs font-semibold text-white transition-opacity hover:opacity-90">
+                                <span>เข้าสู่ระบบผู้ดูแล</span>
+                                <i class="fa-solid fa-arrow-right text-[10px] text-mstChampagne"></i>
+                            </a>
+                            <a href="/link-manager" target="_blank" rel="noreferrer noopener" class="inline-flex items-center gap-2 rounded-full border border-zinc-300 bg-white px-4 py-2 text-xs font-semibold text-zinc-700 transition-colors hover:bg-zinc-50">
+                                <span>MSTSC URL</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="mt-12 flex flex-col gap-2 border-t border-zinc-200/80 pt-6 text-xs text-zinc-400 sm:flex-row sm:items-center sm:justify-between pb-[env(safe-area-inset-bottom)]">
+                <p>&copy; <span id="currentYear">2026</span> Student Council of Muangsuratthani School. All rights reserved.</p>
+                <p class="font-medium text-zinc-500"><i class="fa-solid fa-code text-mstPurple mr-1"></i> Developed by MSTSC Tech Team</p>
             </div>
         </div>
     </footer>
 
     <!-- Modal อ่านข่าว -->
     <div id="newsModal" class="modal-overlay fixed inset-0 flex items-center justify-center p-4 md:p-8">
-        <div class="modal-content bg-white w-full max-w-3xl max-h-[90vh] rounded-[2rem] shadow-2xl overflow-hidden flex flex-col relative">
-            <button onclick="closeNewsModal()" class="absolute top-4 right-4 w-10 h-10 bg-black/50 hover:bg-red-500 text-white rounded-full flex items-center justify-center transition z-20 backdrop-blur-md"><i class="fa-solid fa-xmark"></i></button>
-            <div class="h-64 sm:h-80 w-full relative bg-gray-200 shrink-0">
-                <img id="modalImg" src="" class="w-full h-full object-cover">
-                <div id="modalCat" class="absolute top-4 left-4 text-white text-[10px] font-bold px-4 py-1.5 rounded-full shadow-md">หมวดหมู่</div>
+        <div class="modal-content bg-white w-full max-w-3xl max-h-[90vh] rounded-3xl shadow-2xl overflow-hidden flex flex-col relative border border-amber-200/50">
+            <button id="closeNewsModalBtn" type="button" aria-label="ปิดหน้าต่าง" class="absolute top-4 right-4 w-9 h-9 bg-black/55 hover:bg-black/80 text-white rounded-full flex items-center justify-center transition z-20 backdrop-blur-md">
+                <i class="fa-solid fa-xmark text-sm"></i>
+            </button>
+            <div class="h-64 sm:h-80 w-full relative bg-zinc-100 shrink-0">
+                <img id="modalImg" src="" alt="" class="w-full h-full object-cover">
+                <div id="modalCat" class="absolute top-4 left-4 text-white text-[11px] font-semibold px-3.5 py-1 rounded-full shadow-sm">หมวดหมู่</div>
             </div>
             <div class="p-6 md:p-10 overflow-y-auto flex-1">
-                <p id="modalDate" class="text-sm font-bold text-gray-400 mb-2"><i class="fa-regular fa-clock"></i> วันที่</p>
-                <h3 id="modalTitle" class="text-2xl md:text-3xl font-black text-gray-900 mb-6 leading-tight">หัวข้อข่าว</h3>
-                <div id="modalContent" class="text-gray-800 rich-text-content">เนื้อหาข่าว...</div>
+                <p id="modalDate" class="text-xs font-medium tracking-normal text-zinc-400 mb-2"><i class="fa-regular fa-clock mr-1"></i> วันที่</p>
+                <h3 id="modalTitle" class="text-2xl md:text-3xl font-semibold tracking-tight text-zinc-900 mb-6 leading-snug">หัวข้อข่าว</h3>
+                <div id="modalContent" class="text-zinc-700 text-sm sm:text-base rich-text-content">เนื้อหาข่าว...</div>
             </div>
         </div>
     </div>
 
-    <script>
-        const PORTAL_API_URL = "https://admission-backend-592123078141.asia-southeast1.run.app/api/portal";
-        const PORTAL_CACHE_KEY = "mstsc_portal_public_cache_v1";
-
-        window.newsDataList = [];
-        window.allBoardMembers = [];
-
-        // แปลงลิงก์ Google Drive ให้แสดงรูปภาพได้เร็วและเสถียร 100%
-        function resolveImageUrl(url, fallback) {
-            if (!url) return fallback || '/logo.webp';
-            const str = String(url).trim();
-            if (str.includes('drive.google.com') && !str.includes('thumbnail')) {
-                const match = str.match(/[-\w]{25,}/);
-                if (match && match[0]) return `https://drive.google.com/thumbnail?id=${match[0]}&sz=w1000`;
-            }
-            return str;
-        }
-
-        function toggleMobileMenu() {
-            const menu = document.getElementById('mobileMenu');
-            const nav = document.getElementById('navbar');
-            menu.classList.toggle('hidden');
-            if (!menu.classList.contains('hidden')) {
-                nav.classList.add('bg-white/95');
-                nav.classList.remove('glass');
-            } else if (window.scrollY <= 20) {
-                nav.classList.add('glass');
-                nav.classList.remove('bg-white/95');
-            }
-        }
-
-        function openNewsModal(index) {
-            const data = window.newsDataList[index];
-            if (!data) return;
-            document.getElementById('modalImg').src = resolveImageUrl(data.image, '/logo.webp');
-            document.getElementById('modalTitle').innerText = data.title;
-            document.getElementById('modalContent').innerHTML = data.content;
-            const dObj = new Date(data.date);
-            const dateText = !isNaN(dObj) ? dObj.toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' }) : data.date;
-            document.getElementById('modalDate').innerHTML = `<i class="fa-regular fa-clock"></i> ${dateText}`;
-            const catBadge = document.getElementById('modalCat');
-            catBadge.innerText = data.category;
-            catBadge.className = `absolute top-4 left-4 text-white text-[10px] font-bold px-4 py-1.5 rounded-full shadow-md ${data.category === 'ประกาศ' ? 'bg-red-500' : (data.category === 'กิจกรรม' ? 'bg-emerald-500' : 'bg-blue-500')}`;
-            document.getElementById('newsModal').classList.add('active');
-            document.body.style.overflowY = 'hidden';
-        }
-
-        function closeNewsModal() {
-            document.getElementById('newsModal').classList.remove('active');
-            document.body.style.overflow = '';
-        }
-
-        window.changeBoardYear = () => {
-            renderBoard(document.getElementById('boardYearSelect').value);
-        };
-
-        function renderBoard(targetYear) {
-            const container = document.getElementById('boardContainer');
-            document.getElementById('boardTitle').innerText = `ทำเนียบคณะกรรมการ`;
-            let members = window.allBoardMembers.filter(m => String(m.year) === String(targetYear));
-
-            if (members.length === 0) {
-                container.innerHTML = `<div class="text-center py-10 text-gray-500 font-bold glass rounded-3xl w-full">ไม่พบข้อมูลปีการศึกษา ${targetYear}</div>`;
-                return;
-            }
-
-            members = members.map(m => {
-                let dept = m.department || "คณะกรรมการทั่วไป";
-                let role = m.role || "";
-                if (dept.includes("รองประธาน")) {
-                    let actualDept = role.replace("ฝ่าย", "").trim();
-                    return { ...m, department: actualDept, role: dept };
-                }
-                return m;
-            });
-
-            const getWeight = (deptName) => {
-                if (!deptName) return 99;
-                if (deptName.includes("บริหาร") && !deptName.includes("ทั่วไป")) return 1;
-                if (deptName.includes("วิชาการ")) return 2;
-                if (deptName.includes("งบประมาณ")) return 3;
-                if (deptName.includes("กิจการ")) return 4;
-                if (deptName.includes("บริหารทั่วไป")) return 5;
-                if (deptName.includes("อำนวยการ")) return 6;
-                return 99;
-            };
-
-            const presidents = members.filter(m => m.role.includes('ประธาน') && !m.role.includes('รอง'));
-            const vicePresidents = members.filter(m => m.role.includes('รองประธาน'));
-
-            vicePresidents.sort((a, b) => {
-                let weightA = getWeight(a.department);
-                let weightB = getWeight(b.department);
-                if (weightA !== weightB) return weightA - weightB;
-                return a.name.localeCompare(b.name, 'th');
-            });
-
-            let presHtml = '';
-            let vicePresHtml = '';
-
-            presidents.forEach(m => {
-                let defaultImg = `https://ui-avatars.com/api/?name=${encodeURIComponent(m.name)}&background=4C1D95&color=fff&size=150`;
-                let imgSrc = resolveImageUrl(m.image, defaultImg);
-                presHtml += `<div class="glass glass-hover p-10 rounded-[3rem] w-full max-w-md text-center group mx-auto mb-10"><div class="relative w-36 h-36 mx-auto mb-6"><div class="absolute inset-0 bg-mstYellow rounded-full blur-xl opacity-50 group-hover:opacity-100 transition"></div><img src="${imgSrc}" class="relative w-full h-full object-cover rounded-full border-4 border-white shadow-xl group-hover:scale-105 transition" onerror="this.src='${defaultImg}'"></div><h4 class="text-3xl font-black text-gray-900 mb-1">${m.name}</h4><p class="text-mstDark font-bold text-sm bg-mstYellow px-4 py-1.5 rounded-full inline-block mt-2 shadow-sm">${m.role}</p></div>`;
-            });
-
-            if (vicePresidents.length > 0) {
-                vicePresHtml = `<div class="mb-12"><h4 class="text-xl font-bold text-mstPurple border-b-2 border-mstYellow pb-2 mb-8 inline-block">รองประธานนักเรียน</h4><div class="flex flex-wrap justify-center gap-6">`;
-                vicePresidents.forEach(m => {
-                    let defaultImg = `https://ui-avatars.com/api/?name=${encodeURIComponent(m.name)}&background=4C1D95&color=fff&size=150`;
-                    let imgSrc = resolveImageUrl(m.image, defaultImg);
-                    let displayDept = m.department.includes("ฝ่าย") ? m.department : "ฝ่าย" + m.department;
-                    vicePresHtml += `<div class="glass glass-hover p-6 rounded-3xl text-center group w-[calc(50%-0.75rem)] md:w-[260px]"><img src="${imgSrc}" class="w-24 h-24 object-cover rounded-full mx-auto mb-4 border-4 border-white shadow-md group-hover:scale-110 transition duration-300" onerror="this.src='${defaultImg}'"><h4 class="font-bold text-gray-900">${m.name}</h4><p class="text-xs text-mstPurple font-bold mt-1">${displayDept}</p></div>`;
-                });
-                vicePresHtml += `</div></div>`;
-            }
-
-            let topExecutiveHtml = `<div class="flex flex-col justify-center w-full">` + presHtml + vicePresHtml + `</div>`;
-            let departmentHtml = '';
-
-            const otherMembers = members.filter(m => !m.role.includes('ประธาน'));
-            const grouped = otherMembers.reduce((acc, obj) => {
-                let key = obj.department || "คณะกรรมการทั่วไป";
-                if (!acc[key]) acc[key] = [];
-                acc[key].push(obj);
-                return acc;
-            }, {});
-
-            const sortedDepts = Object.keys(grouped).sort((a, b) => getWeight(a) - getWeight(b));
-
-            for (const dept of sortedDepts) {
-                const mems = grouped[dept];
-                const isExecutiveDept = dept.includes("บริหาร") && !dept.includes("ทั่วไป");
-
-                mems.sort((a, b) => {
-                    if (isExecutiveDept) {
-                        const getExecWeight = (role) => {
-                            if (role.includes("เลขานุการ") && !role.includes("ผู้ช่วย")) return 1;
-                            if (role.includes("ผู้ช่วยเลขานุการ")) return 2;
-                            return 3;
-                        };
-                        const wA = getExecWeight(a.role), wB = getExecWeight(b.role);
-                        if (wA !== wB) return wA - wB;
-                        return a.role.localeCompare(b.role, 'th');
-                    } else {
-                        const getOtherWeight = (role) => role.startsWith("หัวหน้า") ? 1 : 2;
-                        const wA = getOtherWeight(a.role), wB = getOtherWeight(b.role);
-                        if (wA !== wB) return wA - wB;
-                        return a.role.localeCompare(b.role, 'th');
-                    }
-                });
-
-                let deptHtml = `<div class="mb-12"><h4 class="text-xl font-bold text-mstPurple border-b-2 border-mstYellow pb-2 mb-8 inline-block">${dept}</h4><div class="flex flex-wrap justify-center gap-6">`;
-                mems.forEach(m => {
-                    let defaultImg = `https://ui-avatars.com/api/?name=${encodeURIComponent(m.name)}&background=4C1D95&color=fff&size=150`;
-                    let imgSrc = resolveImageUrl(m.image, defaultImg);
-                    deptHtml += `<div class="glass glass-hover p-6 rounded-3xl text-center group w-[calc(50%-0.75rem)] md:w-[260px]"><img src="${imgSrc}" class="w-24 h-24 object-cover rounded-full mx-auto mb-4 border-4 border-white shadow-md group-hover:scale-110 transition duration-300" onerror="this.src='${defaultImg}'"><h4 class="font-bold text-gray-900">${m.name}</h4><p class="text-xs text-mstPurple font-bold mt-1">${m.role}</p></div>`;
-                });
-                deptHtml += `</div></div>`;
-                departmentHtml += deptHtml;
-            }
-
-            container.innerHTML = topExecutiveHtml + departmentHtml;
-        }
-
-        function renderAllPortalSections(bundle) {
-            if (!bundle) return;
-
-            // 1. ผู้อำนวยการ & ครูที่ปรึกษา
-            const personnelEl = document.getElementById('schoolPersonnelContainer');
-            const set = bundle.settings || { directorName: "-", advisorName: "-" };
-            const advisors = String(set.advisorName || "-").split(/,|\n/).map(n => n.trim()).filter(Boolean);
-            const advisorsHtml = advisors.map(adv => `<p class="font-black text-xl md:text-2xl drop-shadow-md whitespace-nowrap">${adv}</p>`).join('');
-            personnelEl.innerHTML = `
-                <div class="text-center relative z-10">
-                    <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center text-2xl mx-auto mb-4 backdrop-blur-md border border-white/30"><i class="fa-solid fa-user-tie"></i></div>
-                    <p class="text-xs text-mstYellow font-bold uppercase tracking-wider mb-2">ผู้อำนวยการโรงเรียน</p>
-                    <p class="font-black text-xl md:text-2xl drop-shadow-md whitespace-nowrap">${set.directorName || "-"}</p>
-                </div>
-                <div class="hidden md:block w-px h-24 bg-white/20 relative z-10"></div>
-                <div class="text-center relative z-10">
-                    <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center text-2xl mx-auto mb-4 backdrop-blur-md border border-white/30"><i class="fa-solid fa-chalkboard-user"></i></div>
-                    <p class="text-xs text-mstYellow font-bold uppercase tracking-wider mb-2">ครูที่ปรึกษา</p>
-                    <div class="flex flex-col md:flex-row flex-wrap justify-center items-center gap-x-8 gap-y-2">
-                        ${advisorsHtml || '<p class="font-black text-2xl drop-shadow-md">-</p>'}
-                    </div>
-                </div>
-            `;
-
-            // 2. ทำเนียบสภานักเรียน
-            window.allBoardMembers = bundle.board || [];
-            const boardContainer = document.getElementById('boardContainer');
-            const selectorContainer = document.getElementById('yearSelectorContainer');
-            const selector = document.getElementById('boardYearSelect');
-            if (window.allBoardMembers.length === 0) {
-                boardContainer.innerHTML = `<div class="text-center py-10 text-gray-500 font-bold glass rounded-3xl">ยังไม่มีข้อมูลทำเนียบคณะกรรมการ</div>`;
-            } else {
-                const uniqueYears = [...new Set(window.allBoardMembers.map(m => m.year))].sort((a, b) => b - a);
-                selector.innerHTML = uniqueYears.map(y => `<option value="${y}">${y}</option>`).join('');
-                selectorContainer.classList.remove('hidden');
-                renderBoard(uniqueYears[0]);
-            }
-
-            // 3. โครงการ PDCA
-            const projGrid = document.getElementById('projectGrid');
-            const projects = bundle.projects || [];
-            if (projects.length === 0) {
-                projGrid.innerHTML = `<div class="w-full text-center py-10 text-gray-500 glass rounded-3xl font-bold">ยังไม่มีข้อมูลโครงการ</div>`;
-            } else {
-                projGrid.innerHTML = projects.map(p => {
-                    let stepColor = p.step === 'Plan' ? 'bg-gray-200 text-gray-600' : (p.step === 'Do' ? 'bg-blue-100 text-blue-600' : (p.step === 'Check' ? 'bg-yellow-100 text-yellow-600' : 'bg-emerald-100 text-emerald-600'));
-                    return `<div class="glass glass-hover p-8 rounded-3xl w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.5rem)] max-w-[400px]">
-                        <div class="flex justify-between items-start mb-6">
-                            <h4 class="font-bold text-gray-900 text-lg leading-tight w-2/3">${p.title}</h4>
-                            <span class="${stepColor} text-xs font-bold px-3 py-1.5 rounded-lg border border-white/50">${p.step}</span>
-                        </div>
-                        <div class="w-full bg-gray-200/50 rounded-full h-3 mb-2 shadow-inner border border-white/50">
-                            <div class="bg-gradient-to-r from-mstPurple to-indigo-400 h-3 rounded-full shadow-md" style="width: ${p.progress}%"></div>
-                        </div>
-                        <div class="flex justify-between text-xs font-bold text-gray-500 mt-2">
-                            <span>ความคืบหน้า</span>
-                            <span class="text-mstPurple text-sm">${p.progress}%</span>
-                        </div>
-                    </div>`;
-                }).join('');
-            }
-
-            // 4. ข่าวสารและประกาศ (แสดง 6 ข่าวล่าสุด)
-            const newsGrid = document.getElementById('publicNewsGrid');
-            window.newsDataList = (bundle.news || []).slice(0, 6);
-            if (window.newsDataList.length === 0) {
-                newsGrid.innerHTML = `<div class="w-full text-center py-10 text-gray-500 font-bold glass rounded-3xl">ยังไม่มีข่าวสารและประกาศ</div>`;
-            } else {
-                newsGrid.innerHTML = window.newsDataList.map((n, index) => {
-                    const dObj = new Date(n.date);
-                    const thDate = !isNaN(dObj) ? dObj.toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric' }) : n.date;
-                    let bg = n.category === 'ประกาศ' ? 'bg-red-500' : (n.category === 'กิจกรรม' ? 'bg-emerald-500' : 'bg-blue-500');
-                    const previewText = String(n.content || '').replace(/<[^>]+>/g, ' ');
-                    const imgSrc = resolveImageUrl(n.image, '/logo.webp');
-
-                    return `<article class="glass glass-hover rounded-[2rem] overflow-hidden flex flex-col group w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.5rem)] max-w-[400px]" onclick="openNewsModal(${index})">
-                        <div class="relative h-56 overflow-hidden bg-gray-200">
-                            <img src="${imgSrc}" class="w-full h-full object-cover group-hover:scale-110 transition duration-700" onerror="this.src='/logo.webp'">
-                            <div class="absolute top-4 left-4 ${bg} text-white text-[10px] font-bold px-4 py-1.5 rounded-full shadow-md">${n.category}</div>
-                        </div>
-                        <div class="p-8 flex flex-col flex-1">
-                            <p class="text-xs font-bold text-gray-400 mb-3"><i class="fa-regular fa-clock"></i> ${thDate}</p>
-                            <h4 class="text-xl font-black text-gray-900 mb-3 line-clamp-2">${n.title}</h4>
-                            <p class="text-sm text-gray-600 mb-6 line-clamp-3">${previewText}</p>
-                            <span class="mt-auto text-mstPurple font-bold text-sm hover:underline flex items-center gap-1 group-hover:text-mstYellow transition cursor-pointer">อ่านรายละเอียด <i class="fa-solid fa-arrow-right text-xs"></i></span>
-                        </div>
-                    </article>`;
-                }).join('');
-            }
-
-            // 5. เครือข่าย MOU
-            const mouGrid = document.getElementById('mouGrid');
-            const mouList = bundle.mou || [];
-            if (mouList.length === 0) {
-                mouGrid.innerHTML = `<p class="text-gray-400 text-center font-bold">ยังไม่มีข้อมูลเครือข่ายโรงเรียน</p>`;
-            } else {
-                const itemsHtml = mouList.map(m => {
-                    const logoSrc = resolveImageUrl(m.logo, '/logo.webp');
-                    return `<div class="flex-shrink-0 flex flex-col items-center group cursor-pointer bg-white/50 p-4 rounded-2xl border border-white/50 hover:bg-white transition shadow-sm hover:shadow-md w-32 md:w-40 mx-3 md:mx-6">
-                        <img src="${logoSrc}" class="w-16 h-16 md:w-20 md:h-20 object-contain transition duration-300" title="${m.name}" onerror="this.src='/logo.webp'">
-                        <p class="text-[10px] md:text-xs font-bold text-gray-500 mt-3 group-hover:text-mstPurple transition max-w-[120px] text-center leading-tight">${m.name}</p>
-                    </div>`;
-                }).join('');
-                mouGrid.innerHTML = `<div class="marquee-content">${itemsHtml.repeat(4)}</div>`;
-            }
-        }
-
-        async function initPortalPage() {
-            // 1. แสดงข้อมูลจาก LocalStorage ทันทีใน 0.01 วินาที
-            const cachedRaw = localStorage.getItem(PORTAL_CACHE_KEY);
-            if (cachedRaw) {
-                try {
-                    renderAllPortalSections(JSON.parse(cachedRaw));
-                } catch (e) {}
-            }
-
-            // 2. ดึงข้อมูลล่าสุดจาก Cloud Run ในครั้งเดียว
-            try {
-                const res = await fetch(`${PORTAL_API_URL}?t=${Date.now()}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'getPortalPublicData' })
-                });
-                const json = await res.json();
-                if (json.status === 'success' && json.data) {
-                    renderAllPortalSections(json.data);
-                    localStorage.setItem(PORTAL_CACHE_KEY, JSON.stringify(json.data));
-                }
-            } catch (e) {
-                console.error("Portal Load Error:", e);
-            }
-        }
-
-        window.addEventListener('scroll', () => {
-            const nav = document.getElementById('navbar');
-            if (window.scrollY > 20) { nav.classList.add('shadow-md'); nav.classList.replace('glass', 'bg-white/95'); }
-            else { nav.classList.remove('shadow-md'); nav.classList.replace('bg-white/95', 'glass'); }
-        });
-
-        document.addEventListener('DOMContentLoaded', initPortalPage);
-    </script>
 </body>
 </html>
