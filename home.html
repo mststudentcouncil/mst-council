@@ -77,7 +77,7 @@
     })();
     </script>
 
-    <title>MSTSC · สภานักเรียน โรงเรียนเมืองสุราษฎร์ธานี</title>
+    <title>MSTSC · สภานักเรียนโรงเรียนเมืองสุราษฎร์ธานี</title>
     
     <link rel="icon" type="image/webp" href="/logo.webp">
     <link rel="apple-touch-icon" href="/logo.webp">
@@ -226,61 +226,50 @@
             100% { transform: translateX(-50%); }
         }
         section[id] { scroll-margin-top: 5.5rem; }
+        /* เพิ่มเงาให้ข้อความ Navbar เพื่อให้อ่านง่ายขึ้นเมื่อพื้นหลังสว่าง */
+        .nav-text-shadow {
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+        }
     </style>
 </head>
 <body class="min-h-screen bg-mstCream text-zinc-900 antialiased selection:bg-mstPurple selection:text-white">
 
     <!-- Header โปร่งใสเหนือวิดีโอ เปลี่ยนเป็นกระจกฝ้าเมื่อเลื่อนหน้าจอ -->
     <header id="navbar" class="fixed inset-x-0 top-0 z-50 transition-all duration-300 bg-transparent pt-[env(safe-area-inset-top)]">
-        <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3.5 sm:px-6">
-            <a href="#" onclick="window.scrollTo({top:0, behavior:'smooth'}); return false;" class="flex items-center gap-3 group">
-                <div class="relative flex items-center justify-center">
-                    <div class="absolute inset-0 rounded-full bg-mstYellow/30 blur-md opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    <img src="/logo.webp" alt="โลโก้สภานักเรียน" class="relative h-9 w-9 object-contain drop-shadow-sm transition-transform duration-300 group-hover:scale-105">
-                </div>
-                <div class="flex flex-col">
-                    <span id="navBrandText" class="text-sm font-bold tracking-tight transition-colors text-white drop-shadow-sm">MSTSC</span>
-                </div>
+    <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3.5 sm:px-6">
+        <a href="#" onclick="window.scrollTo({top:0, behavior:'smooth'}); return false;" class="flex items-center gap-3 group">
+            <div class="relative flex items-center justify-center">
+                <div class="absolute inset-0 rounded-full bg-mstYellow/30 blur-md opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <img src="/logo.webp" alt="โลโก้สภานักเรียน" class="relative h-9 w-9 object-contain drop-shadow-sm transition-transform duration-300 group-hover:scale-105">
+            </div>
+            <div class="flex flex-col">
+                <!-- เพิ่ม nav-text-shadow ที่นี่ -->
+                <span id="navBrandText" class="text-sm font-bold tracking-tight transition-colors text-white nav-text-shadow">MSTSC</span>
+            </div>
+        </a>
+
+        <!-- Desktop Navigation: เพิ่ม nav-text-shadow เพื่อให้อ่านออกแม้พื้นหลังสว่าง -->
+        <nav id="navLinks" class="hidden lg:flex items-center gap-7 text-sm font-medium text-white/90 transition-colors nav-text-shadow">
+            <a href="#services" class="hover:text-mstChampagne transition-colors">ศูนย์บริการดิจิทัล</a>
+            <a href="#projects" class="hover:text-mstChampagne transition-colors">ติดตามโครงการ</a>
+            <a href="#board" class="hover:text-mstChampagne transition-colors">ทำเนียบคณะกรรมการ</a>
+            <a href="#news" class="hover:text-mstChampagne transition-colors">ข่าวประชาสัมพันธ์</a>
+            <a href="#mou" class="hover:text-mstChampagne transition-colors">เครือข่าย MOU</a>
+        </nav>
+
+        <div class="hidden lg:flex items-center gap-3">
+            <a href="./admin.html" id="navAdminBtn" class="inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold transition-all bg-white/95 text-zinc-900 ring-1 ring-white/50 backdrop-blur hover:bg-white shadow-sm hover:-translate-y-0.5">
+                <i class="fa-solid fa-shield-halved text-mstPurple"></i>
+                <span>ผู้ดูแลระบบ</span>
             </a>
-
-            <!-- Desktop Navigation -->
-            <nav id="navLinks" class="hidden lg:flex items-center gap-7 text-sm font-medium text-white/90 transition-colors">
-                <a href="#services" class="hover:text-mstChampagne transition-colors">ศูนย์บริการดิจิทัล</a>
-                <a href="#projects" class="hover:text-mstChampagne transition-colors">ติดตามโครงการ</a>
-                <a href="#board" class="hover:text-mstChampagne transition-colors">ทำเนียบคณะกรรมการ</a>
-                <a href="#news" class="hover:text-mstChampagne transition-colors">ข่าวประชาสัมพันธ์</a>
-                <a href="#mou" class="hover:text-mstChampagne transition-colors">เครือข่าย MOU</a>
-            </nav>
-
-            <div class="hidden lg:flex items-center gap-3">
-                <a href="./admin.html" id="navAdminBtn" class="inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold transition-all bg-white/95 text-zinc-900 ring-1 ring-white/50 backdrop-blur hover:bg-white shadow-sm hover:-translate-y-0.5">
-                    <i class="fa-solid fa-shield-halved text-mstPurple"></i>
-                    <span>ผู้ดูแลระบบ</span>
-                </a>
-            </div>
-
-            <!-- Mobile Menu Button -->
-            <button id="mobileMenuBtn" onclick="toggleMobileMenu()" aria-label="เปิดเมนู" class="lg:hidden flex h-10 w-10 items-center justify-center rounded-full border border-white/25 bg-white/10 text-white backdrop-blur transition-colors">
-                <i class="fa-solid fa-bars text-base"></i>
-            </button>
         </div>
 
-        <!-- Mobile Menu Dropdown -->
-        <div id="mobileMenu" class="hidden lg:hidden glass-header absolute w-full left-0 border-t border-zinc-200/80 pb-[env(safe-area-inset-bottom)] shadow-xl">
-            <div class="mx-auto max-w-6xl flex flex-col px-6 py-6 space-y-4 text-sm font-semibold text-zinc-800">
-                <a href="#services" onclick="toggleMobileMenu()" class="py-1.5 hover:text-mstPurple transition-colors">ศูนย์บริการดิจิทัล</a>
-                <a href="#projects" onclick="toggleMobileMenu()" class="py-1.5 hover:text-mstPurple transition-colors">ติดตามโครงการ (PDCA)</a>
-                <a href="#board" onclick="toggleMobileMenu()" class="py-1.5 hover:text-mstPurple transition-colors">ทำเนียบคณะกรรมการ</a>
-                <a href="#news" onclick="toggleMobileMenu()" class="py-1.5 hover:text-mstPurple transition-colors">ข่าวประชาสัมพันธ์</a>
-                <a href="#mou" onclick="toggleMobileMenu()" class="py-1.5 hover:text-mstPurple transition-colors">เครือข่ายสภานักเรียน (MOU)</a>
-                <div class="pt-2 border-t border-zinc-200/80">
-                    <a href="./admin.html" class="inline-flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-mstDark via-mstPurpleDeep to-mstPurple px-5 py-3 text-xs font-semibold text-white shadow-sm">
-                        <i class="fa-solid fa-shield-halved text-mstYellow"></i> เข้าสู่ระบบผู้ดูแล
-                    </a>
-                </div>
-            </div>
-        </div>
-    </header>
+        <!-- Mobile Menu Button -->
+        <button id="mobileMenuBtn" onclick="toggleMobileMenu()" aria-label="เปิดเมนู" class="lg:hidden flex h-10 w-10 items-center justify-center rounded-full border border-white/25 bg-black/30 text-white backdrop-blur transition-colors">
+            <i class="fa-solid fa-bars text-base"></i>
+        </button>
+    </div>
+</header>
 
     <!-- Hero Section แบบวิดีโอวนลูป (Looping Video) สไตล์เดียวกับอัสสัมชัญ + โทนสี Glam Luxury -->
     <section class="relative h-[88vh] min-h-[600px] w-full overflow-hidden bg-mstDark">
@@ -763,29 +752,27 @@
             const nav = document.getElementById('navbar');
             const menu = document.getElementById('mobileMenu');
             const brandText = document.getElementById('navBrandText');
-            const subText = document.getElementById('navSubText');
             const navLinks = document.getElementById('navLinks');
             const adminBtn = document.getElementById('navAdminBtn');
             const mobileBtn = document.getElementById('mobileMenuBtn');
 
-            const isScrolledOrOpen = window.scrollY > 24 || (menu && !menu.classList.contains('hidden'));
+            // ถ้ามีการเลื่อนจอลงมามากกว่า 20px ให้เปลี่ยนเป็นแถบเมนูสีขาวโปร่งแสง (Glassmorphism) ทันที
+            const isScrolledOrOpen = window.scrollY > 20 || (menu && !menu.classList.contains('hidden'));
 
             if (isScrolledOrOpen) {
-                nav.classList.add('glass-header', 'shadow-xs');
+                nav.classList.add('glass-header', 'shadow-sm', 'bg-white/85');
                 nav.classList.remove('bg-transparent');
                 brandText.className = 'text-sm font-bold tracking-tight transition-colors text-zinc-900';
-                subText.className = 'text-[10px] font-medium uppercase tracking-[0.22em] transition-colors text-amber-700';
-                if (navLinks) navLinks.className = 'hidden lg:flex items-center gap-7 text-sm font-medium text-zinc-600 transition-colors';
+                if (navLinks) navLinks.className = 'hidden lg:flex items-center gap-7 text-sm font-medium text-zinc-700 transition-colors';
                 if (adminBtn) adminBtn.className = 'inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold transition-all bg-mstDark text-white hover:bg-mstPurple shadow-xs';
                 if (mobileBtn) mobileBtn.className = 'lg:hidden flex h-10 w-10 items-center justify-center rounded-full border border-zinc-200 bg-white text-zinc-800 transition-colors';
             } else {
-                nav.classList.remove('glass-header', 'shadow-xs');
+                nav.classList.remove('glass-header', 'shadow-sm', 'bg-white/85');
                 nav.classList.add('bg-transparent');
-                brandText.className = 'text-sm font-bold tracking-tight transition-colors text-white drop-shadow-sm';
-                subText.className = 'text-[10px] font-medium uppercase tracking-[0.22em] transition-colors text-amber-200/80';
-                if (navLinks) navLinks.className = 'hidden lg:flex items-center gap-7 text-sm font-medium text-white/90 transition-colors';
+                brandText.className = 'text-sm font-bold tracking-tight transition-colors text-white nav-text-shadow';
+                if (navLinks) navLinks.className = 'hidden lg:flex items-center gap-7 text-sm font-medium text-white/90 transition-colors nav-text-shadow';
                 if (adminBtn) adminBtn.className = 'inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold transition-all bg-white/95 text-zinc-900 ring-1 ring-white/50 backdrop-blur hover:bg-white shadow-sm';
-                if (mobileBtn) mobileBtn.className = 'lg:hidden flex h-10 w-10 items-center justify-center rounded-full border border-white/25 bg-white/10 text-white backdrop-blur transition-colors';
+                if (mobileBtn) mobileBtn.className = 'lg:hidden flex h-10 w-10 items-center justify-center rounded-full border border-white/25 bg-black/30 text-white backdrop-blur transition-colors';
             }
         }
 
