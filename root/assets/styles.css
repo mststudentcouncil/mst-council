@@ -1,0 +1,134 @@
+:root {
+    --shadow-soft: 0 2px 6px rgba(9, 5, 20, 0.03), 0 12px 32px -6px rgba(76, 29, 149, 0.06);
+    --shadow-float: 0 4px 12px rgba(9, 5, 20, 0.05), 0 24px 48px -12px rgba(76, 29, 149, 0.16);
+}
+
+html {
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    scroll-behavior: smooth;
+}
+
+body {
+    background-color: #FAF8F5;
+    background-image: 
+        radial-gradient(at 0% 0%, rgba(76, 29, 149, 0.04) 0px, transparent 50%),
+        radial-gradient(at 100% 25%, rgba(212, 175, 55, 0.05) 0px, transparent 50%);
+    color: #18181B;
+    letter-spacing: -0.01em;
+    overflow-x: hidden;
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+}
+
+h1, h2, h3, h4 {
+    letter-spacing: -0.02em;
+}
+
+.hero-title-shadow {
+    text-shadow: 0 4px 30px rgba(0, 0, 0, 0.45);
+}
+
+.card-soft {
+    background: rgba(255, 255, 255, 0.92);
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(228, 223, 238, 0.85);
+    border-radius: 1.5rem;
+    box-shadow: var(--shadow-soft);
+    transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.card-soft:hover {
+    background: #FFFFFF;
+    box-shadow: var(--shadow-float);
+    transform: translateY(-4px);
+    border-color: rgba(212, 175, 55, 0.45);
+}
+
+.glass-header {
+    -webkit-backdrop-filter: blur(28px) saturate(190%);
+    backdrop-filter: blur(28px) saturate(190%);
+    background: rgba(250, 248, 245, 0.86);
+    border-bottom: 1px solid rgba(212, 175, 55, 0.22);
+}
+
+.text-glam-gold {
+    background: linear-gradient(135deg, #FFFFFF 0%, #FEF3C7 45%, #FBBF24 85%, #D97706 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.text-glam-purple {
+    background: linear-gradient(135deg, #2E1065 0%, #4C1D95 50%, #9333EA 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.fade-up {
+    animation: fadeUp 0.75s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.delay-1 { animation-delay: 0.08s; }
+.delay-2 { animation-delay: 0.16s; }
+
+@keyframes fadeUp {
+    0% { opacity: 0; transform: translateY(18px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: #FAF8F5; }
+::-webkit-scrollbar-thumb { background: #CFC8E0; border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background: #4C1D95; }
+
+.modal-overlay {
+    background: rgba(9, 5, 20, 0.72);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    z-index: 100;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    padding-top: env(safe-area-inset-top);
+}
+
+.modal-overlay.active { opacity: 1; visibility: visible; }
+.modal-content {
+    transform: scale(0.96) translateY(16px);
+    transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.modal-overlay.active .modal-content {
+    transform: scale(1) translateY(0);
+}
+
+.rich-text-content p { margin-bottom: 1em; line-height: 1.75; }
+.rich-text-content ul { list-style-type: disc; margin-left: 1.5em; margin-bottom: 1em; }
+.rich-text-content ol { list-style-type: decimal; margin-left: 1.5em; margin-bottom: 1em; }
+.rich-text-content a { color: #4C1D95; text-decoration: underline; text-underline-offset: 3px; }
+
+.marquee-container {
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+    -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+    mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+}
+
+.marquee-content {
+    display: flex;
+    width: max-content;
+    animation: marqueeScroll 28s linear infinite;
+}
+.marquee-content:hover { animation-play-state: paused; }
+
+@keyframes marqueeScroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+}
+
+section[id] { scroll-margin-top: 5.5rem; }
+
+.nav-text-shadow {
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+}
