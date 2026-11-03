@@ -72,7 +72,9 @@ export async function onRequest(context) {
     "/feedback/index.html",
     "/richmenuline",
     "/richmenuline/",
-    "/richmenuline/index.html"
+    "/richmenuline/index.html",
+    "/hero.mp4",
+    "/hero"
   ];
 
   // อนุญาตโฟลเดอร์สาธารณะทั้งหมด (รองรับทั้งแบบมีและไม่มี / ปิดท้าย)
